@@ -1,0 +1,141 @@
+@import "tailwindcss";
+
+/* ─── Neumorphic Design System ─── */
+:root {
+  --bg: #dde4f0;
+  --surface: #e4eaf5;
+  --card: #eaf0f8;
+  --shadow-dark: rgba(163, 177, 198, 0.65);
+  --shadow-light: rgba(255, 255, 255, 0.92);
+  --text: #1e293b;
+  --text-muted: #64748b;
+  --accent: #1a1a1a;
+  --accent-hover: #2e2e2e;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+}
+
+@layer base {
+  * { box-sizing: border-box; }
+
+  body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: 'Outfit', system-ui, -apple-system, sans-serif;
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    margin: 0;
+  }
+}
+
+/* ─── Neumorphic Shadows ─── */
+.neu-flat {
+  background: var(--bg);
+  box-shadow:
+    6px 6px 14px var(--shadow-dark),
+    -6px -6px 14px var(--shadow-light);
+}
+
+.neu-card {
+  background: var(--bg);
+  box-shadow:
+    inset 8px 8px 20px var(--shadow-dark),
+    inset -8px -8px 20px var(--shadow-light);
+  border-radius: 1.25rem;
+}
+
+.neu-card-sm {
+  background: var(--bg);
+  box-shadow:
+    inset 5px 5px 12px var(--shadow-dark),
+    inset -5px -5px 12px var(--shadow-light);
+  border-radius: 0.875rem;
+}
+
+.neu-inset {
+  background: var(--bg);
+  box-shadow:
+    inset 5px 5px 12px var(--shadow-dark),
+    inset -5px -5px 12px var(--shadow-light);
+}
+
+.neu-btn {
+  background: var(--bg);
+  box-shadow:
+    inset 4px 4px 10px var(--shadow-dark),
+    inset -4px -4px 10px var(--shadow-light);
+  transition: all 0.15s ease;
+}
+
+.neu-btn:hover {
+  box-shadow:
+    inset 5px 5px 14px var(--shadow-dark),
+    inset -5px -5px 14px var(--shadow-light);
+}
+
+.neu-btn:active {
+  box-shadow:
+    inset 4px 4px 10px var(--shadow-dark),
+    inset -4px -4px 10px var(--shadow-light);
+  transform: translateY(0);
+}
+
+.neu-btn-accent {
+  background: var(--accent);
+  color: white;
+  box-shadow:
+    4px 4px 10px rgba(59, 130, 246, 0.4),
+    -2px -2px 8px rgba(255, 255, 255, 0.3);
+  transition: all 0.15s ease;
+}
+
+.neu-btn-accent:hover {
+  background: var(--accent-hover);
+  box-shadow:
+    6px 6px 14px rgba(59, 130, 246, 0.45),
+    -3px -3px 10px rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+.neu-input {
+  background: var(--bg);
+  box-shadow:
+    inset 4px 4px 10px var(--shadow-dark),
+    inset -4px -4px 10px var(--shadow-light);
+  border: none;
+  outline: none;
+  color: var(--text);
+  border-radius: 0.75rem;
+  padding: 0.625rem 1rem;
+  font-size: 0.75rem;
+  width: 100%;
+  transition: box-shadow 0.2s;
+}
+
+.neu-input:focus {
+  box-shadow:
+    inset 5px 5px 12px var(--shadow-dark),
+    inset -5px -5px 12px var(--shadow-light),
+    0 0 0 2px rgba(59, 130, 246, 0.3);
+}
+
+.neu-input::placeholder {
+  color: var(--text-muted);
+  opacity: 0.7;
+}
+
+/* ─── Scrollbar ─── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: rgba(163,177,198,0.5); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(163,177,198,0.8); }
+
+/* ─── Progress Bars ─── */
+.neu-progress-track {
+  background: var(--bg);
+  box-shadow: inset 2px 2px 5px var(--shadow-dark), inset -2px -2px 5px var(--shadow-light);
+  border-radius: 999px;
+  height: 8px;
+  overflow: hidden;
+}

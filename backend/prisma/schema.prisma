@@ -1,0 +1,106 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Vendedor {
+  id                 Int       @id @default(autoincrement())
+  nombre             String
+  username           String    @unique @default("admin")
+  password           String    @default("123456") // Por defecto para simplificar
+  isAdmin            Boolean   @default(false)
+  rolCanal           String    @default("Moneycall") // Mostrador, Inbound, Moneycall, TM
+  limiteCuentas      Int       @default(100)
+  certificaciones    Json?     // { roleplayScore: 85, fecha: "...", aprobado: true }
+  clientes           Cliente[]
+  auditoriasRealizadas Auditoria[] @relation("GerenteAuditor")
+}
+
+model Cliente {
+  id                 Int          @id @default(autoincrement())
+  vendedorId         Int
+  vendedor           Vendedor     @relation(fields: [vendedorId], references: [id])
+  nombreEmpresa      String
+  contactoPrincipal  String
+  telefono           String
+  email              String?
+  segmentoPareto     String       @default("Marginal 80%") // Top 20%, Marginal 80%
+  cuotaMercado       Int?         // % que nos compra (de la pregunta Q3)
+  respuestas5Q       Json?        // { q1, q2, q3, q4, q5 }
+  llamadas           Llamada[]
+  cotizaciones       Cotizacion[]
+  pedidos            Pedido[]
+  auditorias         Auditoria[]
+}
+
+model Llamada {
+  id                 Int       @id @default(autoincrement())
+  clienteId          Int
+  cliente            Cliente   @relation(fields: [clienteId], references: [id])
+  fechaHora          DateTime  @default(now())
+  direccion          String    // Saliente, Entrante
+  tipoLlamada        String    // S1, S2, F1, F2, DC, RC, PT, IN
+  satisfaccionDc     Boolean   @default(true)
+  comentarios        String?
+  proximaAccion      String?   // Tipo de la próxima acción recomendada
+  proximaFecha       DateTime? // Fecha para la próxima acción
+  auditoria          Auditoria?
+}
+
+model Cotizacion {
+  id                 Int       @id @default(autoincrement())
+  clienteId          Int
+  cliente            Cliente   @relation(fields: [clienteId], references: [id])
+  monto              Float
+  descripcion        String?
+  fechaCreacion      DateTime  @default(now())
+  estado             String    @default("Pendiente") // Pendiente, Ganada, Perdida
+  fechaDecisionF1    DateTime?
+  seguimientoF1      Boolean   @default(false)
+  seguimientoF2      Boolean   @default(false)
+}
+
+// ── Historial de Pedidos/Compras ──────────────────────────────────────────────
+// Core del análisis S1: detectar inactividad en productos específicos
+model Pedido {
+  id                 Int       @id @default(autoincrement())
+  clienteId          Int
+  cliente            Cliente   @relation(fields: [clienteId], references: [id])
+  producto           String    // Nombre del producto/línea
+  categoria          String?   // Ej: "Compresores", "Tubería", "Minisplits"
+  cantidad           Float
+  unidad             String    @default("unidad") // unidad, caja, metro, etc.
+  monto              Float
+  fechaPedido        DateTime  @default(now())
+  notas              String?
+}
+
+// ── Auditoría del Supervisor ─────────────────────────────────────────────────
+model Auditoria {
+  id            Int      @id @default(autoincrement())
+  llamadaId     Int?     @unique
+  llamada       Llamada? @relation(fields: [llamadaId], references: [id])
+  clienteId     Int
+  cliente       Cliente  @relation(fields: [clienteId], references: [id])
+  gerenteId     Int
+  gerente       Vendedor @relation("GerenteAuditor", fields: [gerenteId], references: [id])
+  fechaAuditoria DateTime @default(now())
+  esValida      Boolean  
+  comentarios   String?
+}
+
+// ── Configuración Operacional (Persistente) ──────────────────────────────────
+model Configuracion {
+  id                     Int     @id @default(1)
+  otd                    Float   @default(91)
+  ar                     Float   @default(95)
+  csr                    Float   @default(4.5)
+  idScore                Float   @default(98)
+  vendedoresCertificados Int     @default(7)
+  totalVendedores        Int     @default(8)
+  gerenteCalificado      Boolean @default(true)
+}

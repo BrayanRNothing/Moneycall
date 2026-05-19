@@ -1,0 +1,3054 @@
+--- PAGE 1 ---
+1 
+ 
+ 
+
+--- PAGE 2 ---
+2 
+ 
+ 
+
+--- PAGE 3 ---
+3 
+ 
+AGRADECIMIENTOS 
+            He tenido la gran suerte d e formar parte de una gran industria , y no dejo de 
+prosperar gracias a la ayuda de tantas personas maravillosas. Por otro lado, ciertamente 
+no podría haber escrito este libro sin involucrar a varias organizaciones, que necesitaban 
+tomar el control de su proceso de ventas en lugar de esperar a que los clientes les 
+compraran. Los principios incluidos en el sistema Moneycall surgieron de la observación, 
+el análisis y las frustraciones de los procesos q ue no funcionaban. La proactividad del 
+sistema proporciona el control y la "previsibilidad" que buscan muchos empresarios y 
+vendedores. Hay que reconocer estas experiencias, apoyo y oportunidades. 
+            La primera vez que vi un sistema de ventas proa ctivo en funcionamiento fue en 
+Autonation en Ft My ers, Florida, donde tuve la suerte de recibir su formación y, en 3 
+meses, me convertí en el vendedor número uno de la tienda, trabajando en el 
+departamento de ventas por Internet. Aprendí muchas grandes her ramientas, KPls, y 
+normas. Y lo que es más importante, tenía un laboratorio para observar a los demás 
+realizar las mismas tareas que yo hacía. Podía comparar sus resultados con los míos. 
+Gracias a mi formación en ingeniería industrial, que nunca pensé que utilizaría en ventas, 
+me di cuenta de cómo funcionaba el sistema y tomé muchas ideas de ingeniería para 
+implantar un proceso de ventas mejor y más lógico. Después de reconocer que la 
+distribución HVACR era una "industria de ventas recurrentes", muchas idea s nuevas 
+empezaron a encajar. Una de las primeras cosas que apliqué en nuestro sector fue no 
+buscar nuevos clientes potenciales y concentrarme en "nutrir" a nuestros clientes 
+mediante el seguimiento y el envío de correos electrónicos. Esta fue la primera señal de 
+que ser proactivo pagaba dividendos frente a los que nunca hacían un seguimiento. Más 
+tarde me trasladé a la costa este de Florida, dejando atrás Ft Myers, pero las lecciones 
+que aprendí allí fueron inestimables. 
+            También debo agradecer a Ed Morse, de Delray Beach, la oportunidad de trabajar 
+en su departamento de Internet y aprender un nuevo sistema que también me dio más 
+ideas, lo que me permitió convertirme en el vendedor número uno de su departamento 
+de ventas por Internet. Nunca fui u n gran vendedor, pero era un gran seguidor del 
+--- PAGE 4 ---
+4 
+ 
+sistema, y arm ado con perseverancia y determi nación, aprendí rápidamente que un 
+sistema es más importante que la capacidad de venta. 
+            Es vital que mencione la empresa de consultoría de gestión que más tarde pasó 
+a formar parte de RSM, The Vila del Corral Company. Este talentoso grupo me empujó 
+literalmente a iniciar una carrera en ventas con la frase: "Antes de implantar cualquier 
+consultoría, tienes que venderla". Como director de la oficina, no tenía elección, aunque 
+me disgustaran las ventas (y recordaba que era un IE cursando un MBA, y las ventas 
+estaban "por debajo de mí"). Nunca esperé que las ventas estuvieran en mi futuro, y 
+mirando hacia atrás al crecimiento que las ventas me han dado tanto p rofesional como 
+mentalmente, ahora siento que fue lo mejor que me ha pasado. 
+           Aunque son demasiados para nombrarlos, sería negligente si no diera las gracias 
+a todos los vendedores, empresas, amigos, profesores, autores y consultores que me 
+han colmado de su sabiduría. Mencioné a algunos en la historia del libro, y decidí que 
+tenía que crear una sección especial del l ibro para estos "influencers ”. Estos son los 
+gigantes que me han permitido subirme a sus hombros y han dado forma a mi 
+pensamiento. Es una sección especial para mí, y espero que también te sirva de guía a 
+ti. 
+            He recibido mucha ayuda para poner en práctica los conceptos que se enseñan 
+en este libro. Los miembros de HARDI, a quienes me siento tan bendecido de tener en 
+mi vida, son todos grandes responsables de los logros que han hecho posible este viaje. 
+Y lo que es más importante, a quienes se han tomado el tiempo de comentar con 
+nosotros cómo trabajan y por qué el sistema que proponemos tenía sentido para ellos, 
+aunque aún n o hayan empezado a aplicarlo. A las diferentes empresas que nos han 
+mostrado su funcionamiento y su afán de superación y han compartido 
+desinteresadamente sus mejores prácticas con la división de América Latina. A todos, 
+gracias. Sin ustedes, este libro no  podría haberse materializado, ya que es realmente 
+una obra de colaboración e inspiración. 
+ 
+ 
+ 
+--- PAGE 5 ---
+5 
+ 
+DEDICACIÓN 
+A Giangabriel mi hijo,  
+Tenía el sueño de tener un hijo, y Dios lo hizo realidad; le doy gracias por Giangabriel y 
+sigo pidiéndole sabiduría para poder guiarlo de la mejor manera posible y, a la vez, dejar 
+que él haga su propio camino, que seguramente será muy diferente al mío. A ti, como 
+muestra de nuestro esfuerzo por hacer un camino que la sociedad valore, te dedico este 
+libro. 
+ 
+A Víctor Mora, 
+Gracias a Vitico por ponerme en el camino que estoy ahora; este es el camino más feliz 
+que cualquier hombre puede tener en la vida. Te lo debo a ti. 
+ 
+A mi familia, 
+Por mantenerse positivos y cariñosos cuando tuve que salir de casa en busca de una 
+nueva oportunidad. El apoyo de mi hermana Saly fue inestimable en el nuevo camino 
+que he seguido para estar hoy aquí. Dedico este libro a todos ellos y especialmente a 
+Saly. 
+A los muchos mayoristas de diferentes estados que me han permitido conocer sus 
+sistemas de ventas.  A los muchos gerentes y vendedores que intercambiaron ideas y 
+problemas conmigo para poner a prueba en sus propias operaciones muchas de las 
+ideas aquí expuestas. Especialmente a Tom Roberts por su apoyo a lo largo de mi 
+carrera en esta maravillosa industria de ventas recurrentes de HVACR. 
+ 
+A mis miembros de LATAM de HARDI, 
+Una dedicatoria muy especial a nivel personal a todos vosotros por permitirme entrar en 
+vuestras vidas y vuestros negocios. Mis conversaciones con sus líderes, el tiempo que 
+pasé con su s empleados y gerentes, me hicieron sentir que era parte de una familia y 
+--- PAGE 6 ---
+6 
+ 
+nunca un extraño en un país extranjero. A todos ustede s también les dedico este libro; 
+son sus historias las que hacen de este libro una historia real. 
+ 
+A mi Chérie, 
+Algunos dicen que una de las decisiones más importantes que puede tomar un hombre 
+es elegir a la compañera de vida adecuada. Algunos sabios gurús dicen que, para ser 
+totalmente felices, debemos ser agradecidos. Yo tengo la mejor combinación, bendecida 
+y agradecida en todos los aspectos de mi vida. Chérie, eres una parte importante de mi 
+nuevo y maravilloso camino de abundancia. 
+ 
+Agradecimientos especiales a: 
+Andy Armstrong: Quien ha contribuido enormemente a la forma de escribir la historia, 
+específicamente con la recomendación del capítulo 10 sobre una versión simplificada de 
+la Fórmula Máxima de Ventas. Siento que el capítulo añadió una forma más realista de 
+implementar el sistema más rápidamente y redujo la necesidad de pensar que el 100% 
+de los KPIs deben ser medid os para comenzar la implementación de un Departamento 
+de Moneycall. Andy, muchas gracias por todas tus aportaciones. 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+--- PAGE 7 ---
+7 
+ 
+¿Quién debería de leer este libro y por qué?  
+Hay 3 razones claves para leer este libro:  
+1.  Si te dedicas a la distribución o a cualquier otro negocio de venta recurrente, tu 
+empresa ha invertido en asistir a sesiones sobre "La amenaza de Amazon". En 
+las presentaciones se trataron muchos temas interesantes, pero en todas se 
+omitió mencionar un hecho muy importante: Amazon depende de que los 
+clientes les compren a ellos, y su modelo hace que les resulte muy difícil ser 
+proactivos. Sería extremadamente difícil para Amazon cambiar a una estrategia 
+basada en el teléfono y aún más en la salida y proactividad hacia los clientes 
+recurrentes. Si tu empresa está esperando a que los clientes llamen vs llamarlos 
+proactivamente, entonces este libro puede ayudarte a crear una ventaja 
+competitiva. 
+ 
+2. Si vives en un país en el que Amazon o cualquier otro competidor online aún no 
+es una amenaza, o para el caso, ¿estás seguro de que tu competencia habitual 
+no va a cambiar su estrategia de un modelo de venta reactivo a uno proactivo? 
+Si no quieres esperar a averiguarlo, este libro te ayudará a obtener nuevas ideas 
+para tener ventaja sobre tu competencia actual. 
+ 
+3. Si su negocio ha tenido grandes resultados de ventas en los últimos años, y ve 
+que esos resultados se hacen lentos, si su teléfono suena menos que antes, 
+entonces este libro le mostrará cómo tener más control de sus ventas 
+contactando y aprendiendo más sobre sus clientes actuales. 
+ 
+Si alguna de estas razones le parece lógica, siga leyendo. 
+ 
+ 
+ 
+ 
+--- PAGE 8 ---
+8 
+ 
+Índice de contenidos 
+INTRODUCCIÓN ………………………………………………………………………………. 9 
+CAPÍTULO 1: TODO EMPEZÓ CON UN RETO …………………………………………… 11 
+CAPÍTULO 2: LA GRAN REUNIÓN ………………………………………………………... 18 
+CAPÍTULO 3: LAS 5 PREGUNTAS CLAVE ………………………………………………... 25  
+CAPÍTULO 4: FORMACIÓN DEL NUEVO VENDEDOR PROACTIVO …………………. 29 
+CAPÍTULO 5: LA SEGUNDA FASE DEL SISTEMA MONEYCALL ……………………... 39 
+CAPÍTULO 6: LISTOS PARA EMPEZAR …………………………………………………... 43 
+CAPÍTULO 7: ¡A ESCALAR! ………………………………………………………………... 47 
+CAPÍTULO 8: LA HORA DEL GRAN ESCENARIO ……………………………………….. 53 
+CAPÍTULO 9: SI LO MIDES, CRECERÁN CON I3 ………………………………………... 55 
+CAPÍTULO 10: UN ENFOQUE SIMPLIFICADO DE LA FÓRMULA DE VENTAS DE LEO 
+………………………………………………………………………………………………… 73 
+CAPÍTULO 11: EL PLATO SABE MEJOR EN LA COCINA ……………………………… 81 
+CAPÍTULO 12: CELEBRACIÓN Y ACTUALIZACIONES X 2 ……………………………. 89 
+CAPÍTULO 13: EL GRAN ANUNCIO DEL NUEVO SUMINISTRO DE LATAM ……….. 94 
+CAPÍTULO 14: ¿SE PUEDE HACER ALGO SIN TECNOLOGÍA EN ESTOS DÍAS? …... 97 
+INFLUENCERS ……………………………………………………………………………... 101 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+--- PAGE 9 ---
+9 
+ 
+INTRODUCCIÓN 
+            En diciembre de 2022, vi a Billy Beane, el ejecutivo de los Oakland A's, en una 
+conferencia de HARDI, y me sorprendió hasta qué punto su enfoque del béisbol tenía un 
+giro similar al que estábamos aplicando con varias organizaciones en el frente de las 
+ventas. El libro "Moneyball" de Beane causó sensación porque explicaba cómo una forma 
+de ver el béisbol basada en los datos y el análisis ayudaría a los equipos más pequeños 
+que no podían competir al mismo nivel que los equipos más grandes y poderosos. 
+Nuestro análisis de datos arrojó un resultado diferente, y fue que las empresas de 
+ventas recurrentes deberían concentrarse en nutr ir, comprender y crecer a partir 
+de sus clientes actuales y no tanto en la prospección.  Esto puede ir en contra de 
+muchos "gurús" de la formación en ventas, pero los datos no mienten. Muchos 
+distribuidores del sector HVACR (un sector de ventas recurrentes) obtienen más del 80% 
+de sus ventas de menos del 20% de los clientes de su base de datos. A medida que más 
+y más empresas se concentraron en ser proactivas llamando sistemáticamente a sus 
+clientes "olvidados", sus ventas se dispararon. De ese momento de "AHA" surgió la idea 
+de titular el libro "MoneySales", ya que verás hasta qué punto los datos y los sistemas 
+tienen más que ver con el éxito de las ventas B2B que la aplicación de técnicas de venta 
+"nuevas y mejoradas". Más tarde, cuando nos dimos cuenta de la eficacia de medir 
+diferentes tipos de llamadas, decidimos que el título del libro debía ser "Moneycall", un 
+sistema PROACTIVO para generar más ventas y controlar su proceso. 
+La otra cara del enfoque de Billy era el hecho de que cuestionaba ciertas supos iciones 
+sobre el funcionamiento del juego. Verá que cuestionamos varias ideas sobre la venta, 
+especialmente en las "ventas recurrentes y frecuentes", que han hecho dudar a muchos 
+"formadores de vendedores profesionales" de que se pueda tener éxito en las ventas sin 
+PROSPECTIVAR. Cuando se es proactivo, muchas ideas sobre las ventas salen por la 
+puerta. La clave está en utilizar los datos para servir más que para vender. Los números 
+proporcionarán una guía clara para muchas ideas diferentes, y la historia de  la novela 
+proporcionará una forma de "vivir en las trincheras" para ver el análisis basado en 
+situaciones reales y datos comparables de varias organizaciones. 
+--- PAGE 10 ---
+10 
+ 
+La misión del libro es ponerte en un contexto en el que necesitas cambiar una 
+organización de éxito y hacerla mejor sin contratar "estrellas" para tu equipo de ventas. 
+Todo lo que necesita es contratar a personas dispuestas a seguir un sistema para 
+generar más ventas, servir mejor a sus clientes y ayudar a todos a ganar más dinero; 
+eso es capitalismo en estado puro. 
+Otra clave para entender el sistema es el hecho de que los vendedores tienen un ancho 
+de banda finito y que éste viene determinado por el número de cuentas y llamadas que 
+pueden atender. Además, hay una diferencia entre los tipos de llamad as y la forma de 
+medir esas llamadas. La premisa básica es que si se gestionan las actividades que 
+producen resultados, éstos aparecerán automáticamente. Se trata de una realidad muy 
+liberadora para los directores de ventas, ya que no es necesario esperar a final de mes 
+para predecir cuál será el resultado de un vendedor en particular.  
+No se deje engañar por la sencillez del sistema o de la historia; la clave está en la 
+aplicación. La razón por la que lo hemos convertido en una novela es para mostrar cada 
+paso basándonos en cómo se ha realizado la implantación en otras organizaciones, de 
+modo que usted pueda copiar esos mismos pasos y empezar a producir resultados 
+rápidamente en su propia empresa. Al final de la historia, queremos mostrar que todavía 
+van a surgir ideas viables que mejoren el sistema Moneycall actual. Tal vez usted, sí, 
+usted, el Lector, sea la persona a la que se le ocurra esa idea . Si es así, búscanos en 
+LinkedIn y escríbenos para concertar una llamada y seguir mejorando el sistema. Lo 
+importante es que con herramientas sencillas (una incluida en este libro) y con el software 
+y los sistemas telefónicos disponibles hoy en día, cualquier organización puede implantar 
+Moneycall y tener mucho éxito. 
+ 
+ 
+ 
+ 
+ 
+--- PAGE 11 ---
+11 
+ 
+CAPITULO 1 
+TODO EMPEZÓ CON UN RETO 
+ 
+ 
+            Hola Leo, ¿por fin terminas la gran gira? le preguntó con una sonrisa su 
+compañero de trabajo, Mark, mientras se acercaba a él. 
+Leo: Sí, ha sido todo un viaje. Empecé aquí mismo, levantando cajas, y ahora he visto 
+todas las partes de este negocio. 
+Mark: Te recuerdo en tu primer día, todo entusiasmo y ganas de aprender. Has recorrido 
+un largo camino. Comentó Mark, dándole una palmada en el hombro. 
+Leo se rió: "Tuve que empezar desde abajo, aprender cada parte del negocio. No es sólo 
+un trabajo, es el legado de nuestra familia". 
+Mark: Asintió, comprensivo. "Y estás haciendo un gran trabajo. No es fácil, equilibrar las 
+exigencias de este tipo de trabajo con las responsabilidades de las expectativas 
+familiares." 
+Leo: "Gracias, Mark. Es un reto, pero creo en lo que hacemos aquí. Y he aprendido 
+mucho de todos, incluso de ti". 
+Mientras caminaban de vuelta a la oficina, los pensamientos de Leo eran una mezcla de 
+penurias pasadas y aspiraciones futuras, firmemente cimentadas en los valores del 
+trabajo duro y la dedicación que había aprendido en el almacén. 
+ 
+ 
+ 
+--- PAGE 12 ---
+12 
+ 
+ 
+Leo estaba muy contento cuando terminó su recorrido por los numerosos departamentos 
+de la empresa mayorista de su familia. Hacía tres años que había empezado en el 
+almacén, recogiendo cajas y haciendo el d uro trabajo que millones de obreros hacen 
+cada día en la distribución. Leo es brillante, muy observador y paciente. Ingeniero 
+industrial, trabajó implantando el sistema JIT y otras técnicas de fabricación japonesas 
+en plantas de electrónica y calzado. Más tarde obtuvo su MBA con especialidad en 
+marketing; cuando empezó su vida profesional, tenía claro que nunca querría dedicarse 
+a las ventas. Sentía que ser insistente y molestar constantemente a la gente no era lo 
+suyo. Más tarde descubriría que empezó con una definición equivocada de lo que eran 
+realmente las ventas. Como muchos ing enieros, veía las ventas con unos lentes  
+equivocados; necesitó tiempo, observación y las personas adecuadas para cambiar esa 
+definición. 
+Fue interesante que su último puesto, dura nte los tres años que pasó en la empresa 
+LATAM Supply, fuera precisamente en el departamento de ventas. Se sentía muy 
+cómodo porque los clientes siempre le buscaban, y nunca tuvo que ser contundente en 
+absoluto. El análisis era un superpoder para Leo; las cosas tenían que tener sentido, y 
+cuestionar el statu quo era algo muy habitual para él.  Una de las cosas que le rondaba 
+por la cabeza era: "¿Por qué me siento tan cómodo en este trabajo de ventas?". Esa 
+pregunta le hizo pensar: "¿Quién inicia el proceso de venta en nuestra empresa? ¿Es el 
+cliente o son los vendedores? ¿Realmente vendemos o los clientes vienen y compran? 
+Si compran, ¿tenemos el control del proceso o sólo dependemos de su decisión?" A 
+partir de esas preguntas, comprendió que, si la empresa f uera más proactiva a la hora 
+de iniciar el proceso de ventas con el deseo de servir mejor, lo más probable es que los 
+resultados superaran la gran realidad actual. 
+Después de sus tres años de experiencia en distribución mayorista, más su experiencia 
+en fab ricación y cambio de procesos, Leo sentía que tenía una buena idea de cómo 
+funcionaba la empresa. Las preguntas anteriores le habían dado algunas ideas sobre 
+ciertos cambios que podían hacerse y que, con toda probabilidad, producirían mejores 
+resultados para la empresa. Así que decidió tener una conversación con su padre, Tony, 
+--- PAGE 13 ---
+13 
+ 
+el director general de la empresa, para ver si le dejaba hacer algunos ajustes en el 
+funcionamiento del negocio, especialmente en el departamento de ventas. 
+ 
+Tony estaba dando los últimos retoques a un nuevo local que querían abrir cuando Leo 
+se le acercó con varias ideas que podrían hacer más rentable el negocio. Tras una larga 
+discusión que osciló entre "¿cuánto costaría esto?" y "¡eso nunca funcionaría!". Tony 
+decidió que tal vez l a mejor manera de ver realmente lo que su hijo podía hacer era 
+dejarle dirigir toda la operación del nuevo local. 
+Leo se mostró totalmente incrédulo cuando Tony dijo: "Podemos discutir todo el día sobre 
+lo que podría ser bueno o no, y desde luego no quiero ser como mi padre, que nunca me 
+permitió poner en práctica nada nuevo hasta que se jubiló. Así que, a ver si pones tu 
+dinero donde está tu boca. ¿Dirigirías la nueva ubicación durante un año y luego 
+podríamos comparar los principales indicadores clave de rendimiento de tu operación 
+con los de nuestras otras 17 ubicaciones? " Tras una pausa de diez segundos en 
+absoluto silencio, Tony continuó: "Entonces, si lo haces mejor, podemos aplicar los 
+cambios en las otras sedes. Si no lo consigues, seguiremos hacien do las cosas como 
+hasta ahora. ¿Tenemos un trato? ¿Es una pregunta de sí o no, ahora mismo?". 
+Después de pensárselo unos segundos, Leo respondió: "Sí, lo haré", y procedió a salir 
+de la habitación, sintiendo una enorme presión sobre sus hombros, sin saber a ciencia 
+cierta qué era lo primero que tenía que hacer. 
+De camino a casa, Leo se acordó de su profesor y consultor en su curso de MBA, Guy 
+Galeti, que contribuyó decisivamente a dar forma a algunas de las ideas que Leo tenía 
+ahora. Así que llamó a Guy mie ntras conducía. Tras las cortesías normales, Leo le 
+explicó el motivo de su llamada y el reto que acababa de aceptar. Guy escuchó 
+atentamente lo que Leo describía y luego dijo: "Leo, entiendo que quieras hacer algunas 
+mejoras, y eso significa que tendrás q ue cambiar algunos procesos, pero no puedes 
+cambiarlo todo al principio, y no puedes hacer cambios en toda la empresa, así que ¿por 
+dónde crees que tienes que empezar primero?". 
+ 
+--- PAGE 14 ---
+14 
+ 
+ 
+A Leo siempre le agrado  Guy, ya que era realmente un gran entrenador y casi n unca 
+daba respuestas; sólo hacía grandes preguntas. Después de pensar en lo que Guy 
+acababa de preguntar, Leo respondió: "Tengo que empezar por transformar el sistema 
+de ventas. Si queremos superar a las demás ubicaciones, tengo que generar más 
+ingresos por empleado que el resto, y tengo que hacerlo más rápido que la rampa de 
+crecimiento habitual". 
+Guy preguntó: "¿Cómo lo harás?". 
+"La verdad es que no lo sé", admitió Leo, con tono contemplativo. "Pero creo que en 
+realidad no vendemos nada. Los clientes simp lemente nos llaman, y nosotros les 
+proporcionamos el producto que solicitan." 
+"¿Tienes datos que respalden esta suposición, Leo?". preguntó Guy.  
+"No necesito ningún dato. Yo estaba ah í todos los días, y lo único que tenía que hacer 
+era esperar a que sonara el teléfono, ayudar al cliente a comprar, y cerrábamos un buen 
+porcentaje de las llamadas así. Es un poco diferente para los gestores territoriales que 
+visitan entre 25 y 30 clientes al mes, pero para los vendedores internos o telefónicos, 
+sólo era cues tión de esperar a que empezara la temporada y BOOM, los teléfonos no 
+paraban de sonar." 
+"Vale, la premisa básica es que tus clientes te compraban, tú no vendías nada. Es decir, 
+que eras reactivo frente a proactivo, y quieres cambiar eso, ¿correcto?". resumió Guy. 
+"Correcto, pero ahora estoy pensando en cómo conseguir datos que demuestren que es 
+así", respondió Leo, con un deje de determinación en la voz. 
+ 
+ 
+ 
+ 
+ 
+--- PAGE 15 ---
+15 
+ 
+Guy preguntó: "¿Su sistema telefónico rastrea las llamadas?". 
+"Por supuesto. Todo lo que tengo que hacer es ver la proporción de llamadas entrantes 
+frente al número de llamadas realizadas por los vendedores. Llamaré a Víctor, mi director 
+de informática, y seguro que él tendrá la respuesta", dijo Leo. 
+"¿Cómo es que tu personal actual no hace llamadas aho ra y se limita a esperar a que 
+lleguen?". preguntó Guy. 
+Leo suspiró. "Me puse a pensar en ello. Lo medimos todo desde el punto de vista de las 
+llamadas entrantes: cuánto tardan en responder el teléfono, el tiempo de espera... Creo 
+que nunca pensamos en hacer l as cosas de otra manera. Recibimos tantas llamadas 
+que quizá pensamos que no era necesario hacer nada más. También me parece que 
+muchos vendedores piensan que presupuestar es vender. Entregan un papel con un 
+precio, han hecho su trabajo y el cliente volverá a llamar si lo quiere. Esto demuestra que 
+hay un problema de formación y de calidad de la interacción. Tenemos que diseñar un 
+sistema mejor para que nuestros vendedores tengan más éxito". 
+"Puede que no necesites llamar a nadie. Ahora bien, si lo hicieras , ¿crees que la 
+personalidad y la formación de la persona que atiende las llamadas entrantes serían las 
+mismas que las de la persona que inicia el proceso de llamada?". Guy preguntó 
+"Guy, somos Ingenieros Industriales y creemos en la especialización, así q ue sabemos 
+que se necesita una formación diferente y quizá personalidades diferentes", explicó Leo. 
+"Sin embargo, la clave es: no se pueden hacer bien dos cosas a la vez". 
+"¿Qué quieres decir, Leo?" inquirió Guy, curioso. 
+Leo elaboró: "Sé que los chicos del mostrador hacen llamadas a veces, pero no las hacen 
+bien porque si entra un cliente mientras están hablando, ¿qué le van a decir? ¿Debería 
+decir ¿Oye, espera a que atienda esta llamada ? De ninguna manera . Esa persona ha 
+manejado hasta aqu í y necesita que la atiendan. Así que estoy seguro de que 
+necesitamos una persona especial para esta nueva función proactiva". 
+ 
+ 
+ 
+--- PAGE 16 ---
+16 
+ 
+Guy asintió y luego preguntó: "¿Y la gente del departamento telefónico de ventas 
+internas, por qué no pueden hacer esas llamadas?". 
+"Yo estaba en ese puesto, y el teléfono suena con demasiada frecuencia para que 
+pueda pensar bien", explicó Leo. "Y cuando me decido a hacer una llamada, nunca 
+tome un ritmo que me permita seguir a un cliente concreto y ofrecerle un servicio 
+personalizado. ¿Entiendes lo que quiero decir?". 
+Guy respondió: "La verdad es que no, ¿podrías contarme más?". 
+Leo fue más allá: "El vendedor interno no tiene un conjunto de clientes a los que llamar; 
+tiene a su disposición a todos los clientes de la empresa. Ahora bien, cuando recibes 
+entre 10 y 50 llamadas al día y tu base de datos tiene 1,500 clientes, las matemáticas 
+no te permiten llamar al mismo cliente todos los meses y hacer un seguimiento 
+personalizado de sus compras. Es demasiado aleatorio, y en las ventas recurrentes, la 
+relación que estableces es crucial. 
+Tenemos que entender lo que realmente quieren nuestros clientes. No somos un 
+supermercado con miles de clientes; en nuestro negocio, un puñado de clientes 
+representa un gran porcentaje de nuestro volumen. Tenemos que cambiar el proceso 
+para adaptarlo a esa realidad. Es pura ingeniería industrial; se trata de hacer que el 
+proceso se adapte al tipo de industria en el que estamos. ¿Ahora tiene más sentido?". 
+"Sí, así es", respondió su mentor. "Entonces, está claro que necesitas una nueva 
+estructura y una formación diferente para los nuevos vendedores. ¿En cuánto tiempo 
+necesitas tener al personal y todo en marcha?". 
+"Tengo unos 30 días", respondió Leo. "Pero ahora que me has centrado sólo en 
+cambiar el sistema de ventas, pediré a algunos de los directores que apliquen los 
+mismos procesos que tenemos en otros departamentos. También pediré a algunos 
+veteranos que están a punto de ser ascendidos que pongan las cosas en marcha." 
+"Parece un gran reto", reconoció Guy. "Adelante, ponte en marcha, y si crees que 
+puedo ayudarte, llámame". 
+ 
+ 
+--- PAGE 17 ---
+17 
+ 
+Se intercambiaron cumplidos, colgaron y continuaron con su jornada. Para Leo fue un 
+paso importante, ya que ahora tenía más claro cuáles debían ser sus tareas para 
+empezar por el buen camino. 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+--- PAGE 18 ---
+18 
+ 
+CAPITULO 2 
+LA GRAN REUNIÓN 
+ 
+ 
+            Leo habló con su padre y con el director de HR, y acordaron en qué supervisores 
+podrían promocionarse desde las 17 ubicaciones para poner las cosas en marcha 
+rápidamente. Tony ya había pensado en este movimiento, así que estaba muy avanzado 
+cuando Leo solicitó el personal. La gran sorpresa de Tony fue que Leo iba a gestionar él 
+mismo las ventas desde el principio, lo que le chocó un poco, ya que su hijo siempre 
+había sido bastante negativo con respecto a las ventas. 
+Tony: "Me sorprende que vayas a asumir este papel, admiro que lo hagas, sin embargo, 
+me pregunto si empezar en tu posición más débil es una decisión inteligente." 
+Leo: "Aprendí que tenía un punto de vista equivocado cuando se trataba de ventas , 
+además también aprendí que, si voy a hacer una gran diferencia en la empresa en poco 
+tiempo, necesito ser más eficiente en el número de ventas que produzco con la cantidad 
+de gente que tenemos. Al final, no se trata tanto de entender de ventas, sino más bien 
+de entender un proceso y unos números. Son cosas que hago bastante bien, y sé que 
+estás de acuerdo". 
+Tony se rió y se volvió con una sonrisa en la cara: "Vale, es tu fiesta, así que haz lo que 
+creas necesario, espero que no te estés metiendo en demasi ados problemas. De todas 
+formas, haz lo que creas conveniente, y yo estoy aquí si me necesitas". 
+ 
+ 
+ 
+--- PAGE 19 ---
+19 
+ 
+Muchos matarían por tener un padre así, y muchos nunca querrían verse en esta 
+situación; Leo estaba dispuesto a afrontar el reto de frente. 
+A falta de tres semanas, Leo reunió al equipo directivo y trazaron un plan para cada 
+departamento. Poco después, ya estaban listos, realizando sus tareas y formando a su 
+gente. Todos los departamentos tenían un plan claro, excepto el nuevo Departamento 
+de Ventas Proactiva s; Leo tenía que idear el nuevo sistema en ese corto periodo de 
+tiempo para ayudar a sacar más productos a la calle. Así que, básicamente, Leo sabía 
+que este nuevo sistema tenía que mejorar el KPI de ventas por empleado. Luego, tenía 
+que formar a sus vende dores, implantar las métricas y obtener resultados en tres 
+semanas. Lo bueno es que empezaba con poco en este departamento, y mantenía las 
+mismas estructuras en el departamento de mostrador y en el de ventas internas. Aun así, 
+tenía que marcar una gran dif erencia con su nuevo método proactivo para justificar el 
+aumento de personal. 
+Víctor acudió al despacho de Leo con los datos telefónicos solicitados, y Leo se dio 
+cuenta rápidamente de que, de media, el 93% de las llamadas eran entrantes y, en 
+temporada alta, podían llegar al 99%, por lo que sólo entre el 7% y el 1% de las llamadas 
+eran realizadas por los vendedores. Su corazonada era correcta; la cuestión era cómo 
+podía cambiar las cosas a partir de ahí. 
+Necesitaba empezar a formar a su gente rápidamente y  decidió que seguiría utilizando 
+los mismos métodos de venta que empleaban los otros establecimientos: 
+Ventas en mostrador para los clientes que entraban en la tienda, ventas en el interior 
+para las llamadas entrantes y para trabajar con los gestores de territorio que visitan entre 
+25 y 30 grandes cuentas, y ventas por Internet para los clientes que preferían hacer 
+pedidos en línea o repetirlos con frecuencia con un solo clic. 
+Ahora, el único gran cambio iba a ser el nuevo departamento de ventas telefónicas para 
+las "llamadas salientes". Leo no entendía a quién debía llamar este vendedor. Tras 
+muchas horas de frustración, volvió a llamar a Guy. 
+ 
+ 
+--- PAGE 20 ---
+20 
+ 
+"Hola Guy, ¿cómo estás?" 
+Guy, dándose cuenta del comportamiento de Leo, respondió: "Estoy súper bien, Leo. 
+Pareces emocionado y preocupado al mismo tiempo, ¿qué pasa?". 
+Leo, impaciente por compartirlo, explicó: "Tengo datos que demuestran que a nuestra 
+empresa le va bien en ventas por ser reactiva con nuestros clientes. El informe de Victor 
+muestra que más del 90% de  nuestras llamadas son entrantes, así que está claro que 
+nuestros clientes nos compran, no les vendemos." 
+Guy recordó una cita relevante: "¿No fue Gitomer quien dijo que a la gente no le gusta 
+que le vendan, sino que le encanta comprar?". 
+"Sí", convino Leo , "pero también sé que estar ahí para ayudar a la gente de forma 
+proactiva conduce a más negocio". 
+Intrigado, Guy preguntó: "Es una afirmación atrevida, Leo. ¿Tienes datos que la 
+respalden?". 
+Leo admitió: "No los tengo, y en parte por eso he llamado. Estoy  convencido de que 
+tenemos que iniciar el proceso más a menudo y controlar el proceso de venta, pero no 
+estoy seguro de a QUIÉN tenemos que llamar." 
+Guy sintió curiosidad: "¿Qué quieres decir con “controlar el proceso de venta”?”? 
+Leo explicó: "Cuando somos reactivos, respondemos a las peticiones de los clientes sin 
+tiempo para revisar su último pedido o lo que no han comprado, pero podrían necesitar. 
+Si nos preparamos antes de llamar a un cliente e investigamos sus pedidos anteriores, 
+podemos hacerle preguntas para entender sus problemas. Este enfoque proactivo nos 
+ayuda a atender mejor a nuestros clientes sin realmente 
+vender". 
+Guy respondió: "Entonces, estás hablando de ser proactivo, como tomar una posición 
+ofensiva en lugar de defensiva, usando una analogía deportiva". 
+ 
+ 
+--- PAGE 21 ---
+21 
+ 
+"Exacto", coincidió Leo. "La cuestión es a QUIÉN llamar. No puedo hacer llamadas al 
+azar ni tener a una persona que maneje toda nuestra base de datos de clientes". 
+Guy sugirió: "¿Hay alguna forma de obtener datos que te indiquen los clientes 
+adecuados a los que llamar?". 
+Leo pensó en voz alta: "Quizá sólo necesite hablar con nuestros mejores clientes en la 
+nueva ubicación". 
+"¿Por qué tus mejores clientes?" preguntó Guy. 
+Leo explicó: "Ya les gustamos y nos compran. Ahora que nos mudamos más cerca, es 
+probable que nos aprecien aún más". 
+Guy resumió: "Así que, en esencia, lo que buscas es ofrecer un mejor servicio a tus 
+mejores clientes". 
+Leo reflexionó sobre el resumen de Guy: "Sí, eso es. Ahora me pregunto si centrarnos 
+en nuestros mejores clientes es realmente la mayor oportunidad que tenemos". 
+Guy continuó: "Leo, necesitas utilizar datos para poder hacerte una mejor idea; hacer 
+cambios basándote en corazonadas está muy desfasado...". 
+" Ambos se rieron, y Guy preguntó "¿Has analizado tu número de clientes, cuántas 
+veces compran, cuántos son atendidos por los vendedores, etc.? 
+"Tienes razón, voy a sentarme con Víctor y recabar información para ver qué ocurre 
+realmente hoy en día en todas las ubicaciones, así podremos elaborar un plan mejor". 
+Dijo Leo. 
+Guy: "Genial, parece el lugar perfecto para empezar". 
+Leo se reunió inmediatamente con Víctor delante de un ordenador y empezó a obtener 
+datos sobre el número de clientes por tienda, cuántos habían comprado en los últimos 
+12 a 24 meses, a cuántos clientes atendía una persona típica de mostrador en un año y 
+a cuántos clientes atendían los vendedores telefónicos internos. Los resultados fueron 
+reveladores. 
+ 
+--- PAGE 22 ---
+22 
+ 
+Cada tienda tenía unos 1,500 clientes en la base de datos, pero sólo entre 150 y 200 
+compraban con regularidad, y cada vendedor de mostrador tenía entre 150 y 300 
+clientes en un año, pero entre 30 y 40 realizaban la mayor parte del volumen. 
+Entonces, Leo decidió utilizar un análisis de Pareto para ver quiénes eran el 20% de los 
+clientes que representaban el 80% de las ventas. Se sorprendió al ver que el número 
+era relativamente pequeño, y coincidía con los 30-40 que hacían la mayor parte del 
+volumen por vendedor de mostrador. Lo mismo ocurría con el departamento de ventas 
+internas por teléfono. Eran los mismos clientes que seguían llamando para hacer 
+pedidos. No coincidía con el número de clientes que solicitaban presupuestos y nunca 
+compraban. Recibían muchas más llamadas para pedir presupuestos que les 
+mantenían ocupados, pero eran clientes que nunca compraban. 
+Leo se dio cuenta de que gran parte del tiempo dedicado a estas llamadas entrantes 
+era "desperdiciado". Cuando un cliente recibe quince cotizaciones y no compra, lo que 
+hace es comparar precios y siempre preferirá a su proveedor actual antes que a usted. 
+Si tuvieras un precio más bajo, utilizarían tu precio para conseguirlo de su proveedor 
+actual". 
+Con todos estos datos, Leo sintió que tenía una mejor idea sobre cómo estructurar el 
+nuevo sistema, por lo que decidió llamar a Guy una vez más. 
+Leo: "Guy, no te vas a creer lo que acabo de encontrar". 
+Guy guardó silencio y se limitó a decir: "Oh". 
+Leo continuó: "Los datos me apuntaron en la dirección correcta, un porcentaje muy 
+pequeño de nuestros clientes representa una cantidad muy grande de nuestras ventas, 
+sin embargo, los otros tipos a los que no llamamos, podrían ser una mina de oro". 
+Guy dijo ahora una de esas frases de gurú por las que era tan famoso: "Tus mejores 
+clientes quieren ser tus clientes. Hay algo que haces por ellos que les gusta. Tus 
+clientes marginales, no quieren ser tus clientes, prefieren por alguna razón, comprar 
+más a tus competidores." 
+ 
+ 
+--- PAGE 23 ---
+23 
+ 
+Leo: "Sin duda has dado en el clavo, sólo tengo que seguir tratando superbién a mis 
+mejores clientes en nuestra zona y empezar a entender y cuidar a aquellos clientes que 
+prefieren hacer más negocios en otro sitio para ver si puedo aumentar la cantidad de 
+negocios de ellos aquí. Creo que mi enfoque proactivo me ayudará a conseguirlo". 
+Guy: "Me parece que ya tienes la respuesta a la pregunta de a quién llamar". Los dos 
+volvieron a reírse. 
+Leo: "Desde luego, ahora tengo que averiguar cuántos clientes tengo que asignar a 
+este nuevo vendedor y qué tipo de sistema crearemos para evitar ser "vendedores" y a 
+la vez eficaces. Sólo quiero ayudar a la gente a comprar, servir frente a vender". 
+Guy: "Genial, ¿ahora no deberías hacer también algo de PROSPECCIÓN? Todas las 
+nuevas empresas deben buscar nuevos clientes potenciales para conseguir un mayor 
+número de clientes. 
+Leo: "Eso es exactamente lo que los datos me dicen que no haga, verás ya tengo un 
+montón de clientes que nos conocen, han establecido crédito con la empresa, tienen 
+algún tipo de relación con nosotros, y no los hemos entendido lo suficientemente bien 
+como para convertirlos en clientes más grandes". Creo que muchos formadores en 
+ventas proceden de sectores en los que es necesario encontrar nuevos clientes con 
+frecuencia, como el automovilístico, el inmobiliario o la venta de seguros. Ahora, 
+cuando se trata de ventas recurrentes B2B, como nuestro negocio de piezas y equipos 
+HVACR, no necesito buscar tanto nuevos clientes, sólo conseguir más negocio de los 
+clientes que por alguna razón no me compran principalmente a mí. Ciertamente puedo 
+hacer prospección una vez que tenga controlados a los 1,300 o más clientes que 
+apenas tocamos en la zona de la nueva ubicación." 
+Guy: "Es una conclusión muy interesante, Leo. Creo que tienes razón; nunca lo había 
+pensado así. Ahora que lo pienso, tengo varios clientes B2B que se encuentran en una 
+situación similar en la que son 100% reactivos, y siempre me ha parecido que 
+dedicaban demasiado tiempo y recursos a la prospección. Voy a mirar sus datos 
+también y ver si la misma situación se aplica. 
+--- PAGE 24 ---
+24 
+ 
+Leo: "Eso sería genial Guy, mientras tanto me prepararé para servir mejor a mis 
+clientes actuales". 
+Guy: "Me parece una gran idea, recuerda que a la gente no le gusta que le vendan. 
+Ahora bien, si vas a empezar a llamarles, ¿deberías al menos entender qué es lo que 
+compran?" 
+Leo: "Sabemos lo que compran, está en nuestra base de datos, no vamos a llamar a 
+ningún cliente nuevo, ¡recuerda!". 
+Guy: "No me estás entendiendo, nadie compra productos, compran una solución a un 
+problema, tienen una razón por la que te compran a ti o a la competencia, sería 
+importante saber qué compran en concreto desde el principio." 
+Leo: "¡Vaya Guy! Tienes razón, entonces ¿cómo consigo esa información?". 
+Guy se rió y luego dijo "Tú pregunta... es sencillo, pero tienes que asegurarte de que se 
+hace de forma que el cliente sienta que va a ganar algo con la información". 
+Leo: "Como siempre, creo que has dado en el blanco; déjame pensar qué preguntas 
+tengo que incorporar al sistema para que mi gente pueda hacerlas." 
+Guy: "Me parece un plan; mantengámonos en contacto. Veré si los mismos números se 
+aplican a mis otros clientes B2B con ventas recurrentes". 
+Leo: "Hablamos pronto". 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+--- PAGE 25 ---
+25 
+ 
+CAPITULO 3 
+LAS 5 PREGUNTAS CLAVE 
+ 
+            Leo decidió que iba a hablar con Estelle, la responsable de marketing de la 
+corporación, para que le dijera qué preguntas proporcio narían más información sobre 
+QUÉ compran los clientes. Le explicó toda la conversación con Guy y que necesitaba 
+elaborar una lista de preguntas fáciles que pudieran mostrar al vendedor qué compraba 
+realmente el cliente. 
+Estelle: "Entiendo lo que quieres Le o, creo que tienes que ir al grano y preguntar 
+directamente, aunque la clave estará en la forma en que la persona escuche las 
+respuestas, más que en la pregunta en sí". 
+Leo: "¿Qué quieres decir?" 
+Estelle: "Bueno, cada vez que se hace un estudio de mercado,  es imprescindible dejar 
+que el cliente proporcione información, no para estar a la defensiva ni para vender nada, 
+hay que ser inteligente para obtener el feedback adecuado." 
+Leo: "Eso va de la mano con mi definición de vender". 
+Estelle: "¿Y cuál sería esa definición Leo?" preguntó con una sonrisa en la cara. 
+Leo: "Vender es obtener información, no proporcionar información. Significa entender 
+cuáles son los problemas que el cliente quiere resolver, no lanzar productos o ideas. Por 
+lo tanto, si el vendedor proporciona información, entonces no está aprendiendo lo que el 
+cliente quiere. Cuando se cuenta... no se aprende. Para aprender... hay que es cuchar 
+para determinar los problemas del cliente". 
+ 
+--- PAGE 26 ---
+26 
+ 
+ 
+ 
+Estelle: "Eso suena más a marketing que a venta. Estoy de acu erdo en que, si haces 
+eso, sin duda venderás más, y tu proceso de ventas será más fácil." 
+Leo: "Vale. ¿Qué preguntas debe hacer el vendedor?". 
+Estelle: "Bueno, quiero saber qué es lo que le gusta de comprar con nosotros. Según mi 
+experiencia en investigaci ón, su primera respuesta no será la más valiosa, tendremos 
+que seguir averiguando, estando atentos y escuchando." 
+Leo: "Genial, eso me encanta, ¿qué más?". 
+Estelle: "Si el vendedor ha tratado antes con el cliente' debería preguntar: ¿qué le gusta 
+de hacer negocios conmigo? De nuevo, obtendrás cosas como: "Siempre me devuelve 
+las llamadas", pero la clave, es decir: "Qué bien, me alegro de que le guste; además de 
+devolverle las llamadas, ¿qué más le gusta de hacer negocios conmigo? Y se mantiene 
+esa tendencia hasta que el cliente dice: "Bueno, supongo que eso es todo". Hasta que 
+obtengas esa respuesta, el vendedor tiene que seguir escarbando en busca de 
+información. Esto se aplica a todas las preguntas". 
+Leo: "Suena bastante fácil y lógico, ¿ahora qué otras preguntas deberían hacer?". 
+Estelle se quedó callada un rato y, tras dos minutos mirando al techo, respondió: "¿Qué 
+les gusta de hacer negocios con la competencia? Aquí no se necesitan los nombres de 
+los competidores, basta con entender lo que les gusta y va loran de hacer negocios en 
+otros sitios; si dicen el nombre de una empresa, es salsa, pero la clave está en la 
+información, no en el nombre. 
+ 
+ 
+ 
+ 
+ 
+--- PAGE 27 ---
+27 
+ 
+ 
+Ahora que lo pienso, puede que sea incluso mejor que no digan el nombre, porque si 
+compran a más de dos o tres competidores, y nuestros datos demuestran que lo hacen, 
+obtendremos información sobre lo que valoran de todos ellos, y no sólo del nombre de 
+las empresas que nos han facilitado". 
+Leo: "Estupendo. Ahora, ¿no deberías saber también qué porcentaje de su compra 
+total proviene de nosotros? 
+Estelle: "¡Vaya, es una gran pregunta! Nos permitiría saber cuántas oportunidades de 
+crecimiento tenemos y evitará que el comercial piense que tiene que llamar a nuevos 
+clientes, sólo eso ya me facilitaría mucho el trabajo en marketing." 
+Ambos se rieron mucho con eso. 
+Leo: "Te entiendo perfectamente. Nuestro objetivo no es hacer prospección, al menos 
+al principio, sino entender y ofrecer un mejor servicio a los clientes existentes." 
+Estelle: "Sin embargo, creo que nos estamos perdiendo algo. Es importante que el 
+cliente se dé cuenta de que queremos ayudarle a crecer y no solo venderle algo hoy. 
+Quizá ese sea mi reto en marketing, transmitir ese mensaje". 
+Leo: "Entiendo a Estelle, aunque la mejor manera de hacer que un cliente, o cualquier 
+persona en realidad, reflexione sobre un tema, es plantearle una pregunta. En este 
+caso, nuestro objetivo sería preguntar en qué mercado concreto están intentando 
+crecer y aún no han podido implantar. Algo así como ¿En qué mercado les ha resultado 
+especialmente difícil entrar y cómo podríamos ayudarles a conseguir clientes en ese 
+nicho?". 
+Estelle: "Esa me encanta, hace que el cliente piense que estamos aquí para servir y 
+ayudar. Al mismo tiempo, nos posiciona para poder tirar de recursos para ayudarles a 
+conseguir sus objetivos. Al fin y al cabo, como mayoristas, hemos vendido equipos y 
+piezas en todos los segmentos del mercado de nuestro estado. Así que creo que esa 
+sería una gran última pregunta, Leo". 
+ 
+--- PAGE 28 ---
+28 
+ 
+Leo: "Obviamente el único cambio a las 5 Preguntas Clave que ya planeamos, sería en 
+caso de que el vendedor nunca tratara con un cliente específico. En ese caso, no 
+tendría sentido preguntar qué les gustó de hacer negocios con el vendedor." 
+Estelle: "Me gusta esa pregunta porque proporciona un refuerzo positivo al vendedor de 
+que le gusta al cliente, pero tienes razón, necesitamos una alternativa." 
+Leo: "¿Qué tal simplemente saber qué les ha resultado especialmente frustrante 
+encontrar últimamente? Nuestro objetivo aquí es ver si podemos ayudarles con ese 
+producto." 
+Estelle: "¡Perfecto, marketing 101 ahí! Deja que te digan lo que necesitan, no hay mejor 
+manera de vender. Creo que ya tienes tu lista, Leo". 
+Leo: "Gracias Estelle, déjame empezar a montar el sistema para poder formar a mi 
+nuevo vendedor telefónico. Creo que debería llamar a este nuevo departamento de 
+llamadas proactivas, el equipo Moneycall, ¿qué te parece?" 
+Desde luego es un nombre pegadizo, respondió Estelle. Me gusta, así que buena 
+suerte contratando a tu vendedor Moneycall". 
+Leo se marchó, corriendo alegremente con su nueva idea tomando forma en su 
+cabeza. 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+--- PAGE 29 ---
+29 
+ 
+CAPITULO 4 
+FORMACIÓN DEL NUEVO VENDEDOR 
+PROACTIVO 
+ 
+            Tras una dura sesión de entrevistas con tres candidatos y utilizar una prueba de 
+evaluación de índices para seleccionar al candidato final, Leo fija las fechas para que su 
+nueva vendedora, Laura, empiece a recibir formación sobre cómo utilizar las 5 preguntas 
+clave. También se dio cuenta de que tenía que decidir el número correcto de clientes que 
+Laura iba a poder atender. Ahora, no había cambios aleatorios entre vendedores, y esto 
+garantizaría la construcción de una relación. Laura tendría información sobre lo que les 
+gustaba y valoraban sus clientes y, lo más importante, qué problemas necesitaban 
+resolver. Era la respuesta  de Leo al Mackay 66 de Swim with the Sharks without being 
+eaten alive. Un libro que le influyó enormemente. 
+Llamó a Guy una vez más para ver si podían deducir un número lógico para Laura como 
+número fijo de clientes. 
+Leo: "Hola Guy, otra vez yo, espero que estés bien". 
+Guy: "Genial como siempre Leo, me alegro de que hayas llamado, no te vas a creer lo 
+que he descubierto con mis otros clientes B2B. Tienen exactamente la misma situación 
+que ustedes en HAVCR Distribution. Hay un 80% de sus clientes o más que compran 
+muy poco, y la empresa nunca llega a ellos y ni siquiera entiende por qué compran.  
+ 
+ 
+--- PAGE 30 ---
+30 
+ 
+Reciben un montón de llamadas y muy pocas ventas de estos clientes. Así que voy a 
+utilizarte como conejillo de indias para ver si tu sistema funciona bien. Hay un a 
+oportunidad interesante para que muchas empresas cambien su sistema, pero primero 
+quiero ver si funciona contigo". 
+Se rieron. 
+Guy continuó: "Si funciona, ¿me darías más información sobre el proceso para ver si me 
+atrevo a ponerlo en práctica con esos clientes, obviamente si te parece bien?". 
+Leo: "Absolutamente Guy, en muchos sentidos estamos creando esto juntos. La razón 
+de mi llamada es porque no tengo una idea de cuantas personas debería manejar este 
+nuevo vendedor. ¿Hay alguna manera de empezar lógica mente con una buena 
+estimación?" 
+Guy: "Bueno, recuerdo que cuando era asesor de una gran cadena nacional de 
+concesionarios de coches, tenían un estándar de 48 llamadas por vendedor y día. 
+Cada llamada tenía que ir seguida de un correo electrónico y los mej ores vendedores 
+también enviaban un mensaje de texto." 
+Leo: "Vale, eso sería un poco exagerado en nuestro sector, nunca queremos ser tan 
+insistentes como los vendedores de coches". 
+Ambos estallaron en carcajadas ante ese comentario. 
+Leo: "Ahora bien, si hicieran 48, quizá podríamos hacer 20 al día, ya que tendrán que 
+presupuestar, hacer un seguimiento, escuchar, orientar a sus clientes, etc.". 
+Guy: "El seguimiento es la regla de oro que la mayoría de los vendedores nunca 
+siguen. Mis datos demuestran que, si hacemos un seguimiento del 100% de nuestros 
+presupuestos, nuestra ratio de cierre aumenta un 20%. Eso significa que tu sistema 
+para llamar proactivamente a los clientes está respaldado por datos reales. Lo mejor es 
+que muchos clientes te agradecen el seguimiento porque están tan ocupados que les 
+encanta que les ayudes". 
+ 
+--- PAGE 31 ---
+31 
+ 
+Leo: "No me gustó vender desde el principio", pero cada vez me apasiona más ver la 
+lógica detrás de los números y hacer de todo un proceso como haría un buen Ingeniero 
+Industrial. Ahora que mencionas tu experiencia con el seguimiento, recuerdo un 
+comentario que hizo una secretaria de ventas durante nuestra reunión semanal. Explicó 
+que cada trimestre, al menos un cliente se quejaba de la falta de seguimiento del 
+vendedor a su último presupuesto. Yo pensaba: ¿las escopetas las disparan las 
+palomas? Esa realidad demuestra que debemos incluir sin duda el seguimiento del 
+100% de todos los presupuestos como parte del sistema Moneycall." 
+Guy: "Gran idea, pero no perdamos de vista la primera pregunta, ¿cuántos clientes 
+debe manejar el vendedor telefónico?" 
+Leo: "Correcto, así que los gestores territoriales visitan entre 25 y 30 personas al mes, 
+por lo que el teléfono debería ser al menos 4 o 5 veces más productivo, aunque deban 
+dejar un mensaje en un alto porcentaje de casos. Entonces, ¿crees que 100 es un 
+buen número para empezar?" 
+Guy: "Es una cantidad razonable, ¿y qué dirían cuando llamen"? 
+Leo: "Se me ocurrieron las 5 preguntas clave para entender qué compra 
+específicamente el cliente, y al mismo tiempo necesitamos un guión para que a Laura 
+le resulte fácil vender a sus clientes potenciales la idea de proporcionarle información." 
+Guy: "Eso suena como un gran comienzo para el sistema, ¿cuál sería ese guión de 
+apertura que crees que podría hacer magia?" 
+Leo: "Tenemos que hacer las cosas sencillas, más o menos así: Sr. Cliente, me han 
+dado su cuenta para proporcionar un servicio más personalizado, sólo necesito 17 
+minutos de su tiempo, para hacer algunas preguntas y entender cómo podemos servirle 
+mejor. ¿Tiene tiempo ahora para que pueda ayudarle más?". 
+ 
+ 
+ 
+ 
+--- PAGE 32 ---
+32 
+ 
+Continuó Leo: "El cliente contestaría entonces sí o no; si dice que no, entonces le 
+damos dos alternativas sobre fechas y horas en las que podríamos tener la 
+conversación. Si dice que sí, pasamos inmediatamente a la primera pregunta. En 
+resumen, cuando tenemos programada o aceptamos la "llamada para la entrevista", 
+hacemos las 5 preguntas clave." 
+Guy:" Eso suena bastante fácil, me encantaría ver qué resultados obtienes con ello, y 
+suena como que podría funcionar." 
+Leo: "OK, así que estoy listo para comenzar mi entrenamiento con Laura en las 5 
+preguntas clave y le proporcionaré los primeros 100 clientes que vinieron después del 
+20% superior en el análisis de Pareto". 
+Guy: "Mantenme informado, suena como un gran plan. Ahora lo que no entiendo es 
+¿qué harías después de obtener toda la información de cada cliente? Tienes que llamar 
+con frecuencia o al menos cada mes, así que ¿vas a estar haciendo las mismas 
+preguntas todo el tiempo?" 
+Leo: "Recuerdo ese cuadrado que nos enseñaste en el MBA que aprendiste de Joe 
+Ellers, mostraba las cinco formas en que podías aumentar tus ventas. ¿Lo recuerdas?" 
+Guy: "Absolutamente, es un abridor de mentes. Muchos vendedores piensan que hay 
+infinitas formas de aumentar las ventas, si así fuera, entonces nunca podríamos 
+conseguir un proceso que funcionara. Ayuda entender ese cuadrante". 
+Leo: "Bueno, estoy trabajando en utilizarlo para las siguientes llamadas. Luego te 
+cuento más, tengo que empezar a formar a Laura en el nuevo sistema de ventas y las 5 
+Preguntas Clave, para que esté preparada para el día de la inauguración. Hasta luego 
+Guy". 
+Guy: "Mantente en contacto Leo, realmente me gusta lo que escucho y la pasión que 
+veo en ti sobre este proceso". 
+ 
+ 
+--- PAGE 33 ---
+33 
+ 
+Ambos siguieron con sus respectivas actividades, muy entusiasmados con lo que 
+estaban creando. 
+Leo programó su formación con Laura y le proporcionó las 5 preguntas clave. Quiso 
+hacer un juego de roles para asegurarse de que ella se sintiera cómoda con ellas y 
+pudiera hacerlas con confianza en sus llamadas reales. 
+Leo: "Laura, tienes las 5 preguntas clave, y eres nueva en nuestra organización, nunca 
+antes has hablado con estos clientes, así que vamos a hacer un juego de rol para 
+asegurarnos de que sabes cómo manejar las llamadas, ¿te parece bien?". 
+Laura: "Me parece bien. ¿Te hago la primera pregunta?" 
+Leo: "Sí, adelante. Saltémonos la introducción vendiendo la llamada y asumamos que 
+ya tienes un acuerdo con ellos, y que te han dado 17 minutos. Yo seré el cliente". 
+Laura: "Vale, allá vamos. Sr. Leo, soy Laura de LATAM Supply, espero que se 
+encuentre bien. Como acordamos, hoy nos tomamos el tiempo para ver cómo podemos 
+servirle mejor. ¿Qué diría que le gusta de hacer negocios con LATAM Supply?". 
+Leo (interpretando el papel del cliente): "Bueno Laura, me gusta que tengan precios 
+muy competitivos". 
+Laura: "Genial, entonces ahora ¿qué te gusta de" Ella no llegó a terminar, y Leo la 
+interrumpió. 
+Leo: "¡Espera, espera, no tan rápido! El cliente no te ha dado todas las razones por las 
+que le gusta hacer negocios con nosotros, así que debes profundizar y no parar hasta 
+que el cliente diga: "Y ya está", o algo parecido. ¿Tiene sentido?". 
+Laura: "Absolutamente", continuó: "Sr. Leo, me alegro de que le gusten nuestros 
+precios, ahora, ¿qué más le gusta de hacer negocios con nosotros?". 
+ 
+ 
+ 
+--- PAGE 34 ---
+34 
+ 
+Leo (en el papel de cliente): "Me gusta que den una respuesta rápida a cualquier 
+problema de garantía que pueda tener". 
+Laura: "Genial, me alegra oír eso, a muchos clientes también les gusta, ¿qué más diría 
+que le gusta?". 
+Leo (interpretando el papel): "Nunca tengo que preocuparme de que las cosas no estén 
+listas cuando se prometen, así que eso me ahorra mucho tiempo, y eso me gusta de 
+ustedes." 
+Laura: "Genial señor Leo, ahorrar tiempo es sin duda importante, ¿hay algo más que le 
+guste?". 
+Leo (interpretando el papel): "No, no se me ocurre nada más". 
+Laura: "Bien, entonces pasando a la siguiente pregunta, ¿qué es lo que le gusta de 
+hacer negocios con la competencia?". 
+Leo: "Me encanta que nunca me cobren gastos de envío por muy grande o pequeña 
+que sea mi compra". 
+Laura: "Bueno, señor Leo, si eso es valioso para usted, podemos ver cómo 
+podemos…". Leo interrumpió de nuevo. 
+Leo: "¿Qué pasa cuando empiezas a explicar las opciones de envío que tenemos?". 
+Laura: "Se da cuenta de que podemos hacer lo mismo, pero también deja de darme 
+información.... Entiendo lo que quieres decir Leo". 
+Leo: "Vale ¿y cómo continuarías?". 
+Laura: "Interesante, tasa de entrega cero, qué más te gusta de hacer negocios con 
+nuestros competidores." 
+Leo: "Bien hecho, no detuviste el flujo de información, así que aquí diría, (juego de 
+roles) me gusta su servicio al cliente." 
+ 
+ 
+ 
+--- PAGE 35 ---
+35 
+ 
+Laura: "La atención al cliente es clave en cualquier relación comercial, además de la 
+atención al cliente…" Leo interrumpe una vez más. 
+Leo: "Vale, Laura, hay veces que el cliente dice cosas que requieren más aclaraciones. 
+Esta es una típica; un gran servicio al cliente para ti puede ser una cosa y algo muy 
+diferente para ellos. Lo que buscamos es la definición del cliente, así que tenemos que 
+aclarar qué entiende él por servicio al cliente. 
+Laura: "Antes no lo veía así y ahora me parece una perspectiva muy interesante". 
+Leo: "Entonces, ¿cómo harías para averiguar su idea de servicio al cliente?". 
+Laura (entrando en su papel de vendedora): "Sr. Leo, un servicio excelente es clave en 
+cualquier relación comercial; ¿podría decirme con más detalle qué significa para usted 
+un gran servicio al cliente?". 
+Leo: "¡Muy bien, Laura! En consecuencia, respondería: (role playing) Me gusta que me 
+atiendan rápidamente por teléfono o que siempre me devuelvan la llamada en menos 
+de 30 minutos. También me ofrecen su servicio de apertura de conserjería 24 horas al 
+día, 7 días a la semana, algo que agradezco de verdad. Otra de las cosas que más me 
+gustan es que siempre entregan a tiempo". 
+Laura: "Genial Sr. Leo ¿y qué más le gusta de hacer negocios con ellos?". 
+Leo interrumpió y dijo: "Laura, ¿sabes lo que significa para él entregar a tiempo?". 
+Laura: "Veo que no me aclararon eso. Es similar a la pregunta del servicio, ¡ya lo 
+entiendo!". Continuó de nuevo con su función de ventas: "Entonces, Sr. Leo, cuando 
+dices que siempre entregan a tiempo ¿a qué te refieres exactamente?" 
+ 
+ 
+ 
+ 
+--- PAGE 36 ---
+36 
+ 
+Leo: (juego de roles): "Significa que, si dicen que el equipo estará disponible en tres 
+días más o menos dos días, yo sé que van a ser cinco días como máximo. Eso es lo 
+que quiero decir". 
+Laura (vuelve a su papel de aprendiz): "Ahora entiendo lo que ha hecho. 
+Entiendo cuál es su nivel de puntualidad, mi objetivo es prometer lo mismo o mejor 
+para que podamos conseguir más de su negocio. Lo haré en otra llamada, ya que en 
+este momento mi propósito es únicamente recabar información. ¿Estoy en lo cierto?" 
+Leo: "Eres lo máximo Laura, ¡seguro que lo harás genial aquí! Sólo asegúrate de 
+escribir todas sus respuestas para que puedas usarlas en tus llamadas de seguimiento. 
+Me alegro de que hayas recordado que no es el momento de ofrecer una entrega a 
+tiempo, guardamos esa información para cuando hagamos un presupuesto o le 
+prometamos un plazo de entrega." 
+Laura: "Ahora lo tengo claro: No estoy vendiendo; sólo estoy obteniendo información. El 
+momento de utilizar esa información será en todas mis llamadas futuras". 
+Leo: "Súper, eso es exactamente". Se chocaron los puños. 
+Leo y Laura representaron varias veces las 5 preguntas clave, así como el guión de 
+introducción para la llamada y la doble alternativa cercana a la programación de la 
+llamada, en caso de que el cliente no tuviera tiempo ahora. Incluso prepararon "un texto 
+listo para enviar" que ella personalizaría con el nombre del cliente, sólo para enviárselo 
+a los clientes para preprogramar la llamada y no sorprender nunca a un cliente ni 
+hacerle sentir interrumpido. 
+Antes de terminar su sesión de juegos de rol, Leo mencionó: Laura, es importante que 
+te des cuenta de que lo más probable es que el cliente recuerde algo que necesita 
+mientras está respondiendo a las 5 preguntas clave, si eso ocurre está bien escuchar y 
+ver si puedes ayudarle con ese posible pedido. 
+Laura respondió: Me imagino que eso ocurrirá con frecuencia, no será un problema, les 
+ayudaré con lo que se le haya venido a la mente y me aseguraré de terminar mi 
+pregunta antes de mirar de ayudarles con su petición. Seré flexible y estaré dispuesto a 
+ayudar, no se preocupen. Sabía que lo conseguirías rápidamente, dijo Leo. 
+--- PAGE 37 ---
+37 
+ 
+Laura ya estaba preparada para la primera serie de llamadas, pero tenían dos semanas 
+más y Leo tuvo que idear la segunda parte del sistema para sus llamadas de 
+seguimiento durante todo el año. 
+Después de pensar durante dos días en la segunda parte del sistema mientras Laura 
+seguía practicando sus 5 Preguntas Claves, Leo volvió a la ilustración que le ayudó 
+mucho a la hora de mejorar las ventas. Guy se lo enseñó y surgió de una presentación 
+de Joe Ellers en una conferencia de una asociación comercial. Sintió que tenía la idea 
+básica de lo que necesitaban y se la mostró a Laura: 
+ 
+Las cinco maneras de incrementar las ventas 
+ 
+Incrementa el precio 
+5 
+ 
+ 
+Servicio/Producto Actual 
+ 
+ 
+Nuevo Producto/Servicio 
+ 
+Clientes actuales 
+ 
+ 
+1 
+ 
+ 
+2 
+ 
+Futuros clientes 
+ 
+ 
+3 
+ 
+ 
+4 
+ 
+Fuente: Presentación de ventas de Joe Ellers en la Conferencia HARDI Focus 
+ 
+Leo: "Hola Laura, quería mostrarte este cuadrante, para que veas que hay pocas 
+maneras de aumentar las ventas. Necesitamos pensar qué preguntas debemos hacer 
+usando este cuadrante para las llamadas de seguimiento con nuestros clientes. De 
+esta manera podemos ayudar al cliente y a la empresa a vender de forma más 
+proactiva. También le envié un mensaje de texto a mi antiguo maestro, amigo y 
+--- PAGE 38 ---
+38 
+ 
+consultor Guy, quien fue quien me lo mostró, hablaré con él más tarde, y primero 
+quería recibir tus comentarios al respecto". 
+Laura: "Me gusta eso, sin embargo, muestra aquí que tienes clientes potenciales y 
+dijiste al principio que no haríamos prospección, estoy un poco confundida ahí." 
+Leo: "Entiendo tu preocupación; nunca haremos el cuadrante 4 en nuestro sector; 
+dependeríamos del marketing para producir clientes potenciales para eso. Tenemos 
+tanto potencial con todos los clientes actuales a los que actualmente no atendemos 
+bien que no tiene sentido centrarnos en los clientes potenciales. Tenemos que 
+concentrar nuestros esfuerzos en los cuadrantes 1 y 2 porque es ahí donde existen la 
+mayoría de nuestras oportunidades. 
+Es muy sencillo: para aumentar las ventas, podemos ver qué productos ya no compran 
+nuestros clientes actuales, que antes nos compraban a nosotros, ese es el cuadrante 1. 
+Luego, también podemos ver qué es lo que deberían comprarnos y no nos compran, 
+pero hoy en día, ese es el cuadrante 2. La clave es cómo lo hacemos. 
+Por favor, ve a casa hoy y piénsalo, luego nos reunimos de nuevo mañana para ver 
+cómo lo conseguimos. ¿Te parece bien?" 
+Laura: "De acuerdo. Pensaré en cómo formular las preguntas para los cuadrantes 1 y 2.  
+Sólo tengo que tener en cuenta que el objetivo es obtener información del cliente, incluso 
+en esta nueva etapa preguntando, ¿correcto?" 
+Leo: "Exacto, los vendedores que más preguntan, son los que más venden. Solo 
+mencionar ese hecho, me empezó a dar algunas ideas de cómo proceder. Hasta 
+mañana y prepárate para ayudarme a hacer algo fantástico". 
+Laura sonrió, y se fueron a relajarse y a prepararse para el día siguiente. 
+ 
+ 
+ 
+ 
+--- PAGE 39 ---
+39 
+ 
+CAPITULO 5 
+LA SEGUNDA FASE DEL SISTEMA 
+MONEYCALL 
+ 
+            Leo siguió dándole vueltas a las preguntas y decidió que había llegado el 
+momento de volver a llamar a Guy para ver qué opinaba y compartir los resultados 
+actualizados. Tras la habitual charla personal y trivial, entraron de lleno en la 
+conversación. 
+Leo: "Guy, como siempre necesito pensar en voz alta contigo, así que aquí estoy con la 
+situación de la que hablamos antes, ¿qué hago después de completar las primeras 
+llamadas con las 5 Preguntas Clave?". 
+Guy: "Leo, me pusiste a pensar la última vez y miré el cuadrante que te enseñé, como 
+me pediste, y se me ocurrieron varias ideas. La primera es que, como estás llamando a 
+clientes actuales, ya tienes datos sobre lo que compran ¿no?" 
+Leo: "Sí, ¿y qué?", respondió, un poco sorprendido por su pregunta. 
+Guy: "Bueno, ¿cómo podrías llamar a tus clientes actuales para preguntarles sobre su 
+última compra o sus motivos para dejar de comprar un producto de forma que les resulte 
+valioso?" 
+Leo: "Uhm Guy, siento que viene algo interesante, s in embargo, no lo veo en este 
+momento, dime más". 
+ 
+ 
+--- PAGE 40 ---
+40 
+ 
+Guy: "Bueno, los clientes actuales del cuadrante 1: compran más de lo que compran 
+normalmente, vuelven a comprar lo que solían comprar, o al menos te dan información 
+sobre por qué dejaron de comprar algo que solían comprar. 
+Como tienes todas sus compras anteriores en tu sistema, el vendedor podría hacer una 
+pregunta personalizada sobre cualquiera de esas situaciones, que ayudará al cliente y 
+a la empresa, ¿no?" 
+Leo: "¡Wow! Me gusta esa idea, ¿podemos hacer un juego de rol con esa posibilidad 
+Guy? ¿Te importa? Me gustaría ser el vendedor". 
+Guy: "Perfecto, adelante". 
+Leo (role-playing): "Señor Guy, como le he dicho antes, me han asignado a su cuenta 
+para darle un servicio más personalizado. Mientras hacía un análisis de sus compras 
+anteriores, me he dado cuenta de que solía comprar al menos cinco sistemas de 10 
+toneladas cada mes y, sin embargo, en los últimos 3 meses no ha comprado ninguno. 
+¿Hay alguna razón para ello? 
+Guy: "Me gusta, eso sí que dejaron de comprarlo, ¿qué otra cosa podría ser?". 
+Leo: "También podrías pedirles una proyección de las unidades que esperan comprar 
+en los próximos meses para asegurarnos de que las tenemos en stock. Podría 
+preguntarles por cualquier producto que compren normalmente y que, según el 
+calendario, podrían estar dispuestos a volver a comprar. Por ejemplo, podría decir: Sr. 
+Guy, usted suele comprar cinco unidades de 10 toneladas embaladas el día 20 de cada 
+mes; faltan un par de días para esa fecha. ¿Podría hacer su pedido habitual ese día 
+para que yo me asegure de que se envía y usted no tenga que pensar en ello? 
+Chico: "¡Es increíble! Ahora veo cómo esta llamada proactiva puede cambiar las reglas 
+del juego. Si yo fuera tu cliente, sin duda querría ese nivel de servicio, desde luego no 
+llamaría a ese vendedor, que sólo me está ayudando a comprar. Muy bien, Leo, ¿ahora 
+qué tal el siguiente cuadrante?". 
+ 
+ 
+--- PAGE 41 ---
+41 
+ 
+Leo: "No tan rápido. Creo que siempre deberíamos terminar cualquier llamada de 
+cuadrante con una modificación de la pregunta que se hizo famosa en McDonalds: 
+"¿Qué más le resulta difícil encontrar estos días que yo pueda localizar para usted?". 
+Guy: "Me gusta, es una pregunta de probada eficacia, puedo ver cómo añade valor y es 
+fácil de hacer para el cliente y para el vendedor". ¿Y el segundo cuadrante?" 
+Leo: "Este es un poco más complicado; tenemos que formar al vendedor no solo en 
+cómo buscar en el sistema, sino también para ver qué otros productos coinciden con 
+las compras actuales del cliente. Me cuesta que los clientes imaginen a ciegas cuando 
+se les pregunta si hay otros productos que incluirían en su pedido. Les abre mucho 
+más la mente que pensemos por ellos y les ofrezcamos algunas opciones obvias, ¿no 
+crees?". 
+Guy: "Supongo que sí, por ejemplo, si el cliente del túnel de lavado siempre compra 
+cera para el coche, quizá también podamos ofrecerle el líquido abrillantador de 
+neumáticos para que sus neumáticos también tengan buen aspecto." 
+Leo: "Correcto, recuerdo cuando era vendedor; una gran parte de nuestros clientes no 
+compraban muchos artículos simplemente porque no sabían que teníamos esos 
+productos." 
+Guy: "Correcto, en mi práctica he descubierto que los clientes también segmentan a 
+sus vendedores, de modo que piensan que consiguen cera para coches en la tienda A, 
+pero creen que el líquido abrillantador de neumáticos solo puede encontrarse en la 
+tienda B. Un día, preguntas con qué otros productos tienen dificultades, mencionan el 
+líquido abrillantador de neumáticos y dices, también tenemos eso. En el 90% de los 
+casos, el cliente dirá: "No sabía que vendían ese producto", y al final es porque no 
+somos lo bastante proactivos para preguntar. Es imposible que un cliente conozca las 
+más de 15,000 referencias que tenemos." 
+Leo: "Estoy de acuerdo, pero también tengo que mostrar a Laura qué productos suelen 
+ir juntos con otros artículos para que pueda preguntar fácilmente al cliente por esa otra 
+posibilidad." 
+ 
+--- PAGE 42 ---
+42 
+ 
+Guy:" ¿Cuál sería tu sugerencia para que ella maneje esa pregunta?"  
+Leo: (entró en el juego de roles): "Sr. Guy, veo que siempre nos compra minisplits de 1 
+tonelada cada mes, y nunca lleva los kits de instalación para ellos, pueden ahorrarle 
+mucho tiempo, ¿alguna vez ha probado uno?".  
+Guy: "Me gusta, está redactado de forma sencilla pero contundente para obtener 
+información valiosa. Ahora creo, que estás listo para entrenar a Laura en la siguiente 
+etapa del sistema utilizando los 2 cuadrantes superiores." 
+Leo: "Lo tengo súper claro. Gracias Guy por indicarme la dirección correcta". 
+Guy: "Un placer Leo, lo estamos haciendo juntos". 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+--- PAGE 43 ---
+43 
+ 
+CAPITULO 6 
+LISTO PARA EMPEZAR 
+ 
+ 
+            Leo volvió a su juego de rol con Laura y se aseguró de que ella supiera las 
+preguntas que debía hacer basándose en las 2 casillas superiores del cuadrante. 
+Utilizó su sistema informático para investigar los pedidos anteriores del cliente antes de 
+cada llamada. Laura practicó durante tres días sola frente al espejo y con Leo hasta 
+que éste consideró que dominaba bien cada tipo de llamada. 
+Después de practicar los guiones, Laura estaba muy emocionada por empezar a hacer 
+llamadas y ayudar a los clientes a comprar. Su miedo a hacer llamadas había 
+desaparecido totalmente desde que aprendió mediante el juego de roles durante la 
+semana pasada. Ahora estaban listas para rodar y probar el sistema Moneycall en el 
+mundo real. 
+La tienda estaba repleta de productos, el personal del mostrador estaba listo, el 
+personal de envíos e inventario estaba preparado y ¡ahora era el momento del 
+espectáculo! El equipo de marketing había preparado una ceremonia de inauguración, 
+y todos los clientes locales que habían comprado anteriormente en otro establecimiento 
+estaban invitados al evento de la BQQ. Se anunciaron fotos de LinkedIn, correos 
+electrónicos y vídeos de invitación, testimonios, folletos y ofertas especiales de los 
+proveedores. Fue un gran pistoletazo de salida para la inauguración de la sucursal. 
+El evento fue un éxito; puso la nueva ubicación de LATAM Supply en el mapa. 
+Los clientes empezaron a llegar y a llamar para hacer pedidos, así que muy pronto todo 
+volvió a la normalidad. 
+--- PAGE 44 ---
+44 
+ 
+ 
+Había llegado el momento de que Laura probara el nuevo sistema Moneycall y 
+comprobara su eficacia real. Sabía que, para que el sistema tuviera éxito, sus ventas 
+debían superar los $100,000 dólares al mes; de lo contrario, la productividad de la 
+tienda por empleado sería inferior a la de las demás tiendas. 
+Leo se quedó cerca de ella y escuchó su primera llamada sobre las 5 preguntas clave. 
+Le encantaba cuando Laura manejaba a la perfección una situación interesante. 
+Laura: "Sr. Jones, ¿qué es lo que le gusta de hacer negocios con LATAM Supply?". 
+Sr. Jones (Cliente): "Me gusta que se ocupen de mis problemas de garantía muy 
+rápido". 
+Laura: "Me alegro de que eso sea importante para usted, ahora cuando dice que nos 
+ocupamos de los problemas de garantía rápidamente, ¿qué significa eso para usted?" 
+Leo miró hacia ella, dándole un pulgar hacia arriba. 
+Sr. Jones: "La mayoría de las veces recibo la pieza inmediatamente después de 
+traérsela. Si es una pieza grande, sé que la tendré resuelta en menos de 2 días 
+laborables, eso es lo que prometen y lo cumplen. Nadie lo hace mejor que LATAM 
+Supply". 
+Laura: "Gracias por la explicación, Sr. Jones; nos alegra que le guste". Siguió 
+haciéndolo con los 100 clientes que tenía asignados. Tuvo que dejar mensajes de voz y 
+mensajes a las secretarias y enviar mensajes de texto y correos electrónicos para 
+programar las llamadas. Sin embargo, tenía claro su objetivo general: "No estoy 
+vendiendo, sólo obtengo información". 
+Después de unos quince días, había hablado con 63 clientes. Durante las llamadas, 
+muchos de ellos preguntaron por productos y ella les dio las respuestas y comenzaron 
+a realizar ventas. Algunos comenzaron a devolverle la llamada y, en la mayoría de los 
+casos, ella también necesitaba hacer segundas llamadas y cotizar seguimientos. 
+ 
+ 
+--- PAGE 45 ---
+45 
+ 
+ 
+A Laura se le daba muy bien utilizar su CRM, y sabía exactamente a quién quedaba 
+por llamar, de qué habían hablado la última vez y quién cumplía los requisitos para la 
+segunda fase del sistema en función del cuadrante. 
+Leo quería saber cómo iría su segunda serie de llamadas. Se sentó junto a Laura 
+mientras marcaba al Sr. Plum, a quien le gustaba que los productos se entregaran en el 
+lugar y recibirlo todo en las 4 horas siguientes a su pedido, ¡como muy tarde! 
+Laura: "Soy Laura, de LATAM Supply; ¿cómo estás?". 
+Sr. Plum: "Estoy bien Laura, estoy corriendo a un nuevo trabajo, ¿cómo puedo 
+ayudarte rápidamente?" 
+Laura: "Estaba mirando el hecho de que usted siempre compra tubos de cobre para 
+sus trabajos, sin embargo, han pasado más de 40 días desde su última compra. ¿Hay 
+alguna razón para ello?" 
+Sr. Plum: "¡Vaya! En realidad, necesito algunos tubos para el trabajo que estoy 
+haciendo actualmente y no sabía que estábamos bajos, gracias por avisarme, ¿podría 
+llamarme en unos 20 minutos cuando llegue y ver cuánto nos queda en la tienda, para 
+que pueda decirle exactamente lo que necesito?". 
+Laura: "Por supuesto Sr. Plum, puedo llamarle en 20 minutos, ¿sería este de nuevo el 
+número indicado?". 
+Sr. Plum: "Sí, por favor". 
+Laura: "Perfecto, entonces por favor compruebe si necesita algo más, y así puedo 
+enviarle todo en una sola entrega esta tarde, ¿le parece bien?" 
+Sr. Plum: "¡Es estupendo! Ustedes son lo máximo con este nuevo servicio. Gracias 
+Laura y sigan así". 
+Laura: "Un placer Sr. Plum, hablamos luego". 
+ 
+ 
+--- PAGE 46 ---
+46 
+ 
+Laura colgó el teléfono y ella y Leo no se lo podían creer. Se reían y chocaban los 
+cinco por los comentarios del cliente. Sentían que estaban ante algo fantástico. 
+A final de mes, cuando Leo recibió las cifras de ventas, éstas subían día a día. Aunque 
+iban por detrás de las demás tiendas en ventas totales, el inicio fue el más rápido 
+registrado por ninguna tienda. Laura vendió más de $123,467 dólares en su primer mes 
+y se adelantó a lo previsto. 
+Leo sabía que tenía un buen sistema. Se dio cuenta de que necesitaba incorporar 
+nuevos vendedores para llamar al siguiente lote de 100 clientes locales que LATAM 
+Supply no atendía de forma proactiva. Tuvo la suerte de empezar con una base de 
+clientes en su zona, atendidos previamente desde otras ubicaciones. Era el momento 
+de hacer crecer las ventas de estos clientes actuales en lugar de buscar nuevos 
+clientes. 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+--- PAGE 47 ---
+47 
+ 
+CAPITULO 7 
+¡A ESCALAR! 
+ 
+ 
+       Leo se decidió rápidamente cuando sintió que su sistema Moneycall se ponía en 
+marcha. A los 36 días de la gran apertura, contrató a 2 nuevos vendedores y aplicó las 
+mismas ideas que tenía con Laura. 
+Leo pensó que era un poco más fácil formarles, ya que no sólo utilizó la formación con 
+juegos de rol, sino que también les hizo escuchar a Laura haciendo las llamadas reales. 
+Por término medio, hacía treinta llamadas al día. A veces, no podía hablar con todos los 
+clientes a los que llamaba, así que les dejaba mensajes de voz, junto con un correo 
+electrónico y un mensaje de texto. Los guiones utilizados eran similares a estos: 
+Señor cliente, soy Laura, de LATAM Supply. Tengo información que podría ayudarle. 
+¿Podría devolverme la llamada al 239-788-9003? Si no tengo noticias suyas, le devolveré 
+la llamada el miércoles. Hablamos pronto, Laura. 
+Todo fue bastante rápido, ya que utilizó la misma plantilla para todos sus mensajes. 
+Normalmente, recibe unas 5 llamadas al día. Laura hablaba con entre 10 y 15 personas, 
+hacía sus cotizaciones si era necesario, recibía comentarios sobre las entregas o enviaba 
+información técnica a sus clientes. Era una "abeja ocupada", pero nunca tenía la 
+sensación de estar vendiendo. Todo lo que tenía que hacer era ser proactiva y aportar 
+valor en primer lugar. 
+ 
+ 
+ 
+--- PAGE 48 ---
+48 
+ 
+Leo tenía listos a los dos nuevos vendedores después de su formació n. Tom y María 
+estaban entusiasmados con la idea de trabajar con clientes reales tras dos semanas de 
+formación. Leo estaba igual de emocionado hasta que el informe de final de mes le 
+demostró lo contrario. 
+María hizo la mitad de llamadas que Laura . Tom hiz o incluso menos que Ma ría. En 
+cuanto a ventas, María estaba en $68,117 y Tom en $47,234. Leo estaba perplejo, así 
+que miró el CRM. Tom no había rellenado el CRM con mucha información. Cuando Leo 
+profundizó en el número de presupuestos y el porcentaje de ne gocios cerrados, Tom 
+estaba en torno al 10%. 
+Leo tenía que hablar con sus dos nuevos vendedores y pensó que quizá algunos de los 
+problemas con sus resultados eran culpa suya. Decidió llamar a Guy una vez más antes 
+de reunirse con su personal. 
+Leo: "Hola Guy, ¿cómo estás?" 
+Guy: "Super Leo, estoy esperando a escuchar el feedback de tu sistema de ventas para 
+ver si puedo implementarlo con mis clientes de consultoría que tienen ventas 
+recurrentes." 
+Leo: "Bueno, Laura lo está haciendo fantástico, está vendiendo más de $200k al mes 
+ahora, mi problema es con la gente nueva". 
+La voz de Leo sonaba descorazonada. 
+Guy: "¡Vaya! Ya tienes dos vendedores más; seguro que te mueves rápido". 
+Leo: "Ciertamente el sistema funciona, pero ahora que lo estoy escalando, estoy teniendo 
+algunos dolores de crecimiento". 
+Guy: "No a todo el mundo le va tan bien como a Laura, ¿me equivoco?". 
+ 
+ 
+ 
+ 
+--- PAGE 49 ---
+49 
+ 
+Leo: "Sí, tienes razón. Sus números son más bajos en llamadas, uso de CRM, 
+seguimiento de sus cotizaciones, en cada métrica, están abajo, no tiene sentido." 
+Guy: "Bueno, entonces ¿de quién es la culpa de que no estén en el lugar correcto?" 
+Leo: "Sé lo que vas a decir; soy el líder, es mi responsabilidad. Sin embargo, no puedo 
+hacer de niñera todo el tiempo, tengo que decir algo para que vuelvan al  buen camino. 
+Pero no sé qué decirles". 
+Guy: "Cuando escucho, "No puedo cuidarlos", supongo que estás teniendo una reunión 
+mensual de números, ¿es así?" 
+Leo: "Sí; eso es lo que siempre hemos hecho en la empresa". 
+Guy: "¿Estás midiendo resultados o estás midiendo actividades?" 
+Leo: "Hmmm, ahora que lo pienso, estaba esperando los resultados a final de mes. Esos 
+resultados vienen de las actividades que los vendedores hacen cada día." 
+Guy: "Correcto, menos actividades darán menos resultados, así que, si miras las 
+actividades diaria y semanalmente, entonces será fácil ver si los resultados estarán ahí, 
+hace que las ventas sean predecibles. ¿Tiene sentido?" 
+Leo: "Absolutamente, lo entiendo. Tendré una reunión diaria de 20 minutos para ver las 
+actividades del día anterior y en base a eso tomaré medidas correctivas. Seguramente 
+veo que necesito prestarle más atención a Tom"., y esta idea suena como un plan. 
+Comienza conmigo y les muestro cómo los mantendré encaminados". 
+Guy: "Es muy importante que hagas eso. Ahora, como gerente de ventas, ¿sabes cuál 
+es tu trabajo principal?" 
+Leo: "Hacer que mi gente produzca resultados". 
+Guy: "Está bien, claro, pero ¿qué debes hacer para asegurarte de que eso suceda?" 
+ 
+ 
+ 
+ 
+--- PAGE 50 ---
+50 
+ 
+ 
+Leo: "Ya estás con tus juegos de Yoda". 
+Leo se ríe mientras Guy permanece callado, esperando una respuesta. Leo piensa 
+durante unos minutos y Guy permanece en silencio. 
+De repente, Leo dice: "Ya lo tengo; mi trabajo es guiarles". 
+Guy: "Correcto, mostrarles dónde tienen carencias, proporcionarles orientación 
+haciéndoles preguntas y ayudarles a planificar la mejora. Tus preguntas deberían 
+ayudarles a deducir el plan por sí mismos". 
+Leo: "Me gustan los resultados de tus juegos de Yoda, ¡por eso te llamo! A partir de 
+ahora, así es exactamente como manejaré esta situación. Gracias Guy". 
+Guy: "Hablamos pronto Leo, mantenme informado por favor". 
+Cuando Leo vuelve a la oficina, explica la situación a los tres vendedores utilizando un 
+sistema de clasificación y cómo está correlacionado con el pago. Esto fue algo que 
+también hizo que el sistema Moneycall proactivo fuera más predictivo: quien hace más 
+llamadas proactivas también produce más ventas y, en consecuencia, más dinero. Ahora 
+puede predecir el número de vendedores que necesita para gestionar la cantidad de 
+clientes que compran regularmente. 
+Es una ecuación matemática: 1 vendedor para atender a 100 clientes de Moneycall. 
+Mientras Leo hablaba con el equipo, Tom se sorprendió al ver que, al quedarse en su 
+zona de confort, estaba ganando menos dinero, y eso le abrió los ojos . Leo dejó 
+completamente claro cuando publicó los números y los resultados de ventas que, si 
+haces más llamadas, hablas con más gente y haces más seguimiento, ganarás más 
+dinero, y los números ya lo mostraban claramente. 
+ 
+ 
+ 
+ 
+--- PAGE 51 ---
+51 
+ 
+ Llamadas 
+ 
+Cotizaciones Seguimientos Ventas 
+Laura 380 157 Al 100% de las 
+cotizaciones  
+$287,656 
+María 177 53 Al 67% de las cotizaciones $123,134 
+Tom 102 19 Al 42% de las cotizaciones $69,345 
+ 
+Al comparar los resultados, Leo pudo mostrar la relación entre el número de llamadas y 
+las ventas, y como Laura hacía unas 4 veces más llamadas que Tom, ahora le resultaba 
+evidente por qué ella vendía más que él. Aun así, todos los números ayudaban a que la 
+nueva ubicación tuviera una métrica de ventas por empleado más alta, pero Leo sabía 
+que estaba ante algo grande. 
+Al cabo de un mes, todos los vendedores tenían mejores resultados. Obviamente, Laura 
+fue la que menos mejoró, ya que lo estaba haciendo bastante bien y hacía un 
+seguimiento del 100% de sus cotizaciones, por lo que parecía que el nue vo sistema de 
+gestión, con frecuentes reuniones de ventas y coaching, también les estaba orientando 
+mejor. 
+Otra medida clave era que los vendedores debían esperar obtener alrededor del 50% de 
+los presupuestos de sus llamadas. Si esa cifra es inferior, es porque no estaban haciendo 
+suficientes llamadas al cuadrante 2 o no detectaban suficientes productos que ya no se 
+compraban en el cuadrante 1. 
+Cuando todos los vendedores comprendieron que el sistema Moneycall era la clave para 
+obtener más resultados de ventas, cada vez más vendedores empezaron a seguirlo. 
+Con todo el éxito reciente, Leo sabía que necesitaba cambiar su atención a la parte de 
+pedidos, logística e inventario del negocio, ya que se iba a quedar sin productos 
+rápidamente. Las ventas estaban lleg ando más rápido que sus cifras más optimistas, y 
+aunque era un buen problema que tener, sabía que, sin productos, su gente no podía 
+producir resultados de ventas. 
+ 
+--- PAGE 52 ---
+52 
+ 
+Afortunadamente, Leo pudo hablar con su padre, quien había estado siguiendo en 
+silencio el a umento de las ventas desde la ubicación de Leo; Estaba extremadamente 
+orgulloso y feliz con los resultados hasta el momento. Debido a la atención de Tony a los 
+detalles, ya había movido ciertas cosas con su equipo de logística, por lo que la 
+preocupación de Leo ya estaba resuelta, al menos por el momento. 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+--- PAGE 53 ---
+53 
+ 
+CAPITULO 8 
+LA HORA DEL GRAN ESCENARIO 
+ 
+ 
+           Al cabo de seis meses, Leo siguió creciendo hasta que se hizo cargo de todos los 
+clientes de la lista y los asignó a un vendedor.  1,500 clientes tenían ahora asignado un 
+vendedor proactivo de Moneycall, y algunos de esos clientes habían multiplicado por 10 
+el volumen de negocio con la nueva sede de LATAM Supply, con un aumento medio del 
+20% en los ingresos. Ahora, contaban con 15 vendedores en el nuevo departamento, 
+pero había llegado el momento de dar el siguiente gran paso. 
+Leo sabía que una vez que una cuenta alcanzaba los $60,000 dólares anuales o más, 
+necesitaba asignarla a un gerente de territorio que pudiera proporcionar un servicio aún 
+más personalizado visitando al cliente en persona. 
+Un gerente de territorio dedicado también podría 
+1) Elaborar un plan de crecimiento más individualizado 
+2) Proporcionar un programa de formación 
+3) Planificar diferentes opciones de marketing cooperativo 
+4) Disponer de orientación para determinados proyectos complejos. 
+Llegó el momento de ascender a Laura a Gerente de Territorio (TM), y su trabajo 
+consistía en visitar a 25 clientes en persona cada mes. Leo tomo a los mayores clientes 
+de los 15 vendedores de Moneycall y algunos de los otros TM que tenían más de 25 y 
+se los asignó todos a Laura. 
+--- PAGE 54 ---
+54 
+ 
+Leo pidió a uno de los TM más experimentados que ayudara a formar a Laura sobre qué 
+hacer en cada visita: Qué preguntas hacer, cómo aportar las nuevas t endencias del 
+sector y cómo convertirse en asesora de sus 25 clientes. 
+El objetivo nunca fue vender, sino ayudar a sus clientes a aumentar su negocio. Lo hacía 
+planificando, asegurándose de que sus clientes ponían el precio correcto a sus servicios, 
+aportando ideas para su marketing y buscando segmentos rentables que pudieran 
+explotar. La clave está en entender que, para tener éxito, necesitaba ayudar a sus 
+clientes en aquellas áreas en las que podían hacerlo mejor. La mayoría de los 
+contratistas son muy buenos instalando, reparando y manteniendo equipos; sin embargo, 
+muchos no son tan buenos llevando buenos registros comerciales, calculando costes de 
+los trabajos, haciendo marketing, vendiendo soluciones en lugar de sólo precios, 
+atendiendo al cliente y pidiendo referencias; por eso muchos de ellos no lo consiguen a 
+largo plazo. 
+Laura aprendió bien la lección durante el tiempo que trabajó al teléfono. Leo estaba allí 
+para proporcionar apoyo, y a sus nuevos 25 clientes les encantó la atención y el cuidado 
+proactivo que recibieron de ella y de LATAM Supply. 
+Ese mismo proceso se repetiría cada vez que la empresa consiguiera que otro cliente de 
+Moneycall comprara $60,000 dólares anuales o más. Esa cifra podría ajustarse en otros 
+lugares, pero, por ahora, ese era el número límite que tenía sentido para ellos basándose 
+en el análisis de las ventas totales por el 20% de los clientes más importantes. Eso es lo 
+que los departamentos de ventas de LATAM Supply llaman "el gran momento". 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+--- PAGE 55 ---
+55 
+ 
+CAPITULO 9 
+SI LO MIDES, CRECERÁN CON 𝑰𝟑 
+ 
+ 
+            Guy había estado atento a los resultados que Leo y su equipo estaban 
+obteniendo en LATAM Supply, ya que descubrió que sus otros clientes distribuidores se 
+encontraban en una situación muy similar. Eran reactivos en su proceso  de ventas, los 
+clientes siempre llamaban, su marketing estaba orientado a generar llamadas de clientes 
+y su proceso estaba configurado para atender esas llamadas rápidamente, pero sin llegar 
+nunca a comprender del todo qué problemas necesitaba resolver re almente el cliente. 
+Una de las razones es que cuando los clientes llamaban, esas llamadas eran atendidas 
+por una persona diferente la mayoría de las veces; el sistema estaba configurado para 
+reducir el tiempo de espera, no para aumentar la calidad del serv icio al cliente o la 
+personalización. Guy tenía una mente numérica, estadística y procedimental, así que Leo 
+le hizo pensar largo y tendido sobre este sistema proactivo de Moneycall. Para él tenía 
+todo el sentido porque siempre estaba pensando en sus clien tes de ventas recurrentes 
+en distribución y fabricación. 
+Ahora Guy quería implementar el mismo proceso con sus clientes de ventas recurrentes, 
+pero necesitaba entender más a fondo cómo Leo medía los KPI el proceso. Así que 
+decidió llamar a Leo. 
+ 
+ 
+ 
+ 
+--- PAGE 56 ---
+56 
+ 
+Guy: "Hola Leo, espero que estés bien, ¿cómo va todo?". 
+Leo: "Hola Guy, me alegro de volver a oírte, va genial, estamos a punto de ser la sucursal 
+con el crecimiento de ventas más rápido de las otras 17 locaciones. Y si seguimos así, 
+quizá pueda ganar el desafí o con mi padre y conseguir que el sistema se implante en 
+todas las ubicaciones." 
+Guy: "Es estupendo oír eso Leo, te llamo precisamente por esa misma razón. Sabes que 
+siempre me interesó ver los resultados que obtendrías con tu implantación. También 
+quería asegurarme de que había un proceso repetible que pudiera aplicar con mis otros 
+clientes. Ahora creo en lo que dijo Peter Drucker, "Si no lo mides, no lo puedes gestionar", 
+por lo tanto, imagino que debes tener algunos KPIs clave para asegurarte de que las 
+cosas funcionan sin problemas, ¿es así?" 
+Leo: "Tienes razón Guy, sin KP ls no podríamos conseguir los I3, que son:   
+Mejorar los resultados actuales, Incrementar la productividad e Identificar posibles áreas 
+de mejora o dónde unos vendedores lo hicieron m ejor que otros para poder copiar las 
+mejores prácticas. Esas 3 cosas sólo se consiguen midiendo diariamente todo el 
+proceso." 
+Guy: "Me encanta Leo, ¿podrías describirme todo el proceso para que pueda replicarlo 
+con mis otros clientes?". 
+Leo: "Claro, tú has  participado desde el principio, así que recordarás que todo se basa 
+en el análisis de datos. Aquí lo tienes 
+1.  Haz un análisis 80/20 para determinar a qué clientes llamarás primero y empieza 
+con un vendedor y deja que el éxito te lleve desde ahí. Escogerá a l 80% que no 
+le compra tanto como al 20% que llama con frecuencia y al que le gusta hacer 
+negocios con usted regularmente, lo más probable es que siga haciéndolo. 
+Recuerde que "sus mejores clientes quieren ser sus clientes, y sus "clientes no 
+tan buenos" p refieren comprar a la competencia", así que tiene que atenderles 
+mejor y de forma diferente para conseguir más negocio de ellos. Esos son 
+nuestros primeros objetivos con el sistema proactivo Moneycall". 
+ 
+--- PAGE 57 ---
+57 
+ 
+ 
+Guy: "Ya veo, qué más". 
+2.  Después utilizas un guión para vender la llamada de las 5 preguntas clave, a 
+veces es genial enviar un texto primero para coordinarlo, esto es aún mejor en 
+temporada baja para que los clientes te dediquen más tiempo. El guión típico es 
+el siguiente: "Sr.Cliente, me dieron su cuenta para poder brindarle un servicio 
+más personalizado a usted y a su empresa, ¿podría darme 13 minutos para 
+hacerle unas preguntas para poder atenderlo mejor?".  
+Y el objetivo de la llamada es entender "Qué compran" y aquí haces las 5 
+preguntas básicas que ya conoces: 
+1) Por qué les gusta hacer negocios con nosotros 
+2) Por qué les gusta hacer negocios con la competencia 
+3) Qué porcentaje de lo que compran nos compran a nosotros 
+4) Qué les cuesta encontrar 
+5) En qué segmento del mercado les gustaría penetrar y aún no han podido 
+hacerlo.  
+Si ya han tratado antes con el vendedor, añadiríamos una sexta pregunta: 
+6) ¿Qué le gusta de hacer negocios conmigo? 
+ 
+Respondió Leo: ¿Qué te parece hasta ahora, Guy?". 
+Guy: "Tiene todo el sentido, me acuerdo de las preguntas y de que la clave era no dejar 
+de preguntar qué más les gusta hasta que el cliente dijera: eso es. Me parece un mini 
+"estudio de mercado" que es una forma estupenda de empezar cualquier aventura 
+empresarial, ¿qué más hay?". 
+ 
+ 
+ 
+ 
+ 
+--- PAGE 58 ---
+58 
+ 
+Leo: "Es importante que lleve s un registro de lo que dicen los clientes en tu CRM o al 
+menos en una hoja excel para que cada vez que interactúes o los cites, esas respuestas 
+sean consideradas e incluidas en la propuesta porque eso es lo que valoran y te hace 
+diferente." 
+Guy: "Eso es muy lógico, ¿ahora haces seguimiento de algún KPI?".  
+Leo: "Sí, eso es lo que viene después, hay que me dirlo todo para conseguir los I3, ten 
+en cuenta, que nunca les damos una lista de más de 100 clientes, y estos son los únicos 
+clientes a los que llaman o de los que reciben llamadas. 
+Estos son los KPI que seguimos en el nuevo departamento de Moneycall: 
+1. "Cantidad de llamadas salientes realizadas por cada vendedor (buscamos entre 
+20 y 30 al día por vendedor). Las registramos como S1 o S2 para la casilla 1 o 2 
+de las preguntas del cuadrante de ventas. Por ahora no hacemos S3, pero 
+estamos abiertos a hacerlo más adelante. S4 es otro monstruo, y requiere más 
+implicación de marketing y para nuestro tipo de ventas recurrentes, no 
+necesitamos tanta como otras industrias de las que ya hemos hablado." 
+2. "Número de llamadas recibidas (buscamos una proporción de 80% salientes y 
+20% entrantes para asegurarnos de que somos realmente proactivos). Cuando 
+recibimos llamadas devueltas, las registramos como 1 o 52 en función del análisis 
+de la llamada anterior que hizo el vendedor cuando dejó un mensaje. Si el cliente 
+llama pidiendo ayuda sobre un artículo o una situación concretos, la registramos 
+como llamada entrante. Entonces siempre acabamos con la pregunta de 
+McDonald’s. "¿Qué más le apetece hoy?". Ambos sonrieron, sabiendo que tenía 
+sentido. 
+3. "También miramos cuántos presupuestos se hicieron por vendedor; esperamos 
+que se pida un presupuesto en el 50% de las llamadas salientes. Si el cliente ya 
+ha fijado un precio con nosotros, le recordamos cuál es y, o bien coloca el otro allí 
+mismo, o si no se decide inmediatamente le pedimos una fecha en la que el cliente 
+crea que tendrá una decisión, para que el vendedor pueda hacer un seguimiento 
+de la cotización." 
+ 
+--- PAGE 59 ---
+59 
+ 
+4. "El número de cotizaciones nos llevó a medir nuestro Ratio de Cierre a final de 
+mes de 2 formas: 
+a) Número de presupuestos realizados dividido por los presupuestos cerrados. 
+b) Importe total en dólares de las ofertas dividido por las ventas totales en 
+dólares". 
+Guy interrumpió: "Leo, ¿por qué medir la ratio de cierre de esas 2 maneras diferentes"? 
+Leo: "Gran pregunta Guy, la razón es que queremos ver si hay mucha discrepancia en 
+los dos números, lo que indicaría que estamos ganando en la pequeña cantidad de 
+dólares más que en las cotizaciones de dólares más grandes o viceversa. Ahora bien, si 
+las cifras son bastante similares, sabemos que no hay una diferencia real. Esperamos 
+una ratio de cierre de al menos el 20% y no debería haber una diferencia de más de 5 
+puntos porcentuales entre los dos cálculos del ratio de cierre. ¿Tiene sentido?" 
+Guy: "Absolutamente, por favor sigue con los KPI". 
+5. Leo continuó: "Uno de los KPI más importantes es: Seguimiento de los 
+presupuestos. En primer lugar, recomiendo que todos los seguimientos se 
+registren en el CRM. Pero, para que el plan funcione mejor, te sugiero que 
+utilices dos tipos diferentes: llamada de seguimiento 1 (F1) y 2 (F2), 
+permíteme que te lo explique antes de que te confundas. 
+Queremos que todo el mundo haga un seguimiento de sus presupuestos el 
+100% de las veces, y eso es para asegurarnos de que el cliente lo tiene, lo 
+entiende y proporciona una fecha de respuesta. A veces el cliente hace el 
+pedido en la F1; en nuestro negocio, el 60% de las veces conseguimos el pedido 
+en esa fase, así que puedes ver la importancia de hacer esa llamada. Ahora 
+bien, el otro 40%, cuando no hacen el pedido inmediatamente, nuestro objetivo 
+es conseguir una fecha de respuesta del cliente. En ese momento, queremos 
+hacer un seguimiento de nuevo y ver si han decidido comprar o no. A veces 
+conseguimos el pedido, a veces no y a veces ni siquiera obtenemos una 
+respuesta. Por eso, tenemos la llamada de seguimiento 2 (F2), esperamos el 
+100% de respuestas de las llamadas F1 y al menos el 50% en F2. Y del 50% de 
+F2 esperamos que al menos el 50% o el 25% de todas las citas sean una venta. 
+--- PAGE 60 ---
+60 
+ 
+Ahora mismo, estamos cerrando un mínimo del 25% de nuestras cotizaciones y 
+la tendencia va en aumento. Al hacer las 5 preguntas clave estamos mostrando 
+más valor fuera del precio a nuestros clientes y estamos por encima del ratio de 
+cierre de toda la empresa. Nos hemos dado cuenta de que, con sólo hacer estas 
+llamadas, nuestra ratio de cierre ha aumentado un 25%, pasando del 20% a 
+principios de año al 25% actual, y tenemos el ratio de cierre más alto de toda la 
+empresa. Además, veo que ese ratio tiende a subir poco a poco. ¿Tiene sentido 
+lo que digo, Guy?" 
+ 
+"Absolutamente, esa es una gran idea con el Seguimiento (llamadas F) y los resultados 
+hablan por sí mismos, por favor continúe". Solicitó Guy 
+Leo continuó: 
+6. "Hacemos nuestra llamada de entrega (DC) que es una llamada después de 
+cada pedido de entrega o recogida de "Will Call" en la tienda. El objetivo es 
+asegurarse de que todo se recibe según lo previsto y tranquilizar al cliente para 
+que sepa que puede contar con nosotros. Es un buen momento para celebrar y 
+oír cosas buenas sobre lo que hacemos y quedar bien con el cliente. 
+Después de 10 llamadas seguidas con un 100% de satisfacción en la entrega o 
+recogida de sus pedidos, tenemos la siguiente llamada que medimos. Por 
+supuesto, eso también debería entrar en el CRM. 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+--- PAGE 61 ---
+61 
+ 
+ 
+ 
+Guy: "Interesante, ¿cuál es ese otro tipo de llamada que miden?", preguntó un poco 
+sorprendido por lo detallado que se había vuelto el proceso desde que Leo y él 
+empezaron a hablar. 
+Leo continuó: 
+1. "10 directos (DC) lleva a la llamada de recomendación (RC) aquí el objetivo es 
+decir que estamos contentos de que encuentren nuestro servicio valioso para su 
+negocio y si estarían dispuestos a recomendarnos a alguien que también 
+pudiera beneficiarse de nuestro servicio. Una vez obtenida la respuesta, les 
+preguntamos si les parecería bien una presentación por correo electrónico. El 
+30% de las veces están dispuestos a hacerlo. Para el otro 70% que no se siente 
+cómodo haciéndolo, simplemente les ofrecemos enviarles un correo electrónico 
+resumiendo lo que dijeron para que puedan imprimirlo y firmarlo en su membrete 
+para usarlo como Testimonial. Conseguimos aproximadamente el 95% de los 
+casos porque primero aportamos valor. 
+Guy: "¡Vaya, es impresionante, nunca había visto esto tan sistemático!".  
+Leo: "Esa es la clave en ser PROACTIVOS y tener nosotros el control del proceso 
+midiendo cada paso". 
+Guy: "¿Qué pasa con los que prefieren no dar referencias?". 
+Leo: "Nuestro plan B para esos es pedir siempre un breve vídeo testimonial de 20 
+segundos. Después los publicamos en nuestras páginas de redes sociales y en 
+LinkedIn. Esos vídeos siempre terminan proporcionando más negocio e incluso ayudan 
+a nuestro "vendedor de visitas en persona o TM" cuando están tratando de conseguir 
+un nuevo contratista a bordo. 
+ 
+ 
+ 
+ 
+--- PAGE 62 ---
+62 
+ 
+Guy: "Genial, ahora entiendo por qué veo tantos testimonios en vídeo de tus clientes en 
+LinkedIn, aunque seguramente no todos proporcionan también los vídeos. ¿Qué hacen 
+entonces?" 
+Leo: "Recuerda Guy que en este punto hemos tenido diez llamadas seguidas de DC 
+(entrega/recogida) con un 100% de satisfacción con ellos, por lo que nos hemos 
+ganado el derecho a preguntar, ahora bien, es cierto, algunos dicen que no se les 
+ocurre nadie a quien referirnos o que no pueden hacer el vídeo ya que tienen prisa todo 
+el tiempo, para esos esperamos 5 llamadas más de DC con un 100% de satisfacción 
+para pasar a nuestro plan C. Aquí procedemos simplemente a resumir lo que han dicho 
+y que ellos lo aprueben. Después, lo utilizamos en nuestra página web o redes sociales 
+junto con muchos otros. En resumen, cuando nos hemos ganado el derecho a un 
+testimonio, hacemos todo lo posible por conseguirlo. Lo que he descubierto es que a la 
+gente no le sienta mal que le pregunten si has cumplido primero. Rara vez obtuve una 
+respuesta negativa porque atendimos primero; teníamos un plan A claro, luego 
+inmediatamente un plan B y después de 5 llamadas más de DC un plan C. Claro que 
+tenemos gente que todavía no cumple después de usar los 3 planes, pero en mi 
+experiencia este sistema reduce esas situaciones a alrededor del 10% o menos frente 
+a más del 70% con cualquier otro método que he estudiado. Por esa razón, las 
+llamadas de referencia son nuestro número KPI 7. Entregamos esos clientes 
+potenciales a nuestros TM experimentados y ellos deciden si el volumen inicial tiene 
+sentido para ellos o si es menor, entonces para el departamento de Moneycall". 
+Guy: "Impresionante Leo, gran trabajo con ese sistema, me encantan las referencias y 
+los testimonios en vídeo son los mejores. ¿Algún otro KPI que midas?". 
+8.  Leo continuó:  
+"Recientemente hemos añadido un nuevo KPI que aprendimos de un libro de 
+Alex Goldfayn que consiste en llamar a los clientes sólo para ver cómo están, sin 
+ningún negocio en mente, sólo para conocer realmente a la persona. Las 
+llamamos llamadas de Contacto Personal (PT). 
+ 
+--- PAGE 63 ---
+63 
+ 
+ 
+ 
+También tenemos entradas para los partidos de béisbol, animamos a nuestra 
+gente a salir con nuestros clientes y almorzar, además de hacer nuestras BBQ 
+de hot dogs con frecuencia. Cada vez que no vemos a un cliente durante un 
+tiempo, intentamos verle fuera del trabajo. Es un toque personal, no es negocio, 
+no es obligatorio, pero al menos queremos tener esa llamada PT. Esperamos 
+que nuestros vendedores las hagan al menos una vez al trimestre. Por lo tanto, 
+nuestra llamada PT es nuestro KPI número 8, aunque el número no significa que 
+sea el octavo en importancia, es sólo otro KPI para medir". 
+Guy añadió: "De momento va bien, ¿algo más?". 
+9. Leo: "Hay otro KPI que nos ayuda a medir el grado de confianza que estamos 
+generando con nuestros contratistas. 
+Es el resultado del sistema Moneycall, no mide el éxito diario, pero sí la 
+asociación a largo plazo que establecemos con nuestros contratistas. Nos 
+fijamos en qué porcentaje de nuestros contratistas nos permiten ayudarles con 
+sus clientes finales en proyectos de más de $50,000 dólares. Sabemos que, si el 
+distribuidor y el contratista colaboran, el porcentaje de cierres aumenta un 50%, 
+y si el fabricante de equipos y el distribuidor colaboran con el contratista, el 
+porcentaje de cierres aumenta un 65%. 
+ 
+"Absolutamente, me alegro de que lo hayas aprendido bien, cuando vendes productos 
+vendes precio, y estoy de acuerdo, empezar el año con esas llamadas a los 
+contratistas es una gran idea", respondió Guy. 
+ 
+ 
+ 
+ 
+ 
+--- PAGE 64 ---
+64 
+ 
+ 
+Mencionó Leo: 
+10.  "Por último, hacemos un seguimiento del tamaño de la oportunidad, miramos a 
+ver cómo de grande es un presupuesto en particular y si necesitamos involucrar 
+a más gente para ayudar al cliente a cerrar un trato. A veces tiene que ayudar el 
+departamento de ingeniería, a veces tiene que intervenir un director de ventas 
+porque el tamaño de la operación lo requiere. Para detectar estas situaciones, 
+nos fijamos en el tamaño de la operación. Nuestra regla es que, si supera los 
+$10,000 dólares, nos reunimos para ver si es necesario ofrecer más apoyo para 
+asegurarnos de que el cliente consigue el acuerdo. Como sabe, nuestro deseo 
+es prestar un servicio proactivo, nunca reactivo. 
+ 
+Guy: "¡Vaya! Veo que ustedes se toman en serio lo de ser proactivos a todos los 
+niveles. Es increíble". 
+Leo: "Este último punto enlaza bien con el anterior % que está dispuesto a 
+presentarnos el cliente final. Porque es más fácil ofrecer ayuda en una operación de 
+$10,000 dólares a un cliente que ya ha dicho que está abierto a que le ayudemos, que 
+cuando tienes un cliente que prefiere manejar esas oportunidades por su cuenta." 
+Guy: "Ahora lo veo mejor, tener la información sin duda mejora los resultados de las 
+ventas. Sin duda es mejor ser proactivo en la obtención de la información". 
+Leo: "Queremos estar a la ofensiva nunca a la defensiva, es demasiado tarde para 
+cuando reaccionamos, además nos da una clara estrategia de diferenciación frente a 
+nuestros competidores. El número de clientes que han decidido hacer más negocios 
+con nosotros ha aumentado y recibimos comentarios positivos todo el tiempo. Gracias 
+a que nuestros vendedores están al tanto de todo, con frecuencia escuchamos a 
+nuestros clientes decir: "Me había olvidado de esto, me han salvado con esta llamada", 
+y más cosas por el estilo. Nuestro trabajo es más divertido, pero requiere más 
+planificación y un proceso operativo fluido para que nuestros esfuerzos de venta no se 
+queden en el camino. Recuerda que "tener el producto aumenta la probabilidad de 
+--- PAGE 65 ---
+65 
+ 
+venderlo". Todo sigue la fórmula: Ventas máximas=Estructura x Sistema x 
+Operaciones. 
+Ahora tenemos la estructura y el sistema adecuados, pero también tenemos que 
+asegurarnos de que el almacén, la contabilidad, las compras, el control de inventarios y 
+la logística hagan también su trabajo. Todos nuestros departamentos, no solo el de 
+ventas, tienen que pasar a la ofensiva siendo proactivos". 
+Guy: "Me encanta esa fórmula de ventas, ¿de dónde la has sacado? 
+Leo: "Se me ocurrió a mí, necesitaba entender qué tenía que ir primero y cómo cada 
+parte del sistema influía en todo lo demás." 
+Guy: "Muy interesante, solo espero que la formula no sea muy compleja, recuerda que 
+quiero implementar el sistema con otros clientes. 
+Leo: "Para aquellos clientes que sólo buscan implementar el sistema Moneycall, hay un 
+enfoque más simplista de la fórmula que podemos cubrir más adelante." 
+Guy: "Genial, ¿podrías darme más detalles de la fórmula como la tienes ahora y luego 
+podemos ver la versión simplificada?" 
+Leo: "Claro. La estructura consiste en tener todas las bases cubiertas en cada una de 
+las áreas en las que atendemos a nuestros clientes: mostrador, ventas internas 
+(llamadas entrantes no asignadas a un vendedor Moneycall), ventas Moneycall, ventas 
+TM (ventas externas) y ventas por Internet. La regla 80/20 le permitirá conocer el 
+número de clientes que debe atender cada departamento para ser eficaz. Como el 
+Mostrador es reactivo, dependerá de las visitas a la tienda y no del número de clientes. 
+Todos los demás departamentos empiezan simplemente con los clientes que nuestro 
+análisis 80/20 ha ordenado. 
+ 
+ 
+ 
+ 
+ 
+--- PAGE 66 ---
+66 
+ 
+La base debe ser: 100 clientes para el departamento Moneycall y 25-30 para el 
+departamento de ventas externas o TMs. Y debemos tener a las personas adecuadas 
+en cada puesto, como se suele decir. El director de ventas representa el 70% de la 
+ecuación, por lo que, si el director de ventas realiza el 100% de la labor de "guiar a los 
+vendedores", obtendrá una puntuación de 1; si realiza el 70%, obtendrá una puntuación 
+de 0,7. El 30% restante procede de las personas de cada departamento que realizan la 
+labor de "guiar a los vendedores". El otro 30% proviene de las personas de cada 
+departamento que hacen todo correctamente con sus clientes. En el departamento de 
+Moneycall, buscamos que aprueben con al menos un 80% en sus guiones, juegos de 
+rol e investigación del sistema del cliente, antes de ponerles a hacer llamadas." 
+Guy: "Para que tu estructura sea del 100%, el director de ventas debe ocuparse del 
+100% de la formación, el control de las llamadas y la orientación x 70% de la ecuación. 
+A eso hay que añadir los vendedores que han superado una prueba de interpretación 
+de roles, uso de guiones e investigación en el sistema de lo que el cliente ha pedido 
+antes para llamadas S1 o lo que necesitan añadir a futuros pedidos o llamadas S2, y 
+multiplicar eso por 30% para la segunda parte de la ecuación. ¿Correcto?" Leo: 
+"Correcto Guy, y más tarde puedes hacer un ejemplo real para asegurarte de que lo 
+has entendido." 
+Guy: "Ok, entonces continuemos y digamos que tu estructura es del 100%, ¿ahora 
+qué?". 
+Leo: "Te voy a dar un ejemplo rápido, imagina que tienes Estructura al 100% y Sistema 
+al 100%, esto es una multiplicación así que, si operaciones está al 70%, tendrías: 1 x 1 
+x 0,7= 70% de la capacidad máxima de ventas. Esto te muestra lo duro que debemos 
+trabajar en cada parte de la ecuación para estar por encima del 90% como mínimo." 
+Guy: "Ahora entiendo, por favor continúa". 
+Leo: "En System, buscamos a cada vendedor utilizando los KPI y clasificando al 100% 
+en cada uno, obviamente algunos clasificarán menos, pero eso les muestra lo que 
+pueden mejorar. Por ejemplo, si hacen el número correcto de llamadas (20-30), 
+convierten el 50% de las llamadas en presupuestos, hacen un seguimiento de cada 
+presupuesto F1 y luego F2 es de al menos el 50%, entonces obtendrían una 
+--- PAGE 67 ---
+67 
+ 
+puntuación del 100% en cada uno de esos 4, lo que supone el 25% de la ecuación del 
+Sistema. 
+Guy: "Vale, a ver si lo entiendo para la parte de la ecuación relativa al sistema. Aquí 
+hay 4 partes, si los vendedores hacen el 100% de las llamadas, obtienen un 1 o 100% 
+y luego miramos el número de presupuestos, si es menos del 50%, digamos 40% 
+obtienen una puntuación de 0.8 o 80%, luego las llamadas de seguimiento F1, si hacen 
+el 92% obtienen 0.92 y si hacen menos del 50% de F2, digamos 45% obtienen un 90% 
+o 0.9." 
+Leo: "Eso es correcto, ahora ¿cómo se vería en matemáticas simples?".  
+Guy: "Usando los números anteriores, entonces sería: 
+# De llamadas 100% x citas 80% x F1 92% x F2 90% 
+= 
+1 × 0.8 × 0.92 x 0.9 
+= 
+0.66 o 66%. 
+ 
+¡Vaya! Eso me demuestra la importancia de que todo el mundo se comprometa con el 
+sistema. Según esto obtendrías un 66% en el Sistema variable". 
+Interrumpió Leo: "Correcto Guy, te empuja a asegurarte de que sacas el máximo de cada 
+jugador cuando se trata de los KPls". 
+Guy: "Ahora, ¿cómo se calcularía la variable Operaciones para tener toda la ecuación en 
+su sitio?". 
+ 
+ 
+ 
+ 
+--- PAGE 68 ---
+68 
+ 
+Leo: "Esta es más complicada porque tienes 4 componentes, pero la "entrega a tiempo" 
+se lleva el 90% de la ecuación. La razón es que, si no entregas a tiempo un alto 
+porcentaje de tus clientes, olvídalo, estás acabado en este negocio". 
+Guy interviene diciendo: "¡No Leo! en cualquier negocio, tienes que entregar en el día 
+que prometiste, no sólo en tu negocio, créeme". 
+Leo: "Correcto Guy, por eso está al 90%, ten en cuenta que aquí también medimos qué 
+porcentaje de lo que prometimos se entregó a tiempo, así que, si prometimos 10 piezas 
+y 5 llegaron a tiempo, estamos al 50%." 
+Guy: "¡Eso es muy lógico!". 
+Leo: "Luego tienes otras 3 variables. La primera son las cuentas por cobrar: Si los 
+clientes están pagando por encima de los estándares de la industria, lo haces al 100% 
+y deduces una proporción dependiendo de lo lejos que estés. Entonces, si su cuenta 
+por cobrar está a 35 días y el estándar del sector es 30, usted es un 5/30=17% menos 
+eficiente, por lo que su número sería el siguiente menos eficiente, por lo que su número 
+sería 100%-17% = 83%. ¿Le parece lógico? ¿Tiene sentido?" 
+Guy: "Las matemáticas tienen sentido, pero ¿por qué utilizas AR como una métrica 
+operativa?". 
+Leo: "Pongo la contabilidad, las compras, el almacenamiento, la entrega, todo en 
+operaciones, porque si fallan, mis ventas se verán afectadas negativamente y serán 
+más costosas. Por lo tanto, AR muestra el nivel de satisfacción de los clientes con 
+nuestra empresa y cuánto prefieren pagarnos primero frente a otros proveedores. 
+Además, también indica que un AR más alto genera más gastos, especialmente con 
+tipos de interés más altos. Al final, si el cliente no paga a tiempo, no somos lo bastante 
+proactivos y tenemos que ver cómo cambiar eso antes de que se nos vaya de las 
+manos". 
+ 
+ 
+ 
+--- PAGE 69 ---
+69 
+ 
+Guy: "Me parece una idea interesante, háblame de las otras variables para tener una 
+mejor idea de todo". 
+Leo: "La segunda variable es Ranking de Servicio al Cliente (CSR). Es una gran 
+medida para entender cómo nuestras operaciones producen el servicio que nuestros 
+clientes esperan. Pedimos a nuestros clientes que nos clasifiquen del 1 al 5 y lo 
+utilizamos como nuestro CSR. 
+Por último, la tercera variable es Discrepancias en las facturas (ID). Necesitamos medir 
+si hubo discrepancias en: precio, producto, cantidad, etc.… desde la documentación 
+inicial hasta la factura final. Medimos esas discrepancias en términos porcentuales con 
+respecto a todas las facturas realizadas. Este porcentaje muestra cuánta fricción ha 
+creado Operaciones para el cliente. Si en un periodo se cometieron 3 de 300 facturas o 
+un error del 1%, entonces obtendríamos un 99% en esa variable". 
+Guy: "Déjame hacer los cálculos: El 95% de entrega a tiempo (OTD) sería el 90% o el 
+0,9 de la ecuación, entonces si AR está un 17% por debajo del punto de referencia, 
+estaríamos en el 83%, si el Ranking de Servicio al Cliente (CSR) fuera de 4 sobre 5 
+estaríamos en el 80% y si las Discrepancias en las Facturas tuvieran una tasa de fallo 
+del 1% estaríamos en el 99%. 
+Así pues, la matemática es la siguiente: 
+Variable 1 
+OTD = 95% = 0.95 
+Variables 2,3 y 4 
+AR = 83% = 0.83 
+CSR = 80% = 0.80 
+ID = 99% = 0.99 
+ 
+ 
+--- PAGE 70 ---
+70 
+ 
+Ahora, recuerdo que mencionaste que OTD explica el 90% de la ecuación y las otras 3 
+variables el 10% restante. Haciendo cuentas, quedaría así: 
+Variable 1 
+0.95 × 0.9 = 0.86 
+Variables 2, 3 y 4 
+(0.83 x 0.80 x 0.99) × 0.10 = 0.066 
+El total de la variable operativa es: 
+0.86 + 0.066 = 0.926 = 93% 
+Leo: "Genial, así que ahora tienes 100% en Estructura x 66% en sistema x 93% en 
+Operaciones. Eso significa, en este ejemplo, que tu porcentaje máximo de ventas sería: 
+Estructura 1 x Sistema 0.66 x Operaciones 0.93= 61% por lo que estás vendiendo 
+aproximadamente el 60% de lo que podrías vender. Imagina lo que pasaría si 
+mejoraras todas las métricas de la ecuación". 
+Guy: "Veo claramente que, si hacemos pequeñas mejoras en cada una de esas áreas, 
+podemos conseguir saltos gigantescos en los resultados de ventas." 
+Leo: "Eso es exactamente lo que ha ocurrido, aunque como puedes ver por lo que 
+muestra el cálculo, cualquier empresa podría beneficiarse utilizando esa fórmula de 
+Max Sales y mejorando en cada uno de sus pasos." 
+Guy: "Lo entiendo perfectamente, los números muestran dónde tenemos que mejorar, 
+pero ¿son esos vuestros números reales?" 
+Leo: "No, nuestros números han mejorado desde que empezamos. Nuestra sucursal de 
+Boca Ratón está actualmente al 100% x 89% × 91%= 81%. Debemos mejorar todavía, 
+ahora mismo me estoy concentrando más en el sistema de ventas, más adelante 
+profundizaré en las otras áreas. En este momento, sigo pensando que tenemos que 
+mejorar el sistema de ventas, que es lo que controlo totalmente porque las ventas son 
+mi responsabilidad. Debo delegar las demás áreas en mi equipo, pero sé que también 
+necesito darles apoyo". 
+ 
+--- PAGE 71 ---
+71 
+ 
+Guy: "Absolutamente, no se puede hacer todo al mismo tiempo. Ahora en otro tema 
+con las llamadas, para despejar un poco todas estas matemáticas de mi cabeza. 
+¿Alguna vez has tenido clientes enfadados por no querer ser llamados, especialmente 
+en esta era de los mensajes de texto?" 
+Leo: "Nadie se enfada nunca por hacer un seguimiento, sobre todo cuando ofreces un 
+servicio personalizado. Nos ganamos el derecho a devolverles la llamada después de 
+presupuestar o dar la información solicitada, todos los seguimientos se acuerdan antes 
+de colgar. Además, coordinamos la mayoría de nuestras llamadas con texto, 
+especialmente la primera llamada con las 5 preguntas clave, a partir de ahí acordamos 
+llamadas mensuales o quincenales para dar un servicio individualizado y ellos eligen la 
+mejor hora y día para esas llamadas. Si quieren que lo coordinemos por texto o email, 
+lo hacemos. Nuestro objetivo es hablar con el cliente con algo significativo que 
+preguntarle o decirle y, si no, saludarle en una llamada de PT." 
+Guy: " Hubiera esperado obtener más reacciones negativas, y esto me sorprende". 
+Leo: "Es interesante que digas eso porque muchos de nuestros vendedores creían lo 
+mismo al principio. Lo que descubrimos es que cuando llamas para servir y no para 
+vender y cuando haces una pregunta sencilla basada en el análisis de los patrones de 
+compra de nuestros clientes, ellos aprecian de verdad lo que hacemos. Nadie más lo 
+hace y eso nos hace destacar". 
+Guy: "Quiero ponerlo en práctica sin duda, tomaré tus KPI y los procesaré mejor para 
+comprender el sistema en su totalidad". Guy hizo una pausa y después dijo "Ahora que 
+lo pienso, quizá podría verlo en acción en tu casa si no te importa y así podría 
+averiguar cómo puedo ayudar a mis clientes con este sistema Moneycall. Sería 
+interesante ver si tienen los datos para calcular las Ventas Máximas con su ecuación. 
+Sin embargo, seguro que quiero verlos en acción. También me gustaría llamarte en 
+unos días después de digerir la formula, para ver la versión simplificada, si te parece 
+bien Leo. 
+ 
+ 
+--- PAGE 72 ---
+72 
+ 
+"Será un placer, Guy", respondió Leo, y añadió: "Una última cosa antes de que 
+cuelgues: ten en cuenta que a los vendedores que insisten en enviar mensajes de texto 
+nunca les va tan bien como a los que llaman. Nos hemos dado cuenta de que a 
+muchos les encanta enviar mensajes de texto todo el día y de que ahora están muy de 
+moda, pero nunca conseguirás la cantidad de información que se obtiene sólo con 
+mensajes de texto. Los vendedores con más éxito utilizan los mensajes de texto para 
+coordinar las llamadas o para pedir permiso para llamar y reducir el número de 
+mensajes e incluso la posibilidad de malentendidos. Así que no lo pierdas de vista". 
+Guy: "Gran consejo Leo, nada es tan bueno como la experiencia de la persona que 
+implementa el proceso. Gracias por la confianza y el feedback". 
+Leo: "Un placer Guy, estoy seguro de que nos hará mejorar nuestro proceso también 
+escuchar tus comentarios y las mejores prácticas logradas con tus clientes en el 
+futuro." 
+Guy: "Me parece un buen plan. Déjeme digerir toda esta información y luego coordinaré 
+mi próxima llamada contigo sobre la fórmula simplificada. También quiero visitar tu 
+ubicación para ver cómo funciona todo en tu local". 
+Leo: "Perfecto, hablamos pronto Guy". 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+--- PAGE 73 ---
+73 
+ 
+CAPITULO 10 
+UN ENFOQUE SIMPLIFICADO DE LA 
+FÓRMULA DE VENTAS DE LEO 
+ 
+ 
+            Como Guy había prometido, estaba profundizando en la fórmula de ventas que 
+Leo compartió con él. A Guy le encanta el análisis y tomar decisiones basadas en 
+hechos. Su principal objetivo era conocer el punto de vista de sus propios clientes a la 
+hora de aplicar el sistema y la fórmula. 
+Tras hablar con varios de sus clientes, Guy descubrió que la mayoría de ellos no 
+disponían de los datos necesarios para realizar el análisis completo que requería la 
+fórmula de Leo. A partir de esa información, comprendió que la clave era empezar, 
+sobre todo si había una forma más sencilla de hacerlo. 
+Como siempre, Guy programó su llamada con Leo para ver la versión simplificada para 
+aquellos distribuidores que están empezando. 
+Cuando llegó el día de la llamada, Guy esperaba con impaciencia lo que Leo tenía que 
+decirle 
+Guy: "Hola Leo, gracias por tomarte el tiempo conmigo hoy para hablar sobre la versión 
+simplificada de la fórmula que amablemente compartiste conmigo anteriormente." 
+Leo: "Sin duda Guy, me alegro de que te tomes tan en serio todo el concepto de 
+Moneycall. Como puedes imaginar, no llegué a donde estamos hoy inmediatamente, 
+crecimos a partir de la simple idea de buscar ser proactivos. 
+ 
+--- PAGE 74 ---
+74 
+ 
+El principio básico no es sólo que el 20% de sus clientes le proporcionen el 80% de sus 
+ventas, sino, lo que es más importante, que el 20% de sus actividades producen el 80% 
+de sus resultados. Así pues, el sistema Moneycall trata de concentrar sus esfuerzos en 
+ese 20% que le da los mejores resultados. Así es como empezamos todo el proceso". 
+Guy: "En realidad nunca me había parado a pensar en ese lado del principio de Pareto, 
+pero también tiene sentido que el 20% de tus actividades produzcan el 80% de tus 
+resultados. No me tengas en ascuas, dime cómo empezar de una forma más sencilla". 
+Leo: "La fórmula en sí es la misma, sin embargo, los parámetros a buscar en cada uno 
+son mucho menores y por esa misma razón más sencillos." 
+Guy: "Ok, entonces sigue siendo Estructura x Sistema x Operaciones= Ventas 
+Máximas, ¿es así?". 
+Leo: "Sí, ahora en Estructura la clave es que te fijes si tienes una estructura de canales 
+de venta especializada para cada tipo de venta. Así, la mayoría de los distribuidores 
+tendrían un: Mostrador, Ventas Internas (generalmente llamadas de ventas entrantes) 
+que nosotros cambiamos a Moneycall (llamadas proactivas de ventas salientes a 
+clientes asignados), ventas externas (ventas TM) e Internet." 
+Guy: "Nada nuevo hasta ahora" 
+Leo: "Ahora, debes tener a las personas correctas y especializadas en al menos dos de 
+los cuatro canales. Algunos distribuidores no tienen un departamento de mostrador, la 
+mayoría sí, pero la clave es que al menos dos de ellos deben estar especializados en lo 
+que hacen y deben estar enfocados en el número correcto de clientes para no 
+desperdiciar su 20% de esfuerzo más productivo." 
+Guy: "¿Podrías darme una ilustración para entenderlo mejor?". 
+Leo: "Claro, digamos que tu cliente tiene un mostrador y cuenta con un departamento 
+de Ventas Externas. El mostrador atendiendo llamadas no es realmente una venta 
+telefónica, eso sigue siendo 100% reactivo por lo que cuenta como una venta de 
+mostrador, simplemente se hizo por teléfono. 
+ 
+--- PAGE 75 ---
+75 
+ 
+Así es como funcionan las ventas en mostrador, así que no pasa nada. 
+Ahora bien, si el departamento de ventas exteriores tiene más de 30 clientes por 
+vendedor, entonces es un problema, no podrá visitar a todos sus clientes si intenta 
+abarcar demasiados con un vendedor. Al cubrir demasiados clientes perderás la 
+oportunidad de atender y entender más a esos clientes y parte del esfuerzo más 
+valioso del 20% se desperdiciará buscando clientes menos rentables." 
+Guy: "Ahora, ¿cómo defines cuál es tu 20% de actividad para un vendedor?". 
+Leo: " Estupenda pregunta Guy, ¿te importaría arriesgarte con la respuesta?". 
+Guy: "Bueno, yo diría que cualquier cosa relacionada con estar delante de un cliente o 
+al menos hablar con el cliente." 
+Leo: "Eso es 100% correcto, tus actividades más importantes como vendedor es hablar 
+con el cliente, y mi otra pregunta sería, ¿quién es un cliente?" 
+Guy: "La persona o empresa que te compra, ¿no?". 
+Leo: "Sí, y el que compra más a menudo es más un cliente real en un sector de venta 
+recurrente que los que compran una vez al año. Por lo tanto, nuestro objetivo es tener 
+la mayor cantidad de tiempo posible frente a los clientes que hacen más negocios con 
+nosotros. Descubrimos que hay más contratistas que quieren hacer negocios con 
+nosotros si les entendemos mejor y si resolvemos sus problemas, y solo podemos 
+adquirir ese conocimiento estando cerca de ellos. Por eso es tan importante tener el 
+número adecuado de clientes por cada canal de venta en nuestra empresa." 
+Guy: "Vale, en la fórmula, estructura significa la cantidad de personas que tenemos en 
+cada departamento de venta para poder atender a los clientes que atendemos. 
+El objetivo es concentrar el esfuerzo de cada vendedor para que pueda atender mejor a 
+nuestros clientes más recurrentes y rentables, ¿es correcto?" 
+ 
+ 
+ 
+ 
+--- PAGE 76 ---
+76 
+ 
+Leo: "Yo no podría decirlo mejor". Los dos se ríen. 
+Guy: "Super, ahora que me he asegurado de que mis departamentos cuentan con los 
+vendedores necesarios para atender a los clientes que hemos seleccionado en nuestro 
+análisis 80/20 y hemos concentrado el 100% de sus esfuerzos en esos clientes, 
+¿dónde entra la parte del sistema?" 
+Leo: "El sistema empieza con la proactividad. Antes de llegar ahí, déjame recordarte 
+que empiezas con el número de clientes que decidas que quieres atender bien, 
+nosotros empezamos con los primeros 100 para una persona, vimos los resultados y 
+contratamos a más a medida que Laura aumentaba." 
+Guy: "Ok, entiendo, ahora que veo claro lo que quieres decir con estructura, ¿podrías 
+darme un ejemplo de lo que es la proactividad para tu sistema?" 
+Leo: "Claro, digamos que tienes a tu primera persona para el departamento de 
+Moneycall, y a ese vendedor se le han asignado 100 clientes que estaban 
+desatendidos según tu análisis 80/20. Si esa persona atiende más llamadas de las 
+realizadas, entonces tienes un problema. El objetivo del sistema es asegurarnos de que 
+somos proactivos, por lo que el director de ventas debe comprobar si el nuevo 
+vendedor realiza al menos el 80% de las llamadas que gestiona. La regla nº 1 es: 
+Moneycall funcionará si estamos haciendo llamadas según el sistema que he descrito 
+antes, si al final atendemos más llamadas de las que hacemos, el director de ventas no 
+está guiando el sistema correctamente porque es un sistema reactivo no proactivo." 
+Guy: "Pero Leo, la mayoría de los departamentos de ventas internas trabajan 
+atendiendo llamadas todo el día y eso funciona en todas las empresas que conozco." 
+Leo: "Funciona para mantener a los clientes actuales que te prefieren y están bastante 
+contentos contigo, pero no te permite atender a todos tus clientes tan bien como 
+podrías. La venta interna, tal y como se hace hoy en día, es reactiva, el cliente inicia el 
+proceso y el vendedor debe reaccionar con sus necesidades." 
+ 
+ 
+--- PAGE 77 ---
+77 
+ 
+Guy: "Ahora lo veo, al cambiar la naturaleza de la llamada de reactiva a proactiva 
+también debes aumentar la cantidad de personas que llaman para que puedas ayudar 
+a tus clientes con lo que no están viendo en este momento, ¿correcto?" 
+Leo: "Sí, pero esa parte asusta a los propietarios de negocios, sin embargo, si piensas 
+en añadir sólo una persona a la vez, y esperar a que los resultados muestren que tiene 
+sentido añadir otra, entonces es más fácil. Además, al principio ayuda ir poco a poco, 
+ya que hay que formar a cada vendedor que se inicia en el sistema Moneycall." 
+Guy: "Lo entiendo, esto es mucho más fácil de manejar para empezar, puedo ver por 
+qué es una versión más simple, sin embargo, todavía no es una tarea fácil." 
+Leo: "Si fuera fácil, todo el mundo lo estaría haciendo. Los vendedores son como el 
+agua, buscarán la salida más fácil, nuestro trabajo es guiarles para asegurarnos de que 
+se respeta el sistema. Me he dado cuenta de que cuando les enseñamos el 80/20, la 
+mayoría de los vendedores se dan cuenta de que están demasiado ocupados 
+ayudando a demasiados clientes que no están en su 20% superior. En realidad, cuando 
+les preguntas: ¿cuál es tu cliente nº11? no lo sabrán, porque la mayoría no los 
+clasifica". 
+Guy: "Eso significa que cuando les muestras aquellos clientes que producen los 
+mayores resultados, están dispuestos a concentrarse mejor." 
+Leo: "Sí, para tu Vendedor Moneycall, cuando contratas o promocionas desde otro 
+departamento, es más probable que estén abiertos a esta nueva idea de manejar 
+menos clientes. Yo no recomendaría promocionar a un vendedor de mostrador o a un 
+vendedor externo (Territory Manager TM) a este puesto. La razón es que el ADN de un 
+vendedor Moneycall debe ser proactivo, tienen que ser ellos los que inicien la 
+conversación y deben tener algo de valor en cada interacción por teléfono. Es muy 
+poco probable que un Contador haga eso, y un TM probablemente lo verá como una 
+promoción negativa y sin duda afectará a su programa de comisiones." 
+ 
+ 
+ 
+--- PAGE 78 ---
+78 
+ 
+Guy: "Ya veo, así que Sistema, en la versión simplificada es asegurarnos de que 
+estamos sirviendo al número correcto de clientes, y somos proactivos excepto por 
+supuesto en el Mostrador, para aquellos distribuidores que lo tengan." 
+Leo: "Eso es perfecto" 
+Guy: "Genial, entonces ¿qué pasa con el lado de Operaciones de la fórmula?" 
+Leo: "Esto te encantará, porque la Estructura y el Sistema te llevarán mucho tiempo y 
+esfuerzo, y la mayoría de las empresas establecidas necesitan tener operaciones 
+decentes, de lo contrario no sobrevivirían. Así que concéntrate en las dos primeras y no 
+te preocupes por las operaciones hasta que tengas el resto de las KPIs listas para ser 
+medidas. Así que concéntrate en conseguir la estructura y el sistema adecuados, es 
+decir, el personal adecuado especializado en un tipo de sistema de ventas con el 
+número adecuado de clientes y siendo proactivo en todo menos en las ventas de 
+mostrador, y estarás en el buen camino." 
+Guy: "Sip, me encanta, es bastante simple para empezar".  
+Leo: "Es sencillo, pero eso no significa que sea fácil"... Los dos se rieron. 
+Guy: "Lo sé, como tú dirías, si fuera fácil, todo el mundo lo estaría haciendo, sin 
+embargo, es sencillo de entender, y puedo ver a mis clientes abiertos a empezar con al 
+menos una persona en su departamento de Moneycall." 
+Leo: "Super, eso es a lo que deberías aspirar, conseguir una persona con 100 clientes 
+asignados a ese vendedor haciendo las preguntas correctas y con el ADN adecuado 
+para ser proactivo." 
+Guy: "¿Has encontrado un tipo de persona que funcione mejor para iniciar el 
+departamento de Moneycall?" 
+ 
+ 
+ 
+ 
+--- PAGE 79 ---
+79 
+ 
+ 
+Leo: "Sí, cualquiera que proceda de la venta telefónica y haya tenido que hacer 
+prospección, aunque no hagamos prospección, tenemos que iniciar una conversación. 
+En este sentido, cambiamos la prospección por la comprensión y el acercamiento a 
+nuestros clientes actuales frente a nuevos clientes potenciales. Una segunda 
+posibilidad es una persona del almacén que quiera entrar en ventas, si realmente tiene 
+hambre y está dispuesta a probar cosas nuevas, también podría ser genial, ya que 
+conoce muchos de los productos." 
+Guy: "Entiendo tu lógica, es bueno recibir feedback de tu experiencia, me facilitará el 
+trabajo con mis clientes, gracias Leo." 
+Leo: "Un placer Guy, ¿sientes que dominas mejor la versión simplificada de la 
+fórmula?" 
+Guy: "En realidad, creo que entiendo mejor todo el sistema ahora que hemos reducido 
+lo esencial para que las ruedas empiecen a girar. ¿Hay algo más que quieras añadir 
+antes de que terminemos nuestra llamada?". 
+Leo: "Sí, no se puede pasar por alto la importancia de contar con un gerente de ventas 
+fuerte que sea firme para que se respete el sistema, pero que también sea un gran 
+entrenador y sea consciente de que las cosas llevarán su tiempo." 
+Guy: "Ya veo, es una combinación interesante para un gerente de ventas, la mayoría 
+de ellos son demasiado blandos o tienen demasiado miedo de sus vendedores, sin 
+embargo, ser firme y un buen coach es una combinación interesante. Ya veo por qué 
+tiene tanto peso en la fórmula para el director de ventas." 
+Leo: "Absolutamente Guy, el director de ventas es la clave para que el sistema se 
+implante correctamente. El gerente debe entender bien el sistema y debe saber cómo 
+implementarlo y entrenarlo en el camino para obtener los resultados correctos." 
+ 
+ 
+ 
+--- PAGE 80 ---
+80 
+ 
+Guy: "Ahora lo tengo todo mucho más claro, gracias por simplificarme las cosas. Si lo 
+piensas, al principio, yo seré como el gerente de ventas para mis clientes para que 
+ellos implementen el sistema." 
+Leo: "Correcto, necesitas entrenar ya sea a un gerente de ventas o a un vendedor para 
+cada uno de tus clientes, así que debes explicarles el sistema y entrenarlos a lo largo 
+del camino para obtener los resultados." 
+Guy: "Ahora me siento más cómodo con el sistema, pero quiero verlo en acción, porque 
+seré el responsable de su implantación en otras empresas. Esta llamada ha sido sin 
+duda muy valiosa para entenderlo todo mejor." 
+Leo: "Me alegro de que pienses así. Ahora avísame cuando quieras ver a nuestros 
+chicos trabajando en la oficina para que puedas verlo todo en funcionamiento." 
+Guy: "Revisaré mis notas anteriores sobre la fórmula completa y los KPI y coordinaré 
+esa visita contigo, no te preocupes; estoy realmente emocionado por verlo en 
+funcionamiento". 
+Leo: "De acuerdo, entonces esperaré tu llamada". 
+Ambos intercambiaron amabilidades y acordaron coordinar la visita que Guy sabía que 
+le ayudaría a entenderlo todo mucho mejor. 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+--- PAGE 81 ---
+81 
+ 
+CAPITULO 11 
+EL PLATO SABE MEJOR EN LA COCINA 
+ 
+ 
+            Guy se había tomado un tiempo para revisar sus notas sobre los diferentes ent 
+KPIs que Leo mencionó. En su mente, seguía teniendo una idea sobre el deporte y 
+estar a la ofensiva en la medida de lo posible, que es uno de los objetivos que Leo se 
+marcó durante su última conversación: "Queremos estar siempre a la ofensiva, no a 
+la defensiva". La frase no dejaba de sonar en la cabeza de Guy, un ávido aficionado a 
+los deportes y un nerd de las estadísticas, que repetía ambos pensamientos para 
+tenerlos más claros. 
+Guy relacionó el baloncesto y el fútbol con las pérdidas de balón, y cómo una posesión 
+extra del balón permitía a un equipo tener más oportunidades de superar al rival. Lo 
+mismo ocurre en el béisbol con el porcentaje de jugadores en base: cuantos más 
+jugadores lleguen a la base, mayores serán las posibilidades de anotar. En ventas, 
+cuanto más controlas la interacción con el cliente para ayudarle, para entender mejor 
+su negocio y sus patrones de pedido, más probabilidades tienes de conseguir un 
+pedido. Esto era lógico para Guy y proporcionaba una pauta para lo que Leo estaba 
+poniendo en práctica. 
+ 
+ 
+ 
+ 
+ 
+--- PAGE 82 ---
+82 
+ 
+Había llegado el momento de visitar a Leo y ver el sistema en acción, así que Guy 
+coordinó la visita para el miércoles siguiente en una conversación telefónica. 
+ 
+Ese miércoles, cuando Guy se presentó en la puerta, todo el mundo le esperaba y su 
+nombre apareció en la pantalla del vestíbulo: "Bienvenido Guy Galeti". 
+ 
+Leo inició la conversación mientras Guy entraba: "Hola Guy, me alegro de darte la 
+bienvenida, es todo un honor ver que te tomas tu tiempo para entender mejor lo que 
+hemos hecho aquí". 
+ 
+"Es un placer Leo y tengo que decir que aprecio tu generosidad y el hecho de que 
+estés abierto a que este gran sistema sea compartido". Respondió Guy 
+ 
+Leo: "Sólo si lo comparto seguiré estando alerta. Si algo he aprendido en mi asociación 
+sectorial es que las mejores prácticas de hoy serán las viejas prácticas de mañana. 
+Tenemos que seguir mejorando y no se me ocurre nadie mejor que tú para ayudarnos 
+a mejorar nuestro sistema." 
+ 
+Guy: "Me alegro de que pienses así, no digamos más y déjame ver el sistema en 
+acción." 
+ 
+Leo: "Te pedimos que aparecieras temprano por la mañana Guy, para que puedas 
+participar en nuestra reunión diaria de ventas, sólo dura 20 minutos. Como estamos a 
+final de mes, también te enseñaremos nuestra reunión semanal de ventas. 
+Nuestro objetivo es controlar las actividades; si controlamos las actividades, los 
+resultados vendrán solos, así evitaremos todas las crisis de cierre de fin de mes." 
+ 
+--- PAGE 83 ---
+83 
+ 
+Guy: "Correcto, como acordamos, necesitas controlar las actividades y las actividades 
+conducirán a resultados u objetivos de ventas." 
+Leo: "Correcto, nosotros controlamos las actividades que controlan los resultados, 
+sabemos que, si todos los vendedores de MoneyCall hacen de 20 a 30 llamadas al día, 
+con 10 presupuestos y 100% F1 y al menos 50% F2 lograremos los resultados que 
+conducen a Llamadas de Entrega (DC) y referencias o testimonios de nuestros 
+clientes." 
+Guy: "Así que básicamente se trata de un modelo de ventas predecible, ¿no?". 
+Leo: "Como la mayoría de las cosas en la vida, no es 100% predecible, sin embargo, 
+cuanto más rastreamos los números, más predecible se vuelve. Tenemos las mayores 
+ventas por empleado de toda la empresa. Sabemos que una vez que un vendedor 
+controla su comunicación con sus 100 clientes, podemos contratar a una nueva 
+persona o dividir sus 100 clientes en 2 vendedores y podremos aumentar sus ventas. 
+La clave es utilizar la regla 80/20 antes de hacer el cambio y ver los resultados de las 5 
+Preguntas Clave para el porcentaje de negocio que hacen con nosotros. Primero 
+queremos tener el 100% de todos nuestros clientes en nuestra base de datos en el 
+sistema Moneycall y entonces podremos decidir si necesitamos contratar a más 
+personas para manejar las referencias que obtenemos de nuestras llamadas. 
+Guy: "Entonces, básicamente no haces mucha prospección, ¿tus nuevos clientes 
+vienen sólo de referencias?" Leo: "Como dije antes, sabemos que nuestras ventas son 
+recurrentes y muchos distribuidores o negocios similares nunca se dan cuenta de esto; 
+un negocio de ventas recurrentes debe depender más de los clientes actuales 
+aumentando la cuota de esos clientes, porque los entendemos y atendemos mejor. 
+Cuando haces eso PROACTIVAMENTE, tienes más control y puedes decidir a qué 
+clientes quieres atender y cuáles debes dejar para la competencia. Sabemos que no 
+encajamos bien con todo el mundo, pero para aquellos clientes que valoran algunas de 
+las variables que controlamos bien, podemos ayudarles proactivamente, entonces esos 
+son los clientes que encajan bien en nuestra empresa y con el sistema Moneycall." 
+ 
+--- PAGE 84 ---
+84 
+ 
+Tras una breve pausa, Leo prosiguió: "La prospección no está fuera de la cuestión, por 
+favor recuerde que abrimos hace 9 meses y buscamos servir mejor a los clientes de 
+Boca Ratón que ya servíamos desde una ubicación más al norte en West Palm Beach, 
+así que tal vez en el futuro queramos hacer algo de prospección. La realidad es que 
+nuestro sistema ayuda a atraer a los clientes que valoran lo mismo que nuestros 
+clientes actuales. Para una empresa automovilística, una empresa de software o la 
+mayoría de las empresas de soluciones informáticas, seguros de vida, inmobiliarias y 
+muchos otros sectores similares, la prospección es la clave del juego, porque cada 
+cliente realiza una transacción de vez en cuando, por lo que necesitan una cartera de 
+clientes. Nuestra realidad es muy distinta, y debemos utilizar un sistema diferente al de 
+los supermercados para atraer y atender a nuestros clientes; el enfoque de 
+ametralladora de los supermercados no es adecuado para nuestro negocio, somos más 
+selectivos y nuestro sistema Proactive Moneycall es nuestro rifle. 
+¿Tiene sentido, Guy?". 
+Guy: "Lo tiene, ¿a qué te refieres con que los supermercados tienen un enfoque de 
+ametralladora, no lo he entendido?" 
+Leo: "Los supermercados controlan los productos porque son reactivos esperando a 
+que los clientes aparezcan y compren y no tienen mucha información sobre sus 
+clientes. Por ejemplo: Tienen entre 15,000 y 60,000 SKUs y casi cero información 
+sobre sus miles de clientes, en cambio, nosotros tenemos un número menor de clientes 
+por ubicación y más información sobre ellos, su negocio, el propietario y su personal. 
+Les damos formación en marketing, intentamos ayudarles con sus planes de 
+crecimiento y pasamos mucho tiempo con ellos, así que deberíamos ser más 
+proactivos a la hora de analizar por qué compran el producto A y no compran el 
+producto B que normalmente va con el producto A. 
+ 
+ 
+ 
+ 
+--- PAGE 85 ---
+85 
+ 
+Por otra parte, tenemos un número mucho menor de clientes que un supermercado, así 
+que tiene sentido concentrarse en los que podemos atender mejor. El análisis 80/20 lo 
+demuestra y el éxito de Moneycall con 100 clientes por vendedor lo corrobora. 
+Lo conseguimos con una simple pregunta para recabar opiniones y ver cómo podemos 
+ayudar. ¿Está más claro ahora?" 
+Guy: "Sí Leo, ¡gracias! Es como la analogía deportiva en la que pensé antes de 
+concertar la reunión, queremos estar a la ofensiva todo lo que podamos para superar a 
+nuestros oponentes." 
+Ambos sonrieron y se chocaron los puños. 
+Leo: "Bueno Guy, aquí tienes, vamos a la sala de conferencias para que veas cómo 
+hacemos nuestra reunión de ventas de 20 minutos". 
+Ambos se dirigieron a la sala y Leo se puso en su papel de gerente de ventas y 
+preguntó a cada vendedor cuántas llamadas, presupuestos, seguimientos y pedidos 
+consiguieron ayer en comparación con el objetivo para ver si todo el mundo iba por 
+buen camino. Inmediatamente puso todas las cifras en la pizarra y todos pudieron ver 
+quién estaba en cabeza y quién había hecho más llamadas, seguimientos, 
+presupuestos y ventas. 
+Leo explicó en voz alta a Guy que seleccionaba al azar a un vendedor cada día para 
+que llamara a uno de los clientes que el vendedor registraba en el CRM para ver cómo 
+se sentía tratado el cliente y comprobar si lo que se registraba en el CRM, era lo mismo 
+que Leo recibía del cliente. Esto evitó que cualquier vendedor intentara mostrar 
+números "falsos" en las reuniones matutinas. La razón principal es que las llamadas 
+proactivas requieren información más detallada en el CRM para que el vendedor pueda 
+hacer una "próxima llamada" inteligente y valiosa al mismo cliente. 
+Leo entonces procedió a mostrar que 2 vendedores necesitaban dar un paso adelante 
+para lograr el objetivo, sin embargo, por la tendencia que tenían, su cara no mostraba 
+mucho optimismo. 
+ 
+ 
+--- PAGE 86 ---
+86 
+ 
+Mientras salían de la habitación, Guy preguntó: "Leo, no parecías muy contento con las 
+2 últimas personas de la lista". 
+ 
+Leo: "¿Te has dado cuenta?". 
+ 
+Pareciendo un poco sorprendido por el hecho de que Guy se diera cuenta, continuó: 
+"Llevan 3 meses en los últimos puestos e incluso algunos vendedores nuevos lo han 
+hecho mejor que ellos. Voy a ver si podemos moverlos a otros puestos, aunque veo 
+que no realizan el número de actividades necesarias para hacer el tipo de ventas que 
+hacen otros que están en lo alto de la clasificación de los KPI. Se trata de un sistema 
+muy predictivo, por lo que las personas que no realicen las actividades proactivas que 
+he mencionado no ganarán tanto dinero y, del mismo modo, no producirán las ventas 
+para la empresa o el servicio a nuestros clientes que cada vendedor necesita hacer. 
+ 
+Guy: "Por el lado positivo, 2 es menos del 30% de tus vendedores y esa es la cantidad 
+normal de vendedores de bajo rendimiento que tienen la mayoría de las 
+organizaciones. Sólo eso ya me parece mejor que la mayoría". 
+ 
+Leo: "Entiendo que quieras que todos tengan éxito, pero al final aprendí que no todo el 
+mundo quiere hacer el trabajo que da mucho dinero, muchos sólo quieren quedarse en 
+su zona de confort. Es mi trabajo, como Gerente de ventas, entrenar a nuestra gente y 
+ayudarles a mejorar. Trabajo en ello a menudo y es una clave importante para seguir 
+creciendo como equipo y como empresa. Ahora, también es mi trabajo encontrar 
+vendedores que quieran ser los mejores y ayudar más a nuestros clientes. A cambio, 
+esto les recompensará. Estoy contento con el sistema, anima al vendedor medio a 
+crecer, o si no, destacarás rápidamente. Las personas de calidad producen resultados 
+de calidad y las personas de calidad con un gran sistema producen resultados 
+extraordinarios." 
+ 
+--- PAGE 87 ---
+87 
+ 
+Guy: "Bien dicho, ahora suenas como Yoda". 
+ 
+Ambos se rieron y Guy continuó: "¿Me dejarías ver cómo manejan las llamadas y 
+mantener los KPI que revisas todos los días?". 
+ 
+Leo: "Claro Guy, observemos a Jose que lleva aquí 6 meses y está entre los 3 primeros 
+todos los meses". 
+ 
+El tipo pudo ver las notas de Jose en el 5KQ de cada cliente y cómo señalaba ciertas 
+cosas que valoraban en cada presupuesto. Era impresionante ver que la mayor parte 
+de la conversación la hacían sus clientes, y José se limitaba a hacer preguntas 
+dependiendo de la casilla (S1 o S2) que necesitara para hacer la llamada. 
+ 
+De repente, José se levantó de la silla y le mostró a Leo un nuevo vídeo testimonial que 
+un cliente acababa de enviarle por SMS. Leo sonrió y le dijo a José que había hecho un 
+trabajo maravilloso y que lo publicara en las redes sociales. 
+ 
+Guy se quedó allí escuchando diferentes llamadas y cuando estaba a punto de 
+marcharse, José se dio la vuelta y dijo: "Por favor, venga conmigo, uno de mis clientes 
+está en el mostrador de Will Call recogiendo un pedido de algunas piezas y quería 
+saludarme". 
+ 
+Tanto Leo como Guy le siguieron, y vieron cómo José saludaba a su cliente chocando 
+los cinco. El cliente le dijo lo contento que estaba de que todo volviera a gestionarse 
+con prontitud. José se hizo un selfie con su cliente y le envió un mensaje de texto 
+personalizado diciéndole lo mucho que siempre había disfrutado trabajando para él. 
+ 
+--- PAGE 88 ---
+88 
+ 
+Guy: "Bueno Leo, ciertamente lo entiendo todo mucho mejor, y creo que puedo ayudar 
+a muchos clientes en la distribución eléctrica, venta de hardware y fabricación con este 
+sistema. Empezaré poco a poco, como tú, y los iré ampliando a medida que vayan 
+teniendo éxito. No obstante, tenía en mente algunos de los números que mencionaste, 
+y parece que has ganado el reto con tu padre, ya que muchos de tus números son los 
+mejores de la empresa. Así que, ¿cuándo vamos a celebrar tu nuevo ascenso?". 
+ 
+Leo: "Tranquilo Guy" 
+ 
+Dijo Leo sonriendo y continuo: "Sólo han pasado 9 meses y el reto era de un año; 
+debemos seguir pisando el acelerador y asegurarnos de que salimos victoriosos. Soy 
+optimista, pero soy como Andy Grove, el antiguo CEO de Intel, que escribió el libro 
+"Sólo los paranoicos sobreviven". Así que nada de celebraciones todavía, pues aún 
+podemos mejorar". 
+ 
+Ambos se rieron. 
+ 
+Guy: "Sé que no vas a perder; ¡sin duda te entiendo! Te mantendré informado de mis 
+progresos. Por favor, avísame cuando podamos celebrar tu victoria, estoy seguro de 
+que tu padre se unirá a nosotros con orgullo y alegría, además la empresa también se 
+beneficiará enormemente de ello. Hasta pronto". 
+Ambos se despidieron, tomaron caminos separados y continuaron con sus quehaceres 
+diarios. 
+ 
+ 
+ 
+ 
+--- PAGE 89 ---
+89 
+ 
+CAPITULO 12 
+CELEBRACIÓN Y ACTUALIZACIONES X 2 
+            Leo y su padre Tony se reunieron unos días después de que el reto de 12 
+meses terminara y se midiera. Fue un encuentro fácil y agradable. Tony estaba lleno de 
+alegría y sabía que Leo tenía los números desde el principio, así que no había 
+necesidad de suspense. La clave era responder a la pregunta más importante: ¿Qué 
+hacer a continuación? 
+Tony: "Estoy muy orgulloso de ti, Leo, por lo que has hecho. Es realmente memorable. 
+Me alegro de haberme arriesgado y haberte permitido hacer lo que quisieras con tu 
+emplazamiento, nuestro número 18. Obviamente, no estoy preparado para jubilarme o 
+dimitir (lo dijo con una mirada muy seria directamente a Leo). Sin embargo, sé que este 
+éxito exige un cambio y quiero preguntarte, ¿cuál debería ser el siguiente paso?". 
+Leo: "Te agradezco papá tu apoyo y tu apertura con mis ideas. Nunca podría haberlo 
+hecho sin ti y sin la experiencia que tienes por haber dirigido la empresa durante tanto 
+tiempo después de tu propio padre. También te doy las gracias por permitirme hacer mi 
+propio camino". 
+Tony: "Genial, pero de nuevo, ¿qué crees que deberíamos hacer ahora?". Ahora era 
+contundente en su tono. 
+Leo: "Debería ser el vicepresidente de ventas de la empresa y actualizar todos nuestros 
+locales al sistema Moneycall". 
+ 
+ 
+ 
+--- PAGE 90 ---
+90 
+ 
+Tony: "Me gusta esa idea, ¿ahora piensas hacer los otros 17 al mismo tiempo?". Esta 
+vez había admiración y duda en su voz. 
+Leo: "No. Pensar así sería poco realista. Tenemos que cambiarlos rápidamente porque 
+tenemos una ventaja competitiva, y estoy seguro de que otros intentarán copiarnos. 
+Aun así, tenemos que movernos rápido y seguir mejorando el sistema todo el tiempo 
+para que nadie pueda alcanzarnos." 
+Tony: "Entonces, ¿cuál es el plan para que todo funcione?". 
+Leo: "Creo que tenemos que cambiar 3 ubicaciones a la vez. Puede llevar de 6 a 9 
+meses producir el cambio y tengo otras 2 personas que creo que podrían ayudarme 
+con la transformación." 
+Tony: "Ok, ¿quiénes son?" 
+Leo: "Laura que fue la primera persona que formé en el sistema. Juntos, aprendimos 
+todos los diferentes pasos necesarios para la implementación. Ella también me ayudó a 
+hacer los ajustes adecuados. El otro es Guy, nunca sería nuestro empleado, pero 
+podemos contratarlo como consultor. Ha estado haciendo un trabajo similar con sus 
+propios clientes y creo que también podría ayudarnos a convertir otro local." 
+Tony: "Eso suena como un plan, ¿conocen esta idea?"  
+Leo: "Bueno, necesitaba comentárselo primero para ver si estaban de acuerdo. Si lo 
+están, me gustaría celebrarlo. Quiero dar una fiesta de inauguración, utilizando la 
+transformación del nuevo sistema como una historia de la empresa y algo que los 
+empleados restantes esperen con impaciencia aplicar en sus locaciones." 
+Tony: "No te he parado hasta ahora y no empezaré a pararte ahora. Así que dímelo y lo 
+aprobaré. Esta vez, puedo decir que te lo has ganado y que estaría orgulloso de que 
+implantaras este sistema. Enséñame tu plan y hagámoslo oficial para todos, ¿qué te 
+parece?". 
+ 
+ 
+ 
+--- PAGE 91 ---
+91 
+ 
+Leo: "¡Gracias, papá! Me alegra mucho escuchar eso". 
+Ambos se abrazaron y se dieron unas fuertes palmadas en la espalda. 
+No sólo sentían orgullo, alegría y pasión por la empresa familiar, sino también por el 
+equipo que ambos habían formado. 
+Leo llamó inmediatamente a Laura para informarle de su nuevo cargo. Ella aceptó en el 
+acto con júbilo, aunque eso significara trasladarse fuera de la ciudad para asumir esas 
+nuevas responsabilidades y ocuparse de 6 tiendas y transformarlas de una en una. 
+Ahora lo complicado era cómo incorporar a Guy al equipo como asesor. 
+Leo le convocó a una reunión con la excusa de que quería ver cómo estaba 
+implementando todo con sus clientes. Al reunirse, se metieron de lleno en la 
+conversación. 
+Leo: "¡Me alegro de verte, Guy! Como te dije, quiero escuchar los jugosos detalles de 
+cómo te están yendo las cosas en los esfuerzos de implementación con las empresas 
+de tus clientes." 
+Guy: "Me alegro de verte Leo, yo también soy como tú en muchos aspectos, pero soy 
+más estructurado en ciertas cosas. Necesitaba entender mejor cómo funcionaba el 
+proceso de ventas para mis clientes. Al igual que ustedes aquí en LATAM Supply, las 
+empresas de mis clientes de ventas recurrentes tenían tres o cuatro canales de venta: 
+el mostrador en la tienda, las ventas internas/por teléfono, las ventas externas/visitas 
+personales e Internet. Algunos no tenían vendedor de mostrador, ya que sólo vendían 
+equipos, y muchos sólo vendían por teléfono, pero la similitud clave era que todos eran 
+100% reactivos." 
+Leo: "Interesante desglose, no es nada que no supiera o esperara". Comentó de forma 
+sarcástica. 
+Guy:"Lo sé, pero para explicárselo mejor a los demás hay que facilitar las cosas y 
+desglosarlas bien. La clave fue que todos mis clientes entendieron de dónde venía 
+cuando dije REACTIVO vs PROACTIVO. El problema era que sus equipos de ventas 
+estaban vendiendo más que nunca y sus beneficios eran increíbles, por lo que tenían 
+miedo de agitar demasiado el barco." 
+--- PAGE 92 ---
+92 
+ 
+Leo: "Puedo ver un poco de mi padre en la indecisión que mostraron tus clientes, 
+porque el mayor enemigo de tu éxito futuro es tu éxito actual. 
+Entonces, ¿qué hiciste?" 
+Guy: "Les mostré datos sobre el número de clientes que compraban muy poco con el 
+análisis 80/20. Les expliqué que el riesgo era sólo el sueldo de un vendedor para 
+empezar. Además, yo formaría a este nuevo vendedor y haría un seguimiento de los 
+resultados hasta que consiguiera unas ventas de $100,000 dólares o más al mes. 
+También añadí que tardaría entre 3 y 6 meses en conseguir esa cifra. 
+Con esta explicación, decidieron lanzarse y permitirme iniciar un programa Moneycall 
+para ellos." 
+Leo: "¡Genial, me encanta cómo lo has presentado! ¿Cómo te fue?" 
+Guy: "Al igual que nosotros hablamos y vimos con su gente, las ventas empezaron a 
+acumularse y los nuevos vendedores estaban encantados con el sistema y con los 
+resultados numéricos tangibles. La dirección también estaba deseando ampliar el 
+nuevo departamento". 
+Leo: "¡Gran trabajo, Guy! ¿Qué vas a hacer ahora?" 
+Guy: "Voy a proponer un ascenso para la primera vendedora a la que he formado. Va a 
+asumir el cargo de gerente del departamento. Ella puede hacer el trabajo que yo hacía. 
+En nuestras reuniones de formación, siempre he tenido cuidado de decirle que ese 
+podría ser su trabajo en el futuro y que tenía que hacer lo que yo estaba haciendo con 
+ella. Todos los buenos vendedores son primero sus propios jefes de ventas: 
+deben demostrar que pueden gestionarse a sí mismos antes de pensar en gestionar a 
+otros." 
+Leo: "¡Tan cierto! Parece otra de esas frases de Yoda. Los buenos vendedores deben 
+ser grandes gerentes de sí mismos". 
+ 
+ 
+ 
+--- PAGE 93 ---
+93 
+ 
+Guy: "Me alegro de que te haya gustado. He repetido el mismo proceso de promoción 
+desde dentro con todos mis clientes. Estoy satisfecho con los resultados. Ahora 
+hablemos de ti, ¿qué está pasando aquí amigo mío?". 
+Leo: "Bueno, esa es precisamente la segunda razón por la que quería hablar contigo. 
+Me ascienden a vicepresidente de ventas y me encargaré de la transformación de los 
+otros 17 locales. Voy a ascender a Laura, mi primera vendedora de Moneycall, a 
+Directora Regional de 6 locales. También quiero ver si podría contratar sus servicios 
+para ayudarme a transformar la otra región con 6 ubicaciones más. No sé si te interesa, 
+pero significaría mucho para mí y sería muy útil, ya que entiendes el sistema a la 
+perfección." 
+Guy: "¡Creo que es el momento perfecto, Leo! Estoy terminando la implantación con la 
+mayoría de mis otros clientes y promocionando a su gente para que se haga cargo de 
+mi trabajo. Así que, definitivamente puedo ayudarte. ¿Cuándo piensas empezar?" 
+Leo: "¡Perfecto Guy! Queremos empezar más o menos a principios de año. Te avisaré 
+cuando tengamos nuestra reunión de celebración inicial con toda la empresa. Con este 
+plan podemos empezar el año con buen pie y conseguir que toda la empresa se sume 
+a la idea." 
+Guy: "Como he dicho, el momento perfecto, esperaré tu llamada Leo".  
+Sonrieron, se abrazaron y se despidieron por el momento. Fue una doble celebración 
+de éxito y ascensos para los creadores del sistema Moneycall. 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+--- PAGE 94 ---
+94 
+ 
+CAPITULO 13 
+EL GRAN ANUNCIO DEL NUEVO 
+SUMINISTRO DE LATAM 
+ 
+ 
+            La fiesta estaba a punto de empezar, y todo el mundo estaba listo para los 
+discursos, los anuncios ya sospechados y el brindis con champán. La música ya había 
+estado sonando por un tiempo, pero a Tony y Leo siempre les gustaba empezar a 
+tiempo y cuando llegaron las 7pm, las luces en el podio iluminaron el micrófono y un 
+gran silencio inundo la sala. Este era uno de los eventos más grandes en Boca Raton 
+Florida, pero solo los pasos de Tony subiendo al podio se escuchaban. Este era el 
+momento que todos estaban esperando. 
+Tony: "Señoras y señores, compañeros de trabajo y de fabricación, nuestros queridos 
+clientes, todos los amigos de LATAM Supply, gracias por venir. 
+Como han podido ver en las cifras del último año, nuestra empresa se encuentra en 
+una posición muy sólida y creciendo por encima de la media del sector en la mayoría 
+de los indicadores clave de rendimiento que compartimos en el informe con nuestra 
+asociación sectorial. Especialmente nuestra nueva ubicación dirigida por Leo, ha 
+crecido por encima de todas las métricas que mantenemos con gran satisfacción del 
+cliente y el compromiso, la producción de más testimonios que cualquier otra rama por 
+más de 20 a 1 relación. Queremos anunciar a todos ustedes que Leo asumirá una 
+nueva responsabilidad como Vicepresidente de Ventas para toda la empresa. 
+Nombrará a 2 personas más para que le ayuden a transformar la empresa en el nuevo 
+modelo proactivo que su sucursal ha implantado con tanto éxito durante el último año.  
+--- PAGE 95 ---
+95 
+ 
+ 
+Leo, no quiero robarte el protagonismo, así que, por favor, informa a todos nuestros 
+queridos clientes de cuáles son los planes inmediatos para LATAM Supply". 
+Un gran aplauso agitó las copas de vino de las mesas. Leo se acercó al podio con 
+Laura y Guy a su lado mientras se colocaba en el centro para hablar. 
+Leo: "Gracias Tony y gracias a todos nuestros distinguidos invitados por el generoso 
+aplauso. Me siento humilde por el hecho de que hace poco más de 370 días asumía un 
+nuevo cargo lleno de incertidumbre, sólo inspirado por una idea y la fuerza de algunos 
+datos sobre cómo servir a los clientes de forma proactiva. 
+Tras muchas pruebas y errores, y decisiones basadas en un buen análisis, hemos 
+pulido un sistema que siempre seguirá siendo un trabajo en curso. Laura y Guy han 
+contribuido mucho a pulir el proceso que dio lugar al sistema que todos creamos. Los 
+clientes de nuestra sucursal están más satisfechos que los de cualquier otra de la 
+empresa, y nuestras encuestas indican que los empleados de nuestras tiendas también 
+disfrutan más de su trabajo que en cualquier otra ubicación. Estos indicadores clave 
+demuestran que tenemos la responsabilidad de adoptar este sistema e implantarlo en 
+toda la empresa". 
+Leo fue interrumpido por un aplauso aún mayor y más eufórico. Esperó 30 segundos y 
+agitó las manos para poder continuar. Esto produjo un silencio total, ya que todos 
+querían escuchar cada palabra que siguiera. 
+Continuó Leo: "También tenemos que movernos rápido porque estoy seguro de que 
+nuestros competidores no se quedarán de brazos cruzados y copiarán lo que estamos 
+haciendo. Por eso tenemos que, no sólo implantar nuestro sistema Moneycall, sino 
+también mejorarlo para que la competencia nunca pueda alcanzarnos". 
+Siguió otra ronda de aplausos. Leo esperó 15 segundos esta vez y prosiguió. 
+ 
+ 
+ 
+--- PAGE 96 ---
+96 
+ 
+ 
+Leo: "Por eso voy a nombrar a Laura como mi Directora de Ventas en las localizaciones 
+de la región Este, y también trabajaremos con un consultor externo. 
+Muchos de ustedes le han visto antes por aquí; tiene experiencia en implantar el 
+sistema Moneycall en negocios similares, Guy Galeti". 
+Señaló hacia su izquierda, donde se encontraba Guy. 
+Leo continuó: "Guy trabajará con los locales del suroeste, y yo me encargaré del resto 
+de locales del sureste. Necesitamos la colaboración de todos nuestros empleados para 
+poder llevar esto a cabo. Esto significa que agradecemos cualquier idea que piensen 
+que podríamos utilizar para hacer que este sistema sea aún más proactivo para servir a 
+nuestros clientes. Por favor, preséntense y veamos cómo podemos ponerla en práctica. 
+Ahora les pregunto a todos ustedes, ¿qué empresa que conozcan hace eso de 
+verdad?". 
+Más aplausos detuvieron a Leo durante 10 segundos. 
+Rápidamente añadió. "Lo decimos en serio, y la prueba es la ubicación #18 aquí en 
+Boca Raton, ¡así que hagámoslo! ¡Contamos con ustedes!" 
+Todos se pusieron de pie para aplaudir como si se tratara de un discurso de victoria 
+presidencial. 
+La fiesta continuó y todos sabían que tenían que disfrutar del momento antes de que 
+las campanadas del Big Ben le devolvieran a la realidad el lunes. 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+--- PAGE 97 ---
+97 
+ 
+CAPITULO 14 
+¿SE PUEDE HACER ALGO SIN TECNOLOGÍA 
+EN ESTOS DÍAS? 
+ 
+ 
+            El lunes, tras el gran anuncio, Leo, Laura y Guy se reunieron para reflexionar 
+sobre el camino a seguir. Guy quería poner sobre la mesa algunos temas interesantes, 
+así que los otros dos escucharon primero sus opiniones. 
+"Chicos, como saben, tenemos que encontrar la manera de que la transición sea lo 
+más rápida y fluida posible para todas las sedes. Me he dado cuenta de que una de las 
+claves del sistema es el mantenimiento de registros para tener un control directivo de 
+los tipos de llamadas y números para medir nuestros KPI. Parte de ello lo hacía el 
+sistema telefónico actual que ustedes han programado aquí, así que es una gran 
+ventaja. Sin embargo, es necesario ajustar el CRM para que sea más fácil llevar un 
+buen registro de los diferentes tipos de llamadas y cuál fue el problema principal de la 
+llamada. Me he dado cuenta de que algunos vendedores se quejaban del tiempo que 
+llevaba todo esto. Acabo de enterarme de que uno de mis clientes utiliza Google Docs, 
+pero sigue generando demasiada información. He creado una hoja de registro en 
+Excel, para enseñársela a Víctor, el responsable de TI, para ver si puede programar 
+algo similar en el CRM". Dijo Guy 
+"Interesante idea Guy", continuó Leo. "Recibí algunas de las mismas respuestas de 
+nuestra gente, aunque no presté tanta atención como tú. ¿Te importaría compartir la 
+hoja Excel con nosotros para ver si podemos empezar a utilizarla y a medida que 
+--- PAGE 98 ---
+98 
+ 
+empecemos a entenderla, podríamos ver lo que Víctor puede hacer con ella, suele ser 
+un mago?" 
+Todos se rieron. 
+Guy: "Por supuesto, déjame enseñárselos y hablamos". 
+ 
+ 
+Guy: "Se trata de un registro muy sencillo; rastrea el tipo de llamadas, ahora no dice a 
+quién ni el contenido. El objetivo principal es la velocidad. Basta con pulsar el signo + 
+para añadir una llamada a S1 si ese era el tipo de llamada. Al final, tenemos las 
+llamadas entrantes, y a la derecha está el resumen para el supervisor que puede ver lo 
+que todo el mundo hizo cada día. Mantiene un resumen hasta final de mes, a partir de 
+ahí el supervisor se queda con una copia y todos los demás resetean su hoja." 
+Laura: "Esto me gusta más que mi registro manual de Excel, así que podemos empezar 
+a usar esto mientras Víctor encuentra la manera de programarlo en nuestro CRM con 
+una facilidad de uso similar además de los detalles de cada llamada." 
+Leo: "Eso es genial, empecemos con esto y luego podemos pasar a cualquier magia 
+que Víctor pueda hacer." 
+ 
+
+--- PAGE 99 ---
+99 
+ 
+Guy: "Aquí está el enlace de descarga: 
+https://4929193.fs1.hubspotusercontentnal.net/hubfs/4929193/Moneycall%20report%20
+per%20salesperson.x/sm 
+No quiero agitar demasiado el barco, pero es importante mencionar a Víctor que quizá 
+podamos utilizar Al en el futuro para tomar decisiones más rápidas. Por ejemplo, qué 
+piezas no se han pedido desde hace tiempo y qué piezas/equipos van junto con los 
+pedidos actuales que el cliente nunca ha solicitado, de modo que las llamadas de 1/52 
+dólares puedan ser más fáciles de identificar." 
+Leo: "¡Vaya, es una gran idea! Reduciría el tiempo de formación que necesitan los 
+vendedores para darse cuenta de qué piezas recomendar en sus llamadas S2. Esto se 
+parece cada vez más a La guerra de las galaxias". 
+Todos se partieron de la risa. 
+Leo: "La realidad es que tenemos que estar abiertos a todas estas ideas si queremos 
+seguir mejorando y facilitando las cosas en las siguientes fases. El sistema telefónico se 
+ha programado p or completo para que reciba las llamadas directamente de los 
+vendedores asignados y haga un seguimiento de las llamadas individuales a sus clientes. 
+Incluso hemos programado el envío de mensajes de texto desde nuestro sistema. Por lo 
+tanto, el plan será: D esplegar el sistema telefónico de la tienda Boca en todas las 
+ubicaciones, hacer nuestro desglose 80/20, utilizar el registro de Excel para empezar a 
+hacer un seguimiento y vamos a formar a los nuevos vendedores de Moneycall en cada 
+una de las ubicaciones designadas que queremos que empiecen la implantación." 
+Guy: "¿Sólo quieres contratar gente nueva para las nuevas posiciones de Moneycall?" 
+Leo: "Deberíamos buscar personal de almacén que ya conozca las piezas y sus usos. 
+También necesitamos gente a la que no le importe llamar y encontrar resistencia inicial 
+hasta que los clientes entiendan el carácter personal de nuestro servicio, como ha 
+ocurrido antes." 
+ 
+ 
+--- PAGE 100 ---
+100 
+ 
+Laura: "Estoy abierta a dar oportunidades a los empleados actuales, sin embargo, 
+también necesitamos que hagan una prueba de evaluación para ver si son aptos para 
+el puesto. Sé que la evaluación no es fiable al 100%, pero es un dato adicional que 
+debemos tener en cuenta. Si lo hacemos con los posibles nuevos vendedores, 
+deberíamos hacerlo también con los empleados actuales." 
+Leo: "¡De acuerdo! Rodemos con lo que tenemos, sabemos que siempre habrá una 
+forma mejor. Lo que tenemos ahora funciona muy bien, así que pongámonos a ello y 
+mantengamos a Víctor alerta." 
+Guy: "Nos encanta actuar, ¡eso me gusta! Parece que seamos los Tres Mosqueteros". 
+Todos rieron y pasaron a poner en marcha la aplicación en todas sus sucursales. 
+Al cabo de un año, 12 de las sucursales se habían transformado y utilizaban el modelo. 
+Las publicaciones en las redes sociales se hacían por sucursal, ya que la página de 
+LinkedIn de la empresa estaba inundada de todos los testimonios que generaban las 
+sucursales. Las ventas crecían a un ritmo del 27% en las 12 sucursales transformadas 
+frente a las 5 restantes que seguían utilizando el modelo reactivo. Los Tres 
+Mosqueteros tardaron un año y medio en poner en marcha todas las sucursales. El 
+local original de Boca fue el que estuvo más adelantado que el resto y también se 
+benefició de las ideas que se creaban continuamente en todas las demás tiendas. 
+Esta es la historia que ha ocurrido con muchos distribuidores, y podría ocurrirle a usted, 
+así que ¿dónde están sus mosqueteros para ayudar a su organización a realizar el 
+cambio? ¿Cuándo contratará a su primer vendedor Moneycall? ¿Qué indicadores clave  
+de rendimiento utilizará para empezar? ¿Ha calculado ya su Fórmula Máxima de Ventas? 
+Nuestro objetivo con esta historia era inspirarle con un nuevo sistema que ha ayudado 
+a muchas otras empresas a conseguir mayores resultados de ventas predecibles con 
+un sistema proactivo. Búscanos en LinkedIn y mantengámonos en contacto para 
+mejorar juntos el sistema y si tu idea funciona bien, la incluiremos en la segunda 
+edición de Moneycall. 
+ 
+--- PAGE 101 ---
+101 
+ 
+INFLURNCERS 
+Esta es la sesión en la que quiero homenajear a quienes dieron forma a mi 
+pensamiento y quiero proporcionar un breve resumen con sus principales lecciones 
+para mí, así que tal vez usted puede decidir aprender más acerca de ellos. 
+ Roy Chitwood: Recibí su formación en ventas cuando empecé mi carrera como 
+consultor de ventas. Fue la primera persona que me mostró un "proceso de 
+ventas" y para un Ingeniero esto tenía todo el sentido. Esto hizo que me 
+interesara más por la venta consultiva. 
+ 
+ Andy Grove: "Sólo los paranoicos sobreviven" era uno de esos libros de gestión 
+que básicamente decían que hay que reinventarse todo el tiempo. Por eso 
+decidimos terminar el libro con ideas sobre cómo se podría seguir mejorando el 
+sistema. A partir de ahí siempre me digo El peor enemigo de tu éxito futuro es tu 
+éxito actual. 
+ 
+ Jeffrey Gitomer: Se puede aprender mucho de Jeffrey. Una de las cosas más 
+importantes que saqué de sus seminarios web, podcasts y libros es el hecho de 
+que cuando no obtienes los resultados que quieres, es culpa tuya, no de los 
+clientes, de tu empresa o de tus productos. Esta idea me impulsó a buscar 
+formas de hacer las ventas más fáciles y predecibles. 
+ 
+  Art Sobczak: Uno de los primeros formadores profesionales que puso en 
+marcha un sistema lógico para manejar el teléfono. Art me inspira con frecuencia 
+con sus podcasts y su libro "Smart Calling", fue inestimable para enseñarme 
+mejores formas de manejar el teléfono como vendedor. La formación en ventas 
+en otras organizaciones, además de las actividades diarias, me ayudaron a pulir 
+mis habilidades. Más tarde, descubrí que combinar un proceso con la calidad de 
+la llamada en un sistema, mejoraba mis resultados drásticamente. 
+ 
+--- PAGE 102 ---
+102 
+ 
+ Joe Ellers: Tuve la suerte de ver un par de presentaciones de Joe y nada me 
+abrió más la mente que el cuadrante de ventas que decidí incluir en el libro. Es 
+un concepto tan sencillo que me ayudó a concentrarme en lo que los 
+vendedores debían hacer para tener éxito. Más tarde se convirtió en las 
+llamadas S1 y S2 con preguntas sencillas que facilitan las ventas. 
+ 
+ Neil Rackman: Quizás la figura más influyente en la venta para cualquiera que 
+quiera guiarse por datos y no por "charlas de gurús". Neil y su libro "Spin 
+Selling", me mostraron el valor de usar estadísticas y análisis de datos para 
+tomar decisiones de ventas. Más tarde seguí todo lo que escribió e hizo el 
+Prólogo del libro de los siguientes tipos que encontré. 
+ 
+ Mike Schultz y John Doerr: Del Prólogo de Neil Rackman a su libro "Insight 
+Selling". Estos autores me señalaron el Rain Group. Una empresa de consultoría 
+que continuamente hace investigación de ventas, formación y más. La idea 
+básica es utilizar números y estadísticas para determinar la mejor manera de 
+realizar una tarea de ventas. Esto era muy lógico para mí; buscaba una 
+correlación entre las acciones del vendedor y las ventas. Esta fue la razón que 
+me llevó a hacer un seguimiento de cada uno de los tipos de llamadas y ver qué 
+resultados podíamos esperar de ellas. 
+ Alex Goldfayn: No me lo podía creer cuando leí lo que escribía Alex sobre 
+llamar proactivamente a los clientes. Así que estudié todos sus libros e hice todo 
+lo posible por tenerle en una de nuestras charlas en HARDI. Sentí que mi idea 
+había sido validada. Tiene un sistema tan fácil que no entiendo por qué no lo 
+prueba más gente. La lección más importante que aprendí de Alex es la que se 
+incluye en el libro. "Llama cuando no pase nada sólo para decir hola, he estado 
+pensando en ti". Obviamente, sólo lo harás si lo dices en serio, y si haces bien tu 
+trabajo, te preocuparás por tus clientes a nivel personal. Si no quieres poner en 
+marcha un departamento de ventas e implantación de sistemas Moneycall, al 
+menos lee sus ideas y empieza por ahí, seguro que te ayudará en tus ventas. 
+--- PAGE 103 ---
+103 
+ 
+ Keenan: "Gap Selling" fue un libro transformador para mí. La idea de que 
+tenemos que identificar "problemas frente a necesidades" me abrió los ojos. 
+Él no inventó ese concepto, aunque me lo aclaró mejor que nadie. También me 
+pareció muy valioso determinar cuál es el coste del problema. La gente paga 
+para resolver problemas caros. Cuando añadí la práctica de hacer preguntas 
+sencillas, sólo para entender los problemas o lo que valoraba el cliente, el 
+sistema Moneycall tomó su forma definitiva. 
+ 
+ 
+ 
