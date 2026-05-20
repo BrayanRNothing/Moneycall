@@ -52,6 +52,57 @@ app.post('/api/login', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }) }
 })
 
+// ── 7. RANKING DE VENDEDORES (Reunión diaria 20 min) ─────────────────────────
+app.get('/api/vendedores/ranking', async (req, res) => {
+  try {
+    const today = new Date(); today.setHours(0, 0, 0, 0)
+    const vendedores = await prisma.vendedor.findMany({
+      include: {
+        clientes: {
+          include: {
+            llamadas: true,
+            cotizaciones: true
+          }
+        }
+      }
+    })
+
+    const ranking = vendedores.map(v => {
+      const llamadasHoy = v.clientes.flatMap(c => c.llamadas).filter(l => new Date(l.fechaHora) >= today)
+      const todasLlamadas = v.clientes.flatMap(c => c.llamadas)
+      const todasCotiz = v.clientes.flatMap(c => c.cotizaciones)
+
+      const salHoy = llamadasHoy.filter(l => l.direccion === 'Saliente').length
+      const entHoy = llamadasHoy.filter(l => l.direccion === 'Entrante').length
+      const s1Hoy = llamadasHoy.filter(l => l.tipoLlamada === 'S1').length
+      const s2Hoy = llamadasHoy.filter(l => l.tipoLlamada === 'S2').length
+      const dcHoy = llamadasHoy.filter(l => l.tipoLlamada === 'DC').length
+      const f1Hoy = llamadasHoy.filter(l => l.tipoLlamada === 'F1').length
+
+      const cerradas = todasCotiz.filter(c => c.estado !== 'Pendiente')
+      const ganadas = todasCotiz.filter(c => c.estado === 'Ganada')
+      const ratioNum = cerradas.length > 0 ? Math.round((ganadas.length / cerradas.length) * 100) : 0
+
+      const f1Pct = todasCotiz.length > 0 ? Math.round((todasCotiz.filter(c => c.seguimientoF1).length / todasCotiz.length) * 100) : 0
+
+      return {
+        id: v.id,
+        nombre: v.nombre,
+        rolCanal: v.rolCanal,
+        cuentas: v.clientes.length,
+        hoy: { salientes: salHoy, entrantes: entHoy, s1: s1Hoy, s2: s2Hoy, dc: dcHoy, f1: f1Hoy, total: llamadasHoy.length },
+        ratioNum,
+        f1Pct,
+        cotizaciones: todasCotiz.length,
+        ganadas: ganadas.length,
+        score: salHoy * 3 + ratioNum + f1Pct // score para ordenar ranking
+      }
+    }).sort((a, b) => b.score - a.score)
+
+    res.json(ranking)
+  } catch (e) { res.status(500).json({ error: e.message }) }
+})
+
 app.get('/api/vendedores/:id', async (req, res) => {
   const { id } = req.params
   try {
@@ -504,56 +555,7 @@ app.get('/api/dashboard/metrics', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }) }
 })
 
-// ── 7. RANKING DE VENDEDORES (Reunión diaria 20 min) ─────────────────────────
-app.get('/api/vendedores/ranking', async (req, res) => {
-  try {
-    const today = new Date(); today.setHours(0, 0, 0, 0)
-    const vendedores = await prisma.vendedor.findMany({
-      include: {
-        clientes: {
-          include: {
-            llamadas: true,
-            cotizaciones: true
-          }
-        }
-      }
-    })
 
-    const ranking = vendedores.map(v => {
-      const llamadasHoy = v.clientes.flatMap(c => c.llamadas).filter(l => new Date(l.fechaHora) >= today)
-      const todasLlamadas = v.clientes.flatMap(c => c.llamadas)
-      const todasCotiz = v.clientes.flatMap(c => c.cotizaciones)
-
-      const salHoy = llamadasHoy.filter(l => l.direccion === 'Saliente').length
-      const entHoy = llamadasHoy.filter(l => l.direccion === 'Entrante').length
-      const s1Hoy = llamadasHoy.filter(l => l.tipoLlamada === 'S1').length
-      const s2Hoy = llamadasHoy.filter(l => l.tipoLlamada === 'S2').length
-      const dcHoy = llamadasHoy.filter(l => l.tipoLlamada === 'DC').length
-      const f1Hoy = llamadasHoy.filter(l => l.tipoLlamada === 'F1').length
-
-      const cerradas = todasCotiz.filter(c => c.estado !== 'Pendiente')
-      const ganadas = todasCotiz.filter(c => c.estado === 'Ganada')
-      const ratioNum = cerradas.length > 0 ? Math.round((ganadas.length / cerradas.length) * 100) : 0
-
-      const f1Pct = todasCotiz.length > 0 ? Math.round((todasCotiz.filter(c => c.seguimientoF1).length / todasCotiz.length) * 100) : 0
-
-      return {
-        id: v.id,
-        nombre: v.nombre,
-        rolCanal: v.rolCanal,
-        cuentas: v.clientes.length,
-        hoy: { salientes: salHoy, entrantes: entHoy, s1: s1Hoy, s2: s2Hoy, dc: dcHoy, f1: f1Hoy, total: llamadasHoy.length },
-        ratioNum,
-        f1Pct,
-        cotizaciones: todasCotiz.length,
-        ganadas: ganadas.length,
-        score: salHoy * 3 + ratioNum + f1Pct // score para ordenar ranking
-      }
-    }).sort((a, b) => b.score - a.score)
-
-    res.json(ranking)
-  } catch (e) { res.status(500).json({ error: e.message }) }
-})
 
 // ── 8. AGENDA DEL DÍA (Cola de tareas por vendedor) ──────────────────────────
 app.get('/api/agenda/:vendedorId', async (req, res) => {
