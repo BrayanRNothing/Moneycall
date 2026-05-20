@@ -52,22 +52,101 @@ app.post('/api/login', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }) }
 })
 
+app.get('/api/vendedores/:id', async (req, res) => {
+  const { id } = req.params
+  try {
+    const v = await prisma.vendedor.findUnique({ where: { id: parseInt(id) } })
+    if (!v) return res.status(404).json({ error: 'Vendedor no encontrado' })
+    const { password: _, ...user } = v
+    res.json(user)
+  } catch (e) { res.status(500).json({ error: e.message }) }
+})
+
+app.put('/api/vendedores/:id/examen/habilitar', async (req, res) => {
+  const { id } = req.params
+  try {
+    const current = await prisma.vendedor.findUnique({ where: { id: parseInt(id) } })
+    if (!current) return res.status(404).json({ error: 'Vendedor no encontrado' })
+    const cert = current.certificaciones ? (typeof current.certificaciones === 'string' ? JSON.parse(current.certificaciones) : current.certificaciones) : {}
+    
+    const v = await prisma.vendedor.update({
+      where: { id: parseInt(id) },
+      data: {
+        certificaciones: {
+          ...cert,
+          examenEstado: 'habilitado',
+          examenHabilitado: true,
+          examenRespuestas: null
+        }
+      }
+    })
+    const { password: _, ...user } = v
+    res.json(user)
+  } catch (e) { res.status(500).json({ error: e.message }) }
+})
+
+app.put('/api/vendedores/:id/examen/submit', async (req, res) => {
+  const { id } = req.params
+  const { respuestas } = req.body
+  try {
+    const current = await prisma.vendedor.findUnique({ where: { id: parseInt(id) } })
+    if (!current) return res.status(404).json({ error: 'Vendedor no encontrado' })
+    const cert = current.certificaciones ? (typeof current.certificaciones === 'string' ? JSON.parse(current.certificaciones) : current.certificaciones) : {}
+    
+    const v = await prisma.vendedor.update({
+      where: { id: parseInt(id) },
+      data: {
+        certificaciones: {
+          ...cert,
+          examenEstado: 'respondido',
+          examenRespuestas: respuestas,
+          fechaEnvioExamen: new Date().toISOString()
+        }
+      }
+    })
+    const { password: _, ...user } = v
+    res.json(user)
+  } catch (e) { res.status(500).json({ error: e.message }) }
+})
+
 app.put('/api/vendedores/:id/certificacion', async (req, res) => {
   const { id } = req.params
   const { roleplayScore, aprobado, observaciones } = req.body
   try {
+    const current = await prisma.vendedor.findUnique({ where: { id: parseInt(id) } })
+    if (!current) return res.status(404).json({ error: 'Vendedor no encontrado' })
+    const cert = current.certificaciones ? (typeof current.certificaciones === 'string' ? JSON.parse(current.certificaciones) : current.certificaciones) : {}
+
     const v = await prisma.vendedor.update({
       where: { id: parseInt(id) },
       data: { 
         certificaciones: { 
+          ...cert,
           roleplayScore, 
           aprobado, 
           observaciones, 
+          examenEstado: 'calificado',
           fecha: new Date().toISOString() 
         } 
       }
     })
-    res.json(v)
+
+    // Auto-Sync: Recalcular contadores globales en la tabla de configuración
+    const totalVendedores = await prisma.vendedor.count()
+    const vendedoresList = await prisma.vendedor.findMany()
+    const vendedoresCertificados = vendedoresList.filter(x => {
+      const certObj = x.certificaciones ? (typeof x.certificaciones === 'string' ? JSON.parse(x.certificaciones) : x.certificaciones) : {}
+      return certObj.aprobado && certObj.roleplayScore >= 80
+    }).length
+
+    await prisma.configuracion.upsert({
+      where: { id: 1 },
+      update: { totalVendedores, vendedoresCertificados },
+      create: { id: 1, totalVendedores, vendedoresCertificados }
+    })
+
+    const { password: _, ...user } = v
+    res.json(user)
   } catch (e) { res.status(500).json({ error: e.message }) }
 })
 

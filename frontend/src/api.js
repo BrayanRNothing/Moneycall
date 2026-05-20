@@ -69,3 +69,9 @@ export const saveConfig = (data) => req('/config', { method: 'PUT', body: JSON.s
 // ── Auditoría ─────────────────────────────────────────────────────────────────
 export const getAuditorias = () => req('/auditoria')
 export const createAuditoria = (data) => req('/auditoria', { method: 'POST', body: JSON.stringify(data) })
+
+// ── Certificaciones de Roleplay & Exámenes ────────────────────────────────────
+export const getVendedor = (id) => req(`/vendedores/${id}`)
+export const habilitarExamen = (id) => req(`/vendedores/${id}/examen/habilitar`, { method: 'PUT' })
+export const submitExamen = (id, respuestas) => req(`/vendedores/${id}/examen/submit`, { method: 'PUT', body: JSON.stringify({ respuestas }) })
+export const certificarVendedor = (id, data) => req(`/vendedores/${id}/certificacion`, { method: 'PUT', body: JSON.stringify(data) })

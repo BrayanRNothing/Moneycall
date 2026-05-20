@@ -5,7 +5,8 @@ import {
   CheckCircle2, AlertCircle, Zap, BarChart3,
   MessageSquare, X, Info, RefreshCw
 } from 'lucide-react'
-import { getLlamadasHoy, createLlamada, getClientes } from '../api'
+import { getLlamadasHoy, createLlamada, getClientes, getVendedor } from '../api'
+import ExamenRoleplay from '../components/ExamenRoleplay'
 
 const CALL_TYPES = [
   { code: 'S1', label: 'Cuadrante 1', sublabel: 'Recuperación de producto', color: '#3b82f6', bg: 'rgba(59,130,246,0.08)', border: 'rgba(59,130,246,0.2)', icon: PhoneOutgoing, direction: 'Saliente', tip: 'Revisar historial — ¿qué producto dejaron de comprar? Preguntar la razón.' },
@@ -21,6 +22,7 @@ const CALL_TYPES = [
 const META_MIN = 20, META_MAX = 30
 
 export default function Llamadas() {
+  const [currentUser, setCurrentUser] = useState(() => JSON.parse(localStorage.getItem('user')) || { id: 1 })
   const [log, setLog] = useState([])
   const [clientes, setClientes] = useState([])
   const [loading, setLoading] = useState(true)
@@ -45,7 +47,20 @@ export default function Llamadas() {
     } finally { setLoading(false) }
   }
 
-  useEffect(() => { load() }, [])
+  const syncUser = async () => {
+    try {
+      const updated = await getVendedor(currentUser.id)
+      setCurrentUser(updated)
+      localStorage.setItem('user', JSON.stringify(updated))
+    } catch (e) {
+      console.error('Error syncing user certifications:', e)
+    }
+  }
+
+  useEffect(() => {
+    syncUser()
+    load()
+  }, [])
 
   // Métricas del día
   const salientes = log.filter(l => l.direccion === 'Saliente').length
@@ -80,22 +95,63 @@ export default function Llamadas() {
     return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`
   }
 
-  const user = JSON.parse(localStorage.getItem('user')) || { id: 1 }
-  const cert = user.certificaciones || {}
+  const cert = currentUser.certificaciones || {}
   const isCertified = cert.aprobado && cert.roleplayScore >= 80
-  const canCall = user.isAdmin || isCertified
+  const canCall = currentUser.isAdmin || isCertified
 
   if (!canCall) {
+    if (cert.examenEstado === 'habilitado') {
+      return (
+        <ExamenRoleplay 
+          user={currentUser} 
+          onSubmitted={async () => {
+            await syncUser()
+          }} 
+        />
+      )
+    }
+
+    if (cert.examenEstado === 'respondido') {
+      return (
+        <div className="flex flex-col items-center justify-center h-full p-8 text-center space-y-6 mt-20 animate-fade-in">
+          <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-white" 
+            style={{ background: 'linear-gradient(135deg, #10b981, #34d399)', boxShadow: '0 8px 32px rgba(16,185,129,0.3)' }}>
+            <CheckCircle2 size={32} />
+          </div>
+          <div className="space-y-2 max-w-md mx-auto">
+            <h2 className="text-xl font-extrabold tracking-tight" style={{ color: 'var(--text)' }}>Examen en Revisión</h2>
+            <p className="text-sm leading-relaxed" style={{ color: 'var(--text-muted)' }}>
+              Tus respuestas del examen de certificación metodológica han sido enviadas con éxito.
+            </p>
+            <p className="text-xs font-semibold p-3.5 rounded-xl border" 
+              style={{ background: 'rgba(16,185,129,0.02)', borderColor: 'rgba(16,185,129,0.15)', color: '#10b981' }}>
+              Tu gerente está evaluando tu examen. Tan pronto sea calificado con un puntaje mayor o igual a 80%, tu cuenta será desbloqueada automáticamente. ¡Mucho éxito!
+            </p>
+          </div>
+          <button onClick={syncUser} className="neu-btn text-xs font-bold px-4 py-2.5 rounded-xl flex items-center gap-2">
+            <RefreshCw size={14} /> Verificar Estado
+          </button>
+        </div>
+      )
+    }
+
     return (
-      <div className="flex flex-col items-center justify-center h-full p-8 text-center space-y-4 mt-20">
-        <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-white" style={{ background: '#ef4444', boxShadow: '0 8px 32px rgba(239,68,68,0.3)' }}>
+      <div className="flex flex-col items-center justify-center h-full p-8 text-center space-y-6 mt-20 animate-fade-in">
+        <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-white" style={{ background: 'linear-gradient(135deg, #ef4444, #f87171)', boxShadow: '0 8px 32px rgba(239,68,68,0.3)' }}>
           <AlertCircle size={32} />
         </div>
-        <h2 className="text-xl font-bold" style={{ color: 'var(--text)' }}>Certificación Pendiente</h2>
-        <p className="text-sm max-w-md mx-auto leading-relaxed" style={{ color: 'var(--text-muted)' }}>
-          Tu calificación de Roleplay ({cert.roleplayScore || 0}%) no alcanza el mínimo requerido (80%) por la metodología para registrar llamadas.<br /><br />
-          Contacta a tu gerente para agendar una evaluación de las 5 Preguntas Clave.
-        </p>
+        <div className="space-y-2 max-w-md mx-auto">
+          <h2 className="text-xl font-bold" style={{ color: 'var(--text)' }}>Certificación Pendiente</h2>
+          <p className="text-sm leading-relaxed" style={{ color: 'var(--text-muted)' }}>
+            Tu calificación de Roleplay ({cert.roleplayScore || 0}%) no alcanza el mínimo requerido (80%) por la metodología para registrar llamadas.
+          </p>
+          <div className="p-4 rounded-xl border text-xs" style={{ background: 'rgba(239,68,68,0.02)', borderColor: 'rgba(239,68,68,0.15)', color: 'var(--text-muted)' }}>
+            Solicita a tu gerente que habilite tu **Examen de Certificación Metodológica** desde el panel de control o que califique tu roleplay directamente.
+          </div>
+        </div>
+        <button onClick={syncUser} className="neu-btn text-xs font-bold px-4 py-2.5 rounded-xl flex items-center gap-2">
+          <RefreshCw size={14} /> Verificar Estado
+        </button>
       </div>
     )
   }
