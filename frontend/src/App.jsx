@@ -12,7 +12,8 @@ import {
   Bell,
   Settings,
   LogOut,
-  X
+  X,
+  Shield
 } from 'lucide-react'
 
 import Dashboard from './pages/Dashboard'
@@ -23,6 +24,7 @@ import Llamadas from './pages/Llamadas'
 import Configuracion from './pages/Configuracion'
 import MiDia from './pages/MiDia'
 import Login from './pages/Login'
+import AdminPanel from './pages/AdminPanel'
 
 function App() {
   const location = useLocation()
@@ -47,16 +49,21 @@ function App() {
   if (!user) return <Login onLogin={handleLogin} />
 
   const navigation = [
-    { name: 'Mi Día', href: '/mi-dia', icon: CalendarDays },
-    { name: 'Dashboard', href: '/', icon: LayoutDashboard },
-    { name: 'Portafolio', href: '/portafolio', icon: Users },
-    { name: 'Llamadas', href: '/llamadas', icon: Phone },
-    { name: 'Cotizaciones', href: '/quotes', icon: FileText },
-    { name: 'Testimonios', href: '/testimonials', icon: Award },
+    { name: 'Mi Día', href: '/mi-dia', icon: CalendarDays, roles: ['gerente', 'vendedor'] },
+    { name: 'Dashboard', href: '/', icon: LayoutDashboard, roles: ['gerente', 'vendedor'] },
+    { name: 'Portafolio', href: '/portafolio', icon: Users, roles: ['gerente', 'vendedor'] },
+    { name: 'Llamadas', href: '/llamadas', icon: Phone, roles: ['gerente', 'vendedor'] },
+    { name: 'Cotizaciones', href: '/quotes', icon: FileText, roles: ['gerente', 'vendedor'] },
+    { name: 'Testimonios', href: '/testimonials', icon: Award, roles: ['gerente', 'vendedor'] },
   ]
 
-  // Si no es admin, filtramos vistas (por ejemplo, el gerente ve todo, el vendedor no ve config)
-  const navItems = user.isAdmin ? navigation : navigation.filter(n => n.name !== 'Dashboard' || true) // Dejamos todo por ahora, limitaremos la config.
+  // Determinar el rol del usuario
+  const userRole = user.isSuperAdmin ? 'superadmin' : user.isAdmin ? 'gerente' : 'vendedor'
+
+  // Filtrar nav según rol
+  const navItems = userRole === 'superadmin'
+    ? [] // SuperAdmin no tiene nav de trabajo diario, solo panel admin
+    : navigation.filter(item => item.roles.includes(userRole))
 
   const isActive = (path) => location.pathname === path
 
@@ -88,7 +95,7 @@ function App() {
 
         {/* Nav Items */}
         <nav className="flex flex-col gap-2">
-          {navigation.map((item) => {
+          {navItems.map((item) => {
             const Icon = item.icon
             const active = isActive(item.href)
             return (
@@ -109,7 +116,25 @@ function App() {
         </nav>
 
         <div className="mt-auto space-y-2">
-          {user.isAdmin && (
+          {/* SuperAdmin: Panel de Administración */}
+          {user.isSuperAdmin && (
+            <>
+              <p className="text-[10px] font-bold tracking-widest uppercase px-2 mb-2" style={{ color: 'var(--text-muted)' }}>Sistema</p>
+              <Link
+                to="/admin"
+                className="flex items-center gap-3 px-4 py-3 rounded-2xl font-semibold text-sm transition-all"
+                style={isActive('/admin')
+                  ? { background: 'var(--bg)', color: 'var(--accent)', boxShadow: 'inset 4px 4px 10px var(--shadow-dark), inset -4px -4px 10px var(--shadow-light)' }
+                  : { color: 'var(--text-muted)' }
+                }
+              >
+                <Shield size={18} strokeWidth={isActive('/admin') ? 2.5 : 1.8} />
+                Panel Admin
+              </Link>
+            </>
+          )}
+          {/* Gerente: Configuración */}
+          {user.isAdmin && !user.isSuperAdmin && (
             <>
               <p className="text-[10px] font-bold tracking-widest uppercase px-2 mb-2" style={{ color: 'var(--text-muted)' }}>Gerente</p>
               <Link
@@ -137,7 +162,9 @@ function App() {
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-[11px] font-bold truncate leading-tight" style={{ color: 'var(--text)' }}>{user.nombre}</p>
-            <p className="text-[9px] truncate mt-0.5" style={{ color: 'var(--text-muted)' }}>{user.rolCanal}</p>
+            <p className="text-[9px] truncate mt-0.5" style={{ color: 'var(--text-muted)' }}>
+              {user.isSuperAdmin ? '⚡ SuperAdmin' : user.isAdmin ? '👔 Gerente' : user.rolCanal}
+            </p>
           </div>
           <button
             onClick={handleLogout}
@@ -192,7 +219,21 @@ function App() {
           </div>
           
           <div className="mt-auto space-y-3">
-            {user.isAdmin && (
+            {user.isSuperAdmin && (
+              <Link
+                to="/admin"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-4 px-5 py-4 rounded-2xl font-semibold text-sm transition-all"
+                style={isActive('/admin')
+                  ? { background: 'var(--bg)', color: 'var(--accent)', boxShadow: 'inset 4px 4px 10px var(--shadow-dark), inset -4px -4px 10px var(--shadow-light)' }
+                  : { color: 'var(--text-muted)' }
+                }
+              >
+                <Shield size={20} />
+                Panel Admin
+              </Link>
+            )}
+            {user.isAdmin && !user.isSuperAdmin && (
               <Link
                 to="/configuracion"
                 onClick={() => setMobileMenuOpen(false)}
@@ -250,6 +291,7 @@ function App() {
         {/* Page Content */}
         <div className="flex-1 p-5 md:p-6 overflow-y-auto max-w-7xl w-full mx-auto">
           <Routes>
+            <Route path="/admin" element={<AdminPanel />} />
             <Route path="/mi-dia" element={<MiDia />} />
             <Route path="/" element={<Dashboard />} />
             <Route path="/portafolio" element={<Portafolio />} />

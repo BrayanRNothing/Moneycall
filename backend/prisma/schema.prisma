@@ -12,10 +12,15 @@ model Vendedor {
   nombre             String
   username           String    @unique @default("admin")
   password           String    @default("123456") // Por defecto para simplificar
-  isAdmin            Boolean   @default(false)
+  isSuperAdmin       Boolean   @default(false)    // Nivel 1: dueño del sistema
+  isAdmin            Boolean   @default(false)    // Nivel 2: gerente de equipo
   rolCanal           String    @default("Moneycall") // Mostrador, Inbound, Moneycall, TM
   limiteCuentas      Int       @default(100)
   certificaciones    Json?     // { roleplayScore: 85, fecha: "...", aprobado: true }
+  // Auto-relación: un vendedor puede pertenecer a un gerente
+  gerenteId          Int?
+  gerente            Vendedor?  @relation("GerenteVendedor", fields: [gerenteId], references: [id])
+  vendedoresACargo   Vendedor[] @relation("GerenteVendedor")
   clientes           Cliente[]
   auditoriasRealizadas Auditoria[] @relation("GerenteAuditor")
 }

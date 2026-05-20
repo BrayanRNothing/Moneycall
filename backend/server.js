@@ -201,7 +201,121 @@ app.put('/api/vendedores/:id/certificacion', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }) }
 })
 
+// ── SUPERADMIN: Gestión de Gerentes ───────────────────────────────────────────
+
+// Listar todos los gerentes (con conteo de vendedores a cargo)
+app.get('/api/admin/gerentes', async (req, res) => {
+  try {
+    const gerentes = await prisma.vendedor.findMany({
+      where: { isAdmin: true },
+      include: {
+        vendedoresACargo: {
+          select: { id: true, nombre: true, rolCanal: true, username: true, certificaciones: true }
+        },
+        _count: { select: { clientes: true } }
+      }
+    })
+    const result = gerentes.map(({ password: _, ...g }) => g)
+    res.json(result)
+  } catch (e) { res.status(500).json({ error: e.message }) }
+})
+
+// Crear nuevo gerente
+app.post('/api/admin/gerentes', async (req, res) => {
+  const { nombre, username, password, rolCanal } = req.body
+  try {
+    const v = await prisma.vendedor.create({
+      data: {
+        nombre,
+        username,
+        password: password || '123456',
+        isAdmin: true,
+        isSuperAdmin: false,
+        rolCanal: rolCanal || 'Gerencia'
+      }
+    })
+    const { password: _, ...user } = v
+    res.json(user)
+  } catch (e) { res.status(500).json({ error: e.message }) }
+})
+
+// Eliminar gerente (y desasociar sus vendedores, no los elimina)
+app.delete('/api/admin/gerentes/:id', async (req, res) => {
+  const { id } = req.params
+  try {
+    // Desasociar vendedores que apuntaban a este gerente
+    await prisma.vendedor.updateMany({
+      where: { gerenteId: parseInt(id) },
+      data: { gerenteId: null }
+    })
+    await prisma.vendedor.delete({ where: { id: parseInt(id) } })
+    res.json({ success: true })
+  } catch (e) { res.status(500).json({ error: e.message }) }
+})
+
+// Ver vendedores de un gerente específico
+app.get('/api/admin/gerentes/:id/vendedores', async (req, res) => {
+  const { id } = req.params
+  try {
+    const vendedores = await prisma.vendedor.findMany({
+      where: { gerenteId: parseInt(id), isAdmin: false, isSuperAdmin: false }
+    })
+    const result = vendedores.map(({ password: _, ...v }) => v)
+    res.json(result)
+  } catch (e) { res.status(500).json({ error: e.message }) }
+})
+
+// Crear vendedor bajo un gerente
+app.post('/api/admin/gerentes/:id/vendedores', async (req, res) => {
+  const { id } = req.params
+  const { nombre, username, password, rolCanal } = req.body
+  try {
+    const v = await prisma.vendedor.create({
+      data: {
+        nombre,
+        username,
+        password: password || '123456',
+        isAdmin: false,
+        isSuperAdmin: false,
+        rolCanal: rolCanal || 'Moneycall',
+        gerenteId: parseInt(id)
+      }
+    })
+    const { password: _, ...user } = v
+    res.json(user)
+  } catch (e) { res.status(500).json({ error: e.message }) }
+})
+
+// Eliminar vendedor
+app.delete('/api/vendedores/:id', async (req, res) => {
+  const { id } = req.params
+  try {
+    await prisma.vendedor.delete({ where: { id: parseInt(id) } })
+    res.json({ success: true })
+  } catch (e) { res.status(500).json({ error: e.message }) }
+})
+
+// Editar vendedor (nombre, username, password, rolCanal, isSuperAdmin, isAdmin)
+app.put('/api/vendedores/:id', async (req, res) => {
+  const { id } = req.params
+  const { nombre, username, password, rolCanal, gerenteId, isSuperAdmin, isAdmin } = req.body
+  try {
+    const data = {}
+    if (nombre !== undefined) data.nombre = nombre
+    if (username !== undefined) data.username = username
+    if (password !== undefined) data.password = password
+    if (rolCanal !== undefined) data.rolCanal = rolCanal
+    if (gerenteId !== undefined) data.gerenteId = gerenteId ? parseInt(gerenteId) : null
+    if (isSuperAdmin !== undefined) data.isSuperAdmin = isSuperAdmin
+    if (isAdmin !== undefined) data.isAdmin = isAdmin
+    const v = await prisma.vendedor.update({ where: { id: parseInt(id) }, data })
+    const { password: _, ...user } = v
+    res.json(user)
+  } catch (e) { res.status(500).json({ error: e.message }) }
+})
+
 // ── 2. CLIENTES ───────────────────────────────────────────────────────────────
+
 app.get('/api/clientes', async (req, res) => {
   try {
     const { vendedorId } = req.query
