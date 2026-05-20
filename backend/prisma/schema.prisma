@@ -28,7 +28,7 @@ model Vendedor {
 model Cliente {
   id                 Int          @id @default(autoincrement())
   vendedorId         Int
-  vendedor           Vendedor     @relation(fields: [vendedorId], references: [id])
+  vendedor           Vendedor     @relation(fields: [vendedorId], references: [id], onDelete: Cascade)
   nombreEmpresa      String
   contactoPrincipal  String
   telefono           String
@@ -45,7 +45,7 @@ model Cliente {
 model Llamada {
   id                 Int       @id @default(autoincrement())
   clienteId          Int
-  cliente            Cliente   @relation(fields: [clienteId], references: [id])
+  cliente            Cliente   @relation(fields: [clienteId], references: [id], onDelete: Cascade)
   fechaHora          DateTime  @default(now())
   direccion          String    // Saliente, Entrante
   tipoLlamada        String    // S1, S2, F1, F2, DC, RC, PT, IN
@@ -59,7 +59,7 @@ model Llamada {
 model Cotizacion {
   id                 Int       @id @default(autoincrement())
   clienteId          Int
-  cliente            Cliente   @relation(fields: [clienteId], references: [id])
+  cliente            Cliente   @relation(fields: [clienteId], references: [id], onDelete: Cascade)
   monto              Float
   descripcion        String?
   fechaCreacion      DateTime  @default(now())
@@ -74,7 +74,7 @@ model Cotizacion {
 model Pedido {
   id                 Int       @id @default(autoincrement())
   clienteId          Int
-  cliente            Cliente   @relation(fields: [clienteId], references: [id])
+  cliente            Cliente   @relation(fields: [clienteId], references: [id], onDelete: Cascade)
   producto           String    // Nombre del producto/línea
   categoria          String?   // Ej: "Compresores", "Tubería", "Minisplits"
   cantidad           Float
@@ -88,11 +88,11 @@ model Pedido {
 model Auditoria {
   id            Int      @id @default(autoincrement())
   llamadaId     Int?     @unique
-  llamada       Llamada? @relation(fields: [llamadaId], references: [id])
+  llamada       Llamada? @relation(fields: [llamadaId], references: [id], onDelete: Cascade)
   clienteId     Int
-  cliente       Cliente  @relation(fields: [clienteId], references: [id])
+  cliente       Cliente  @relation(fields: [clienteId], references: [id], onDelete: Cascade)
   gerenteId     Int
-  gerente       Vendedor @relation("GerenteAuditor", fields: [gerenteId], references: [id])
+  gerente       Vendedor @relation("GerenteAuditor", fields: [gerenteId], references: [id], onDelete: Cascade)
   fechaAuditoria DateTime @default(now())
   esValida      Boolean  
   comentarios   String?
