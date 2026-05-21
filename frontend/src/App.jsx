@@ -1,4 +1,4 @@
-import { Routes, Route, Link, useLocation } from 'react-router-dom'
+import { Routes, Route, Link, useLocation, Navigate } from 'react-router-dom'
 import { useState } from 'react'
 import {
   LayoutDashboard,
@@ -409,7 +409,7 @@ function App() {
           <Routes>
             <Route path="/admin" element={<AdminPanel />} />
             <Route path="/mi-dia" element={<MiDia />} />
-            <Route path="/" element={<Dashboard />} />
+            <Route path="/" element={user.isSuperAdmin ? <Navigate to="/admin" replace /> : <Dashboard />} />
             {/* <Route path="/reunion-diaria" element={<ReunionDiaria />} /> */}
             <Route path="/portafolio" element={<Portafolio />} />
             <Route path="/llamadas" element={<Llamadas />} />

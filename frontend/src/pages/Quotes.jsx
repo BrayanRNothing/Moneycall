@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { FileText, Plus, CheckCircle2, XCircle, Clock, X, RefreshCw, AlertCircle } from 'lucide-react'
+import { FileText, Plus, CheckCircle2, XCircle, Clock, X, RefreshCw, AlertCircle, Info, Zap } from 'lucide-react'
 import { getCotizaciones, createCotizacion, logF1, closeCotizacion, getClientes } from '../api'
 
 export default function Quotes() {
@@ -14,11 +14,12 @@ export default function Quotes() {
   const [newClientId, setNewClientId] = useState('')
   const [newAmount, setNewAmount] = useState('')
   const [saving, setSaving] = useState(false)
+  const [showHelpGuide, setShowHelpGuide] = useState(false)
 
   const load = async () => {
     setLoading(true); setError(null)
     try {
-      const [qs, clts] = await Promise.all([getCotizaciones(), getClientes(user.id)])
+      const [qs, clts] = await Promise.all([getCotizaciones(user.id), getClientes(user.id)])
       setQuotes(qs)
       setClientes(clts)
     } catch (e) { setError(e.message) } finally { setLoading(false) }
@@ -81,12 +82,59 @@ export default function Quotes() {
           <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>Seguimiento al 100% — nunca cotizar y olvidar.</p>
         </div>
         <div className="flex gap-2">
+          <button onClick={() => setShowHelpGuide(!showHelpGuide)} className="neu-btn text-xs font-bold px-3 py-2 rounded-xl flex items-center gap-1.5" style={{ color: 'var(--accent)' }}>
+            <Info size={14} /> {showHelpGuide ? 'Ocultar Guía' : 'Ver Guía Metodológica'}
+          </button>
           <button onClick={load} className="neu-btn w-9 h-9 rounded-xl flex items-center justify-center" style={{ color: 'var(--text-muted)' }}><RefreshCw size={14} /></button>
           <button onClick={() => setShowAdd(!showAdd)} className="neu-btn-accent text-xs font-bold px-4 py-2.5 rounded-xl flex items-center gap-2">
             <Plus size={15} /> Nueva Cotización
           </button>
         </div>
       </div>
+
+      {/* Guía metodológica (Modal) */}
+      {showHelpGuide && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in" style={{ background: 'rgba(30,41,59,0.3)', backdropFilter: 'blur(4px)' }}>
+          <div className="w-full max-w-4xl rounded-2xl overflow-hidden p-6 space-y-4" style={{ background: 'var(--bg)', boxShadow: '16px 16px 40px var(--shadow-dark), -16px -16px 40px var(--shadow-light)' }}>
+            <div className="flex items-center justify-between pb-2 border-b" style={{ borderColor: 'rgba(163,177,198,0.2)' }}>
+              <div className="flex items-center gap-2">
+                <Zap size={16} className="text-blue-500 animate-pulse" />
+                <h3 className="text-sm font-extrabold text-blue-600">Manual de Cotizaciones y Ratios F1 / F2</h3>
+              </div>
+              <button onClick={() => setShowHelpGuide(false)} className="text-xs font-bold px-2.5 py-1.5 rounded-lg neu-btn" style={{ color: 'var(--text-muted)' }}>✕</button>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 text-xs py-2">
+              <div className="space-y-1.5">
+                <p className="font-extrabold text-blue-500 text-sm">📅 Flujo F1: Confirmar Recepción (24 horas)</p>
+                <p className="text-[11px] leading-relaxed" style={{ color: 'var(--text-muted)' }}>
+                  Al enviar una cotización, <strong>tienes 24 horas</strong> para registrar la llamada <strong>F1</strong>. El propósito de esta llamada es confirmar que el cliente recibió el documento, aclarar dudas técnicas y lo más importante: <strong>acordar una fecha fija de decisión</strong> en la que el cliente dará respuesta. El sistema agendará automáticamente la llamada F2 para esa fecha.
+                </p>
+              </div>
+              
+              <div className="space-y-1.5">
+                <p className="font-extrabold text-amber-500 text-sm">⏱ Flujo F2: Cierre Definitivo (Fecha de Decisión)</p>
+                <p className="text-[11px] leading-relaxed" style={{ color: 'var(--text-muted)' }}>
+                  La llamada <strong>F2</strong> se realiza estrictamente en la fecha acordada en F1. Su objetivo es el cierre definitivo de la transacción (Ganada o Perdida) o un ajuste final. No dejes cotizaciones en el aire. La metodología establece que el 60% de los cierres ocurren en F1 y gran parte del restante se define con el rigor de F2.
+                </p>
+              </div>
+              
+              <div className="space-y-1.5">
+                <p className="font-extrabold text-emerald-500 text-sm">📊 El Estándar del 5% de Discrepancia</p>
+                <p className="text-[11px] leading-relaxed" style={{ color: 'var(--text-muted)' }}>
+                  <strong>Cierre Numérico vs. Financiero:</strong> Si ganas muchas cotizaciones pequeñas pero pierdes las de montos grandes (o viceversa), tus ratios diferirán enormemente. La metodología exige que la discrepancia entre el ratio de éxito numérico y por importe sea <strong>menor al 5%</strong> para garantizar un control uniforme del precio, rentabilidad y consistencia en descuentos.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex justify-end pt-3 border-t" style={{ borderColor: 'rgba(163,177,198,0.2)' }}>
+              <button onClick={() => setShowHelpGuide(false)} className="neu-btn text-xs font-bold px-4 py-2.5 rounded-xl">
+                Cerrar Guía
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {error && (
         <div className="neu-card p-3 flex items-center gap-3" style={{ border: '1px solid rgba(239,68,68,0.3)' }}>

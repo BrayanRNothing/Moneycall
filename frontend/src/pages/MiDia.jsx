@@ -438,11 +438,15 @@ export default function MiDia() {
               const pendingCount = clienteObj.tareas.filter(t => !completadas.has(`${t.clienteId}-${t.tipo}`)).length
               
               return (
-                <div key={clienteObj.clienteId} className="neu-card overflow-hidden transition-all duration-300">
+                <div
+                  key={clienteObj.clienteId}
+                  className="neu-card overflow-hidden transition-all duration-300"
+                >
                   {/* Acordeón Header */}
                   <div 
                     onClick={() => toggleClientExpand(clienteObj.clienteId)}
-                    className="px-5 py-3.5 flex items-center justify-between cursor-pointer hover:bg-slate-100/50 dark:hover:bg-slate-800/30 transition-all select-none"
+                    className="px-5 py-3.5 flex items-center justify-between cursor-pointer transition-all select-none"
+                    style={{ borderBottom: '1px solid rgba(163,177,198,0.12)' }}
                   >
                     <div className="flex items-center gap-3 flex-wrap">
                       <span className="text-sm font-extrabold" style={{ color: 'var(--text)' }}>
@@ -471,7 +475,10 @@ export default function MiDia() {
 
                   {/* Acordeón Body */}
                   {isExpanded && (
-                    <div className="px-5 pb-4 pt-1 space-y-2.5 border-t border-slate-100 dark:border-slate-800/60 bg-slate-50/20 dark:bg-slate-900/10">
+                    <div
+                      className="px-5 pb-4 pt-1 space-y-2.5"
+                      style={{ borderTop: '1px solid rgba(163,177,198,0.08)' }}
+                    >
                       {clienteObj.tareas.map((tarea, index) => {
                         const cfg = TIPO_CONFIG[tarea.tipo] || TIPO_CONFIG.S1
                         const Icon = cfg.icon
@@ -482,9 +489,9 @@ export default function MiDia() {
                           <div 
                             key={index} 
                             className="neu-card-sm p-3.5 flex items-center gap-3.5 transition-all"
-                            style={done ? { opacity: 0.4 } : { borderLeft: `4px solid ${cfg.color}` }}
+                            style={{ opacity: done ? 0.5 : 1 }}
                           >
-                            <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white shrink-0 shadow-sm" style={{ background: cfg.color }}>
+                            <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white shrink-0 shadow-sm" style={{ background: `linear-gradient(135deg, ${cfg.color}, ${cfg.color}cc)` }}>
                               <Icon size={14} />
                             </div>
                             <div className="flex-1 min-w-0">
@@ -504,7 +511,12 @@ export default function MiDia() {
                             {!done ? (
                               <button onClick={() => setLogModal(tarea)}
                                 className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-extrabold transition-all hover:scale-105"
-                                style={{ background: cfg.bg, color: cfg.color, border: `1px solid ${cfg.border}` }}>
+                                style={{
+                                  background: `linear-gradient(135deg, ${cfg.bg}, rgba(255,255,255,0.08))`,
+                                  color: cfg.color,
+                                  border: `1px solid ${cfg.border}`,
+                                  boxShadow: `3px 3px 8px var(--shadow-dark), -3px -3px 8px var(--shadow-light)`
+                                }}>
                                 <Phone size={10} /> Llamar
                               </button>
                             ) : (

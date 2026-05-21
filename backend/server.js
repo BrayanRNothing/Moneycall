@@ -30,6 +30,30 @@ async function ensureAdminUser() {
 
 ensureAdminUser()
 
+async function resolveVendorScope({ vendedorId, gerenteId } = {}) {
+  const rawId = gerenteId ?? vendedorId
+  const rootId = rawId ? parseInt(rawId) : null
+  if (!Number.isFinite(rootId)) return null
+
+  const root = await prisma.vendedor.findUnique({
+    where: { id: rootId },
+    select: { id: true, isAdmin: true, isSuperAdmin: true }
+  })
+
+  if (!root) return []
+
+  if (root.isSuperAdmin) return null
+
+  const shouldScopeToTeam = gerenteId !== undefined || (root.isAdmin && !root.isSuperAdmin)
+  if (!shouldScopeToTeam) return [rootId]
+
+  const team = await prisma.vendedor.findMany({
+    where: { OR: [{ id: rootId }, { gerenteId: rootId }] },
+    select: { id: true }
+  })
+
+  return team.map(v => v.id)
+}
 // ── Health ────────────────────────────────────────────────────────────────────
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'Moneycall CRM API running' })
@@ -75,8 +99,15 @@ app.post('/api/login', async (req, res) => {
 // ── 7. RANKING DE VENDEDORES (Reunión diaria 20 min) ─────────────────────────
 app.get('/api/vendedores/ranking', async (req, res) => {
   try {
+    const { gerenteId } = req.query
+    const scopeIds = await resolveVendorScope({ gerenteId })
+    const teamWhere = Array.isArray(scopeIds)
+      ? { id: { in: scopeIds.length ? scopeIds : [-1] } }
+      : {}
+
     const today = new Date(); today.setHours(0, 0, 0, 0)
     const vendedores = await prisma.vendedor.findMany({
+      where: teamWhere,
       include: {
         clientes: {
           include: {
@@ -339,7 +370,10 @@ app.put('/api/vendedores/:id', async (req, res) => {
 app.get('/api/clientes', async (req, res) => {
   try {
     const { vendedorId } = req.query
-    const filter = vendedorId ? { vendedorId: parseInt(vendedorId) } : {}
+    const scopeIds = await resolveVendorScope({ vendedorId })
+    const filter = Array.isArray(scopeIds)
+      ? { vendedorId: { in: scopeIds.length ? scopeIds : [-1] } }
+      : {}
     const clientes = await prisma.cliente.findMany({
       where: filter,
       include: {
@@ -428,10 +462,15 @@ app.post('/api/clientes/pareto/:vendedorId', async (req, res) => {
 // Llamadas de hoy (para el logger del día)
 app.get('/api/llamadas/today', async (req, res) => {
   try {
+    const { gerenteId } = req.query
+    const scopeIds = await resolveVendorScope({ gerenteId })
+    const teamWhere = Array.isArray(scopeIds)
+      ? { cliente: { vendedorId: { in: scopeIds.length ? scopeIds : [-1] } } }
+      : {}
     const today = new Date()
     today.setHours(0, 0, 0, 0)
     const llamadas = await prisma.llamada.findMany({
-      where: { fechaHora: { gte: today } },
+      where: { fechaHora: { gte: today }, ...teamWhere },
       include: { cliente: { select: { nombreEmpresa: true } } },
       orderBy: { fechaHora: 'desc' }
     })
@@ -597,10 +636,15 @@ app.delete('/api/pedidos/:id', async (req, res) => {
 app.get('/api/pedidos/alertas/:vendedorId', async (req, res) => {
   try {
     const vendedorId = parseInt(req.params.vendedorId)
+    const scopeIds = await resolveVendorScope({ vendedorId })
+    const teamWhere = Array.isArray(scopeIds)
+      ? { vendedorId: { in: scopeIds.length ? scopeIds : [-1] } }
+      : { vendedorId }
+
     const hace30 = new Date(); hace30.setDate(hace30.getDate() - 30)
 
     const clientes = await prisma.cliente.findMany({
-      where: { vendedorId },
+      where: teamWhere,
       include: {
         pedidos: { orderBy: { fechaPedido: 'desc' } }
       }
@@ -656,7 +700,13 @@ app.get('/api/pedidos/alertas/:vendedorId', async (req, res) => {
 // ── 5. COTIZACIONES ───────────────────────────────────────────────────────────
 app.get('/api/cotizaciones', async (req, res) => {
   try {
+    const { gerenteId } = req.query
+    const scopeIds = await resolveVendorScope({ gerenteId })
+    const teamWhere = Array.isArray(scopeIds)
+      ? { cliente: { vendedorId: { in: scopeIds.length ? scopeIds : [-1] } } }
+      : {}
     const data = await prisma.cotizacion.findMany({
+      where: teamWhere,
       include: { cliente: { select: { nombreEmpresa: true, vendedorId: true } } },
       orderBy: { fechaCreacion: 'desc' }
     })
@@ -714,6 +764,13 @@ app.put('/api/cotizaciones/:id/close', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }) }
 })
 
+app.delete('/api/cotizaciones/:id', async (req, res) => {
+  try {
+    await prisma.cotizacion.delete({ where: { id: parseInt(req.params.id) } })
+    res.json({ ok: true })
+  } catch (e) { res.status(500).json({ error: e.message }) }
+})
+
 // ── 5. CONFIGURACIÓN OPERACIONAL (Fórmula Máxima) ────────────────────────────
 app.get('/api/config', async (req, res) => {
   try {
@@ -739,10 +796,18 @@ app.put('/api/config', async (req, res) => {
 // ── 6. DASHBOARD METRICS ──────────────────────────────────────────────────────
 app.get('/api/dashboard/metrics', async (req, res) => {
   try {
+    const { gerenteId } = req.query
+    const scopeIds = await resolveVendorScope({ gerenteId })
+    const teamWhere = Array.isArray(scopeIds)
+      ? { cliente: { vendedorId: { in: scopeIds.length ? scopeIds : [-1] } } }
+      : {}
+
     const today = new Date(); today.setHours(0, 0, 0, 0)
 
     // Llamadas hoy
-    const llamadasHoy = await prisma.llamada.findMany({ where: { fechaHora: { gte: today } } })
+    const llamadasHoy = await prisma.llamada.findMany({ 
+      where: { fechaHora: { gte: today }, ...teamWhere } 
+    })
     const totalHoy = llamadasHoy.length
     const salientes = llamadasHoy.filter(l => l.direccion === 'Saliente').length
     const entrantes = llamadasHoy.filter(l => l.direccion === 'Entrante').length
@@ -755,7 +820,7 @@ app.get('/api/dashboard/metrics', async (req, res) => {
     }, {})
 
     // Ratios de cierre
-    const cotizaciones = await prisma.cotizacion.findMany()
+    const cotizaciones = await prisma.cotizacion.findMany({ where: teamWhere })
     const cerradas = cotizaciones.filter(c => c.estado !== 'Pendiente')
     const ganadas = cotizaciones.filter(c => c.estado === 'Ganada')
     const numRatio = cerradas.length > 0 ? Math.round((ganadas.length / cerradas.length) * 100) : 0
@@ -770,14 +835,58 @@ app.get('/api/dashboard/metrics', async (req, res) => {
     let cfg = await prisma.configuracion.findUnique({ where: { id: 1 } })
     if (!cfg) cfg = await prisma.configuracion.create({ data: { id: 1 } })
 
-    const gerenteScore = cfg.gerenteCalificado ? 100 : 50
-    const vendScore = cfg.totalVendedores > 0
-      ? Math.round((cfg.vendedoresCertificados / cfg.totalVendedores) * 100)
-      : 0
-    const estructura = Math.round(gerenteScore * 0.7 + vendScore * 0.3)
-    const sistema = totalHoy > 0 ? Math.round(ratioSaliente * 0.4 + numRatio * 0.3 + importRatio * 0.3) : 89
-    const operaciones = Math.round(cfg.otd * 0.9 + ((cfg.ar + (cfg.csr / 5 * 100) + cfg.idScore) / 3) * 0.1)
-    const maxSales = Math.round((estructura * sistema * operaciones) / 10000)
+    let totalVendedores = cfg.totalVendedores
+    let vendedoresCertificados = cfg.vendedoresCertificados
+    let gerenteCalificado = cfg.gerenteCalificado
+
+    if (gerenteId) {
+      const rootId = parseInt(gerenteId)
+      totalVendedores = await prisma.vendedor.count({
+        where: { gerenteId: rootId }
+      })
+      const teamVendedors = await prisma.vendedor.findMany({
+        where: { gerenteId: rootId },
+        select: { certificaciones: true }
+      })
+      vendedoresCertificados = teamVendedors.filter(v => {
+        if (!v.certificaciones) return false
+        try {
+          const cert = typeof v.certificaciones === 'string' ? JSON.parse(v.certificaciones) : v.certificaciones
+          return cert && cert.aprobado === true
+        } catch {
+          return false
+        }
+      }).length
+
+      const gerenteUser = await prisma.vendedor.findUnique({
+        where: { id: rootId },
+        select: { certificaciones: true }
+      })
+      if (gerenteUser && gerenteUser.certificaciones) {
+        try {
+          const cert = typeof gerenteUser.certificaciones === 'string' ? JSON.parse(gerenteUser.certificaciones) : gerenteUser.certificaciones
+          gerenteCalificado = cert && cert.aprobado === true
+        } catch {
+          gerenteCalificado = false
+        }
+      } else {
+        gerenteCalificado = false
+      }
+    }
+
+    let estructura = 0
+    let sistema = 0
+    let operaciones = 0
+    let maxSales = 0
+
+    if (totalVendedores > 0) {
+      const gerenteScore = gerenteCalificado ? 100 : 50
+      const vendScore = Math.round((vendedoresCertificados / totalVendedores) * 100)
+      estructura = Math.round(gerenteScore * 0.7 + vendScore * 0.3)
+      sistema = totalHoy > 0 ? Math.round(ratioSaliente * 0.4 + numRatio * 0.3 + importRatio * 0.3) : 0
+      operaciones = Math.round(cfg.otd * 0.9 + ((cfg.ar + (cfg.csr / 5 * 100) + cfg.idScore) / 3) * 0.1)
+      maxSales = Math.round((estructura + sistema + operaciones) / 3)
+    }
 
     res.json({
       llamadasHoy: totalHoy,
@@ -946,11 +1055,17 @@ app.get('/api/auditoria', async (req, res) => {
 // Reunión Diaria de 20 min: métricas del día ANTERIOR por vendedor (para gerente)
 app.get('/api/daily-meeting', async (req, res) => {
   try {
+    const { gerenteId } = req.query
+    const scopeIds = await resolveVendorScope({ gerenteId })
+    const teamWhere = Array.isArray(scopeIds)
+      ? { id: { in: scopeIds.length ? scopeIds : [-1] } }
+      : {}
+
     const ayer = new Date(); ayer.setDate(ayer.getDate() - 1); ayer.setHours(0, 0, 0, 0)
     const finAyer = new Date(); finAyer.setHours(0, 0, 0, 0)
 
     const vendedores = await prisma.vendedor.findMany({
-      where: { isAdmin: false, isSuperAdmin: false },
+      where: { isAdmin: false, isSuperAdmin: false, ...teamWhere },
       include: {
         clientes: {
           include: {
@@ -1120,8 +1235,15 @@ app.put('/api/clientes/:id/plan-testimonio', async (req, res) => {
 // Clientes listos para upgrade a TM (ventas anuales > $60,000)
 app.get('/api/clientes/tm-upgrade', async (req, res) => {
   try {
+    const { gerenteId } = req.query
+    const scopeIds = await resolveVendorScope({ gerenteId })
+    const teamWhere = Array.isArray(scopeIds)
+      ? { vendedorId: { in: scopeIds.length ? scopeIds : [-1] } }
+      : {}
+
     const hace365 = new Date(); hace365.setDate(hace365.getDate() - 365)
     const clientes = await prisma.cliente.findMany({
+      where: teamWhere,
       include: {
         cotizaciones: { where: { estado: 'Ganada', fechaCreacion: { gte: hace365 } } },
         vendedor: { select: { nombre: true } }
@@ -1149,5 +1271,7 @@ app.get('/api/clientes/tm-upgrade', async (req, res) => {
 })
 
 app.listen(PORT, () => console.log(`🚀 Moneycall CRM Backend running on port ${PORT}`))
+
+
 
 

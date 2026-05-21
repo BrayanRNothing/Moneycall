@@ -38,6 +38,7 @@ export default function Llamadas() {
   const [tooltip, setTooltip] = useState(null)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState(null)
+  const [showHelpGuide, setShowHelpGuide] = useState(false)
 
   const [crossSellData, setCrossSellData] = useState(null)
   const [loadingCrossSell, setLoadingCrossSell] = useState(false)
@@ -85,7 +86,7 @@ export default function Llamadas() {
   const load = async () => {
     setLoading(true)
     try {
-      const [llamadas, clts] = await Promise.all([getLlamadasHoy(), getClientes(currentUser.id)])
+      const [llamadas, clts] = await Promise.all([getLlamadasHoy(currentUser.id), getClientes(currentUser.id)])
       setLog(llamadas)
       setClientes(clts)
       setError(null)
@@ -139,7 +140,7 @@ export default function Llamadas() {
       case 'PT':
         return `"${cName}, le habla ${vName} de Moneycall. Espero que esté teniendo una excelente semana. Mi llamada es 100% de relación, solo quería saludarle, saber cómo marcha su negocio y agradecerle la confianza en nosotros. No le quito más que un minuto, ¿hay algo específico en lo que yo le pueda apoyar o facilitar desde aquí?"`
       case 'IN':
-        return `"¡Hola ${cName}! Qué gusto saludarle, bienvenido a Moneycall. Claro que sí, con mucho gusto le ayudo con su solicitud. [Atender la solicitud del cliente]... Y por cierto, antes de despedirnos, ¿sabía que también contamos con la línea de ${selectedS2Product || 'nuestros equipos adicionales'} que podría servirle para su pedido actual? Se lo comento por si quiere que lo agreguemos de una vez."`
+        return `"¡Hola ${cName}! Qué gusto saludarle, bienvenido a Moneycall. Claro que sí, con mucho gusto le ayudo con su solicitud... [Atender solicitud del cliente]... Y por cierto, antes de despedirnos, de acuerdo a nuestra filosofía de servicio, me gustaría hacerle la pregunta de cierre de Moneycall: ¿Qué más le resulta difícil encontrar hoy en el mercado que yo pueda localizar para usted?"`
       default:
         return ''
     }
@@ -288,6 +289,9 @@ export default function Llamadas() {
           </p>
         </div>
         <div className="flex gap-2">
+          <button onClick={() => setShowHelpGuide(!showHelpGuide)} className="neu-btn text-xs font-bold px-3 py-2 rounded-xl flex items-center gap-1.5" style={{ color: 'var(--accent)' }}>
+            <Info size={14} /> {showHelpGuide ? 'Ocultar Guía' : 'Ver Guía Metodológica'}
+          </button>
           <button onClick={load} className="neu-btn w-9 h-9 rounded-xl flex items-center justify-center" style={{ color: 'var(--text-muted)' }}>
             <RefreshCw size={14} />
           </button>
@@ -296,6 +300,54 @@ export default function Llamadas() {
           </button>
         </div>
       </div>
+
+      {/* Guía metodológica (Modal) */}
+      {showHelpGuide && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in" style={{ background: 'rgba(30,41,59,0.3)', backdropFilter: 'blur(4px)' }}>
+          <div className="w-full max-w-4xl rounded-2xl overflow-hidden p-6 space-y-4" style={{ background: 'var(--bg)', boxShadow: '16px 16px 40px var(--shadow-dark), -16px -16px 40px var(--shadow-light)' }}>
+            <div className="flex items-center justify-between pb-2 border-b" style={{ borderColor: 'rgba(163,177,198,0.2)' }}>
+              <div className="flex items-center gap-2">
+                <Zap size={16} className="text-blue-500 animate-pulse" />
+                <h3 className="text-sm font-extrabold text-blue-600">Manual de Registro y Metodología Moneycall</h3>
+              </div>
+              <button onClick={() => setShowHelpGuide(false)} className="text-xs font-bold px-2.5 py-1.5 rounded-lg neu-btn" style={{ color: 'var(--text-muted)' }}>✕</button>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 text-xs py-2">
+              <div className="space-y-1.5">
+                <p className="font-extrabold text-blue-500 text-sm">📞 S1 & S2 (Llamadas de Cuadrante)</p>
+                <p className="text-[11px] leading-relaxed" style={{ color: 'var(--text-muted)' }}>
+                  <strong>S1 (Cuadrante 1 - Recuperación):</strong> Revisa el historial de pedidos del cliente. Si solía comprar un producto (ej. compresores) y lleva &gt;45 días sin comprarlo, llámale proactivamente para indagar la razón y recuperarlo.<br/><br/>
+                  <strong>S2 (Cuadrante 2 - Venta Cruzada):</strong> Identifica productos complementarios que clientes similares compran pero este no (ej. kits de instalación para minisplits). Llama para ofrecerlos proactivamente y subir tu ticket promedio.
+                </p>
+              </div>
+              
+              <div className="space-y-1.5">
+                <p className="font-extrabold text-amber-500 text-sm">⏳ F1 & F2 (Pipeline de Cotización)</p>
+                <p className="text-[11px] leading-relaxed" style={{ color: 'var(--text-muted)' }}>
+                  <strong>F1 (Seguimiento 1):</strong> ¡Meta 100%! Llama a las 24 horas de enviar cualquier cotización para confirmar recepción y resolver dudas. Su objetivo principal es <u>acordar una fecha de decisión</u> con el cliente.<br/><br/>
+                  <strong>F2 (Seguimiento 2):</strong> Llamada de cierre definitivo. Se realiza de forma puntual en la fecha de decisión acordada en F1. ¡Aquí se rescata la mayor parte de las ventas en duda!
+                </p>
+              </div>
+              
+              <div className="space-y-1.5">
+                <p className="font-extrabold text-emerald-500 text-sm">🚚 DC, RC, PT y el Secreto McDonald's</p>
+                <p className="text-[11px] leading-relaxed" style={{ color: 'var(--text-muted)' }}>
+                  <strong>DC (Delivery Check):</strong> Llamada post-entrega física. ¿Llegó todo conforme? 10 DCs perfectas te dan derecho de hacer una llamada <strong>RC (Referencia)</strong> para pedir testimonios (Plan A/B/C).<br/><br/>
+                  <strong>PT (Contacto Personal):</strong> Llamada trimestral sin agenda comercial. "Solo llamaba para saludarte".<br/><br/>
+                  <strong>🍔 Pregunta McDonald's:</strong> Al terminar toda interacción, pregunta siempre: <em>"¿Qué más te resulta difícil encontrar hoy que yo pueda localizar para ti?"</em>. ¡Captura compras que el cliente asumía que no vendías!
+                </p>
+              </div>
+            </div>
+
+            <div className="flex justify-end pt-3 border-t" style={{ borderColor: 'rgba(163,177,198,0.2)' }}>
+              <button onClick={() => setShowHelpGuide(false)} className="neu-btn text-xs font-bold px-4 py-2.5 rounded-xl">
+                Cerrar Guía
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Error banner */}
       {error && (

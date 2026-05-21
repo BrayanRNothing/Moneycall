@@ -1,5 +1,5 @@
 // ── Moneycall CRM — API Utility ───────────────────────────────────────────────
-const BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
+const BASE = import.meta.env.VITE_API_URL || 'https://moneycall-production.up.railway.app/api'
 
 async function req(path, options = {}) {
   const token = localStorage.getItem('token')
@@ -40,7 +40,7 @@ export const updatePreferenciaContacto = (clienteId, contactoPreferencia) =>
   req(`/clientes/${clienteId}/preferencia`, { method: 'PUT', body: JSON.stringify({ contactoPreferencia }) })
 export const updatePlanTestimonio = (clienteId, planTestimonio) =>
   req(`/clientes/${clienteId}/plan-testimonio`, { method: 'PUT', body: JSON.stringify({ planTestimonio }) })
-export const getClientesTMUpgrade = () => req('/clientes/tm-upgrade')
+export const getClientesTMUpgrade = (gerenteId) => req(`/clientes/tm-upgrade${gerenteId ? `?gerenteId=${gerenteId}` : ''}`)
 
 // ── Pedidos (Historial de compras) ────────────────────────────────────────────
 export const getPedidos = (clienteId) => req(`/pedidos?clienteId=${clienteId}`)
@@ -49,24 +49,27 @@ export const deletePedido = (id) => req(`/pedidos/${id}`, { method: 'DELETE' })
 export const getAlertasS1 = (vendedorId = 1) => req(`/pedidos/alertas/${vendedorId}`)
 
 // ── Llamadas ──────────────────────────────────────────────────────────────────
-export const getLlamadasHoy = () => req('/llamadas/today')
+export const getLlamadasHoy = (gerenteId) => req(`/llamadas/today${gerenteId ? `?gerenteId=${gerenteId}` : ''}`)
 export const getLlamadasByCliente = (clienteId) => req(`/llamadas?clienteId=${clienteId}`)
 export const createLlamada = (data) => req('/llamadas', { method: 'POST', body: JSON.stringify(data) })
 
 // ── Cotizaciones ──────────────────────────────────────────────────────────────
-export const getCotizaciones = () => req('/cotizaciones')
+export const getCotizaciones = (gerenteId) => req(`/cotizaciones${gerenteId ? `?gerenteId=${gerenteId}` : ''}`)
 export const createCotizacion = (data) => req('/cotizaciones', { method: 'POST', body: JSON.stringify(data) })
 export const logF1 = (id, fechaDecisionF1) =>
   req(`/cotizaciones/${id}/f1`, { method: 'PUT', body: JSON.stringify({ fechaDecisionF1 }) })
 export const closeCotizacion = (id, estado) =>
   req(`/cotizaciones/${id}/close`, { method: 'PUT', body: JSON.stringify({ estado }) })
+export const deleteCotizacion = (id) => req(`/cotizaciones/${id}`, { method: 'DELETE' })
 
 // ── Dashboard Metrics ─────────────────────────────────────────────────────────
-export const getDashboardMetrics = () => req('/dashboard/metrics')
+export const getDashboardMetrics = (gerenteId) => req(`/dashboard/metrics${gerenteId ? `?gerenteId=${gerenteId}` : ''}`)
+export const getDashboardActivity = (gerenteId, range = 'all') =>
+  req(`/dashboard/activity?gerenteId=${gerenteId}&range=${range}`)
+
+export const getDailyMeeting = (gerenteId) => req(`/daily-meeting${gerenteId ? '?gerenteId=' + gerenteId : ''}`)
 
 // ── Reunión Diaria de 20 minutos (Gerente) ────────────────────────────────────
-export const getDailyMeeting = () => req('/daily-meeting')
-
 // ── Ranking de vendedores (reunión diaria) ────────────────────────────────────
 export const getRanking = () => req('/vendedores/ranking')
 
@@ -95,3 +98,4 @@ export const createGerente = (data) => req('/admin/gerentes', { method: 'POST', 
 export const deleteGerente = (id) => req(`/admin/gerentes/${id}`, { method: 'DELETE' })
 export const getVendedoresByGerente = (gerenteId) => req(`/admin/gerentes/${gerenteId}/vendedores`)
 export const createVendedorPorGerente = (gerenteId, data) => req(`/admin/gerentes/${gerenteId}/vendedores`, { method: 'POST', body: JSON.stringify(data) })
+

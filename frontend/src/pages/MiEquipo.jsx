@@ -50,7 +50,8 @@ export default function MiEquipo({ currentUser }) {
     setLoading(true)
     setError(null)
     try {
-      let data
+      let data = []
+      let gerenteObj = null
       if (isGerente) {
         try {
           data = await getVendedoresByGerente(currentUser.id)
@@ -59,16 +60,28 @@ export default function MiEquipo({ currentUser }) {
           const all = await getVendedores()
           data = all.filter(v => Number(v.gerenteId) === Number(currentUser.id) && !v.isAdmin && !v.isSuperAdmin)
         }
+        gerenteObj = currentUser
       } else {
         // Read-only roster of sellers belonging to the same manager's team
         const all = await getVendedores()
         if (currentUser.gerenteId) {
           data = all.filter(v => Number(v.gerenteId) === Number(currentUser.gerenteId) && !v.isAdmin && !v.isSuperAdmin)
+          gerenteObj = all.find(v => Number(v.id) === Number(currentUser.gerenteId))
         } else {
           // If no manager is assigned, show all non-admin sellers as fallback
           data = all.filter(v => !v.isAdmin && !v.isSuperAdmin)
         }
       }
+
+      if (gerenteObj) {
+        const managerCard = {
+          ...gerenteObj,
+          isManagerCard: true,
+          rolCanal: 'Gerente'
+        }
+        data = [managerCard, ...data]
+      }
+
       setTeam(data)
     } catch (e) {
       setError(e.message || 'Error al cargar el equipo')
@@ -210,20 +223,32 @@ export default function MiEquipo({ currentUser }) {
             const status = getRoleplayStatus(v)
             return (
               <div key={v.id} className="neu-card p-5 flex flex-col justify-between relative overflow-hidden group transition-all duration-300 hover:scale-[1.01]">
-                {/* Visual Accent */}
-                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 to-violet-500 opacity-60" />
                 
                 {/* Top Info */}
                 <div className="space-y-4">
                   <div className="flex items-center gap-3.5">
                     <div className="w-11 h-11 rounded-xl flex items-center justify-center font-black text-white text-sm uppercase shrink-0"
-                      style={{ background: 'linear-gradient(135deg, #4f46e5, #6366f1)', boxShadow: '0 4px 10px rgba(79,70,229,0.15)' }}>
+                      style={{ 
+                        background: v.isManagerCard 
+                          ? 'linear-gradient(135deg, var(--accent), #4f46e5)' 
+                          : 'linear-gradient(135deg, #4f46e5, #6366f1)', 
+                        boxShadow: v.isManagerCard
+                          ? '0 4px 10px rgba(236,72,153,0.15)'
+                          : '0 4px 10px rgba(79,70,229,0.15)' 
+                      }}>
                       {v.nombre.slice(0, 2)}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <h4 className="text-sm font-extrabold truncate" style={{ color: 'var(--text)' }}>
-                        {v.nombre}
-                      </h4>
+                      <div className="flex items-center gap-1.5">
+                        <h4 className="text-sm font-extrabold truncate" style={{ color: 'var(--text)' }}>
+                          {v.nombre}
+                        </h4>
+                        {v.isManagerCard && (
+                          <span className="text-[8px] font-black uppercase px-1.5 py-0.5 rounded bg-indigo-500/10 text-indigo-500 border border-indigo-500/20 shrink-0">
+                            Gerente
+                          </span>
+                        )}
+                      </div>
                       <p className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 leading-none mt-0.5">
                         @{v.username}
                       </p>
@@ -240,7 +265,7 @@ export default function MiEquipo({ currentUser }) {
                     <div className="neu-inset rounded-xl p-2.5 text-center">
                       <span className="text-[8px] font-bold text-slate-400 dark:text-slate-500 uppercase block leading-none">Límite Cartera</span>
                       <span className="text-[11px] font-black text-slate-700 dark:text-slate-200 block mt-1">
-                        {v.limiteCuentas || 100}
+                        {v.isManagerCard ? 'N/A' : (v.limiteCuentas || 100)}
                       </span>
                     </div>
                   </div>
@@ -254,7 +279,7 @@ export default function MiEquipo({ currentUser }) {
                 </div>
 
                 {/* Acciones */}
-                {isGerente && (
+                {isGerente && !v.isManagerCard && (
                   <div className="flex items-center justify-end gap-2 pt-4 mt-4 border-t border-slate-200/10">
                     <button 
                       onClick={() => openEditModal(v)}

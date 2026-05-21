@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Settings, Save, RefreshCw, AlertCircle, CheckCircle2, Sparkles, Sliders, Database, User, Lock } from 'lucide-react'
-import { getConfig, saveConfig, updateVendedor } from '../api'
+import { getConfig, saveConfig, updateVendedor, getDashboardMetrics } from '../api'
 
 const getColorByValue = (val) => {
   if (val < 70) return '#ef4444' // Red
@@ -20,6 +20,7 @@ export default function Configuracion({ currentUser, onUserUpdate }) {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState(null)
+  const [realMetrics, setRealMetrics] = useState(null)
   
   // Navigation & Tabs
   const showFormula = currentUser?.isAdmin || currentUser?.isSuperAdmin
@@ -48,9 +49,15 @@ export default function Configuracion({ currentUser, onUserUpdate }) {
     }
     setLoading(true)
     try {
-      const configData = await getConfig()
+      const [configData, metricsData] = await Promise.all([
+        getConfig(),
+        getDashboardMetrics(currentUser?.id).catch(() => null)
+      ])
       setCfg(configData)
       setInitialCfg(JSON.parse(JSON.stringify(configData)))
+      if (metricsData) {
+        setRealMetrics(metricsData)
+      }
     } catch (e) { 
       setError(e.message) 
     } finally { 
@@ -114,13 +121,20 @@ export default function Configuracion({ currentUser, onUserUpdate }) {
 
   // Calcular fórmula en tiempo real
   const calc = cfg ? (() => {
-    const gerenteScore = cfg.gerenteCalificado ? 100 : 50
-    const vendScore = cfg.totalVendedores > 0 ? Math.round((cfg.vendedoresCertificados / cfg.totalVendedores) * 100) : 0
+    const totalVends = realMetrics?.formula?.cfg?.totalVendedores ?? cfg.totalVendedores
+    const certVends = realMetrics?.formula?.cfg?.vendedoresCertificados ?? cfg.vendedoresCertificados
+    const isGerCalificado = realMetrics?.formula?.cfg?.gerenteCalificado ?? cfg.gerenteCalificado
+
+    const gerenteScore = isGerCalificado ? 100 : 50
+    const vendScore = totalVends > 0 ? Math.round((certVends / totalVends) * 100) : 0
     const estructura = Math.round(gerenteScore * 0.7 + vendScore * 0.3)
-    const sistema = 89 // Viene del backend en dashboard real
+    
+    // Sistema dinámico del backend de este gerente, si no hay, por defecto 0
+    const sistema = realMetrics?.formula?.sistema ?? 0
+    
     const operaciones = Math.round(cfg.otd * 0.9 + ((cfg.ar + (cfg.csr / 5 * 100) + cfg.idScore) / 3) * 0.1)
     const maxSales = Math.round((estructura * sistema * operaciones) / 10000)
-    return { estructura, sistema, operaciones, maxSales, gerenteScore, vendScore }
+    return { estructura, sistema, operaciones, maxSales, gerenteScore, vendScore, totalVends, certVends }
   })() : null
 
   const isDirty = cfg && initialCfg && JSON.stringify(cfg) !== JSON.stringify(initialCfg)
@@ -282,14 +296,14 @@ export default function Configuracion({ currentUser, onUserUpdate }) {
                     <div className="p-3 rounded-xl border border-slate-300/10 bg-slate-300/[0.01] flex flex-col justify-center">
                       <span className="text-[8px] font-bold text-slate-500 uppercase">Total Vendedores</span>
                       <span className="text-lg font-black text-slate-800 dark:text-slate-200 mt-0.5 leading-none">
-                        {cfg.totalVendedores}
+                        {calc.totalVends}
                       </span>
                       <span className="text-[8px] text-slate-500 mt-1">Registrados en CRM</span>
                     </div>
                     <div className="p-3 rounded-xl border border-slate-300/10 bg-indigo-500/[0.01] flex flex-col justify-center border-indigo-500/5">
                       <span className="text-[8px] font-bold text-indigo-400 uppercase">Certificados</span>
                       <span className="text-lg font-black text-indigo-500 mt-0.5 leading-none">
-                        {cfg.vendedoresCertificados}
+                        {calc.certVends}
                       </span>
                       <span className="text-[8px] text-slate-500 mt-1">Roleplay ≥ 80%</span>
                     </div>
