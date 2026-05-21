@@ -226,22 +226,42 @@ export default function Dashboard() {
           )}
         </div>
 
-        {/* McDonald's Card */}
-        <div className="neu-card p-4 flex flex-col justify-between" style={{ background: 'linear-gradient(135deg, var(--bg), #fef3c7)' }}>
-          <div className="space-y-3">
-            <div className="flex items-center gap-2 text-amber-700">
-              <Sparkles size={16} fill="currentColor" />
-              <h3 className="text-xs font-bold uppercase tracking-wider">La Pregunta McDonald's</h3>
-            </div>
-            <p className="text-[11px] leading-relaxed text-amber-950 font-medium">
-              En cada cotización y llamada de cotización, haz la pregunta de venta cruzada proactiva (S2).
-            </p>
-            <div className="neu-inset p-3.5 rounded-xl bg-white/50 text-[11.5px] italic text-amber-900 border border-amber-200/50">
-              "Veo que lleva compresores y gas... ¿lleva las bases, soldaduras, o tuberías para la instalación? Siempre las tenemos listas en Will Call."
+        {/* Fórmula Máxima Card */}
+        <div className="neu-card p-4 flex flex-col items-center justify-between">
+          <div className="w-full text-center shrink-0 mb-1">
+            <h3 className="text-xs font-bold" style={{ color: 'var(--text)' }}>Fórmula Máxima de Ventas</h3>
+            <p className="text-[9px]" style={{ color: 'var(--text-muted)' }}>Estructura × Sistema × Operaciones</p>
+          </div>
+          <div className="relative flex items-center justify-center my-1">
+            <svg className="w-28 h-28 -rotate-90">
+              <circle cx="56" cy="56" r="45" fill="none" stroke="rgba(163,177,198,0.2)" strokeWidth="9" />
+              <circle cx="56" cy="56" r="45" fill="none" stroke="url(#grad)" strokeWidth="9"
+                strokeDasharray={282.7}
+                strokeDashoffset={282.7 - (282.7 * (f?.maxSales || 0)) / 100}
+                strokeLinecap="round" />
+              <defs>
+                <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#4f46e5" />
+                  <stop offset="100%" stopColor="#10b981" />
+                </linearGradient>
+              </defs>
+            </svg>
+            <div className="absolute text-center">
+              <span className="text-2xl font-extrabold" style={{ color: 'var(--text)' }}>{f?.maxSales || 0}%</span>
+              <span className="text-[8px] font-bold block uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Capacidad</span>
             </div>
           </div>
-          <div className="pt-2 text-[9px] font-bold text-amber-700 uppercase tracking-widest text-center border-t border-amber-200/40">
-            Aumenta el ticket promedio +35%
+          <div className="grid grid-cols-3 gap-1.5 w-full pt-2 border-t mt-1" style={{ borderColor: 'rgba(163,177,198,0.3)' }}>
+            {[
+              { label: 'Estr.', value: f?.estructura, color: 'var(--text)' },
+              { label: 'Sist.', value: f?.sistema, color: '#4f46e5' },
+              { label: 'Oper.', value: f?.operaciones, color: '#10b981' },
+            ].map(m2 => (
+              <div key={m2.label} className="text-center">
+                <span className="text-[9px] block font-semibold" style={{ color: 'var(--text-muted)' }}>{m2.label}</span>
+                <span className="text-xs font-extrabold" style={{ color: m2.color }}>{m2.value || 0}%</span>
+              </div>
+            ))}
           </div>
         </div>
       </div>
