@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@variant dark (&:where(.dark, .dark *));
+
 /* ─── Neumorphic Design System ─── */
 :root {
   --bg: #dde4f0;
@@ -14,23 +16,6 @@
   --success: #10b981;
   --warning: #f59e0b;
   --danger: #ef4444;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #0f172a;
-    --surface: #1e293b;
-    --card: #1e293b;
-    --shadow-dark: rgba(0, 0, 0, 0.5);
-    --shadow-light: rgba(255, 255, 255, 0.05);
-    --text: #f8fafc;
-    --text-muted: #94a3b8;
-    --accent: #f8fafc;
-    --accent-hover: #e2e8f0;
-  }
-  .neu-btn-accent {
-    color: #0f172a !important;
-  }
 }
 
 
