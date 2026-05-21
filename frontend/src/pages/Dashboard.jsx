@@ -104,7 +104,7 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <div className="space-y-4 h-full flex flex-col justify-between animate-pulse">
+      <div className="space-y-4 min-h-full flex flex-col pb-6 animate-pulse">
         <div className="flex items-center justify-between shrink-0">
           <div>
             <div className="h-6 bg-gray-400/10 rounded w-48 mb-2" />
@@ -131,7 +131,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="space-y-5 h-full flex flex-col justify-between">
+    <div className="space-y-5 min-h-full flex flex-col pb-6">
       <div className="flex items-center justify-between shrink-0">
         <div>
           <h2 className="text-xl font-extrabold tracking-tight" style={{ color: 'var(--text)' }}>Dashboard Operativo</h2>
@@ -192,7 +192,7 @@ export default function Dashboard() {
       </div>
 
       {/* Middle Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 flex-1 items-stretch min-h-0">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-stretch">
         {/* Llamadas del día por cuadrante */}
         <div className="neu-card p-4 lg:col-span-2 flex flex-col justify-between">
           <div className="flex items-center justify-between shrink-0 mb-2">
