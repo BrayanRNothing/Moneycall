@@ -31,6 +31,10 @@ export default function Llamadas() {
   const [selectedClientId, setSelectedClientId] = useState('')
   const [note, setNote] = useState('')
   const [dcSatisfied, setDcSatisfied] = useState(true)
+  const [doInterview, setDoInterview] = useState(false)
+  const [resp5Q, setResp5Q] = useState({ q1: '', q2: '', q3: '', q4: '', q5: '' })
+  const [schedule, setSchedule] = useState(false)
+  const [scheduledAt, setScheduledAt] = useState('')
   const [tooltip, setTooltip] = useState(null)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState(null)
@@ -38,7 +42,7 @@ export default function Llamadas() {
   const load = async () => {
     setLoading(true)
     try {
-      const [llamadas, clts] = await Promise.all([getLlamadasHoy(), getClientes()])
+      const [llamadas, clts] = await Promise.all([getLlamadasHoy(), getClientes(currentUser.id)])
       setLog(llamadas)
       setClientes(clts)
       setError(null)
@@ -77,16 +81,24 @@ export default function Llamadas() {
     e.preventDefault(); setSaving(true)
     try {
       const cliente = clientes.find(c => c.id === parseInt(selectedClientId))
-      await createLlamada({
+      const payload = {
         clienteId: parseInt(selectedClientId),
         tipoLlamada: selectedType.code,
         direccion: selectedType.direction,
         satisfaccionDc: selectedType.code === 'DC' ? dcSatisfied : true,
         comentarios: note
-      })
+      }
+      if (doInterview) payload.respuestas5Q = resp5Q
+      if (schedule && scheduledAt) {
+        payload.proximaAccion = selectedType.code
+        payload.proximaFecha = new Date(scheduledAt).toISOString()
+      }
+      await createLlamada(payload)
       await load()
       setShowForm(false); setSelectedType(null)
       setSelectedClientId(''); setNote(''); setDcSatisfied(true)
+      setDoInterview(false); setResp5Q({ q1: '', q2: '', q3: '', q4: '', q5: '' })
+      setSchedule(false); setScheduledAt('')
     } catch (e) { alert('Error: ' + e.message) } finally { setSaving(false) }
   }
 
@@ -346,6 +358,38 @@ export default function Llamadas() {
                   </button>
                 </div>
               )}
+
+              {/* Opcional: entrevista 5 preguntas */}
+              {(selectedType?.code === 'S1' || selectedType?.code === 'S2') && (
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold uppercase tracking-wider block" style={{ color: 'var(--text-muted)' }}>Entrevista (5 Preguntas)</label>
+                  <div className="flex items-center gap-3">
+                    <input id="doInterview" type="checkbox" checked={doInterview} onChange={e => setDoInterview(e.target.checked)} />
+                    <label htmlFor="doInterview" className="text-[12px]" style={{ color: 'var(--text-muted)' }}>Realizar las 5 preguntas clave y guardar respuestas</label>
+                  </div>
+                  {doInterview && (
+                    <div className="grid grid-cols-1 gap-2">
+                      <input className="neu-input" placeholder="1) ¿Qué le gusta de hacer negocios con nosotros?" value={resp5Q.q1} onChange={e => setResp5Q({ ...resp5Q, q1: e.target.value })} />
+                      <input className="neu-input" placeholder="2) ¿Qué le gusta de hacer negocios con la competencia?" value={resp5Q.q2} onChange={e => setResp5Q({ ...resp5Q, q2: e.target.value })} />
+                      <input className="neu-input" placeholder="3) ¿Qué % de su compra total proviene de nosotros?" value={resp5Q.q3} onChange={e => setResp5Q({ ...resp5Q, q3: e.target.value })} />
+                      <input className="neu-input" placeholder="4) ¿Qué le cuesta encontrar últimamente?" value={resp5Q.q4} onChange={e => setResp5Q({ ...resp5Q, q4: e.target.value })} />
+                      <input className="neu-input" placeholder="5) ¿En qué mercado quiere crecer y aún no ha podido?" value={resp5Q.q5} onChange={e => setResp5Q({ ...resp5Q, q5: e.target.value })} />
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Programar llamada */}
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold uppercase tracking-wider block" style={{ color: 'var(--text-muted)' }}>Programar llamada</label>
+                <div className="flex items-center gap-3">
+                  <input id="doSchedule" type="checkbox" checked={schedule} onChange={e => setSchedule(e.target.checked)} />
+                  <label htmlFor="doSchedule" className="text-[12px]" style={{ color: 'var(--text-muted)' }}>Programar para otra fecha/hora</label>
+                </div>
+                {schedule && (
+                  <input type="datetime-local" className="neu-input" value={scheduledAt} onChange={e => setScheduledAt(e.target.value)} />
+                )}
+              </div>
 
               <div className="space-y-1.5">
                 <label className="text-[10px] font-bold uppercase tracking-wider block" style={{ color: 'var(--text-muted)' }}>Nota para el CRM</label>

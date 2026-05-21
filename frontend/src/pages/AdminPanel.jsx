@@ -8,10 +8,11 @@ import { getGerentes, createGerente, deleteGerente, createVendedorPorGerente, de
 
 // ── Utility ──────────────────────────────────────────────────────────────────
 const initials = (name = '') => name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
-const ROLES_CANAL = ['Moneycall', 'Mostrador', 'Inbound', 'TM', 'Gerencia']
+// Canal = canal/área de venta; Gerencia no es un canal de vendedor
+const CHANNELS = ['Moneycall', 'Mostrador', 'Inbound', 'TM']
 
 // ── Formulario reutilizable ──────────────────────────────────────────────────
-function UserForm({ fields, form, onChange, showPass, onTogglePass, rolCanal, onRolChange }) {
+function UserForm({ fields, form, onChange, showPass, onTogglePass, rolCanal, onRolChange, channelOptions = CHANNELS }) {
   return (
     <div className="space-y-4">
       {fields.map(f => (
@@ -35,7 +36,7 @@ function UserForm({ fields, form, onChange, showPass, onTogglePass, rolCanal, on
       <div className="space-y-1.5">
         <label className="text-[10px] font-bold uppercase tracking-wider block" style={{ color: 'var(--text-muted)' }}>Canal / Rol</label>
         <select name="rolCanal" value={rolCanal} onChange={onRolChange} className="neu-input w-full text-sm">
-          {ROLES_CANAL.map(r => <option key={r} value={r}>{r}</option>)}
+          {channelOptions.map(r => <option key={r} value={r}>{r}</option>)}
         </select>
       </div>
     </div>
@@ -97,7 +98,7 @@ function ModalCrearGerente({ onClose, onCreated }) {
           ]}
           form={form} onChange={handle}
           showPass={showPass} onTogglePass={() => setShowPass(!showPass)}
-          rolCanal={form.rolCanal} onRolChange={handle}
+          rolCanal={form.rolCanal} onRolChange={handle} channelOptions={[ 'Gerencia' ]}
         />
         <div className="flex gap-3 pt-2">
           <button type="button" onClick={onClose} className="neu-btn flex-1 py-2.5 rounded-xl text-sm font-semibold" style={{ color: 'var(--text-muted)' }}>Cancelar</button>
@@ -139,7 +140,7 @@ function ModalCrearVendedor({ gerente, onClose, onCreated }) {
           ]}
           form={form} onChange={handle}
           showPass={showPass} onTogglePass={() => setShowPass(!showPass)}
-          rolCanal={form.rolCanal} onRolChange={handle}
+          rolCanal={form.rolCanal} onRolChange={handle} channelOptions={CHANNELS}
         />
         <div className="flex gap-3 pt-2">
           <button type="button" onClick={onClose} className="neu-btn flex-1 py-2.5 rounded-xl text-sm font-semibold" style={{ color: 'var(--text-muted)' }}>Cancelar</button>

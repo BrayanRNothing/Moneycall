@@ -4,7 +4,7 @@ import {
   Heart, Phone, RefreshCw, Trophy, ChevronRight,
   PhoneOutgoing, Truck, ArrowRight, Zap
 } from 'lucide-react'
-import { getAgenda, getRanking, createLlamada, getClientes, getVendedor } from '../api'
+import { getAgenda, getRanking, createLlamada, getClientes, getVendedor, getVendedoresByGerente } from '../api'
 import ExamenRoleplay from '../components/ExamenRoleplay'
 
 // ── Colores y config por tipo de tarea ───────────────────────────────────────
@@ -35,7 +35,20 @@ export default function MiDia() {
     try {
       const [ag, rk] = await Promise.all([getAgenda(currentUser.id), getRanking()])
       setAgenda(ag)
-      setRanking(rk)
+      // Si soy gerente, mostrar solo mi equipo + yo
+      if (currentUser.isAdmin && !currentUser.isSuperAdmin) {
+        try {
+          const team = await getVendedoresByGerente(currentUser.id)
+          const teamIds = new Set(team.map(t => t.id))
+          const filtered = rk.filter(v => v.id === currentUser.id || teamIds.has(v.id))
+          setRanking(filtered)
+        } catch (e) {
+          // fallback al ranking completo si falla la llamada
+          setRanking(rk)
+        }
+      } else {
+        setRanking(rk)
+      }
     } catch (e) { setError(e.message) }
     finally { setLoading(false) }
   }

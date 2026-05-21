@@ -433,7 +433,7 @@ app.get('/api/llamadas', async (req, res) => {
 })
 
 app.post('/api/llamadas', async (req, res) => {
-  const { clienteId, tipoLlamada, direccion, satisfaccionDc, comentarios } = req.body
+  const { clienteId, tipoLlamada, direccion, satisfaccionDc, comentarios, respuestas5Q, proximaAccion, proximaFecha } = req.body
   try {
     const l = await prisma.llamada.create({
       data: {
@@ -441,11 +441,56 @@ app.post('/api/llamadas', async (req, res) => {
         tipoLlamada,
         direccion: direccion || (tipoLlamada === 'IN' ? 'Entrante' : 'Saliente'),
         satisfaccionDc: satisfaccionDc !== undefined ? satisfaccionDc : true,
-        comentarios
+        comentarios,
+        proximaAccion: proximaAccion || null,
+        proximaFecha: proximaFecha ? new Date(proximaFecha) : null
       },
       include: { cliente: { select: { nombreEmpresa: true } } }
     })
+
+    // Si la llamada incluye respuestas a las 5 preguntas, guardarlas en el cliente
+    if (respuestas5Q) {
+      try {
+        await prisma.cliente.update({ where: { id: parseInt(clienteId) }, data: { respuestas5Q } })
+      } catch (err) {
+        console.warn('No se pudo actualizar respuestas5Q en cliente:', err.message)
+      }
+    }
     res.json(l)
+  } catch (e) { res.status(500).json({ error: e.message }) }
+})
+
+
+// Pareto global: devuelve clientes ordenados por total de compras (desc)
+app.get('/api/clientes/pareto_global', async (req, res) => {
+  try {
+    const clientes = await prisma.cliente.findMany({ include: { cotizaciones: true, vendedor: true } })
+    const sorted = clientes
+      .map(c => ({ id: c.id, nombreEmpresa: c.nombreEmpresa, vendedorId: c.vendedorId, total: c.cotizaciones.filter(q => q.estado === 'Ganada').reduce((s, q) => s + q.monto, 0) }))
+      .sort((a, b) => b.total - a.total)
+    res.json(sorted)
+  } catch (e) { res.status(500).json({ error: e.message }) }
+})
+
+// Asignar batch de clientes a un vendedor (respeta limite de cuentas)
+app.post('/api/clientes/assign/:vendedorId', async (req, res) => {
+  const { vendedorId } = req.params
+  const { clientIds } = req.body // array de ids
+  try {
+    const vId = parseInt(vendedorId)
+    const vendedor = await prisma.vendedor.findUnique({ where: { id: vId } })
+    if (!vendedor) return res.status(404).json({ error: 'Vendedor no encontrado' })
+
+    const currentCount = await prisma.cliente.count({ where: { vendedorId: vId } })
+    const remaining = (vendedor.limiteCuentas || 100) - currentCount
+    if (clientIds.length > remaining) return res.status(400).json({ error: `El vendedor sólo puede recibir ${remaining} clientes más` })
+
+    const updated = []
+    for (const cid of clientIds) {
+      const c = await prisma.cliente.update({ where: { id: parseInt(cid) }, data: { vendedorId: vId } })
+      updated.push(c)
+    }
+    res.json({ ok: true, assigned: updated.length, clientes: updated.map(x => ({ id: x.id, nombreEmpresa: x.nombreEmpresa })) })
   } catch (e) { res.status(500).json({ error: e.message }) }
 })
 
@@ -567,6 +612,23 @@ app.post('/api/cotizaciones', async (req, res) => {
       data: { clienteId: parseInt(clienteId), monto: parseFloat(monto) },
       include: { cliente: { select: { nombreEmpresa: true } } }
     })
+
+    // Automatizar creación de seguimiento F1 programado (por defecto 3 días)
+    try {
+      const fechaF1 = new Date(); fechaF1.setDate(fechaF1.getDate() + 3)
+      await prisma.llamada.create({
+        data: {
+          clienteId: parseInt(clienteId),
+          tipoLlamada: 'F1',
+          direccion: 'Saliente',
+          comentarios: `Seguimiento automático F1 para cotización ${c.id}`,
+          proximaAccion: 'F1',
+          proximaFecha: fechaF1
+        }
+      })
+    } catch (err) {
+      console.warn('No se pudo crear seguimiento F1 automático:', err.message)
+    }
     res.json(c)
   } catch (e) { res.status(500).json({ error: e.message }) }
 })
@@ -741,6 +803,70 @@ app.post('/api/auditoria', async (req, res) => {
       }
     })
     res.json(a)
+  } catch (e) { res.status(500).json({ error: e.message }) }
+})
+
+// ── AUTOMATIZACIONES: Procesar follow-ups (F1 vencidas → crear F2) ─────────
+app.post('/api/automations/process-followups', async (req, res) => {
+  try {
+    const now = new Date()
+
+    // 1) Cotizaciones con F1 programada ya (seguimientoF1=true) y fechaDecisionF1 pasada, sin F2 programada
+    const vencidasF1 = await prisma.cotizacion.findMany({
+      where: {
+        estado: 'Pendiente',
+        seguimientoF1: true,
+        fechaDecisionF1: { lte: now },
+        f2Programada: false
+      },
+      include: { cliente: true }
+    })
+
+    // 2) Cotizaciones sin F1 marcada pero antiguas (por ejemplo > 7 días) — opción conservadora
+    const hace7 = new Date(); hace7.setDate(hace7.getDate() - 7)
+    const antiguas = await prisma.cotizacion.findMany({
+      where: {
+        estado: 'Pendiente',
+        seguimientoF1: false,
+        fechaCreacion: { lte: hace7 },
+        f2Programada: false
+      },
+      include: { cliente: true }
+    })
+
+    const todos = [...vencidasF1, ...antiguas]
+    const created = []
+
+    for (const cot of todos) {
+      // Crear llamada F2 programada inmediatamente
+      const l = await prisma.llamada.create({
+        data: {
+          clienteId: cot.clienteId,
+          tipoLlamada: 'F2',
+          direccion: 'Saliente',
+          comentarios: `F2 automática para cotización ${cot.id}`
+        }
+      })
+
+      // Marcar cotizacion como F2 programada para evitar duplicados
+      await prisma.cotizacion.update({ where: { id: cot.id }, data: { f2Programada: true } })
+      created.push({ cotizacionId: cot.id, clienteId: cot.clienteId, monto: cot.monto, llamadaId: l.id })
+
+      // Regla de escalado: notificar gerente si monto > 10000
+      if (cot.monto > 10000) {
+        // Intentar crear una auditoría de notificación (si hay gerentes configurados, se deja en log)
+        await prisma.auditoria.create({
+          data: {
+            clienteId: cot.clienteId,
+            gerenteId: cot.cliente?.vendedorId || 1,
+            esValida: false,
+            comentarios: `Escalado automático: cotización ${cot.id} de $${cot.monto} requiere atención de gerente.`
+          }
+        })
+      }
+    }
+
+    res.json({ ok: true, processed: created.length, details: created })
   } catch (e) { res.status(500).json({ error: e.message }) }
 })
 

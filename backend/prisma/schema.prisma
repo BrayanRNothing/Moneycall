@@ -67,6 +67,7 @@ model Cotizacion {
   fechaDecisionF1    DateTime?
   seguimientoF1      Boolean   @default(false)
   seguimientoF2      Boolean   @default(false)
+  f2Programada       Boolean   @default(false)
 }
 
 // ── Historial de Pedidos/Compras ──────────────────────────────────────────────

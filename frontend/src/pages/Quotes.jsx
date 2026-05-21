@@ -3,6 +3,7 @@ import { FileText, Plus, CheckCircle2, XCircle, Clock, X, RefreshCw, AlertCircle
 import { getCotizaciones, createCotizacion, logF1, closeCotizacion, getClientes } from '../api'
 
 export default function Quotes() {
+  const user = JSON.parse(localStorage.getItem('user')) || { id: 1 }
   const [quotes, setQuotes] = useState([])
   const [clientes, setClientes] = useState([])
   const [loading, setLoading] = useState(true)
@@ -17,7 +18,7 @@ export default function Quotes() {
   const load = async () => {
     setLoading(true); setError(null)
     try {
-      const [qs, clts] = await Promise.all([getCotizaciones(), getClientes()])
+      const [qs, clts] = await Promise.all([getCotizaciones(), getClientes(user.id)])
       setQuotes(qs)
       setClientes(clts)
     } catch (e) { setError(e.message) } finally { setLoading(false) }

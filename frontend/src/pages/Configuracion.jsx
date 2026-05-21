@@ -179,7 +179,7 @@ export default function Configuracion() {
   if (loading) return <div className="text-center py-12 text-slate-500">Cargando configuración...</div>
 
   return (
-    <div className="space-y-6 max-w-4xl relative pb-24">
+    <div className="space-y-6 w-full relative pb-24">
       {/* Encabezado */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -193,14 +193,14 @@ export default function Configuracion() {
         </div>
 
         {/* Selector de Pestañas Neumórfico */}
-        <div className="flex p-1 rounded-xl bg-slate-200/60 dark:bg-slate-800/40 border border-slate-300/10 shadow-inner w-full sm:w-auto shrink-0 max-w-xs self-start sm:self-center">
+        <div className="flex p-1 rounded-xl bg-slate-200/60 /40 border border-slate-300/10 shadow-inner w-full sm:w-auto shrink-0 max-w-xs self-start sm:self-center">
           <button 
             type="button"
             onClick={() => setActiveTab('formula')}
             className={`flex-1 sm:flex-initial px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 flex items-center justify-center gap-1.5 ${
               activeTab === 'formula' 
-                ? 'bg-slate-100 dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-sm scale-[1.02]' 
-                : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                ? 'bg-slate-100  text-slate-900  shadow-sm scale-[1.02]' 
+                : 'text-slate-500 hover:text-slate-700 '
             }`}
           >
             <Sliders size={13} />
@@ -211,8 +211,8 @@ export default function Configuracion() {
             onClick={() => setActiveTab('equipo')}
             className={`flex-1 sm:flex-initial px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 flex items-center justify-center gap-1.5 ${
               activeTab === 'equipo' 
-                ? 'bg-slate-100 dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-sm scale-[1.02]' 
-                : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                ? 'bg-slate-100  text-slate-900  shadow-sm scale-[1.02]' 
+                : 'text-slate-500 hover:text-slate-700 '
             }`}
           >
             <Users size={13} />
@@ -278,7 +278,7 @@ export default function Configuracion() {
                   <div className="flex items-center gap-2">
                     <Database size={16} className="text-indigo-400" />
                     <div>
-                      <h4 className="text-xs font-extrabold text-slate-800 dark:text-slate-200 uppercase">1. Componente Estructura</h4>
+                      <h4 className="text-xs font-extrabold text-slate-800  uppercase">1. Componente Estructura</h4>
                       <p className="text-[9px] text-slate-500">Peso en fórmula: 30% · Mide capacitación del equipo.</p>
                     </div>
                   </div>
@@ -290,7 +290,7 @@ export default function Configuracion() {
                   <div className="space-y-1.5 p-3 rounded-xl border border-slate-300/10 bg-slate-300/[0.02]">
                     <div className="flex justify-between items-center">
                       <div>
-                        <span className="text-[9px] font-bold uppercase text-slate-600 dark:text-slate-400 tracking-wider">Estatus de Gerente</span>
+                        <span className="text-[9px] font-bold uppercase text-slate-600  tracking-wider">Estatus de Gerente</span>
                         <p className="text-[8px] text-slate-500 leading-none mt-0.5">¿Cuenta con certificación de roleplay vigente?</p>
                       </div>
                       <span className={`text-[8px] font-extrabold px-1.5 py-0.5 rounded ${cfg.gerenteCalificado ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'}`}>
@@ -328,7 +328,7 @@ export default function Configuracion() {
                   <div className="grid grid-cols-2 gap-3">
                     <div className="p-3 rounded-xl border border-slate-300/10 bg-slate-300/[0.01] flex flex-col justify-center">
                       <span className="text-[8px] font-bold text-slate-500 uppercase">Total Vendedores</span>
-                      <span className="text-lg font-black text-slate-800 dark:text-slate-200 mt-0.5 leading-none">
+                      <span className="text-lg font-black text-slate-800  mt-0.5 leading-none">
                         {cfg.totalVendedores}
                       </span>
                       <span className="text-[8px] text-slate-500 mt-1">Registrados en CRM</span>
@@ -363,7 +363,7 @@ export default function Configuracion() {
                   <div className="flex items-center gap-2">
                     <RefreshCw size={16} className="text-indigo-500 animate-spin-slow" />
                     <div>
-                      <h4 className="text-xs font-extrabold text-slate-800 dark:text-slate-200 uppercase">2. Componente Sistema</h4>
+                      <h4 className="text-xs font-extrabold text-slate-800  uppercase">2. Componente Sistema</h4>
                       <p className="text-[9px] text-slate-500">Mide efectividad del proceso de ventas y llamadas.</p>
                     </div>
                   </div>
@@ -407,7 +407,7 @@ export default function Configuracion() {
               <div className="flex items-center gap-2">
                 <Sliders size={18} className="text-emerald-500" />
                 <div>
-                  <h3 className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase">3. Componente Operaciones (Servicio y Logística)</h3>
+                  <h3 className="text-xs font-bold text-slate-800  uppercase">3. Componente Operaciones (Servicio y Logística)</h3>
                   <p className="text-[9px] text-slate-500">
                     Mide el servicio al cliente y logística. **Fórmula:** OTD × 90% + [AR + ID + (CSR/5×100)] / 3 × 10%
                   </p>
@@ -420,7 +420,7 @@ export default function Configuracion() {
               <div className="space-y-4 justify-between flex flex-col p-4 rounded-xl border border-emerald-500/10 bg-emerald-500/[0.01]">
                 <div className="space-y-2">
                   <div className="flex justify-between items-center text-[10px] font-extrabold uppercase tracking-wider">
-                    <span className="text-slate-700 dark:text-slate-300">OTD — On-Time Delivery (Almacén)</span>
+                    <span className="text-slate-700 ">OTD — On-Time Delivery (Almacén)</span>
                     <span className="text-xs font-black px-2 py-0.5 rounded" style={{ color: 'white', background: getColorByValue(cfg.otd) }}>
                       {cfg.otd}%
                     </span>
@@ -435,7 +435,7 @@ export default function Configuracion() {
                     type="range" 
                     min="0" 
                     max="100" 
-                    className="w-full accent-emerald-500 cursor-pointer h-2 bg-slate-300 dark:bg-slate-700 rounded-lg appearance-none"
+                    className="w-full accent-emerald-500 cursor-pointer h-2 bg-slate-300  rounded-lg appearance-none"
                     value={cfg.otd || 0} 
                     onChange={e => update('otd', parseFloat(e.target.value))} 
                   />
@@ -452,7 +452,7 @@ export default function Configuracion() {
                 {/* CSR Slider */}
                 <div className="space-y-2 p-3 rounded-lg border border-slate-300/10 bg-slate-300/[0.02]">
                   <div className="flex justify-between items-center text-[10px] font-extrabold uppercase tracking-wider">
-                    <span className="text-slate-600 dark:text-slate-400">CSR — Satisfacción (1.0 - 5.0)</span>
+                    <span className="text-slate-600 ">CSR — Satisfacción (1.0 - 5.0)</span>
                     <span className="text-xs font-black flex items-center gap-0.5" style={{ color: getColorByCSR(cfg.csr) }}>
                       ★ {cfg.csr?.toFixed(1) || '0.0'}
                     </span>
@@ -462,7 +462,7 @@ export default function Configuracion() {
                     min="1" 
                     max="5" 
                     step="0.1"
-                    className="w-full accent-indigo-600 cursor-pointer h-1.5 bg-slate-300 dark:bg-slate-700 rounded-lg appearance-none"
+                    className="w-full accent-indigo-600 cursor-pointer h-1.5 bg-slate-300  rounded-lg appearance-none"
                     value={cfg.csr || 1} 
                     onChange={e => update('csr', parseFloat(e.target.value))} 
                   />
@@ -474,7 +474,7 @@ export default function Configuracion() {
                 {/* AR Slider */}
                 <div className="space-y-2 p-3 rounded-lg border border-slate-300/10 bg-slate-300/[0.02]">
                   <div className="flex justify-between items-center text-[10px] font-extrabold uppercase tracking-wider">
-                    <span className="text-slate-600 dark:text-slate-400">AR — Plazo de Cobranza (%)</span>
+                    <span className="text-slate-600 ">AR — Plazo de Cobranza (%)</span>
                     <span className="text-xs font-black" style={{ color: getColorByValue(cfg.ar) }}>
                       {cfg.ar}%
                     </span>
@@ -483,7 +483,7 @@ export default function Configuracion() {
                     type="range" 
                     min="0" 
                     max="100" 
-                    className="w-full accent-indigo-600 cursor-pointer h-1.5 bg-slate-300 dark:bg-slate-700 rounded-lg appearance-none"
+                    className="w-full accent-indigo-600 cursor-pointer h-1.5 bg-slate-300  rounded-lg appearance-none"
                     value={cfg.ar || 0} 
                     onChange={e => update('ar', parseFloat(e.target.value))} 
                   />
@@ -492,7 +492,7 @@ export default function Configuracion() {
                 {/* ID Score (Invoice Accuracy) Slider */}
                 <div className="space-y-2 p-3 rounded-lg border border-slate-300/10 bg-slate-300/[0.02]">
                   <div className="flex justify-between items-center text-[10px] font-extrabold uppercase tracking-wider">
-                    <span className="text-slate-600 dark:text-slate-400">ID — Facturación Correcta (%)</span>
+                    <span className="text-slate-600 ">ID — Facturación Correcta (%)</span>
                     <span className="text-xs font-black" style={{ color: getColorByValue(cfg.idScore) }}>
                       {cfg.idScore}%
                     </span>
@@ -501,7 +501,7 @@ export default function Configuracion() {
                     type="range" 
                     min="0" 
                     max="100" 
-                    className="w-full accent-indigo-600 cursor-pointer h-1.5 bg-slate-300 dark:bg-slate-700 rounded-lg appearance-none"
+                    className="w-full accent-indigo-600 cursor-pointer h-1.5 bg-slate-300  rounded-lg appearance-none"
                     value={cfg.idScore || 0} 
                     onChange={e => update('idScore', parseFloat(e.target.value))} 
                   />
@@ -530,7 +530,7 @@ export default function Configuracion() {
             <div className="flex items-center gap-2">
               <Database size={18} style={{ color: 'var(--accent)' }} />
               <div>
-                <h3 className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase">Estructura del Equipo Moneycall</h3>
+                <h3 className="text-xs font-bold text-slate-800  uppercase">Estructura del Equipo Moneycall</h3>
                 <p className="text-[10px] text-slate-500">Maneja las evaluaciones de roleplay, bloqueos operativos y exámenes metodológicos.</p>
               </div>
             </div>
@@ -576,7 +576,7 @@ export default function Configuracion() {
                         </div>
                         <div>
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-xs font-bold text-slate-800 dark:text-slate-200">{v.nombre}</span>
+                            <span className="text-xs font-bold text-slate-800 ">{v.nombre}</span>
                             <span className="text-[9px] font-semibold text-slate-500">@{v.username}</span>
                           </div>
                           <p className="text-[9px] text-slate-500 mt-0.5">

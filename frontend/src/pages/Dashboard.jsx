@@ -6,6 +6,7 @@ import {
 import { getDashboardMetrics, getAlertasS1, getClientes, createAuditoria } from '../api'
 
 export default function Dashboard() {
+  const user = JSON.parse(localStorage.getItem('user')) || { id: 1 }
   const [metrics, setMetrics] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -17,7 +18,7 @@ export default function Dashboard() {
   const load = async () => {
     setLoading(true); setError(null)
     try {
-      const [data, s1, clts] = await Promise.all([getDashboardMetrics(), getAlertasS1(1), getClientes()])
+      const [data, s1, clts] = await Promise.all([getDashboardMetrics(), getAlertasS1(user.id), getClientes(user.id)])
       setMetrics(data)
       setAlertasS1(s1)
       setClientes(clts)
@@ -38,6 +39,17 @@ export default function Dashboard() {
 
   const m = metrics
   const f = m?.formula
+
+  const isMetricsEmpty = (data) => {
+    if (!data) return true;
+    return (
+      (data.llamadasHoy === 0 || !data.llamadasHoy) &&
+      (data.salientes === 0 || !data.salientes) &&
+      (data.entrantes === 0 || !data.entrantes) &&
+      Object.keys(data.tiposHoy || {}).length === 0 &&
+      Object.keys(data.alertas || {}).length === 0
+    );
+  };
 
   const kpis = m ? [
     { name: 'Llamadas Salientes', value: `${m.salientes} / 30`, sub: 'Meta: 20–30 diarias', icon: PhoneOutgoing, color: '#ec4899', bg: 'rgba(236,72,153,0.06)' },
@@ -233,37 +245,47 @@ export default function Dashboard() {
             <h3 className="text-xs font-bold" style={{ color: 'var(--text)' }}>Fórmula Máxima de Ventas</h3>
             <p className="text-[9px]" style={{ color: 'var(--text-muted)' }}>Estructura × Sistema × Operaciones</p>
           </div>
-          <div className="relative flex items-center justify-center my-1">
-            <svg className="w-28 h-28 -rotate-90">
-              <circle cx="56" cy="56" r="45" fill="none" stroke="var(--bg)" strokeWidth="9" />
-              <circle cx="56" cy="56" r="45" fill="none" stroke="url(#grad)" strokeWidth="9"
-                strokeDasharray={282.7}
-                strokeDashoffset={282.7 - (282.7 * (f?.maxSales || 0)) / 100}
-                strokeLinecap="round" />
-              <defs>
-                <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#1a1a1a" />
-                  <stop offset="100%" stopColor="#4f46e5" />
-                </linearGradient>
-              </defs>
-            </svg>
-            <div className="absolute text-center">
-              <span className="text-2xl font-extrabold" style={{ color: 'var(--text)' }}>{f?.maxSales || 0}%</span>
-              <span className="text-[8px] font-bold block uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Capacidad</span>
-            </div>
-          </div>
-          <div className="grid grid-cols-3 gap-1.5 w-full pt-2 border-t mt-1" style={{ borderColor: 'rgba(163,177,198,0.3)' }}>
-            {[
-              { label: 'Estr.', value: f?.estructura, color: '#1a1a1a' },
-              { label: 'Sist.', value: f?.sistema, color: '#4f46e5' },
-              { label: 'Oper.', value: f?.operaciones, color: '#10b981' },
-            ].map(m2 => (
-              <div key={m2.label} className="text-center">
-                <span className="text-[9px] block font-semibold" style={{ color: 'var(--text-muted)' }}>{m2.label}</span>
-                <span className="text-xs font-extrabold" style={{ color: m2.color }}>{m2.value || 0}%</span>
+          {(!m || isMetricsEmpty(m)) ? (
+            <div className="flex-1 flex items-center justify-center w-full">
+              <div className="rounded-xl py-4 w-full text-center text-[10px]" style={{ border: '1.5px dashed rgba(163,177,198,0.3)', color: 'var(--text-muted)' }}>
+                Sin datos visuales en las tablas
               </div>
-            ))}
-          </div>
+            </div>
+          ) : (
+            <>
+              <div className="relative flex items-center justify-center my-1">
+                <svg className="w-28 h-28 -rotate-90">
+                  <circle cx="56" cy="56" r="45" fill="none" stroke="var(--bg)" strokeWidth="9" />
+                  <circle cx="56" cy="56" r="45" fill="none" stroke="url(#grad)" strokeWidth="9"
+                    strokeDasharray={282.7}
+                    strokeDashoffset={282.7 - (282.7 * (f?.maxSales || 0)) / 100}
+                    strokeLinecap="round" />
+                  <defs>
+                    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" stopColor="#1a1a1a" />
+                      <stop offset="100%" stopColor="#4f46e5" />
+                    </linearGradient>
+                  </defs>
+                </svg>
+                <div className="absolute text-center">
+                  <span className="text-2xl font-extrabold" style={{ color: 'var(--text)' }}>{f?.maxSales || 0}%</span>
+                  <span className="text-[8px] font-bold block uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Capacidad</span>
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-1.5 w-full pt-2 border-t mt-1" style={{ borderColor: 'rgba(163,177,198,0.3)' }}>
+                {[
+                  { label: 'Estr.', value: f?.estructura, color: '#1a1a1a' },
+                  { label: 'Sist.', value: f?.sistema, color: '#4f46e5' },
+                  { label: 'Oper.', value: f?.operaciones, color: '#10b981' },
+                ].map(m2 => (
+                  <div key={m2.label} className="text-center">
+                    <span className="text-[9px] block font-semibold" style={{ color: 'var(--text-muted)' }}>{m2.label}</span>
+                    <span className="text-xs font-extrabold" style={{ color: m2.color }}>{m2.value || 0}%</span>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
         </div>
       </div>
 
@@ -326,23 +348,31 @@ export default function Dashboard() {
             ))}
             
             {/* Si no hay suficientes alertas S1 reales, mostrar las operativas de la metodología */}
-            <div className="flex gap-2 p-2.5 rounded-xl" style={{ background: 'rgba(16,185,129,0.05)', border: '1px solid rgba(16,185,129,0.2)' }}>
-              <div className="w-7 h-7 rounded-lg flex items-center justify-center text-white font-bold text-[10px] shrink-0" style={{ background: '#10b981' }}>DC</div>
-              <div className="space-y-0.5 min-w-0">
-                <span className="text-[8px] font-bold uppercase tracking-wider block" style={{ color: '#10b981' }}>DC Pendiente</span>
-                <p className="text-[10px] font-bold truncate" style={{ color: 'var(--text)' }}>{m?.tiposHoy?.DC || 0} entregas del día sin verificar.</p>
-                <p className="text-[9px] truncate" style={{ color: 'var(--text-muted)' }}>Confirmar recepción con cada cliente.</p>
+            {(!m || isMetricsEmpty(m)) ? (
+              <div className="col-span-1 sm:col-span-2 rounded-xl py-4 text-center text-[10px]" style={{ border: '1.5px dashed rgba(163,177,198,0.3)', color: 'var(--text-muted)' }}>
+                Sin datos visuales en las tablas
               </div>
-            </div>
-            
-            <div className="flex gap-2 p-2.5 rounded-xl" style={{ background: 'rgba(245,158,11,0.05)', border: '1px solid rgba(245,158,11,0.2)' }}>
-              <div className="w-7 h-7 rounded-lg flex items-center justify-center text-white font-bold text-[10px] shrink-0" style={{ background: '#f59e0b' }}>F1</div>
-              <div className="space-y-0.5 min-w-0">
-                <span className="text-[8px] font-bold uppercase tracking-wider block" style={{ color: '#f59e0b' }}>F1 Pendiente</span>
-                <p className="text-[10px] font-bold truncate" style={{ color: 'var(--text)' }}>{m?.cotizaciones?.sinF1 || 0} cotizaciones sin seguimiento F1.</p>
-                <p className="text-[9px] truncate" style={{ color: 'var(--text-muted)' }}>Meta: 100% de cotizaciones con F1.</p>
-              </div>
-            </div>
+            ) : (
+              <>
+                <div className="flex gap-2 p-2.5 rounded-xl" style={{ background: 'rgba(16,185,129,0.05)', border: '1px solid rgba(16,185,129,0.2)' }}>
+                  <div className="w-7 h-7 rounded-lg flex items-center justify-center text-white font-bold text-[10px] shrink-0" style={{ background: '#10b981' }}>DC</div>
+                  <div className="space-y-0.5 min-w-0">
+                    <span className="text-[8px] font-bold uppercase tracking-wider block" style={{ color: '#10b981' }}>DC Pendiente</span>
+                    <p className="text-[10px] font-bold truncate" style={{ color: 'var(--text)' }}>{m?.tiposHoy?.DC || 0} entregas del día sin verificar.</p>
+                    <p className="text-[9px] truncate" style={{ color: 'var(--text-muted)' }}>Confirmar recepción con cada cliente.</p>
+                  </div>
+                </div>
+                
+                <div className="flex gap-2 p-2.5 rounded-xl" style={{ background: 'rgba(245,158,11,0.05)', border: '1px solid rgba(245,158,11,0.2)' }}>
+                  <div className="w-7 h-7 rounded-lg flex items-center justify-center text-white font-bold text-[10px] shrink-0" style={{ background: '#f59e0b' }}>F1</div>
+                  <div className="space-y-0.5 min-w-0">
+                    <span className="text-[8px] font-bold uppercase tracking-wider block" style={{ color: '#f59e0b' }}>F1 Pendiente</span>
+                    <p className="text-[10px] font-bold truncate" style={{ color: 'var(--text)' }}>{m?.cotizaciones?.sinF1 || 0} cotizaciones sin seguimiento F1.</p>
+                    <p className="text-[9px] truncate" style={{ color: 'var(--text-muted)' }}>Meta: 100% de cotizaciones con F1.</p>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>
