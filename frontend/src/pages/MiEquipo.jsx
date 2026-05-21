@@ -57,12 +57,17 @@ export default function MiEquipo({ currentUser }) {
         } catch (err) {
           console.warn('Fallback to getVendedores due to manager routing:', err)
           const all = await getVendedores()
-          data = all.filter(v => v.gerenteId === currentUser.id && !v.isAdmin && !v.isSuperAdmin)
+          data = all.filter(v => Number(v.gerenteId) === Number(currentUser.id) && !v.isAdmin && !v.isSuperAdmin)
         }
       } else {
-        // Read-only roster of all sellers for peer transparency
+        // Read-only roster of sellers belonging to the same manager's team
         const all = await getVendedores()
-        data = all.filter(v => !v.isAdmin && !v.isSuperAdmin)
+        if (currentUser.gerenteId) {
+          data = all.filter(v => Number(v.gerenteId) === Number(currentUser.gerenteId) && !v.isAdmin && !v.isSuperAdmin)
+        } else {
+          // If no manager is assigned, show all non-admin sellers as fallback
+          data = all.filter(v => !v.isAdmin && !v.isSuperAdmin)
+        }
       }
       setTeam(data)
     } catch (e) {

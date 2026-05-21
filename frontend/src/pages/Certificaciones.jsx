@@ -46,8 +46,14 @@ export default function Certificaciones({ currentUser }) {
     setLoading(true)
     try {
       const data = await getVendedores()
-      // Filter out gerentes or show all depending on system design
-      setVendedores(data)
+      // Only show sellers belonging to the manager's team
+      let teamSellers = data
+      if (!currentUser?.isSuperAdmin) {
+        teamSellers = data.filter(v => Number(v.gerenteId) === Number(currentUser?.id) && !v.isAdmin && !v.isSuperAdmin)
+      } else {
+        teamSellers = data.filter(v => !v.isAdmin && !v.isSuperAdmin)
+      }
+      setVendedores(teamSellers)
     } catch (e) { 
       setError(e.message) 
     } finally { 
