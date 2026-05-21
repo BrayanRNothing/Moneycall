@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import {
   PhoneOutgoing, Percent, TrendingUp, ArrowUpRight,
   ShieldCheck, CheckCircle2, AlertCircle, RefreshCw,
-  ShieldAlert, Award, Sparkles, AlertOctagon
+  ShieldAlert, Award, Sparkles
 } from 'lucide-react'
 import { getDashboardMetrics, getAlertasS1, getClientes, createAuditoria, getClientesTMUpgrade } from '../api'
 
@@ -153,18 +153,6 @@ export default function Dashboard() {
               <p className="text-xs font-extrabold uppercase tracking-wider leading-none">¡Discrepancia Crítica en Close Ratio!</p>
               <p className="text-[10px] text-red-600 font-bold mt-0.5">
                 La diferencia entre el Close Ratio por cantidad ({m.closeRatios.numRatio}%) y por importe ({m.closeRatios.importRatio}%) es de {m.closeRatios.discrepancia}pp (máx. tolerado: 5pp). Esto indica que estamos perdiendo cotizaciones de alto valor.
-              </p>
-            </div>
-          </div>
-        )}
-
-        {m?.ratioSaliente < 80 && (
-          <div className="p-3.5 rounded-2xl flex items-center gap-3 bg-amber-50 border border-amber-200 text-amber-800">
-            <AlertOctagon size={18} className="text-amber-600 shrink-0" />
-            <div>
-              <p className="text-xs font-extrabold uppercase tracking-wider leading-none">¡Desviación en Proactividad 80/20!</p>
-              <p className="text-[10px] text-amber-700 font-semibold mt-0.5">
-                El ratio de llamadas salientes es de {m.ratioSaliente}%, inferior al estándar proactivo del 80%. Priorizar llamadas salientes de los cuadrantes S1, S2, y DC para no caer en el modo reactivo (IN).
               </p>
             </div>
           </div>
