@@ -29,6 +29,8 @@ import MiDia from './pages/MiDia'
 import Login from './pages/Login'
 import AdminPanel from './pages/AdminPanel'
 import ReunionDiaria from './pages/ReunionDiaria'
+import Certificaciones from './pages/Certificaciones'
+import MiEquipo from './pages/MiEquipo'
 
 const fmtUSD = (n) => n >= 1000 ? `$${(n / 1000).toFixed(n % 1000 === 0 ? 0 : 1)}K` : `$${n.toLocaleString()}`
 
@@ -70,23 +72,32 @@ function App() {
 
   if (!user) return <Login onLogin={handleLogin} />
 
-  const navigation = [
+  const topNavigation = [
     { name: 'Mi Día', href: '/mi-dia', icon: CalendarDays, roles: ['gerente', 'vendedor'] },
     { name: 'Dashboard', href: '/', icon: LayoutDashboard, roles: ['gerente', 'vendedor'] },
     { name: 'Reunión Diaria', href: '/reunion-diaria', icon: TrendingUp, roles: ['gerente'] },
     { name: 'Portafolio', href: '/portafolio', icon: Users, roles: ['gerente', 'vendedor'] },
     { name: 'Llamadas', href: '/llamadas', icon: Phone, roles: ['gerente', 'vendedor'] },
     { name: 'Cotizaciones', href: '/quotes', icon: FileText, roles: ['gerente', 'vendedor'] },
-    { name: 'Testimonios', href: '/testimonials', icon: Award, roles: ['gerente', 'vendedor'] },
+  ]
+
+  const bottomNavigation = [
+    { name: 'Mi Equipo', href: '/mi-equipo', icon: Users, roles: ['gerente', 'vendedor'] },
+    { name: 'Certificaciones', href: '/certificaciones', icon: Award, roles: ['gerente'] },
+    { name: 'Ajustes', href: '/configuracion', icon: Settings, roles: ['gerente', 'vendedor'] },
   ]
 
   // Determinar el rol del usuario
   const userRole = user.isSuperAdmin ? 'superadmin' : user.isAdmin ? 'gerente' : 'vendedor'
 
   // Filtrar nav según rol
-  const navItems = userRole === 'superadmin'
-    ? [] // SuperAdmin no tiene nav de trabajo diario, solo panel admin
-    : navigation.filter(item => item.roles.includes(userRole))
+  const topNavItems = userRole === 'superadmin'
+    ? []
+    : topNavigation.filter(item => item.roles.includes(userRole))
+
+  const bottomNavItems = userRole === 'superadmin'
+    ? []
+    : bottomNavigation.filter(item => item.roles.includes(userRole))
 
   const isActive = (path) => location.pathname === path
 
@@ -121,7 +132,7 @@ function App() {
         </div>
 
         {/* Nav Label — solo si hay items */}
-        {navItems.length > 0 && (
+        {topNavItems.length > 0 && (
           <p className="text-[10px] font-bold tracking-widest uppercase px-2" style={{ color: 'var(--text-muted)' }}>Menú</p>
         )}
 
@@ -143,7 +154,7 @@ function App() {
           )}
 
           {/* Nav normal (gerente y vendedor) */}
-          {navItems.map((item) => {
+          {topNavItems.map((item) => {
             const Icon = item.icon
             const active = isActive(item.href)
             return (
@@ -161,24 +172,32 @@ function App() {
               </Link>
             )
           })}
-
-          {/* Gerente: Configuración inline con el resto del nav */}
-          {user.isAdmin && !user.isSuperAdmin && (
-            <Link
-              to="/configuracion"
-              className="flex items-center gap-3 px-4 py-3 rounded-2xl font-semibold text-sm transition-all"
-              style={isActive('/configuracion')
-                ? { background: 'var(--bg)', color: 'var(--accent)', boxShadow: 'inset 4px 4px 10px var(--shadow-dark), inset -4px -4px 10px var(--shadow-light)' }
-                : { color: 'var(--text-muted)' }
-              }
-            >
-              <Settings size={18} strokeWidth={isActive('/configuracion') ? 2.5 : 1.8} />
-              Configuración
-            </Link>
-          )}
         </nav>
 
-        <div className="mt-auto" />
+        {/* Bottom Nav Items */}
+        <div className="mt-auto flex flex-col gap-2">
+          {bottomNavItems.length > 0 && (
+            <p className="text-[10px] font-bold tracking-widest uppercase px-2 mb-1" style={{ color: 'var(--text-muted)' }}>Operaciones</p>
+          )}
+          {bottomNavItems.map((item) => {
+            const Icon = item.icon
+            const active = isActive(item.href)
+            return (
+              <Link
+                key={item.name}
+                to={item.href}
+                className="flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-200 font-semibold text-sm"
+                style={active
+                  ? { background: 'var(--bg)', color: 'var(--accent)', boxShadow: 'inset 4px 4px 10px var(--shadow-dark), inset -4px -4px 10px var(--shadow-light)' }
+                  : { color: 'var(--text-muted)' }
+                }
+              >
+                <Icon size={18} strokeWidth={active ? 2.5 : 1.8} />
+                {item.name}
+              </Link>
+            )
+          })}
+        </div>
       </aside>
 
       {/* ── Mobile Header ── */}
@@ -211,7 +230,7 @@ function App() {
                 <Shield size={20} /> Panel Admin
               </Link>
             )}
-            {navItems.map((item) => {
+            {topNavItems.map((item) => {
               const Icon = item.icon
               const active = isActive(item.href)
               return (
@@ -225,16 +244,25 @@ function App() {
                 </Link>
               )
             })}
-            {/* Gerente: Configuración inline */}
-            {user.isAdmin && !user.isSuperAdmin && (
-              <Link to="/configuracion" onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center gap-4 px-5 py-4 rounded-2xl font-semibold text-sm transition-all"
-                style={isActive('/configuracion')
-                  ? { background: 'var(--bg)', color: 'var(--accent)', boxShadow: 'inset 4px 4px 10px var(--shadow-dark), inset -4px -4px 10px var(--shadow-light)' }
-                  : { color: 'var(--text-muted)' }}>
-                <Settings size={20} /> Configuración
-              </Link>
+            
+            {bottomNavItems.length > 0 && (
+              <div className="border-t border-slate-100 dark:border-slate-800/60 my-3 pt-3" />
             )}
+
+            {bottomNavItems.map((item) => {
+              const Icon = item.icon
+              const active = isActive(item.href)
+              return (
+                <Link key={item.name} to={item.href} onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-4 px-5 py-4 rounded-2xl font-semibold text-sm transition-all"
+                  style={active
+                    ? { background: 'var(--bg)', color: 'var(--accent)', boxShadow: 'inset 4px 4px 10px var(--shadow-dark), inset -4px -4px 10px var(--shadow-light)' }
+                    : { color: 'var(--text-muted)' }}>
+                  <Icon size={20} />
+                  {item.name}
+                </Link>
+              )
+            })}
           </div>
           <div className="mt-auto pt-3" style={{ borderTop: '1px solid rgba(163,177,198,0.2)' }}>
             <button onClick={handleLogout}
@@ -387,8 +415,10 @@ function App() {
             <Route path="/portafolio" element={<Portafolio />} />
             <Route path="/llamadas" element={<Llamadas />} />
             <Route path="/quotes" element={<Quotes />} />
-            <Route path="/testimonials" element={<Testimonials />} />
-            <Route path="/configuracion" element={<Configuracion />} />
+            {/* <Route path="/testimonials" element={<Testimonials />} /> */}
+            <Route path="/configuracion" element={<Configuracion currentUser={user} onUserUpdate={(updated) => { setUser(updated); localStorage.setItem('user', JSON.stringify(updated)); }} />} />
+            <Route path="/mi-equipo" element={<MiEquipo currentUser={user} />} />
+            <Route path="/certificaciones" element={<Certificaciones currentUser={user} />} />
           </Routes>
         </div>
       </main>

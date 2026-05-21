@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import {
   CalendarDays, Clock, CheckCircle2, AlertCircle, Star,
   Heart, Phone, RefreshCw, Trophy, ChevronRight,
-  PhoneOutgoing, Truck, ArrowRight, Zap
+  PhoneOutgoing, Truck, ArrowRight, Zap, ChevronDown, ChevronUp, Video
 } from 'lucide-react'
 import { getAgenda, getRanking, createLlamada, getClientes, getVendedor, getVendedoresByGerente } from '../api'
 import ExamenRoleplay from '../components/ExamenRoleplay'
@@ -30,6 +30,19 @@ export default function MiDia() {
   const [nota, setNota] = useState('')
   const [saving, setSaving] = useState(false)
   const [copyState, setCopyState] = useState({ script: false, sms: false })
+  const [expandedClients, setExpandedClients] = useState(new Set())
+
+  const toggleClientExpand = (id) => {
+    setExpandedClients(prev => {
+      const next = new Set(prev)
+      if (next.has(id)) {
+        next.delete(id)
+      } else {
+        next.add(id)
+      }
+      return next
+    })
+  }
 
   const handleCopy = (text, type) => {
     navigator.clipboard.writeText(text)
@@ -220,6 +233,26 @@ export default function MiDia() {
     )
   }
 
+  // Agrupar tareas por cliente
+  const agendaPorCliente = agenda.reduce((acc, tarea) => {
+    const key = tarea.clienteId
+    if (!acc[key]) {
+      acc[key] = {
+        clienteId: tarea.clienteId,
+        cliente: tarea.cliente,
+        contactoPreferencia: tarea.contactoPreferencia,
+        contactoPrincipal: tarea.contactoPrincipal,
+        dcSatisfactoriasCount: tarea.dcSatisfactoriasCount,
+        planTestimonio: tarea.planTestimonio,
+        tareas: []
+      }
+    }
+    acc[key].tareas.push(tarea)
+    return acc
+  }, {})
+
+  const clientesConTareas = Object.values(agendaPorCliente)
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -301,88 +334,17 @@ export default function MiDia() {
         </div>
       </div>
 
-      {/* ── Cola de Tareas (Agenda) ── */}
-      <div className="space-y-3">
-        <div className="flex items-center gap-2">
-          <Zap size={16} style={{ color: 'var(--accent)' }} />
-          <h3 className="text-sm font-bold" style={{ color: 'var(--text)' }}>Cola de Tareas del Día</h3>
-          <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full" style={{ background: 'rgba(99,102,241,0.1)', color: '#6366f1' }}>
-            Ordenadas por prioridad metodológica
-          </span>
-        </div>
-
-        {loading ? (
-          <div className="space-y-3">
-            {[1, 2, 3].map(n => (
-              <div key={n} className="neu-card p-4 flex items-center gap-4 animate-pulse" style={{ border: '1px solid rgba(163,177,198,0.1)' }}>
-                <div className="w-10 h-10 rounded-xl bg-gray-400/10 shrink-0" />
-                <div className="flex-1 min-w-0 space-y-2">
-                  <div className="h-3 bg-gray-400/10 rounded w-1/4" />
-                  <div className="h-2 bg-gray-400/10 rounded w-2/3" />
-                </div>
-                <div className="w-16 h-8 rounded-xl bg-gray-400/10 shrink-0" />
-              </div>
-            ))}
-          </div>
-        ) : agenda.length === 0 ? (
-          <div className="neu-card p-8 text-center space-y-2">
-            <CheckCircle2 size={32} className="mx-auto" style={{ color: '#10b981' }} />
-            <p className="font-bold" style={{ color: '#10b981' }}>¡Agenda completa!</p>
-            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Todos tus clientes están al día. Excelente trabajo.</p>
-          </div>
-        ) : (
-          <div className="space-y-2">
-            {agenda.map((tarea, i) => {
-              const cfg = TIPO_CONFIG[tarea.tipo] || TIPO_CONFIG.S1
-              const Icon = cfg.icon
-              const key = `${tarea.clienteId}-${tarea.tipo}`
-              const done = completadas.has(key)
-              return (
-                <div key={i} className="neu-card p-4 flex items-center gap-4 transition-all"
-                  style={done ? { opacity: 0.4 } : { border: `1px solid ${cfg.border}` }}>
-                  {/* Tipo badge */}
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white shrink-0" style={{ background: cfg.color }}>
-                    <Icon size={16} />
-                  </div>
-                  {/* Info */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-[9px] font-extrabold px-2 py-0.5 rounded-full"
-                        style={{ background: cfg.bg, color: cfg.color, border: `1px solid ${cfg.border}` }}>
-                        {cfg.badge}
-                      </span>
-                      <span className="text-sm font-bold truncate" style={{ color: 'var(--text)' }}>{tarea.cliente}</span>
-                      {tarea.contactoPreferencia && (
-                        <span className="text-[8.5px] font-bold px-2 py-0.5 rounded-full"
-                          style={{ background: 'rgba(99,102,241,0.08)', color: '#6366f1', border: '1px solid rgba(99,102,241,0.2)' }}>
-                          💬 Preferencia: <span className="font-extrabold capitalize">{tarea.contactoPreferencia}</span>
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-[11px] mt-0.5 leading-tight" style={{ color: 'var(--text-muted)' }}>{tarea.razon}</p>
-                  </div>
-                  {/* Acción */}
-                  {!done ? (
-                    <button onClick={() => setLogModal(tarea)}
-                      className="shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all hover:scale-105"
-                      style={{ background: cfg.bg, color: cfg.color, border: `1px solid ${cfg.border}` }}>
-                      <Phone size={12} /> Llamar
-                    </button>
-                  ) : (
-                    <CheckCircle2 size={20} style={{ color: '#10b981' }} className="shrink-0" />
-                  )}
-                </div>
-              )
-            })}
-          </div>
-        )}
-      </div>
-
       {/* ── Ranking — Reunión Diaria de 20 min ── */}
       <div className="neu-card overflow-hidden">
-        <div className="px-5 py-4 flex items-center gap-2" style={{ borderBottom: '1px solid rgba(163,177,198,0.2)' }}>
-          <Trophy size={15} style={{ color: '#f59e0b' }} />
-          <h3 className="text-xs font-bold" style={{ color: 'var(--text)' }}>Ranking del Equipo — Reunión Diaria 20 min</h3>
+        <div className="px-5 py-4 flex items-center justify-between" style={{ borderBottom: '1px solid rgba(163,177,198,0.2)' }}>
+          <div className="flex items-center gap-2">
+            <Trophy size={15} style={{ color: '#f59e0b' }} />
+            <h3 className="text-xs font-bold" style={{ color: 'var(--text)' }}>Ranking del Equipo — Reunión Diaria 20 min</h3>
+          </div>
+          <button onClick={() => window.open('https://meet.google.com/new', '_blank')} className="neu-btn-accent text-[10px] font-extrabold px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all hover:scale-105 active:scale-95 shrink-0" style={{ background: 'linear-gradient(135deg, #10b981, #059669)', color: 'white', border: 'none' }}>
+            <Video size={12} />
+            Unirse a Meet
+          </button>
         </div>
         {ranking.length === 0 ? (
           <div className="p-6 text-center text-xs" style={{ color: 'var(--text-muted)' }}>
@@ -436,6 +398,126 @@ export default function MiDia() {
                 ))}
               </tbody>
             </table>
+          </div>
+        )}
+      </div>
+
+      {/* ── Cola de Tareas (Agenda) ── */}
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          <Zap size={16} style={{ color: 'var(--accent)' }} />
+          <h3 className="text-sm font-bold" style={{ color: 'var(--text)' }}>Cola de Tareas del Día</h3>
+          <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full" style={{ background: 'rgba(99,102,241,0.1)', color: '#6366f1' }}>
+            Agrupadas por cliente — Ahorro de espacio interactivo
+          </span>
+        </div>
+
+        {loading ? (
+          <div className="space-y-3">
+            {[1, 2, 3].map(n => (
+              <div key={n} className="neu-card p-4 flex items-center gap-4 animate-pulse" style={{ border: '1px solid rgba(163,177,198,0.1)' }}>
+                <div className="w-10 h-10 rounded-xl bg-gray-400/10 shrink-0" />
+                <div className="flex-1 min-w-0 space-y-2">
+                  <div className="h-3 bg-gray-400/10 rounded w-1/4" />
+                  <div className="h-2 bg-gray-400/10 rounded w-2/3" />
+                </div>
+                <div className="w-16 h-8 rounded-xl bg-gray-400/10 shrink-0" />
+              </div>
+            ))}
+          </div>
+        ) : clientesConTareas.length === 0 ? (
+          <div className="neu-card p-8 text-center space-y-2">
+            <CheckCircle2 size={32} className="mx-auto" style={{ color: '#10b981' }} />
+            <p className="font-bold" style={{ color: '#10b981' }}>¡Agenda completa!</p>
+            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Todos tus clientes están al día. Excelente trabajo.</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {clientesConTareas.map((clienteObj) => {
+              const isExpanded = expandedClients.has(clienteObj.clienteId)
+              const pendingCount = clienteObj.tareas.filter(t => !completadas.has(`${t.clienteId}-${t.tipo}`)).length
+              
+              return (
+                <div key={clienteObj.clienteId} className="neu-card overflow-hidden transition-all duration-300">
+                  {/* Acordeón Header */}
+                  <div 
+                    onClick={() => toggleClientExpand(clienteObj.clienteId)}
+                    className="px-5 py-3.5 flex items-center justify-between cursor-pointer hover:bg-slate-100/50 dark:hover:bg-slate-800/30 transition-all select-none"
+                  >
+                    <div className="flex items-center gap-3 flex-wrap">
+                      <span className="text-sm font-extrabold" style={{ color: 'var(--text)' }}>
+                        {clienteObj.cliente}
+                      </span>
+                      {clienteObj.contactoPreferencia && (
+                        <span className="text-[8.5px] font-bold px-2 py-0.5 rounded-full"
+                          style={{ background: 'rgba(99,102,241,0.08)', color: '#6366f1', border: '1px solid rgba(99,102,241,0.2)' }}>
+                          💬 {clienteObj.contactoPreferencia}
+                        </span>
+                      )}
+                      {pendingCount > 0 ? (
+                        <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-red-100 dark:bg-red-950/45 text-red-500 border border-red-200 dark:border-red-900/50">
+                          {pendingCount} pendientes
+                        </span>
+                      ) : (
+                        <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/45 text-emerald-500 border border-emerald-200 dark:border-emerald-900/50">
+                          Completado
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
+                      {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                    </div>
+                  </div>
+
+                  {/* Acordeón Body */}
+                  {isExpanded && (
+                    <div className="px-5 pb-4 pt-1 space-y-2.5 border-t border-slate-100 dark:border-slate-800/60 bg-slate-50/20 dark:bg-slate-900/10">
+                      {clienteObj.tareas.map((tarea, index) => {
+                        const cfg = TIPO_CONFIG[tarea.tipo] || TIPO_CONFIG.S1
+                        const Icon = cfg.icon
+                        const key = `${tarea.clienteId}-${tarea.tipo}`
+                        const done = completadas.has(key)
+                        
+                        return (
+                          <div 
+                            key={index} 
+                            className="neu-card-sm p-3.5 flex items-center gap-3.5 transition-all"
+                            style={done ? { opacity: 0.4 } : { borderLeft: `4px solid ${cfg.color}` }}
+                          >
+                            <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white shrink-0 shadow-sm" style={{ background: cfg.color }}>
+                              <Icon size={14} />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="text-[8.5px] font-extrabold px-1.5 py-0.2 rounded-full"
+                                  style={{ background: cfg.bg, color: cfg.color, border: `1px solid ${cfg.border}` }}>
+                                  {cfg.badge}
+                                </span>
+                                <span className="text-xs font-bold" style={{ color: 'var(--text)' }}>
+                                  {cfg.label}
+                                </span>
+                              </div>
+                              <p className="text-[10px] mt-0.5 leading-normal" style={{ color: 'var(--text-muted)' }}>
+                                {tarea.razon}
+                              </p>
+                            </div>
+                            {!done ? (
+                              <button onClick={() => setLogModal(tarea)}
+                                className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-extrabold transition-all hover:scale-105"
+                                style={{ background: cfg.bg, color: cfg.color, border: `1px solid ${cfg.border}` }}>
+                                <Phone size={10} /> Llamar
+                              </button>
+                            ) : (
+                              <CheckCircle2 size={16} style={{ color: '#10b981' }} className="shrink-0" />
+                            )}
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )}
+                </div>
+              )
+            })}
           </div>
         )}
       </div>
