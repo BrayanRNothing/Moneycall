@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Users, HelpCircle, Check, Award, X, Plus, Trash2, RefreshCw, AlertCircle, ShoppingBag, BarChart3 } from 'lucide-react'
-import { getClientes, createCliente, updateCliente5Q, deleteCliente, recalcularPareto, getPedidos, createPedido, deletePedido } from '../api'
+import { getClientes, createCliente, updateCliente5Q, deleteCliente, recalcularPareto, getPedidos, createPedido, deletePedido, updatePreferenciaContacto } from '../api'
 
 const CALL_COLORS = { S1: '#3b82f6', S2: '#6366f1', DC: '#10b981', PT: '#94a3b8', F1: '#f59e0b', RC: '#f59e0b', IN: '#64748b' }
 
@@ -10,6 +10,7 @@ const questions = [
   { key: 'q3', label: '3. ¿Qué % de compras totales nos hace a nosotros?', placeholder: 'Ej. 40% con nosotros.' },
   { key: 'q4', label: '4. ¿Qué le ha costado encontrar últimamente?', placeholder: 'Ej. Motores monofásicos 1.5 HP.' },
   { key: 'q5', label: '5. ¿En qué mercado quiere crecer y cómo podemos ayudar?', placeholder: 'Ej. VRF comercial en Broward.' },
+  { key: 'q6', label: '6. ¿Qué le gusta de hacer negocios conmigo? (si ya se conocen)', placeholder: 'Ej. El trato personalizado.' },
 ]
 
 export default function Portafolio() {
@@ -208,10 +209,20 @@ export default function Portafolio() {
                       </p>
                     )}
                   </div>
-                  <div className="flex items-center gap-1.5 shrink-0">
+                  <div className="flex items-center gap-1.5 shrink-0 flex-wrap justify-end max-w-[160px]">
                     {rcReady && (
                       <span title="¡10 DCs! Pedir RC." className="w-6 h-6 rounded-full flex items-center justify-center text-white animate-bounce" style={{ background: '#10b981' }}>
                         <Award size={12} />
+                      </span>
+                    )}
+                    {client.cuotaMercado !== null && client.cuotaMercado !== undefined && (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-100">
+                        {client.cuotaMercado}% cuota
+                      </span>
+                    )}
+                    {client.ventasAnuales >= 60000 && (
+                      <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded-full bg-amber-500 text-white shadow-sm border border-amber-600 animate-pulse" title="Ventas anuales > $60,000. ¡Listo para upgrade a Territory Manager!">
+                        💰 Listo para TM
                       </span>
                     )}
                     <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full"
@@ -243,6 +254,29 @@ export default function Portafolio() {
                     <div className="h-full rounded-full transition-all duration-700"
                       style={{ width: `${Math.min(client.satisfiedDcs || 0, 10) * 10}%`, background: rcReady ? '#10b981' : '#3b82f6' }} />
                   </div>
+                </div>
+                {/* Preferencia de Contacto */}
+                <div className="flex items-center justify-between gap-2 mt-1">
+                  <span className="text-[10px] font-semibold text-slate-500">Preferencia:</span>
+                  <select
+                    value={client.contactoPreferencia || ''}
+                    onChange={async (e) => {
+                      const val = e.target.value || null
+                      try {
+                        await updatePreferenciaContacto(client.id, val)
+                        setClients(prev => prev.map(c => c.id === client.id ? { ...c, contactoPreferencia: val } : c))
+                      } catch (err) {
+                        alert('Error: ' + err.message)
+                      }
+                    }}
+                    className="text-[10px] font-bold py-1 px-2 rounded-lg bg-slate-100 hover:bg-slate-200/50 border-none outline-none capitalize text-slate-700 shadow-sm cursor-pointer"
+                  >
+                    <option value="">No especificada</option>
+                    <option value="mensual">📅 Mensual</option>
+                    <option value="quincenal">🗓 Quincenal</option>
+                    <option value="texto">💬 SMS / Texto</option>
+                    <option value="email">✉ Email</option>
+                  </select>
                 </div>
 
                 {/* Actions */}

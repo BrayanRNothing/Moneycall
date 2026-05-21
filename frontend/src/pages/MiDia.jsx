@@ -29,6 +29,71 @@ export default function MiDia() {
   const [logModal, setLogModal] = useState(null) // { tarea }
   const [nota, setNota] = useState('')
   const [saving, setSaving] = useState(false)
+  const [copyState, setCopyState] = useState({ script: false, sms: false })
+
+  const handleCopy = (text, type) => {
+    navigator.clipboard.writeText(text)
+    setCopyState(prev => ({ ...prev, [type]: true }))
+    setTimeout(() => {
+      setCopyState(prev => ({ ...prev, [type]: false }))
+    }, 2000)
+  }
+
+  const getSuggestedScript = () => {
+    if (!logModal) return ''
+    const cName = logModal.contactoPrincipal || 'Sr. Cliente'
+    const vName = currentUser?.nombre || 'su asesor'
+    
+    switch (logModal.tipo) {
+      case 'S1':
+        return `"${cName}, le habla ${vName} de Moneycall. Veo que solía comprarnos sus productos habituales con frecuencia, pero hace más de 45 días que no registramos un pedido. ¿Cómo ha estado la demanda? Quería asegurarme de que todo marche bien y ver si requiere reposición hoy."`
+      case 'S2':
+        return `"${cName}, le habla ${vName} de Moneycall. Espero que esté teniendo un gran día. Le llamo porque notamos que adquiere regularmente sus productos estándar, y muchos de nuestros clientes con perfiles similares suelen complementar sus pedidos con otros accesorios o insumos cruzados para optimizar costos y tiempos. ¿Cómo maneja esa parte actualmente? ¿Le gustaría recibir una muestra o cotización rápida?"`
+      case 'F1':
+        return `"${cName}, le habla ${vName} de Moneycall. Le llamo para dar el primer seguimiento formal a la cotización que le enviamos. ¿Pudo revisar los costos y partidas con su equipo técnico? Quería saber si tiene algún comentario inicial y qué fecha estimada de decisión están considerando para planificar el stock."`
+      case 'F2':
+        return `"${cName}, le habla ${vName} de Moneycall. Le doy seguimiento a la cotización pendiente. Sé que su tiempo es valioso, y como estamos cerrando lotes esta semana, me gustaría confirmar si procedemos con la orden. ¿Qué día de esta semana prefiere recibir el material para no retrasar su obra/operación?"`
+      case 'DC':
+        return `"${cName}, le habla ${vName} de Moneycall. Veo en mi sistema que su pedido fue entregado hace un momento. Mi llamada es rápida, solo para confirmar: ¿el material llegó completo y en perfectas condiciones? ¿El chofer le brindó la atención adecuada? En Moneycall su total satisfacción en la entrega es nuestra prioridad."`
+      case 'RC':
+        const plan = logModal.planTestimonio || 'A'
+        const scriptsPlan = {
+          A: `"Estupendo. Como hemos tenido ${logModal.dcSatisfactoriasCount || 0} entregas perfectas consecutivas, nos enorgullece nuestro servicio. ¿Le importaría si grabamos un video testimonio corto de 30 segundos sobre cómo le hemos ayudado a eficientar su operación?"`,
+          B: `"Entiendo que el video sea complicado. ¿Nos permitiría redactar un testimonio escrito en su nombre de 2 líneas basado en su excelente experiencia para colocarlo en nuestra web junto a su logo?"`,
+          C: `"Totalmente respetable. ¿Habrá alguna otra empresa o colega en su sector a quien estime que nuestro servicio de entrega garantizada y Moneycall le pueda aportar el mismo valor que a usted? Estaríamos muy agradecidos de su parte."`
+        }
+        return `"${cName}, le habla ${vName} de Moneycall. Primero que nada, quiero agradecerle su lealtad. En nuestro afán de mantener un servicio excelente, notamos que ya lleva ${logModal.dcSatisfactoriasCount || 0} entregas perfectas consecutivas. Quería hacerle una consulta rápida:\n\n[Enfoque: Plan ${plan}]\n${scriptsPlan[plan] || scriptsPlan.A}"`
+      case 'PT':
+        return `"${cName}, le habla ${vName} de Moneycall. Espero que esté teniendo una excelente semana. Mi llamada es 100% de relación, solo quería saludarle, saber cómo marcha su negocio y agradecerle la confianza en nosotros. No le quito más que un minuto, ¿hay algo específico en lo que yo le pueda apoyar o facilitar desde aquí?"`
+      default:
+        return `"${cName}, le habla ${vName} de Moneycall. Espero que se encuentre excelente. Le llamo para dar seguimiento a sus requerimientos y ver cómo le podemos asistir hoy."`
+    }
+  }
+
+  const getSmsTemplate = () => {
+    if (!logModal) return ''
+    const cName = logModal.contactoPrincipal || 'cliente'
+    const eName = logModal.cliente || 'su empresa'
+    
+    switch (logModal.tipo) {
+      case 'S1':
+        return `Hola ${cName} de ${eName}, le saludamos de Moneycall. Intentamos comunicarnos para informarle sobre stock y promociones especiales de sus productos habituales. Avísenos si desea reabastecerse. ¡Saludos!`
+      case 'S2':
+        return `Hola ${cName}, le saludamos de Moneycall. Le contactamos para comentarle sobre nuestros productos complementarios, ideal para acompañar su compra habitual. Quedamos a sus órdenes si requiere detalles o cotización.`
+      case 'F1':
+        return `Hola ${cName}, de Moneycall le enviamos un atento saludo. Le escribimos para dar seguimiento a la cotización pendiente. Cualquier ajuste que requiera o si desea proceder, no dude en escribirnos por aquí o llamarnos.`
+      case 'F2':
+        return `Hola ${cName}, de Moneycall. Le informamos que estamos cerrando programaciones de despacho para esta semana. Si desea asegurar sus materiales y congelar el precio cotizado, avísenos para procesar su orden a la brevedad.`
+      case 'DC':
+        return `Hola ${cName}, confirmamos que su pedido ya fue entregado. ¿Llegó todo conforme? Su opinión es sumamente valiosa para mantener nuestro estándar. Si tiene cualquier observación, por favor háganosla saber. ¡Gracias!`
+      case 'RC':
+        return `Hola ${cName}, le saluda de Moneycall. Nos alegra saber que sus últimas entregas han sido excelentes. Nos encantaría contar con su breve testimonio o recomendación para seguir creciendo juntos. ¿Le vendría bien una llamada corta mañana?`
+      case 'PT':
+        return `Hola ${cName}, le saludamos de Moneycall. Esperamos que tenga una excelente semana y que su negocio marche viento en popa. Agradecemos enormemente su lealtad y quedamos a su entera disposición.`
+      default:
+        return `Hola ${cName}, de Moneycall. Intentamos llamarle hace un momento. Quedamos a su entera disposición para cualquier requerimiento de cotizaciones o entregas. ¡Excelente día!`
+    }
+  }
 
   const load = async () => {
     setLoading(true); setError(null)
@@ -287,6 +352,12 @@ export default function MiDia() {
                         {cfg.badge}
                       </span>
                       <span className="text-sm font-bold truncate" style={{ color: 'var(--text)' }}>{tarea.cliente}</span>
+                      {tarea.contactoPreferencia && (
+                        <span className="text-[8.5px] font-bold px-2 py-0.5 rounded-full"
+                          style={{ background: 'rgba(99,102,241,0.08)', color: '#6366f1', border: '1px solid rgba(99,102,241,0.2)' }}>
+                          💬 Preferencia: <span className="font-extrabold capitalize">{tarea.contactoPreferencia}</span>
+                        </span>
+                      )}
                     </div>
                     <p className="text-[11px] mt-0.5 leading-tight" style={{ color: 'var(--text-muted)' }}>{tarea.razon}</p>
                   </div>
@@ -376,52 +447,115 @@ export default function MiDia() {
             const cfg = TIPO_CONFIG[logModal.tipo] || TIPO_CONFIG.S1
             const Icon = cfg.icon
             return (
-              <div className="w-full max-w-md rounded-2xl overflow-hidden" style={{ background: 'var(--bg)', boxShadow: '16px 16px 40px var(--shadow-dark), -16px -16px 40px var(--shadow-light)' }}>
-                <div className="px-6 py-4 flex items-center justify-between" style={{ borderBottom: '1px solid rgba(163,177,198,0.3)', background: cfg.bg }}>
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-xl flex items-center justify-center text-white" style={{ background: cfg.color }}>
-                      <Icon size={15} />
+              <div className="w-full max-w-4xl rounded-2xl overflow-hidden flex flex-col md:flex-row max-h-[85vh] md:h-[620px]" style={{ background: 'var(--bg)', boxShadow: '16px 16px 40px var(--shadow-dark), -16px -16px 40px var(--shadow-light)' }}>
+                {/* Columna Izquierda: Formulario (40% de ancho) */}
+                <div className="w-full md:w-5/12 flex flex-col justify-between p-6 border-r border-slate-200 dark:border-slate-800">
+                  <div className="space-y-4">
+                    {/* Header */}
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white shrink-0 shadow-lg" style={{ background: cfg.color }}>
+                        <Icon size={16} />
+                      </div>
+                      <div>
+                        <span className="text-xs font-bold text-slate-400 block uppercase tracking-wider">Registrar {cfg.label}</span>
+                        <span className="text-sm font-extrabold" style={{ color: 'var(--text)' }}>{logModal.cliente}</span>
+                      </div>
                     </div>
-                    <div>
-                      <span className="text-sm font-bold block" style={{ color: 'var(--text)' }}>Registrar {cfg.label}</span>
-                      <span className="text-[10px]" style={{ color: cfg.color }}>{logModal.cliente}</span>
+
+                    <div className="border-t border-slate-100 dark:border-slate-800 my-2" />
+
+                    {/* Info Mini Card */}
+                    <div className="neu-inset p-3.5 rounded-xl space-y-2">
+                      <div className="flex items-center justify-between text-[10px]">
+                        <span className="font-semibold text-slate-400">Contacto:</span>
+                        <span className="font-bold text-slate-700 dark:text-slate-200">{logModal.contactoPrincipal || 'No registrado'}</span>
+                      </div>
+                      <div className="flex items-center justify-between text-[10px]">
+                        <span className="font-semibold text-slate-400">Preferencia:</span>
+                        <span className="font-extrabold text-indigo-500 capitalize">{logModal.contactoPreferencia || 'Texto/Llamada'}</span>
+                      </div>
+                      <div className="flex items-center justify-between text-[10px]">
+                        <span className="font-semibold text-slate-400">Entrega DC:</span>
+                        <span className="font-bold text-emerald-500">{logModal.dcSatisfactoriasCount || 0} perfectas</span>
+                      </div>
+                      {logModal.tipo === 'RC' && (
+                        <div className="flex items-center justify-between text-[10px]">
+                          <span className="font-semibold text-slate-400">Testimonio:</span>
+                          <span className="font-extrabold text-amber-500">Plan {logModal.planTestimonio || 'A'}</span>
+                        </div>
+                      )}
                     </div>
+
+                    {/* Nota del CRM */}
+                    <form onSubmit={handleComplete} className="space-y-4" id="log-task-form">
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-bold uppercase tracking-wider block" style={{ color: 'var(--text-muted)' }}>
+                          Nota de la llamada (guardar en CRM)
+                        </label>
+                        <textarea className="neu-input resize-none w-full text-xs p-3 rounded-xl" rows={6}
+                          placeholder="Escriba los comentarios de la llamada, acuerdos y compromisos..."
+                          value={nota} onChange={e => setNota(e.target.value)} />
+                      </div>
+                    </form>
+                  </div>
+
+                  {/* Botones de Acción */}
+                  <div className="flex gap-2 justify-end pt-4 border-t border-slate-100 dark:border-slate-800">
+                    <button type="button" onClick={() => { setLogModal(null); setNota('') }}
+                      className="neu-btn text-xs font-semibold px-4 py-2.5 rounded-xl transition-all" style={{ color: 'var(--text-muted)' }}>
+                      Cancelar
+                    </button>
+                    <button type="submit" form="log-task-form" disabled={saving}
+                      className="neu-btn-accent text-xs font-bold px-5 py-2.5 rounded-xl flex items-center gap-1.5 transition-all hover:scale-105">
+                      <Phone size={13} /> {saving ? 'Guardando...' : 'Marcar Completada'}
+                    </button>
                   </div>
                 </div>
 
-                <div className="p-5 space-y-4">
-                  {/* Guía contextual del libro */}
-                  <div className="p-3 rounded-xl text-[10px] leading-relaxed space-y-1"
-                    style={{ background: cfg.bg, border: `1px solid ${cfg.border}`, color: 'var(--text)' }}>
-                    <p className="font-bold" style={{ color: cfg.color }}>📖 Guía del libro Moneycall</p>
-                    {logModal.tipo === 'F2' && <p>Llama para cerrar. Pregunta: "¿Pudiste revisar la cotización? ¿Tienes alguna duda antes de proceder?"</p>}
-                    {logModal.tipo === 'F1' && <p>Confirma recepción: "¿Pudiste ver la cotización? ¿Para cuándo crees que puedas darme una respuesta?"</p>}
-                    {logModal.tipo === 'RC' && <p>Plan A: "Ya que completamos 10 entregas perfectas, ¿me presentarías a alguien que también se beneficie de nuestro servicio?"</p>}
-                    {logModal.tipo === 'PT' && <p>"Hola [nombre], solo llamo para saludarte y ver cómo van las cosas. ¿Hay algo en lo que te podamos ayudar?"</p>}
-                    {logModal.tipo === 'S1' && <p>Revisa el historial del cliente. Pregunta: "¿Qué más te resulta difícil encontrar?" (pregunta McDonald's al final).</p>}
-                    <p className="text-[9px] mt-1 font-semibold" style={{ color: 'var(--text-muted)' }}>{logModal.razon}</p>
+                {/* Columna Derecha: Guías y Mensajes (60% de ancho) */}
+                <div className="w-full md:w-7/12 flex flex-col p-6 overflow-y-auto space-y-4" style={{ background: 'rgba(163,177,198,0.06)' }}>
+                  <div>
+                    <h4 className="text-[10px] font-extrabold uppercase tracking-wider" style={{ color: cfg.color }}>📖 Guía del Libro Moneycall</h4>
+                    <p className="text-[11px] font-medium leading-relaxed mt-1" style={{ color: 'var(--text)' }}>
+                      {logModal.razon}
+                    </p>
                   </div>
 
-                  <form onSubmit={handleComplete} className="space-y-4">
-                    <div className="space-y-1.5">
-                      <label className="text-[10px] font-bold uppercase tracking-wider block" style={{ color: 'var(--text-muted)' }}>
-                        Nota de la llamada (guardar en CRM)
-                      </label>
-                      <textarea className="neu-input resize-none" rows={3}
-                        placeholder="Resumen de lo que se habló, próxima acción..."
-                        value={nota} onChange={e => setNota(e.target.value)} />
-                    </div>
-                    <div className="flex gap-2 justify-end">
-                      <button type="button" onClick={() => { setLogModal(null); setNota('') }}
-                        className="neu-btn text-xs font-semibold px-4 py-2 rounded-xl" style={{ color: 'var(--text-muted)' }}>
-                        Cancelar
-                      </button>
-                      <button type="submit" disabled={saving}
-                        className="neu-btn-accent text-xs font-bold px-5 py-2 rounded-xl flex items-center gap-1.5">
-                        <Phone size={13} /> {saving ? 'Guardando...' : 'Marcar completada'}
+                  {/* Guión de Apertura Recomendado */}
+                  <div className="neu-card p-4 space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                        Guión de Apertura Sugerido ({logModal.tipo})
+                      </span>
+                      <button type="button" onClick={() => handleCopy(getSuggestedScript(), 'script')}
+                        className="neu-btn text-[9px] font-bold px-2.5 py-1 transition-all"
+                        style={copyState.script ? { color: '#10b981' } : { color: 'var(--text-muted)' }}>
+                        {copyState.script ? '¡Copiado!' : 'Copiar'}
                       </button>
                     </div>
-                  </form>
+                    <div className="p-3.5 rounded-xl text-xs leading-relaxed italic border border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50"
+                      style={{ color: 'var(--text)' }}>
+                      {getSuggestedScript()}
+                    </div>
+                  </div>
+
+                  {/* SMS / WhatsApp de Respaldo */}
+                  <div className="neu-card p-4 space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                        WhatsApp / SMS de Respaldo (Si no responde)
+                      </span>
+                      <button type="button" onClick={() => handleCopy(getSmsTemplate(), 'sms')}
+                        className="neu-btn text-[9px] font-bold px-2.5 py-1 transition-all"
+                        style={copyState.sms ? { color: '#10b981' } : { color: 'var(--text-muted)' }}>
+                        {copyState.sms ? '¡Copiado!' : 'Copiar'}
+                      </button>
+                    </div>
+                    <div className="p-3.5 rounded-xl text-xs leading-relaxed italic border border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50"
+                      style={{ color: 'var(--text)' }}>
+                      {getSmsTemplate()}
+                    </div>
+                  </div>
                 </div>
               </div>
             )

@@ -26,20 +26,24 @@ model Vendedor {
 }
 
 model Cliente {
-  id                 Int          @id @default(autoincrement())
-  vendedorId         Int
-  vendedor           Vendedor     @relation(fields: [vendedorId], references: [id], onDelete: Cascade)
-  nombreEmpresa      String
-  contactoPrincipal  String
-  telefono           String
-  email              String?
-  segmentoPareto     String       @default("Marginal 80%") // Top 20%, Marginal 80%
-  cuotaMercado       Int?         // % que nos compra (de la pregunta Q3)
-  respuestas5Q       Json?        // { q1, q2, q3, q4, q5 }
-  llamadas           Llamada[]
-  cotizaciones       Cotizacion[]
-  pedidos            Pedido[]
-  auditorias         Auditoria[]
+  id                     Int          @id @default(autoincrement())
+  vendedorId             Int
+  vendedor               Vendedor     @relation(fields: [vendedorId], references: [id], onDelete: Cascade)
+  nombreEmpresa          String
+  contactoPrincipal      String
+  telefono               String
+  email                  String?
+  segmentoPareto         String       @default("Marginal 80%") // Top 20%, Marginal 80%
+  cuotaMercado           Int?         // % que nos compra (de la pregunta Q3)
+  respuestas5Q           Json?        // { q1, q2, q3, q4, q5, q6 }
+  contactoPreferencia    String?      // mensual, quincenal, texto, email
+  planTestimonio         String       @default("A")  // A, B, C, completado
+  dcSatisfactoriasCount  Int          @default(0)   // Contador de DC satisfactorias consecutivas
+  ventasAnuales          Float        @default(0)   // Calculado: suma de cotizaciones Ganadas en los últimos 365 días
+  llamadas               Llamada[]
+  cotizaciones           Cotizacion[]
+  pedidos                Pedido[]
+  auditorias             Auditoria[]
 }
 
 model Llamada {

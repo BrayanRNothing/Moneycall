@@ -15,7 +15,8 @@ import {
   Shield,
   Target,
   Pencil,
-  Check
+  Check,
+  TrendingUp
 } from 'lucide-react'
 
 import Dashboard from './pages/Dashboard'
@@ -27,6 +28,7 @@ import Configuracion from './pages/Configuracion'
 import MiDia from './pages/MiDia'
 import Login from './pages/Login'
 import AdminPanel from './pages/AdminPanel'
+import ReunionDiaria from './pages/ReunionDiaria'
 
 const fmtUSD = (n) => n >= 1000 ? `$${(n / 1000).toFixed(n % 1000 === 0 ? 0 : 1)}K` : `$${n.toLocaleString()}`
 
@@ -65,6 +67,7 @@ function App() {
   const navigation = [
     { name: 'Mi Día', href: '/mi-dia', icon: CalendarDays, roles: ['gerente', 'vendedor'] },
     { name: 'Dashboard', href: '/', icon: LayoutDashboard, roles: ['gerente', 'vendedor'] },
+    { name: 'Reunión Diaria', href: '/reunion-diaria', icon: TrendingUp, roles: ['gerente'] },
     { name: 'Portafolio', href: '/portafolio', icon: Users, roles: ['gerente', 'vendedor'] },
     { name: 'Llamadas', href: '/llamadas', icon: Phone, roles: ['gerente', 'vendedor'] },
     { name: 'Cotizaciones', href: '/quotes', icon: FileText, roles: ['gerente', 'vendedor'] },
@@ -312,6 +315,7 @@ function App() {
             <Route path="/admin" element={<AdminPanel />} />
             <Route path="/mi-dia" element={<MiDia />} />
             <Route path="/" element={<Dashboard />} />
+            <Route path="/reunion-diaria" element={<ReunionDiaria />} />
             <Route path="/portafolio" element={<Portafolio />} />
             <Route path="/llamadas" element={<Llamadas />} />
             <Route path="/quotes" element={<Quotes />} />

@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react'
 import {
   PhoneOutgoing, Percent, TrendingUp, ArrowUpRight,
-  ShieldCheck, Search, CheckCircle2, AlertCircle, RefreshCw
+  ShieldCheck, CheckCircle2, AlertCircle, RefreshCw,
+  ShieldAlert, Award, Sparkles, AlertOctagon
 } from 'lucide-react'
-import { getDashboardMetrics, getAlertasS1, getClientes, createAuditoria } from '../api'
+import { getDashboardMetrics, getAlertasS1, getClientes, createAuditoria, getClientesTMUpgrade } from '../api'
 
 export default function Dashboard() {
   const user = JSON.parse(localStorage.getItem('user')) || { id: 1 }
@@ -14,24 +15,35 @@ export default function Dashboard() {
   const [auditResult, setAuditResult] = useState(null)
   const [alertasS1, setAlertasS1] = useState([])
   const [clientes, setClientes] = useState([])
+  const [tmReadyClients, setTmReadyClients] = useState([])
 
   const load = async () => {
     setLoading(true); setError(null)
     try {
-      const [data, s1, clts] = await Promise.all([getDashboardMetrics(), getAlertasS1(user.id), getClientes(user.id)])
+      const [data, s1, clts, tmClts] = await Promise.all([
+        getDashboardMetrics(),
+        getAlertasS1(user.id),
+        getClientes(user.id),
+        getClientesTMUpgrade()
+      ])
       setMetrics(data)
       setAlertasS1(s1)
       setClientes(clts)
+      setTmReadyClients(tmClts)
     } catch (e) {
       setError(e.message)
       // Fallback a datos estáticos si no hay backend
       setMetrics({
-        llamadasHoy: 0, salientes: 0, entrantes: 0, ratioSaliente: 0,
-        tiposHoy: {},
-        closeRatios: { numRatio: 0, importRatio: 0, discrepancia: 0 },
-        cotizaciones: { total: 0, cerradas: 0, ganadas: 0, sinF1: 0 },
-        formula: { estructura: 100, sistema: 89, operaciones: 91, maxSales: 81 }
+        llamadasHoy: 18, salientes: 14, entrantes: 4, ratioSaliente: 77,
+        tiposHoy: { S1: 2, S2: 3, DC: 6, IN: 4, PT: 3 },
+        closeRatios: { numRatio: 18, importRatio: 26, discrepancia: 8 },
+        cotizaciones: { total: 10, cerradas: 8, ganadas: 2, sinF1: 2 },
+        formula: { estructura: 80, sistema: 75, operaciones: 85, maxSales: 51 }
       })
+      setTmReadyClients([
+        { id: 101, nombreEmpresa: 'Apex Mechanical Contractors', contactoPrincipal: 'Roberto Gómez', ventasAnuales: 72400, vendedor: 'Carlos López', segmentoPareto: 'Top 20%' },
+        { id: 102, nombreEmpresa: 'Delray Comfort Experts', contactoPrincipal: 'Mark Wilson', ventasAnuales: 61500, vendedor: 'Carlos López', segmentoPareto: 'Top 20%' }
+      ])
     } finally { setLoading(false) }
   }
 
@@ -46,23 +58,22 @@ export default function Dashboard() {
       (data.llamadasHoy === 0 || !data.llamadasHoy) &&
       (data.salientes === 0 || !data.salientes) &&
       (data.entrantes === 0 || !data.entrantes) &&
-      Object.keys(data.tiposHoy || {}).length === 0 &&
-      Object.keys(data.alertas || {}).length === 0
+      Object.keys(data.tiposHoy || {}).length === 0
     );
   };
 
   const kpis = m ? [
     { name: 'Llamadas Salientes', value: `${m.salientes} / 30`, sub: 'Meta: 20–30 diarias', icon: PhoneOutgoing, color: '#ec4899', bg: 'rgba(236,72,153,0.06)' },
-    { name: 'Proactividad', value: `${m.ratioSaliente}%`, sub: `${m.salientes} sal · ${m.entrantes} ent · Meta ≥80%`, icon: ArrowUpRight, color: '#f59e0b', bg: 'rgba(245,158,11,0.06)' },
+    { name: 'Proactividad', value: `${m.ratioSaliente}%`, sub: `${m.salientes} sal · ${m.entrantes} ent · Estándar: ≥80%`, icon: ArrowUpRight, color: m.ratioSaliente >= 80 ? '#10b981' : '#f59e0b', bg: 'rgba(245,158,11,0.06)' },
     { name: 'Ratio Cierre (Núm.)', value: `${m.closeRatios.numRatio}%`, sub: `${m.cotizaciones.ganadas} de ${m.cotizaciones.cerradas} · Meta ≥20%`, icon: Percent, color: '#10b981', bg: 'rgba(16,185,129,0.06)' },
-    { name: 'Ratio Cierre (Imp.)', value: `${m.closeRatios.importRatio}%`, sub: `Disc. ${m.closeRatios.discrepancia}% · Meta <5%`, icon: TrendingUp, color: '#3b82f6', bg: 'rgba(59,130,246,0.06)' },
+    { name: 'Ratio Cierre (Imp.)', value: `${m.closeRatios.importRatio}%`, sub: `Disc. ${m.closeRatios.discrepancia}pp · Límite ≤5pp`, icon: TrendingUp, color: m.closeRatios.discrepancia <= 5 ? '#3b82f6' : '#ef4444', bg: 'rgba(59,130,246,0.06)' },
   ] : []
 
   const quadrants = m ? [
-    { id: 'S1', label: 'Cuadrante 1 (S1) — Recuperación', value: `${m.tiposHoy?.S1 || 0} llamadas`, percent: Math.min((m.tiposHoy?.S1 || 0) * 5, 100), color: '#3b82f6' },
-    { id: 'S2', label: 'Cuadrante 2 (S2) — Venta Cruzada', value: `${m.tiposHoy?.S2 || 0} llamadas`, percent: Math.min((m.tiposHoy?.S2 || 0) * 5, 100), color: '#6366f1' },
-    { id: 'DC', label: 'Delivery Check (DC)', value: `${m.tiposHoy?.DC || 0} llamadas`, percent: Math.min((m.tiposHoy?.DC || 0) * 10, 100), color: '#10b981' },
-    { id: 'IN', label: 'Entrantes (IN) — Reactivas', value: `${m.tiposHoy?.IN || 0} llamadas`, percent: Math.min((m.tiposHoy?.IN || 0) * 10, 100), color: '#94a3b8' },
+    { id: 'S1', label: 'Cuadrante 1 (S1) — Recuperación', value: `${m.tiposHoy?.S1 || 0} llamadas`, percent: Math.min((m.tiposHoy?.S1 || 0) * 10, 100), color: '#3b82f6' },
+    { id: 'S2', label: 'Cuadrante 2 (S2) — Venta Cruzada', value: `${m.tiposHoy?.S2 || 0} llamadas`, percent: Math.min((m.tiposHoy?.S2 || 0) * 10, 100), color: '#6366f1' },
+    { id: 'DC', label: 'Delivery Check (DC) — Calidad', value: `${m.tiposHoy?.DC || 0} llamadas`, percent: Math.min((m.tiposHoy?.DC || 0) * 10, 100), color: '#10b981' },
+    { id: 'PT', label: 'Prospección Proactiva (PT)', value: `${m.tiposHoy?.PT || 0} llamadas`, percent: Math.min((m.tiposHoy?.PT || 0) * 10, 100), color: '#ec4899' },
   ] : []
 
   const handleAudit = async (e) => {
@@ -72,7 +83,6 @@ export default function Dashboard() {
     if (!cliente) return
     const ok = Math.random() > 0.2
     try {
-      const user = JSON.parse(localStorage.getItem('user')) || { id: 1 }
       await createAuditoria({
         clienteId: parseInt(auditClient),
         gerenteId: user.id,
@@ -116,65 +126,15 @@ export default function Dashboard() {
             </div>
           ))}
         </div>
-
-        {/* Middle Row Skeletons */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 flex-1 items-stretch min-h-0">
-          <div className="neu-card p-4 lg:col-span-2 flex flex-col justify-between space-y-4">
-            <div className="h-4 bg-gray-400/10 rounded w-1/3 mb-2" />
-            <div className="space-y-4 flex-1 py-4">
-              {[1, 2, 3, 4].map(n => (
-                <div key={n} className="space-y-2">
-                  <div className="h-3 bg-gray-400/10 rounded w-1/4" />
-                  <div className="h-2 bg-gray-400/10 rounded w-full" />
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="neu-card p-4 flex flex-col items-center justify-between space-y-4">
-            <div className="h-4 bg-gray-400/10 rounded w-1/2" />
-            <div className="w-24 h-24 rounded-full border-8 border-gray-400/5 flex items-center justify-center">
-              <div className="w-12 h-6 bg-gray-400/10 rounded" />
-            </div>
-            <div className="w-full space-y-2">
-              <div className="h-2 bg-gray-400/10 rounded w-full" />
-              <div className="h-2 bg-gray-400/10 rounded w-2/3 mx-auto" />
-            </div>
-          </div>
-        </div>
-
-        {/* Bottom Row Skeletons */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 flex-1 items-stretch min-h-0">
-          <div className="neu-card p-4 space-y-4">
-            <div className="h-4 bg-gray-400/10 rounded w-1/4" />
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {[1, 2, 3, 4].map(n => (
-                <div key={n} className="flex gap-2 p-2.5 rounded-xl bg-gray-400/5">
-                  <div className="w-7 h-7 rounded-lg bg-gray-400/10 shrink-0" />
-                  <div className="flex-1 space-y-2">
-                    <div className="h-2.5 bg-gray-400/10 rounded w-1/3" />
-                    <div className="h-3.5 bg-gray-400/10 rounded w-2/3" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-          
-          <div className="neu-card p-4 space-y-4">
-            <div className="h-4 bg-gray-400/10 rounded w-1/3" />
-            <div className="h-8 bg-gray-400/10 rounded-xl" />
-            <div className="h-10 bg-gray-400/10 rounded-xl" />
-          </div>
-        </div>
       </div>
     )
   }
 
   return (
-    <div className="space-y-4 h-full flex flex-col justify-between">
+    <div className="space-y-5 h-full flex flex-col justify-between">
       <div className="flex items-center justify-between shrink-0">
         <div>
-          <h2 className="text-xl font-extrabold tracking-tight" style={{ color: 'var(--text)' }}>Dashboard</h2>
+          <h2 className="text-xl font-extrabold tracking-tight" style={{ color: 'var(--text)' }}>Dashboard Operativo</h2>
           <p className="text-[10px]" style={{ color: 'var(--text-muted)' }}>
             {error ? '⚠ Sin conexión al backend — datos de ejemplo' : 'Métricas en tiempo real del equipo Moneycall'}
           </p>
@@ -182,6 +142,33 @@ export default function Dashboard() {
         <button onClick={load} className="neu-btn w-8 h-8 rounded-xl flex items-center justify-center" style={{ color: 'var(--text-muted)' }}>
           <RefreshCw size={13} className={loading ? 'animate-spin' : ''} />
         </button>
+      </div>
+
+      {/* ── Banners de Alerta por Desviación Metodológica ── */}
+      <div className="space-y-2 shrink-0">
+        {m?.closeRatios?.discrepancia > 5 && (
+          <div className="p-3.5 rounded-2xl flex items-center gap-3 bg-red-50 border border-red-200 text-red-700 animate-pulse">
+            <ShieldAlert size={18} className="text-red-500 shrink-0" />
+            <div>
+              <p className="text-xs font-extrabold uppercase tracking-wider leading-none">¡Discrepancia Crítica en Close Ratio!</p>
+              <p className="text-[10px] text-red-600 font-bold mt-0.5">
+                La diferencia entre el Close Ratio por cantidad ({m.closeRatios.numRatio}%) y por importe ({m.closeRatios.importRatio}%) es de {m.closeRatios.discrepancia}pp (máx. tolerado: 5pp). Esto indica que estamos perdiendo cotizaciones de alto valor.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {m?.ratioSaliente < 80 && (
+          <div className="p-3.5 rounded-2xl flex items-center gap-3 bg-amber-50 border border-amber-200 text-amber-800">
+            <AlertOctagon size={18} className="text-amber-600 shrink-0" />
+            <div>
+              <p className="text-xs font-extrabold uppercase tracking-wider leading-none">¡Desviación en Proactividad 80/20!</p>
+              <p className="text-[10px] text-amber-700 font-semibold mt-0.5">
+                El ratio de llamadas salientes es de {m.ratioSaliente}%, inferior al estándar proactivo del 80%. Priorizar llamadas salientes de los cuadrantes S1, S2, y DC para no caer en el modo reactivo (IN).
+              </p>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* KPI Cards */}
@@ -193,7 +180,7 @@ export default function Dashboard() {
               <div className="space-y-0.5 min-w-0">
                 <span className="text-[9px] font-bold uppercase tracking-wider block" style={{ color: 'var(--text-muted)' }}>{kpi.name}</span>
                 <p className="text-xl font-extrabold tracking-tight" style={{ color: 'var(--text)' }}>{kpi.value}</p>
-                <span className="text-[9px] font-semibold block truncate" style={{ color: 'var(--success)' }}>{kpi.sub}</span>
+                <span className="text-[9px] font-semibold block truncate" style={{ color: kpi.color }}>{kpi.sub}</span>
               </div>
               <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white shrink-0"
                 style={{ background: kpi.color, boxShadow: `2px 2px 6px ${kpi.color}35` }}>
@@ -209,7 +196,7 @@ export default function Dashboard() {
         {/* Llamadas del día por cuadrante */}
         <div className="neu-card p-4 lg:col-span-2 flex flex-col justify-between">
           <div className="flex items-center justify-between shrink-0 mb-2">
-            <h3 className="text-xs font-bold" style={{ color: 'var(--text)' }}>Actividad del Día por Cuadrante</h3>
+            <h3 className="text-xs font-bold" style={{ color: 'var(--text)' }}>Actividad del Día por Tipo de Llamada (Metodología)</h3>
             <span className="text-[9px] font-bold px-2.5 py-1 rounded-lg" style={{ color: 'var(--text-muted)', background: 'var(--bg)', boxShadow: '2px 2px 4px var(--shadow-dark), -2px -2px 4px var(--shadow-light)' }}>
               Hoy
             </span>
@@ -233,69 +220,39 @@ export default function Dashboard() {
             <div className="mt-3 p-2.5 rounded-xl flex items-center gap-2" style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)' }}>
               <AlertCircle size={12} style={{ color: '#f59e0b' }} />
               <span className="text-[10px] font-semibold" style={{ color: '#f59e0b' }}>
-                {m.cotizaciones.sinF1} cotización(es) sin seguimiento F1 — incumple la metodología
+                {m.cotizaciones.sinF1} cotización(es) sin seguimiento F1 (meta: 100% en las primeras 24 hrs)
               </span>
             </div>
           )}
         </div>
 
-        {/* Fórmula Máxima */}
-        <div className="neu-card p-4 flex flex-col items-center justify-between">
-          <div className="w-full text-center shrink-0 mb-1">
-            <h3 className="text-xs font-bold" style={{ color: 'var(--text)' }}>Fórmula Máxima de Ventas</h3>
-            <p className="text-[9px]" style={{ color: 'var(--text-muted)' }}>Estructura × Sistema × Operaciones</p>
-          </div>
-          {(!m || isMetricsEmpty(m)) ? (
-            <div className="flex-1 flex items-center justify-center w-full">
-              <div className="rounded-xl py-4 w-full text-center text-[10px]" style={{ border: '1.5px dashed rgba(163,177,198,0.3)', color: 'var(--text-muted)' }}>
-                Sin datos visuales en las tablas
-              </div>
+        {/* McDonald's Card */}
+        <div className="neu-card p-4 flex flex-col justify-between" style={{ background: 'linear-gradient(135deg, var(--bg), #fef3c7)' }}>
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 text-amber-700">
+              <Sparkles size={16} fill="currentColor" />
+              <h3 className="text-xs font-bold uppercase tracking-wider">La Pregunta McDonald's</h3>
             </div>
-          ) : (
-            <>
-              <div className="relative flex items-center justify-center my-1">
-                <svg className="w-28 h-28 -rotate-90">
-                  <circle cx="56" cy="56" r="45" fill="none" stroke="var(--bg)" strokeWidth="9" />
-                  <circle cx="56" cy="56" r="45" fill="none" stroke="url(#grad)" strokeWidth="9"
-                    strokeDasharray={282.7}
-                    strokeDashoffset={282.7 - (282.7 * (f?.maxSales || 0)) / 100}
-                    strokeLinecap="round" />
-                  <defs>
-                    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
-                      <stop offset="0%" stopColor="#1a1a1a" />
-                      <stop offset="100%" stopColor="#4f46e5" />
-                    </linearGradient>
-                  </defs>
-                </svg>
-                <div className="absolute text-center">
-                  <span className="text-2xl font-extrabold" style={{ color: 'var(--text)' }}>{f?.maxSales || 0}%</span>
-                  <span className="text-[8px] font-bold block uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Capacidad</span>
-                </div>
-              </div>
-              <div className="grid grid-cols-3 gap-1.5 w-full pt-2 border-t mt-1" style={{ borderColor: 'rgba(163,177,198,0.3)' }}>
-                {[
-                  { label: 'Estr.', value: f?.estructura, color: '#1a1a1a' },
-                  { label: 'Sist.', value: f?.sistema, color: '#4f46e5' },
-                  { label: 'Oper.', value: f?.operaciones, color: '#10b981' },
-                ].map(m2 => (
-                  <div key={m2.label} className="text-center">
-                    <span className="text-[9px] block font-semibold" style={{ color: 'var(--text-muted)' }}>{m2.label}</span>
-                    <span className="text-xs font-extrabold" style={{ color: m2.color }}>{m2.value || 0}%</span>
-                  </div>
-                ))}
-              </div>
-            </>
-          )}
+            <p className="text-[11px] leading-relaxed text-amber-950 font-medium">
+              En cada cotización y llamada de cotización, haz la pregunta de venta cruzada proactiva (S2).
+            </p>
+            <div className="neu-inset p-3.5 rounded-xl bg-white/50 text-[11.5px] italic text-amber-900 border border-amber-200/50">
+              "Veo que lleva compresores y gas... ¿lleva las bases, soldaduras, o tuberías para la instalación? Siempre las tenemos listas en Will Call."
+            </div>
+          </div>
+          <div className="pt-2 text-[9px] font-bold text-amber-700 uppercase tracking-widest text-center border-t border-amber-200/40">
+            Aumenta el ticket promedio +35%
+          </div>
         </div>
       </div>
 
       {/* Bottom Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 shrink-0">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 shrink-0">
         {/* Auditoría */}
         <div className="neu-card p-4 space-y-3">
           <div className="flex items-center gap-2">
             <ShieldCheck size={16} style={{ color: 'var(--accent)' }} />
-            <h3 className="text-xs font-bold" style={{ color: 'var(--text)' }}>Centro de Auditoría del Supervisor</h3>
+            <h3 className="text-xs font-bold" style={{ color: 'var(--text)' }}>Auditoría del Gerente</h3>
           </div>
           <p className="text-[10px]" style={{ color: 'var(--text-muted)' }}>Valida llamadas al azar para asegurar veracidad en el CRM.</p>
           <form onSubmit={handleAudit} className="flex gap-2">
@@ -329,17 +286,47 @@ export default function Dashboard() {
           )}
         </div>
 
+        {/* Clientes listos para upgrade a TM */}
+        <div className="neu-card p-4 space-y-3 flex flex-col justify-between">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Award size={16} className="text-amber-500" />
+              <h3 className="text-xs font-bold text-slate-800">Clientes Listos para TM (Upgrades)</h3>
+            </div>
+            <p className="text-[10px] text-slate-500">Cuentas con compras anuales &gt; $60,000 USD listas para pasar a Territory Manager.</p>
+          </div>
+
+          <div className="flex-1 overflow-y-auto space-y-2 max-h-[140px] pr-1 mt-1">
+            {tmReadyClients.length === 0 ? (
+              <div className="rounded-xl py-4 text-center text-[10px]" style={{ border: '1.5px dashed rgba(163,177,198,0.3)', color: 'var(--text-muted)' }}>
+                Ningún cliente supera la meta de $60k anuales aún.
+              </div>
+            ) : (
+              tmReadyClients.map(c => (
+                <div key={c.id} className="flex justify-between items-center p-2 rounded-xl bg-amber-50/50 border border-amber-200/40 text-[11px]">
+                  <div>
+                    <p className="font-extrabold text-slate-800 leading-tight">{c.nombreEmpresa}</p>
+                    <p className="text-[9px] text-slate-500">Vendedor: {c.vendedor || 'Equipo'}</p>
+                  </div>
+                  <span className="font-extrabold text-amber-600 bg-amber-100/50 px-2 py-0.5 rounded border border-amber-200">
+                    ${c.ventasAnuales.toLocaleString()}
+                  </span>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
         {/* Alertas S1/S2 y Operativas */}
         <div className="neu-card p-4 space-y-3">
           <h3 className="text-xs font-bold" style={{ color: 'var(--text)' }}>Alertas Proactivas en Tiempo Real</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {/* Alertas dinámicas S1 desde el historial de compras */}
-            {alertasS1.slice(0, 2).map((a, i) => (
+          <div className="grid grid-cols-1 sm:grid-cols-1 gap-2.5">
+            {alertasS1.slice(0, 1).map((a, i) => (
               <div key={`s1-${i}`} className="flex gap-2 p-2.5 rounded-xl" style={{ background: 'rgba(59,130,246,0.05)', border: '1px solid rgba(59,130,246,0.2)' }}>
                 <div className="w-7 h-7 rounded-lg flex items-center justify-center text-white font-bold text-[10px] shrink-0" style={{ background: '#3b82f6' }}>
                   S1
                 </div>
-                <div className="space-y-0.5 min-w-0">
+                <div className="space-y-0.5 min-w-0 flex-1">
                   <span className="text-[8px] font-bold uppercase tracking-wider block" style={{ color: '#3b82f6' }}>Inactividad: {a.cliente}</span>
                   <p className="text-[10px] font-bold truncate" style={{ color: 'var(--text)' }} title={a.razon}>{a.razon}</p>
                   <p className="text-[9px] truncate" style={{ color: 'var(--text-muted)' }}>Llamar para verificar stock de {a.producto}.</p>
@@ -347,32 +334,14 @@ export default function Dashboard() {
               </div>
             ))}
             
-            {/* Si no hay suficientes alertas S1 reales, mostrar las operativas de la metodología */}
-            {(!m || isMetricsEmpty(m)) ? (
-              <div className="col-span-1 sm:col-span-2 rounded-xl py-4 text-center text-[10px]" style={{ border: '1.5px dashed rgba(163,177,198,0.3)', color: 'var(--text-muted)' }}>
-                Sin datos visuales en las tablas
+            <div className="flex gap-2 p-2.5 rounded-xl" style={{ background: 'rgba(16,185,129,0.05)', border: '1px solid rgba(16,185,129,0.2)' }}>
+              <div className="w-7 h-7 rounded-lg flex items-center justify-center text-white font-bold text-[10px] shrink-0" style={{ background: '#10b981' }}>DC</div>
+              <div className="space-y-0.5 min-w-0 flex-1">
+                <span className="text-[8px] font-bold uppercase tracking-wider block" style={{ color: '#10b981' }}>DC Pendiente</span>
+                <p className="text-[10px] font-bold truncate" style={{ color: 'var(--text)' }}>{m?.tiposHoy?.DC || 0} entregas del día sin verificar.</p>
+                <p className="text-[9px] truncate" style={{ color: 'var(--text-muted)' }}>Confirmar recepción con cada cliente.</p>
               </div>
-            ) : (
-              <>
-                <div className="flex gap-2 p-2.5 rounded-xl" style={{ background: 'rgba(16,185,129,0.05)', border: '1px solid rgba(16,185,129,0.2)' }}>
-                  <div className="w-7 h-7 rounded-lg flex items-center justify-center text-white font-bold text-[10px] shrink-0" style={{ background: '#10b981' }}>DC</div>
-                  <div className="space-y-0.5 min-w-0">
-                    <span className="text-[8px] font-bold uppercase tracking-wider block" style={{ color: '#10b981' }}>DC Pendiente</span>
-                    <p className="text-[10px] font-bold truncate" style={{ color: 'var(--text)' }}>{m?.tiposHoy?.DC || 0} entregas del día sin verificar.</p>
-                    <p className="text-[9px] truncate" style={{ color: 'var(--text-muted)' }}>Confirmar recepción con cada cliente.</p>
-                  </div>
-                </div>
-                
-                <div className="flex gap-2 p-2.5 rounded-xl" style={{ background: 'rgba(245,158,11,0.05)', border: '1px solid rgba(245,158,11,0.2)' }}>
-                  <div className="w-7 h-7 rounded-lg flex items-center justify-center text-white font-bold text-[10px] shrink-0" style={{ background: '#f59e0b' }}>F1</div>
-                  <div className="space-y-0.5 min-w-0">
-                    <span className="text-[8px] font-bold uppercase tracking-wider block" style={{ color: '#f59e0b' }}>F1 Pendiente</span>
-                    <p className="text-[10px] font-bold truncate" style={{ color: 'var(--text)' }}>{m?.cotizaciones?.sinF1 || 0} cotizaciones sin seguimiento F1.</p>
-                    <p className="text-[9px] truncate" style={{ color: 'var(--text-muted)' }}>Meta: 100% de cotizaciones con F1.</p>
-                  </div>
-                </div>
-              </>
-            )}
+            </div>
           </div>
         </div>
       </div>

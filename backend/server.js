@@ -468,17 +468,56 @@ app.post('/api/llamadas', async (req, res) => {
       include: { cliente: { select: { nombreEmpresa: true } } }
     })
 
-    // Si la llamada incluye respuestas a las 5 preguntas, guardarlas en el cliente
+    // Si la llamada incluye respuestas a las 5/6 preguntas, guardarlas en el cliente
     if (respuestas5Q) {
       try {
-        await prisma.cliente.update({ where: { id: parseInt(clienteId) }, data: { respuestas5Q } })
+        const updateData = { respuestas5Q }
+        // Si Q3 tiene valor numérico, guardar cuota de mercado
+        if (respuestas5Q.q3) {
+          const match = String(respuestas5Q.q3).match(/(\d+)/)
+          if (match) updateData.cuotaMercado = parseInt(match[1])
+        }
+        await prisma.cliente.update({ where: { id: parseInt(clienteId) }, data: updateData })
       } catch (err) {
         console.warn('No se pudo actualizar respuestas5Q en cliente:', err.message)
+      }
+    }
+
+    // Si es una llamada DC, actualizar contador de DCs satisfactorias y plan de testimonios
+    if (tipoLlamada === 'DC') {
+      try {
+        const cliente = await prisma.cliente.findUnique({ where: { id: parseInt(clienteId) } })
+        if (cliente) {
+          const esSatisfactoria = satisfaccionDc !== undefined ? satisfaccionDc : true
+          let nuevoCont = esSatisfactoria ? cliente.dcSatisfactoriasCount + 1 : 0 // reset si no satisfactoria
+          
+          // Actualizar plan de testimonios según reglas del libro
+          let nuevoPlan = cliente.planTestimonio
+          if (esSatisfactoria) {
+            if (nuevoCont >= 10 && cliente.planTestimonio === 'A') nuevoPlan = 'A' // mantiene A, agenda RC
+            if (nuevoCont >= 15 && cliente.planTestimonio === 'B') nuevoPlan = 'C'
+          }
+
+          // Recalcular ventas anuales
+          const hace365 = new Date(); hace365.setDate(hace365.getDate() - 365)
+          const cotGanadas = await prisma.cotizacion.findMany({
+            where: { clienteId: parseInt(clienteId), estado: 'Ganada', fechaCreacion: { gte: hace365 } }
+          })
+          const ventasAnuales = cotGanadas.reduce((s, c) => s + c.monto, 0)
+
+          await prisma.cliente.update({
+            where: { id: parseInt(clienteId) },
+            data: { dcSatisfactoriasCount: nuevoCont, planTestimonio: nuevoPlan, ventasAnuales }
+          })
+        }
+      } catch (err) {
+        console.warn('No se pudo actualizar DC count:', err.message)
       }
     }
     res.json(l)
   } catch (e) { res.status(500).json({ error: e.message }) }
 })
+
 
 
 // Pareto global: devuelve clientes ordenados por total de compras (desc)
@@ -781,25 +820,25 @@ app.get('/api/agenda/:vendedorId', async (req, res) => {
 
       // F2 vencido — URGENTE
       if (f2Hoy.length > 0) {
-        tareas.push({ prioridad: 1, tipo: 'F2', cliente: c.nombreEmpresa, clienteId: c.id, razon: `${f2Hoy.length} cotización(es) con fecha de decisión vencida. ¡Llamar ahora!`, cotizacionId: f2Hoy[0].id })
+        tareas.push({ prioridad: 1, tipo: 'F2', cliente: c.nombreEmpresa, clienteId: c.id, razon: `${f2Hoy.length} cotización(es) con fecha de decisión vencida. ¡Llamar ahora!`, cotizacionId: f2Hoy[0].id, contactoPreferencia: c.contactoPreferencia, contactoPrincipal: c.contactoPrincipal, planTestimonio: c.planTestimonio, dcSatisfactoriasCount: c.dcSatisfactoriasCount })
       }
       // Sin F1 — URGENTE
       if (sinF1.length > 0) {
-        tareas.push({ prioridad: 1, tipo: 'F1', cliente: c.nombreEmpresa, clienteId: c.id, razon: `${sinF1.length} cotización(es) enviadas sin seguimiento F1. Meta: 100%.`, cotizacionId: sinF1[0].id })
+        tareas.push({ prioridad: 1, tipo: 'F1', cliente: c.nombreEmpresa, clienteId: c.id, razon: `${sinF1.length} cotización(es) enviadas sin seguimiento F1. Meta: 100%.`, cotizacionId: sinF1[0].id, contactoPreferencia: c.contactoPreferencia, contactoPrincipal: c.contactoPrincipal, planTestimonio: c.planTestimonio, dcSatisfactoriasCount: c.dcSatisfactoriasCount })
       }
       // RC listo (10 DCs satisfactorias)
       if (dcsSatisfechas >= 10 && !c.llamadas.some(l => l.tipoLlamada === 'RC')) {
-        tareas.push({ prioridad: 2, tipo: 'RC', cliente: c.nombreEmpresa, clienteId: c.id, razon: `¡${dcsSatisfechas} DCs perfectas! Pedir testimonio. Iniciar con Plan A.` })
+        tareas.push({ prioridad: 2, tipo: 'RC', cliente: c.nombreEmpresa, clienteId: c.id, razon: `¡${dcsSatisfechas} DCs perfectas! Pedir testimonio. Iniciar con Plan A.`, contactoPreferencia: c.contactoPreferencia, contactoPrincipal: c.contactoPrincipal, planTestimonio: c.planTestimonio, dcSatisfactoriasCount: c.dcSatisfactoriasCount })
       }
       // PT trimestral (más de 90 días sin PT)
       if (!ultimaPT || new Date(ultimaPT.fechaHora) < hace90) {
         const diasSinPT = ultimaPT ? Math.round((Date.now() - new Date(ultimaPT.fechaHora)) / 86400000) : 999
-        tareas.push({ prioridad: 3, tipo: 'PT', cliente: c.nombreEmpresa, clienteId: c.id, razon: `${diasSinPT === 999 ? 'Nunca ha tenido' : `Hace ${diasSinPT} días`} una llamada personal. Meta: 1 PT/trimestre.` })
+        tareas.push({ prioridad: 3, tipo: 'PT', cliente: c.nombreEmpresa, clienteId: c.id, razon: `${diasSinPT === 999 ? 'Nunca ha tenido' : `Hace ${diasSinPT} días`} una llamada personal. Meta: 1 PT/trimestre.`, contactoPreferencia: c.contactoPreferencia, contactoPrincipal: c.contactoPrincipal, planTestimonio: c.planTestimonio, dcSatisfactoriasCount: c.dcSatisfactoriasCount })
       }
       // S1 — sin llamada esta semana
       if (!ultimaLlamada || new Date(ultimaLlamada.fechaHora) < hace7) {
         const diasSin = ultimaLlamada ? Math.round((Date.now() - new Date(ultimaLlamada.fechaHora)) / 86400000) : 999
-        tareas.push({ prioridad: 4, tipo: 'S1', cliente: c.nombreEmpresa, clienteId: c.id, razon: `Sin contacto hace ${diasSin === 999 ? 'siempre' : diasSin + ' días'}. Revisar historial de pedidos.` })
+        tareas.push({ prioridad: 4, tipo: 'S1', cliente: c.nombreEmpresa, clienteId: c.id, razon: `Sin contacto hace ${diasSin === 999 ? 'siempre' : diasSin + ' días'}. Revisar historial de pedidos.`, contactoPreferencia: c.contactoPreferencia, contactoPrincipal: c.contactoPrincipal, planTestimonio: c.planTestimonio, dcSatisfactoriasCount: c.dcSatisfactoriasCount })
       }
     }
 
@@ -901,5 +940,214 @@ app.get('/api/auditoria', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }) }
 })
 
+
+// ── NUEVOS ENDPOINTS METODOLOGÍA MONEYCALL ────────────────────────────────────
+
+// Reunión Diaria de 20 min: métricas del día ANTERIOR por vendedor (para gerente)
+app.get('/api/daily-meeting', async (req, res) => {
+  try {
+    const ayer = new Date(); ayer.setDate(ayer.getDate() - 1); ayer.setHours(0, 0, 0, 0)
+    const finAyer = new Date(); finAyer.setHours(0, 0, 0, 0)
+
+    const vendedores = await prisma.vendedor.findMany({
+      where: { isAdmin: false, isSuperAdmin: false },
+      include: {
+        clientes: {
+          include: {
+            llamadas: { where: { fechaHora: { gte: ayer, lt: finAyer } } },
+            cotizaciones: true
+          }
+        }
+      }
+    })
+
+    const result = vendedores.map(v => {
+      const llamadasAyer = v.clientes.flatMap(c => c.llamadas)
+      const todasCotiz = v.clientes.flatMap(c => c.cotizaciones)
+
+      const salientes = llamadasAyer.filter(l => l.direccion === 'Saliente').length
+      const entrantes = llamadasAyer.filter(l => l.direccion === 'Entrante').length
+      const s1 = llamadasAyer.filter(l => l.tipoLlamada === 'S1').length
+      const s2 = llamadasAyer.filter(l => l.tipoLlamada === 'S2').length
+      const dc = llamadasAyer.filter(l => l.tipoLlamada === 'DC').length
+      const f1 = llamadasAyer.filter(l => l.tipoLlamada === 'F1').length
+      const f2 = llamadasAyer.filter(l => l.tipoLlamada === 'F2').length
+      const rc = llamadasAyer.filter(l => l.tipoLlamada === 'RC').length
+      const pt = llamadasAyer.filter(l => l.tipoLlamada === 'PT').length
+
+      const total = salientes + entrantes
+      const proactividad = total > 0 ? Math.round((salientes / total) * 100) : 0
+
+      const cotizAyer = v.clientes.flatMap(c =>
+        c.cotizaciones.filter(q => { const f = new Date(q.fechaCreacion); return f >= ayer && f < finAyer })
+      )
+
+      const cerradas = todasCotiz.filter(c => c.estado !== 'Pendiente')
+      const ganadas = todasCotiz.filter(c => c.estado === 'Ganada')
+      const numRatio = cerradas.length > 0 ? Math.round((ganadas.length / cerradas.length) * 100) : 0
+      const totalAmt = cerradas.reduce((s, c) => s + c.monto, 0)
+      const wonAmt = ganadas.reduce((s, c) => s + c.monto, 0)
+      const importRatio = totalAmt > 0 ? Math.round((wonAmt / totalAmt) * 100) : 0
+      const discrepancia = Math.abs(numRatio - importRatio)
+
+      const f1Pct = todasCotiz.length > 0
+        ? Math.round((todasCotiz.filter(c => c.seguimientoF1).length / todasCotiz.length) * 100)
+        : 0
+
+      // Score de actividad: llamadas salientes ayer vs meta 20-30
+      const metaCumplida = salientes >= 20
+      const alertas = []
+      if (proactividad < 80) alertas.push(`⚠ Proactividad ${proactividad}% < 80%`)
+      if (salientes < 20) alertas.push(`📞 Solo ${salientes}/30 llamadas salientes`)
+      if (discrepancia > 5) alertas.push(`📊 Discrepancia close ratio: ${discrepancia}pp > 5pp`)
+      if (f1Pct < 100) alertas.push(`🔴 F1 en solo ${f1Pct}% de cotizaciones`)
+
+      return {
+        id: v.id,
+        nombre: v.nombre,
+        rolCanal: v.rolCanal,
+        cuentas: v.clientes.length,
+        ayer: { salientes, entrantes, s1, s2, dc, f1, f2, rc, pt, total, proactividad },
+        cotizAyer: cotizAyer.length,
+        closeRatios: { numRatio, importRatio, discrepancia },
+        f1Pct,
+        metaCumplida,
+        alertas
+      }
+    }).sort((a, b) => b.ayer.salientes - a.ayer.salientes)
+
+    res.json(result)
+  } catch (e) { res.status(500).json({ error: e.message }) }
+})
+
+// Sugerencias S1/S2 por cliente (cross-sell basado en historial de pedidos)
+app.get('/api/clientes/:id/cross-sell', async (req, res) => {
+  try {
+    const clienteId = parseInt(req.params.id)
+    const hace60 = new Date(); hace60.setDate(hace60.getDate() - 60)
+
+    const cliente = await prisma.cliente.findUnique({
+      where: { id: clienteId },
+      include: {
+        pedidos: { orderBy: { fechaPedido: 'desc' } },
+        vendedor: { include: { clientes: { include: { pedidos: true } } } }
+      }
+    })
+
+    if (!cliente) return res.status(404).json({ error: 'Cliente no encontrado' })
+
+    const pedidosCliente = cliente.pedidos
+    const productosActivos = new Set(pedidosCliente.filter(p => new Date(p.fechaPedido) >= hace60).map(p => p.producto))
+    const productosHistoricos = new Set(pedidosCliente.map(p => p.producto))
+
+    // S1: productos que solía comprar pero no ha comprado en los últimos 60 días
+    const sugerenciasS1 = []
+    const productoMap = {}
+    for (const p of pedidosCliente) {
+      if (!productoMap[p.producto]) productoMap[p.producto] = []
+      productoMap[p.producto].push(p)
+    }
+    for (const [prod, hist] of Object.entries(productoMap)) {
+      const ultimo = hist[0]
+      const diasDesde = Math.round((Date.now() - new Date(ultimo.fechaPedido)) / 86400000)
+      if (diasDesde > 45) {
+        sugerenciasS1.push({
+          producto: prod,
+          diasDesde,
+          ultimaCantidad: ultimo.cantidad,
+          guion: `Sr. cliente, solía comprarnos "${prod}" regularmente. Han pasado ${diasDesde} días desde su último pedido. ¿Necesita reabastecerse?`
+        })
+      }
+    }
+
+    // S2: productos que compran otros clientes del mismo vendedor junto con los del cliente actual
+    const todosLosPedidos = cliente.vendedor.clientes
+      .filter(c => c.id !== clienteId)
+      .flatMap(c => c.pedidos)
+
+    const coOcurrencias = {}
+    // Encontrar qué productos suelen acompañar a los productos activos del cliente
+    for (const prodActivo of productosActivos) {
+      // Clientes que también compran este producto
+      const clientesCoProd = cliente.vendedor.clientes.filter(c =>
+        c.id !== clienteId && c.pedidos.some(p => p.producto === prodActivo)
+      )
+      // Qué otros productos compraron esos clientes
+      const otrosProductos = clientesCoProd.flatMap(c => c.pedidos.map(p => p.producto))
+        .filter(p => !productosHistoricos.has(p))
+      for (const otroProd of otrosProductos) {
+        coOcurrencias[otroProd] = (coOcurrencias[otroProd] || 0) + 1
+      }
+    }
+
+    const sugerenciasS2 = Object.entries(coOcurrencias)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([producto, frecuencia]) => ({
+        producto,
+        frecuencia,
+        guion: `Veo que usted compra [producto relacionado]. Muchos de nuestros clientes también llevan "${producto}" junto con ese pedido. ¿Alguna vez lo ha probado?`
+      }))
+
+    res.json({ s1: sugerenciasS1.slice(0, 5), s2: sugerenciasS2 })
+  } catch (e) { res.status(500).json({ error: e.message }) }
+})
+
+// Actualizar preferencia de contacto de un cliente
+app.put('/api/clientes/:id/preferencia', async (req, res) => {
+  const { contactoPreferencia } = req.body
+  try {
+    const c = await prisma.cliente.update({
+      where: { id: parseInt(req.params.id) },
+      data: { contactoPreferencia }
+    })
+    res.json(c)
+  } catch (e) { res.status(500).json({ error: e.message }) }
+})
+
+// Actualizar plan de testimonios de un cliente
+app.put('/api/clientes/:id/plan-testimonio', async (req, res) => {
+  const { planTestimonio } = req.body
+  try {
+    const c = await prisma.cliente.update({
+      where: { id: parseInt(req.params.id) },
+      data: { planTestimonio }
+    })
+    res.json(c)
+  } catch (e) { res.status(500).json({ error: e.message }) }
+})
+
+// Clientes listos para upgrade a TM (ventas anuales > $60,000)
+app.get('/api/clientes/tm-upgrade', async (req, res) => {
+  try {
+    const hace365 = new Date(); hace365.setDate(hace365.getDate() - 365)
+    const clientes = await prisma.cliente.findMany({
+      include: {
+        cotizaciones: { where: { estado: 'Ganada', fechaCreacion: { gte: hace365 } } },
+        vendedor: { select: { nombre: true } }
+      }
+    })
+
+    const resultado = clientes
+      .map(c => ({
+        ...c,
+        ventasAnuales: c.cotizaciones.reduce((s, q) => s + q.monto, 0)
+      }))
+      .filter(c => c.ventasAnuales >= 60000)
+      .sort((a, b) => b.ventasAnuales - a.ventasAnuales)
+      .map(c => ({
+        id: c.id,
+        nombreEmpresa: c.nombreEmpresa,
+        contactoPrincipal: c.contactoPrincipal,
+        ventasAnuales: c.ventasAnuales,
+        vendedor: c.vendedor.nombre,
+        segmentoPareto: c.segmentoPareto
+      }))
+
+    res.json(resultado)
+  } catch (e) { res.status(500).json({ error: e.message }) }
+})
+
 app.listen(PORT, () => console.log(`🚀 Moneycall CRM Backend running on port ${PORT}`))
+
 

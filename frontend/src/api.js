@@ -34,6 +34,14 @@ export const updateCliente5Q = (id, respuestas5Q) =>
 export const deleteCliente = (id) => req(`/clientes/${id}`, { method: 'DELETE' })
 export const recalcularPareto = (vendedorId) => req(`/clientes/pareto/${vendedorId}`, { method: 'POST' })
 
+// Nuevos endpoints de clientes — Metodología Moneycall
+export const getCrossSell = (clienteId) => req(`/clientes/${clienteId}/cross-sell`)
+export const updatePreferenciaContacto = (clienteId, contactoPreferencia) =>
+  req(`/clientes/${clienteId}/preferencia`, { method: 'PUT', body: JSON.stringify({ contactoPreferencia }) })
+export const updatePlanTestimonio = (clienteId, planTestimonio) =>
+  req(`/clientes/${clienteId}/plan-testimonio`, { method: 'PUT', body: JSON.stringify({ planTestimonio }) })
+export const getClientesTMUpgrade = () => req('/clientes/tm-upgrade')
+
 // ── Pedidos (Historial de compras) ────────────────────────────────────────────
 export const getPedidos = (clienteId) => req(`/pedidos?clienteId=${clienteId}`)
 export const createPedido = (data) => req('/pedidos', { method: 'POST', body: JSON.stringify(data) })
@@ -55,6 +63,9 @@ export const closeCotizacion = (id, estado) =>
 
 // ── Dashboard Metrics ─────────────────────────────────────────────────────────
 export const getDashboardMetrics = () => req('/dashboard/metrics')
+
+// ── Reunión Diaria de 20 minutos (Gerente) ────────────────────────────────────
+export const getDailyMeeting = () => req('/daily-meeting')
 
 // ── Ranking de vendedores (reunión diaria) ────────────────────────────────────
 export const getRanking = () => req('/vendedores/ranking')
@@ -84,4 +95,3 @@ export const createGerente = (data) => req('/admin/gerentes', { method: 'POST', 
 export const deleteGerente = (id) => req(`/admin/gerentes/${id}`, { method: 'DELETE' })
 export const getVendedoresByGerente = (gerenteId) => req(`/admin/gerentes/${gerenteId}/vendedores`)
 export const createVendedorPorGerente = (gerenteId, data) => req(`/admin/gerentes/${gerenteId}/vendedores`, { method: 'POST', body: JSON.stringify(data) })
-
