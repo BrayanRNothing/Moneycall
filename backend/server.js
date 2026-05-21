@@ -10,6 +10,25 @@ const prisma = new PrismaClient()
 app.use(cors())
 app.use(express.json())
 
+// Bootstrap: crear usuario admin por defecto si la tabla de vendedores está vacía
+async function ensureAdminUser() {
+  try {
+    const total = await prisma.vendedor.count()
+    if (total === 0) {
+      const user = process.env.ADMIN_USER || 'admin'
+      const pass = process.env.ADMIN_PASS || '123456'
+      const v = await prisma.vendedor.create({
+        data: { nombre: 'Administrador', username: user, password: pass, isSuperAdmin: true, isAdmin: true }
+      })
+      console.log('Bootstrap admin creado:', user)
+    }
+  } catch (e) {
+    console.error('Error al asegurar admin:', e.message)
+  }
+}
+
+ensureAdminUser()
+
 // ── Health ────────────────────────────────────────────────────────────────────
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'Moneycall CRM API running' })
