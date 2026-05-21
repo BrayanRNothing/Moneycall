@@ -42,6 +42,12 @@ function App() {
   const [metaUSD, setMetaUSD] = useState(() => Number(localStorage.getItem('metaUSD') || 0))
   const [editingMeta, setEditingMeta] = useState(false)
   const [metaDraft, setMetaDraft] = useState('')
+  const [showNotifications, setShowNotifications] = useState(false)
+  const [notifications, setNotifications] = useState([
+    { id: 1, text: '¡Alerta S1! Inactividad detectada en Apex Mechanical.', type: 'error', read: false, time: 'Hace 5m' },
+    { id: 2, text: '¡DC Pendiente! Entregas de Will Call sin registrar.', type: 'warning', read: false, time: 'Hace 20m' },
+    { id: 3, text: '¡La Pregunta McDonald\'s! Recuerda ofrecer S2 en cada cotización.', type: 'info', read: false, time: 'Hace 1h' },
+  ])
 
   const saveMeta = () => {
     const num = parseFloat(metaDraft.replace(/[^0-9.]/g, '')) || 0
@@ -260,10 +266,72 @@ function App() {
           {/* Right Side */}
           <div className="flex items-center gap-4">
             {/* Bell */}
-            <button className="neu-btn w-9 h-9 rounded-xl flex items-center justify-center relative" style={{ color: 'var(--text-muted)' }}>
-              <Bell size={16} />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full" style={{ background: 'var(--accent)' }}></span>
-            </button>
+            <div className="relative">
+              <button 
+                onClick={() => setShowNotifications(!showNotifications)}
+                className="neu-btn w-9 h-9 rounded-xl flex items-center justify-center relative transition-all active:scale-95" 
+                style={{ 
+                  color: showNotifications ? 'var(--accent)' : 'var(--text-muted)',
+                  boxShadow: showNotifications ? 'inset 2px 2px 5px var(--shadow-dark), inset -2px -2px 5px var(--shadow-light)' : undefined
+                }}
+              >
+                <Bell size={16} />
+                {notifications.some(n => !n.read) && (
+                  <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full animate-pulse" style={{ background: 'var(--accent)' }}></span>
+                )}
+              </button>
+
+              {showNotifications && (
+                <div className="absolute right-0 top-11 w-80 rounded-2xl p-4 z-50 animate-fade-in"
+                  style={{
+                    background: 'var(--bg)',
+                    boxShadow: '6px 6px 20px var(--shadow-dark), -6px -6px 20px var(--shadow-light)',
+                    border: '1px solid rgba(163,177,198,0.2)'
+                  }}>
+                  <div className="flex justify-between items-center pb-2 mb-2 border-b" style={{ borderColor: 'rgba(163,177,198,0.15)' }}>
+                    <h4 className="text-[11px] font-extrabold uppercase tracking-wider" style={{ color: 'var(--text)' }}>Notificaciones</h4>
+                    {notifications.some(n => !n.read) && (
+                      <button 
+                        onClick={() => setNotifications(notifications.map(n => ({ ...n, read: true })))} 
+                        className="text-[9px] font-bold text-sky-500 hover:text-sky-600 transition-colors"
+                      >
+                        Marcar todas leídas
+                      </button>
+                    )}
+                  </div>
+                  <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
+                    {notifications.length === 0 ? (
+                      <p className="text-[10px] text-center py-4" style={{ color: 'var(--text-muted)' }}>No tienes notificaciones</p>
+                    ) : (
+                      notifications.map(n => (
+                        <div 
+                          key={n.id} 
+                          onClick={() => {
+                            setNotifications(notifications.map(item => item.id === n.id ? { ...item, read: true } : item))
+                          }}
+                          className={`p-2.5 rounded-xl transition-all cursor-pointer flex gap-2 items-start ${n.read ? 'opacity-55' : 'hover:scale-[1.01]'}`}
+                          style={{
+                            background: n.read ? 'transparent' : 'rgba(163,177,198,0.06)',
+                            border: n.read ? '1px dashed rgba(163,177,198,0.15)' : '1px solid rgba(163,177,198,0.2)'
+                          }}
+                        >
+                          <div className="w-1.5 h-1.5 rounded-full shrink-0 mt-1.5"
+                            style={{
+                              background: n.read ? 'var(--text-muted)' : 'var(--accent)',
+                              boxShadow: n.read ? 'none' : '0 0 5px var(--accent)'
+                            }} 
+                          />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[10px] leading-tight font-semibold" style={{ color: 'var(--text)' }}>{n.text}</p>
+                            <span className="text-[8px] mt-0.5 block" style={{ color: 'var(--text-muted)' }}>{n.time}</span>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
 
             {/* KPI Badge — meta editable por gerente */}
             {(user.isAdmin || user.isSuperAdmin) ? (
