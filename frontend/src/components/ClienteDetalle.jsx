@@ -145,15 +145,20 @@ export default function ClienteDetalle({ cliente, onBack, onUpdate }) {
   }
 
   // --- Form States for Pedidos ---
-  const [newPedido, setNewPedido] = useState({ producto: '', cantidad: 1, monto: '' })
+  const [newPedidos, setNewPedidos] = useState([{ producto: '', cantidad: 1, monto: '' }])
   const [savingPed, setSavingPed] = useState(false)
   
   const handleAddPedido = async (e) => {
-    e.preventDefault(); if(!newPedido.producto || !newPedido.monto) return
+    e.preventDefault()
+    const validItems = newPedidos.filter(p => p.producto && p.monto)
+    if(validItems.length === 0) return
     setSavingPed(true)
     try { 
-      await createPedido({ ...newPedido, clienteId: cliente.id })
-      await loadData(); setNewPedido({ producto: '', cantidad: 1, monto: '' }); onUpdate()
+      const payload = validItems.map(p => ({ ...p, clienteId: cliente.id }))
+      await createPedido(payload)
+      await loadData()
+      setNewPedidos([{ producto: '', cantidad: 1, monto: '' }])
+      onUpdate()
     } catch(e) { alert(e.message) } finally { setSavingPed(false) }
   }
   const handleDeletePed = async (id) => {
@@ -467,18 +472,47 @@ export default function ClienteDetalle({ cliente, onBack, onUpdate }) {
           {activeTab === 'pedidos' && (
             <div className="space-y-6">
               <div className="neu-card p-5">
-                <form onSubmit={handleAddPedido} className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
-                  <div className="md:col-span-6 space-y-1.5">
-                    <label className="text-[10px] font-bold uppercase tracking-wider block" style={{ color: 'var(--text-muted)' }}>Producto Comprado</label>
-                    <input required className="neu-input w-full" value={newPedido.producto} onChange={e=>setNewPedido({...newPedido, producto: e.target.value})} placeholder="Ej. Equipo XYZ" />
+                <form onSubmit={handleAddPedido} className="space-y-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-[10px] font-bold uppercase tracking-wider block" style={{ color: 'var(--text-muted)' }}>Registrar Nueva Compra (Múltiples Items)</label>
+                    <button type="button" onClick={() => setNewPedidos([...newPedidos, { producto: '', cantidad: 1, monto: '' }])} className="neu-btn text-xs px-3 py-1.5 rounded-lg flex items-center gap-1">
+                      <Plus size={12}/> Agregar Fila
+                    </button>
                   </div>
-                  <div className="md:col-span-3 space-y-1.5">
-                    <label className="text-[10px] font-bold uppercase tracking-wider block" style={{ color: 'var(--text-muted)' }}>Monto Total USD</label>
-                    <input required type="number" className="neu-input w-full" value={newPedido.monto} onChange={e=>setNewPedido({...newPedido, monto: e.target.value})} placeholder="Ej. 5000" />
-                  </div>
-                  <div className="md:col-span-3">
-                    <button type="submit" disabled={savingPed} className="neu-btn-accent w-full text-xs font-bold py-2.5 rounded-xl flex items-center justify-center gap-2 h-[42px]">
-                      <Plus size={14} /> Registrar Compra
+                  
+                  {newPedidos.map((item, idx) => (
+                    <div key={idx} className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end bg-slate-50/50 p-3 rounded-xl border border-slate-100 relative">
+                      <div className="md:col-span-5 space-y-1.5">
+                        <label className="text-[10px] font-bold uppercase tracking-wider block" style={{ color: 'var(--text-muted)' }}>Producto</label>
+                        <input required className="neu-input w-full" value={item.producto} onChange={e=>{
+                          const arr = [...newPedidos]; arr[idx].producto = e.target.value; setNewPedidos(arr)
+                        }} placeholder="Ej. Equipo XYZ" />
+                      </div>
+                      <div className="md:col-span-2 space-y-1.5">
+                        <label className="text-[10px] font-bold uppercase tracking-wider block" style={{ color: 'var(--text-muted)' }}>Cant.</label>
+                        <input required type="number" min="0.01" step="any" className="neu-input w-full" value={item.cantidad} onChange={e=>{
+                          const arr = [...newPedidos]; arr[idx].cantidad = e.target.value; setNewPedidos(arr)
+                        }} placeholder="1" />
+                      </div>
+                      <div className="md:col-span-3 space-y-1.5">
+                        <label className="text-[10px] font-bold uppercase tracking-wider block" style={{ color: 'var(--text-muted)' }}>Monto Total USD</label>
+                        <input required type="number" step="any" className="neu-input w-full" value={item.monto} onChange={e=>{
+                          const arr = [...newPedidos]; arr[idx].monto = e.target.value; setNewPedidos(arr)
+                        }} placeholder="5000" />
+                      </div>
+                      <div className="md:col-span-2">
+                        {newPedidos.length > 1 && (
+                          <button type="button" onClick={() => setNewPedidos(newPedidos.filter((_, i) => i !== idx))} className="neu-btn text-red-500 w-full flex items-center justify-center py-2.5 rounded-xl h-[42px]" title="Eliminar fila">
+                            <Trash2 size={14} />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+
+                  <div className="flex justify-end pt-2">
+                    <button type="submit" disabled={savingPed} className="neu-btn-accent text-xs font-bold px-6 py-2.5 rounded-xl flex items-center justify-center gap-2">
+                      <ShoppingBag size={14} /> Registrar {newPedidos.length > 1 ? 'Compra Múltiple' : 'Compra'}
                     </button>
                   </div>
                 </form>
@@ -490,16 +524,18 @@ export default function ClienteDetalle({ cliente, onBack, onUpdate }) {
                     <tr>
                       <th className="px-5 py-4 text-[10px] font-bold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Fecha</th>
                       <th className="px-5 py-4 text-[10px] font-bold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Producto</th>
+                      <th className="px-5 py-4 text-[10px] font-bold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Cant.</th>
                       <th className="px-5 py-4 text-[10px] font-bold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Monto</th>
                       <th className="px-5 py-4 text-[10px] font-bold uppercase tracking-wider text-right" style={{ color: 'var(--text-muted)' }}>Acción</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y" style={{ borderColor: 'rgba(163,177,198,0.1)' }}>
-                    {pedidos.length===0 && <tr><td colSpan="4" className="p-8 text-center" style={{ color: 'var(--text-muted)' }}>No hay compras registradas.</td></tr>}
+                    {pedidos.length===0 && <tr><td colSpan="5" className="p-8 text-center" style={{ color: 'var(--text-muted)' }}>No hay compras registradas.</td></tr>}
                     {pedidos.map(p => (
                       <tr key={p.id} className="hover:bg-slate-50/30 transition-colors">
                         <td className="px-5 py-4 font-medium" style={{ color: 'var(--text-muted)' }}>{new Date(p.fechaPedido).toLocaleDateString()}</td>
                         <td className="px-5 py-4 font-extrabold" style={{ color: 'var(--text)' }}>{p.producto}</td>
+                        <td className="px-5 py-4 font-medium" style={{ color: 'var(--text-muted)' }}>{p.cantidad} {p.unidad}</td>
                         <td className="px-5 py-4 font-bold text-emerald-500">${p.monto.toLocaleString()}</td>
                         <td className="px-5 py-4 text-right">
                           <button onClick={()=>handleDeletePed(p.id)} className="neu-btn w-8 h-8 rounded-lg inline-flex items-center justify-center text-red-500">

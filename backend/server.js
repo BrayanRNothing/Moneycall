@@ -608,14 +608,32 @@ app.get('/api/pedidos', async (req, res) => {
 })
 
 app.post('/api/pedidos', async (req, res) => {
-  const { clienteId, producto, categoria, cantidad, unidad, monto, notas } = req.body
   try {
+    if (Array.isArray(req.body)) {
+      const pedidos = await Promise.all(req.body.map(item => 
+        prisma.pedido.create({
+          data: {
+            clienteId: parseInt(item.clienteId),
+            producto: item.producto,
+            categoria: item.categoria || 'General',
+            cantidad: parseFloat(item.cantidad) || 1,
+            unidad: item.unidad || 'unidad',
+            monto: parseFloat(item.monto),
+            notas: item.notas
+          },
+          include: { cliente: { select: { nombreEmpresa: true } } }
+        })
+      ))
+      return res.json(pedidos)
+    }
+
+    const { clienteId, producto, categoria, cantidad, unidad, monto, notas } = req.body
     const p = await prisma.pedido.create({
       data: {
         clienteId: parseInt(clienteId),
         producto,
         categoria: categoria || 'General',
-        cantidad: parseFloat(cantidad),
+        cantidad: parseFloat(cantidad) || 1,
         unidad: unidad || 'unidad',
         monto: parseFloat(monto),
         notas
