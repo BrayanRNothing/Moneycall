@@ -1,4 +1,4 @@
-import { Routes, Route, Link, useLocation, Navigate } from 'react-router-dom'
+import { Routes, Route, Link, useLocation, Navigate, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import {
   LayoutDashboard,
@@ -36,6 +36,7 @@ const fmtUSD = (n) => n >= 1000 ? `$${(n / 1000).toFixed(n % 1000 === 0 ? 0 : 1)
 
 function App() {
   const location = useLocation()
+  const navigate = useNavigate()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [user, setUser] = useState(() => {
     const saved = localStorage.getItem('user')
@@ -62,6 +63,11 @@ function App() {
     localStorage.setItem('token', token)
     localStorage.setItem('user', JSON.stringify(u))
     setUser(u)
+    if (u.isSuperAdmin) {
+      navigate('/admin', { replace: true })
+    } else {
+      navigate('/mi-dia', { replace: true })
+    }
   }
 
   const handleLogout = () => {
@@ -407,7 +413,7 @@ function App() {
         {/* Page Content */}
         <div className="flex-1 p-5 md:p-6 overflow-y-auto max-w-7xl w-full mx-auto">
           <Routes>
-            <Route path="/admin" element={<AdminPanel />} />
+            <Route path="/admin" element={user.isSuperAdmin ? <AdminPanel /> : <Navigate to="/mi-dia" replace />} />
             <Route path="/mi-dia" element={<MiDia />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/" element={user.isSuperAdmin ? <Navigate to="/admin" replace /> : <Navigate to="/mi-dia" replace />} />
