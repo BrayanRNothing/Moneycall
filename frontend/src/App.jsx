@@ -74,7 +74,7 @@ function App() {
 
   const topNavigation = [
     { name: 'Mi Día', href: '/mi-dia', icon: CalendarDays, roles: ['gerente', 'vendedor'] },
-    { name: 'Dashboard', href: '/', icon: LayoutDashboard, roles: ['gerente', 'vendedor'] },
+    { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, roles: ['gerente', 'vendedor'] },
     { name: 'Portafolio', href: '/portafolio', icon: Users, roles: ['gerente', 'vendedor'] },
     { name: 'Llamadas', href: '/llamadas', icon: Phone, roles: ['gerente', 'vendedor'] },
     { name: 'Cotizaciones', href: '/quotes', icon: FileText, roles: ['gerente', 'vendedor'] },
@@ -409,6 +409,7 @@ function App() {
           <Routes>
             <Route path="/admin" element={<AdminPanel />} />
             <Route path="/mi-dia" element={<MiDia />} />
+            <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/" element={user.isSuperAdmin ? <Navigate to="/admin" replace /> : <Navigate to="/mi-dia" replace />} />
             {/* <Route path="/reunion-diaria" element={<ReunionDiaria />} /> */}
             <Route path="/portafolio" element={<Portafolio />} />
