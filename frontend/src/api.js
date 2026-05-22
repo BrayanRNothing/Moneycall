@@ -58,6 +58,8 @@ export const getCotizaciones = (gerenteId) => req(`/cotizaciones${gerenteId ? `?
 export const createCotizacion = (data) => req('/cotizaciones', { method: 'POST', body: JSON.stringify(data) })
 export const logF1 = (id, fechaDecisionF1) =>
   req(`/cotizaciones/${id}/f1`, { method: 'PUT', body: JSON.stringify({ fechaDecisionF1 }) })
+export const logF2 = (id) =>
+  req(`/cotizaciones/${id}/f2`, { method: 'PUT' })
 export const closeCotizacion = (id, estado) =>
   req(`/cotizaciones/${id}/close`, { method: 'PUT', body: JSON.stringify({ estado }) })
 export const deleteCotizacion = (id) => req(`/cotizaciones/${id}`, { method: 'DELETE' })

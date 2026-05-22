@@ -409,7 +409,7 @@ function App() {
           <Routes>
             <Route path="/admin" element={<AdminPanel />} />
             <Route path="/mi-dia" element={<MiDia />} />
-            <Route path="/" element={user.isSuperAdmin ? <Navigate to="/admin" replace /> : <Dashboard />} />
+            <Route path="/" element={user.isSuperAdmin ? <Navigate to="/admin" replace /> : <Navigate to="/mi-dia" replace />} />
             {/* <Route path="/reunion-diaria" element={<ReunionDiaria />} /> */}
             <Route path="/portafolio" element={<Portafolio />} />
             <Route path="/llamadas" element={<Llamadas />} />

@@ -16,8 +16,9 @@ export default function Portafolio() {
   
   // Detalle Cliente Modal
   const [selectedClient, setSelectedClient] = useState(null)
+  const [activeTab, setActiveTab] = useState('Cliente')
   
-  const [newClient, setNewClient] = useState({ nombreEmpresa: '', contactoPrincipal: '', telefono: '', vendedorId: user.id })
+  const [newClient, setNewClient] = useState({ nombreEmpresa: '', contactoPrincipal: '', telefono: '', vendedorId: user.id, tipo: 'Cliente' })
   const [saving, setSaving] = useState(false)
   const [recalcPending, setRecalcPending] = useState(false)
 
@@ -34,8 +35,9 @@ export default function Portafolio() {
   useEffect(() => { load() }, [])
 
   const filtered = clients.filter(c =>
-    c.nombreEmpresa?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    c.contactoPrincipal?.toLowerCase().includes(searchQuery.toLowerCase())
+    (c.tipo || 'Cliente') === activeTab &&
+    (c.nombreEmpresa?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    c.contactoPrincipal?.toLowerCase().includes(searchQuery.toLowerCase()))
   )
 
   const handleAddClient = async (e) => {
@@ -44,7 +46,7 @@ export default function Portafolio() {
       await createCliente(newClient)
       await load()
       setShowAddModal(false)
-      setNewClient({ nombreEmpresa: '', contactoPrincipal: '', telefono: '', vendedorId: user.id })
+      setNewClient({ nombreEmpresa: '', contactoPrincipal: '', telefono: '', vendedorId: user.id, tipo: activeTab })
     } catch (e) { alert('Error: ' + e.message) } finally { setSaving(false) }
   }
 
@@ -105,11 +107,30 @@ export default function Portafolio() {
       )}
 
       {/* Toolbar y Buscador */}
+      <div className="flex gap-4 border-b border-slate-200 mb-4 px-2" style={{ borderColor: 'rgba(163,177,198,0.2)' }}>
+        <button onClick={() => { setActiveTab('Cliente'); setNewClient(prev => ({...prev, tipo: 'Cliente'})); }} 
+          className={`pb-3 px-2 text-xs font-bold uppercase tracking-wider transition-all ${activeTab === 'Cliente' ? 'border-b-2' : ''}`}
+          style={{ 
+            color: activeTab === 'Cliente' ? 'var(--accent)' : 'var(--text-muted)',
+            borderColor: activeTab === 'Cliente' ? 'var(--accent)' : 'transparent'
+          }}>
+          Clientes
+        </button>
+        <button onClick={() => { setActiveTab('Lead'); setNewClient(prev => ({...prev, tipo: 'Lead'})); }}
+          className={`pb-3 px-2 text-xs font-bold uppercase tracking-wider transition-all ${activeTab === 'Lead' ? 'border-b-2' : ''}`}
+          style={{ 
+            color: activeTab === 'Lead' ? 'var(--accent)' : 'var(--text-muted)',
+            borderColor: activeTab === 'Lead' ? 'var(--accent)' : 'transparent'
+          }}>
+          Leads
+        </button>
+      </div>
+
       <div className="neu-card p-4 flex items-center justify-between gap-4">
         <div className="relative w-full max-w-sm">
           <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-muted)' }} />
           <input className="neu-input w-full py-2 pl-9 pr-4 text-xs" 
-            placeholder="Buscar por empresa o contacto..."
+            placeholder={`Buscar ${activeTab.toLowerCase()} por empresa o contacto...`}
             value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
         </div>
         {/* Barra de progreso */}
@@ -213,6 +234,18 @@ export default function Portafolio() {
                     onChange={e => setNewClient(prev => ({ ...prev, [f.key]: e.target.value }))} />
                 </div>
               ))}
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold uppercase tracking-wider block" style={{ color: 'var(--text-muted)' }}>Tipo</label>
+                <div className="relative">
+                  <select required className="neu-input w-full py-2.5 px-3 text-xs appearance-none" 
+                    value={newClient.tipo || 'Cliente'}
+                    onChange={e => setNewClient(prev => ({ ...prev, tipo: e.target.value }))}>
+                    <option value="Cliente">Cliente</option>
+                    <option value="Lead">Lead</option>
+                  </select>
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: 'var(--text-muted)' }}>▾</span>
+                </div>
+              </div>
               <div className="flex gap-3 justify-end pt-2">
                 <button type="button" onClick={() => setShowAddModal(false)} className="neu-btn text-xs font-semibold px-4 py-2.5 rounded-xl" style={{ color: 'var(--text-muted)' }}>Cancelar</button>
                 <button type="submit" disabled={saving || clients.length >= 100} className="neu-btn-accent text-xs font-bold px-6 py-2.5 rounded-xl">

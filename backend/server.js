@@ -282,7 +282,8 @@ app.post('/api/admin/gerentes', async (req, res) => {
         password: password || '123456',
         isAdmin: true,
         isSuperAdmin: false,
-        rolCanal: rolCanal || 'Gerencia'
+        rolCanal: rolCanal || 'Gerencia',
+        certificaciones: { roleplayScore: 100, aprobado: true, fecha: new Date().toISOString(), examenEstado: 'calificado', examenHabilitado: true }
       }
     })
     const { password: _, ...user } = v
@@ -398,7 +399,7 @@ app.get('/api/clientes', async (req, res) => {
 })
 
 app.post('/api/clientes', async (req, res) => {
-  const { vendedorId, nombreEmpresa, contactoPrincipal, telefono, segmentoPareto } = req.body
+  const { vendedorId, nombreEmpresa, contactoPrincipal, telefono, segmentoPareto, tipo } = req.body
   try {
     const vId = parseInt(vendedorId)
     // Validar límite de clientes (Regla de oro: 100 por vendedor Moneycall)
@@ -409,7 +410,7 @@ app.post('/api/clientes', async (req, res) => {
     }
 
     const c = await prisma.cliente.create({
-      data: { vendedorId: vId, nombreEmpresa, contactoPrincipal, telefono, segmentoPareto: segmentoPareto || 'Marginal 80%' }
+      data: { vendedorId: vId, nombreEmpresa, contactoPrincipal, telefono, segmentoPareto: segmentoPareto || 'Marginal 80%', tipo: tipo || 'Cliente' }
     })
     res.json(c)
   } catch (e) { res.status(500).json({ error: e.message }) }
@@ -748,6 +749,16 @@ app.put('/api/cotizaciones/:id/f1', async (req, res) => {
     const c = await prisma.cotizacion.update({
       where: { id: parseInt(req.params.id) },
       data: { seguimientoF1: true, fechaDecisionF1: new Date(fechaDecisionF1) }
+    })
+    res.json(c)
+  } catch (e) { res.status(500).json({ error: e.message }) }
+})
+
+app.put('/api/cotizaciones/:id/f2', async (req, res) => {
+  try {
+    const c = await prisma.cotizacion.update({
+      where: { id: parseInt(req.params.id) },
+      data: { seguimientoF2: true }
     })
     res.json(c)
   } catch (e) { res.status(500).json({ error: e.message }) }

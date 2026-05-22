@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { FileText, Plus, CheckCircle2, XCircle, Clock, X, RefreshCw, AlertCircle, Info, Zap } from 'lucide-react'
-import { getCotizaciones, createCotizacion, logF1, closeCotizacion, getClientes } from '../api'
+import { getCotizaciones, createCotizacion, logF1, logF2, closeCotizacion, deleteCotizacion, getClientes } from '../api'
 
 export default function Quotes() {
   const user = JSON.parse(localStorage.getItem('user')) || { id: 1 }
@@ -49,6 +49,17 @@ export default function Quotes() {
 
   const handleClose = async (id, estado) => {
     try { await closeCotizacion(id, estado); await load() }
+    catch (e) { alert('Error: ' + e.message) }
+  }
+
+  const handleLogF2 = async (id) => {
+    try { await logF2(id); await load() }
+    catch (e) { alert('Error: ' + e.message) }
+  }
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('¿Seguro que deseas eliminar esta cotización?')) return;
+    try { await deleteCotizacion(id); await load() }
     catch (e) { alert('Error: ' + e.message) }
   }
 
@@ -286,12 +297,22 @@ export default function Quotes() {
                         <span className="text-[10px] font-bold px-2.5 py-1 rounded-full" style={{ background: ss.bg, color: ss.color }}>{q.estado}</span>
                       </td>
                       <td className="px-5 py-3.5">
-                        {q.estado === 'Pendiente' && q.seguimientoF1 && (
-                          <div className="flex gap-1.5">
-                            <button onClick={() => handleClose(q.id, 'Ganada')} className="w-7 h-7 rounded-lg flex items-center justify-center text-white" style={{ background: '#10b981' }}><CheckCircle2 size={13} /></button>
-                            <button onClick={() => handleClose(q.id, 'Perdida')} className="w-7 h-7 rounded-lg flex items-center justify-center text-white" style={{ background: '#ef4444' }}><XCircle size={13} /></button>
-                          </div>
-                        )}
+                        <div className="flex gap-1.5 items-center">
+                          {q.estado === 'Pendiente' && q.seguimientoF1 && !q.seguimientoF2 && (
+                            <button onClick={() => handleLogF2(q.id)}
+                              className="flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-lg"
+                              style={{ background: 'rgba(236,72,153,0.08)', color: '#ec4899', border: '1px solid rgba(236,72,153,0.2)' }}>
+                              <Clock size={11} /> Log F2
+                            </button>
+                          )}
+                          {q.estado === 'Pendiente' && q.seguimientoF2 && (
+                            <>
+                              <button onClick={() => handleClose(q.id, 'Ganada')} className="w-7 h-7 rounded-lg flex items-center justify-center text-white" style={{ background: '#10b981' }} title="Ganada"><CheckCircle2 size={13} /></button>
+                              <button onClick={() => handleClose(q.id, 'Perdida')} className="w-7 h-7 rounded-lg flex items-center justify-center text-white" style={{ background: '#ef4444' }} title="Perdida"><XCircle size={13} /></button>
+                            </>
+                          )}
+                          <button onClick={() => handleDelete(q.id)} className="w-7 h-7 rounded-lg flex items-center justify-center transition-colors hover:bg-red-50" style={{ color: '#ef4444' }} title="Eliminar"><X size={14} /></button>
+                        </div>
                       </td>
                     </tr>
                   )

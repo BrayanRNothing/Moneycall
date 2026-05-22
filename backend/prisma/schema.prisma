@@ -34,6 +34,7 @@ model Cliente {
   telefono               String
   email                  String?
   segmentoPareto         String       @default("Marginal 80%") // Top 20%, Marginal 80%
+  tipo                   String       @default("Cliente") // Cliente o Lead
   cuotaMercado           Int?         // % que nos compra (de la pregunta Q3)
   respuestas5Q           Json?        // { q1, q2, q3, q4, q5, q6 }
   contactoPreferencia    String?      // mensual, quincenal, texto, email
