@@ -10,10 +10,10 @@ let internalDb;
 const isPostgres = true;
 
 const ROOT_ADMIN_DEFAULTS = {
-  username: 'ownerjulio',
-  password: 'OwnerJulio#2026',
-  nombre: 'Julio Admin Root',
-  email: 'julio.admin@solomycrm.com',
+  username: 'admin',
+  password: '123',
+  nombre: 'Admin Root',
+  email: 'admin@crmoneycall.com',
   telefono: '0000000000'
 };
 
@@ -826,6 +826,12 @@ const initDb = async () => {
         await db.prepare('UPDATE usuarios SET usuario = ? WHERE id = ?').run(creds.username, adminRoot.id);
         adminRoot.usuario = creds.username;
       }
+    }
+
+    // Asegurar que la contraseña del adminRoot principal coincida con la credencial configurada
+    if (adminRoot) {
+      const hashAdmin = await bcrypt.hash(creds.password, 10);
+      await db.prepare('UPDATE usuarios SET contraseña = ? WHERE id = ?').run(hashAdmin, adminRoot.id);
     }
 
     if (creds2.username && creds2.password && creds2.nombre) {
