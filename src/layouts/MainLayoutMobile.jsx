@@ -2,7 +2,7 @@ import React from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import AnimatedGridBackground from '../components/ui/AnimatedGridBackground';
-import logosolomycrm from '../assets/logosolomycrm.png';
+import logocrmoneycall from '../assets/logocrmoneycall.png';
 
 const MainLayoutMobile = ({ menuItems, userInfo }) => {
     const location = useLocation();
@@ -17,10 +17,10 @@ const MainLayoutMobile = ({ menuItems, userInfo }) => {
                     <div className="flex items-center justify-between h-16">
                         <div className="flex items-center gap-3">
                             <div className="w-9 h-9 rounded-xl bg-white shadow-sm border border-slate-100 p-2 flex items-center justify-center">
-                                <img src={logosolomycrm} alt="SoloMyCRM" className="w-full h-full object-contain" />
+                                <img src={logocrmoneycall} alt="SoloMyCRM" className="w-full h-full object-contain" />
                             </div>
                             <div className="flex flex-col">
-                                <span className="text-[11px] font-black tracking-[0.15em] uppercase text-slate-800 leading-none">SoloMyCRM</span>
+                                <span className="text-[11px] font-black tracking-[0.15em] uppercase text-slate-800 leading-none">CRMoneyCall</span>
                                 <span className="text-[9px] font-bold text-(--theme-500) uppercase tracking-widest mt-0.5">{userInfo?.rol || 'Workspace'}</span>
                             </div>
                         </div>

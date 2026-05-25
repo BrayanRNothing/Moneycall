@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Lock, Eye, EyeOff, ArrowRight, ArrowDown, Layout, Check } from 'lucide-react';
 import { getUser, saveUser, saveToken } from '../../utils/authUtils';
 import API_URL from '../../config/api';
-import logosolomycrm from '../../assets/logosolomycrm.png';
+import logocrmoneycall from '../../assets/logocrmoneycall.png';
 import AnimatedGridBackground from '../../components/ui/AnimatedGridBackground';
 import Typewriter from 'typewriter-effect';
 import LoginMobile from './LoginMobile';
@@ -225,7 +225,7 @@ const Login = () => {
               <strong className="text-xs font-black tracking-[0.25em] uppercase text-slate-900">
                 <Typewriter
                   options={{
-                    strings: ['solomycrm.com'],
+                    strings: ['crmoneycall.com'],
                     autoStart: true, loop: true, delay: 100, deleteSpeed: 50, pauseFor: 30000, cursor: '|'
                   }}
                 />
@@ -235,8 +235,8 @@ const Login = () => {
             {/* Nav Links - Distributed */}
             <div className="hidden md:flex items-center justify-between flex-1 max-w-5xl ml-12 relative z-10">
               {[
-                { name: 'Página web', to: 'https://solomycrm.com/', isExternal: true },
-                { name: 'Contáctanos', to: 'https://www.solomycrm.com/#/contacto', isExternal: true },
+                { name: 'Página web', to: 'https://crmoneycall.com/', isExternal: true },
+                { name: 'Contáctanos', to: 'https://www.crmoneycall.com/#/contacto', isExternal: true },
                 { name: 'Términos y condiciones de uso', to: '/terminos-y-condiciones', targetBlank: true },
                 { name: 'Política de privacidad', to: '/politica-de-privacidad', targetBlank: true }
               ].map((link) => (
@@ -281,7 +281,7 @@ const Login = () => {
               {/* Top Right: Status Box (Subtle) */}
               <div className="absolute -top-4 -right-4 md:-top-6 md:-right-6 hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full border border-slate-200/50 bg-white/30 backdrop-blur-sm opacity-60 hover:opacity-100 transition-opacity z-30">
                 <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">SoloMyCRM V15</span>
+                <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">CRMoneyCall V15</span>
               </div>
             </div>
 
@@ -315,7 +315,7 @@ const Login = () => {
                 <div className="flex flex-col items-center mb-10">
                   <div className="w-24 h-24 flex items-center justify-center p-2 mb-4 relative group">
                     <div className="absolute inset-0 bg-(--theme-500)/5 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-                    <img src={logosolomycrm} alt="SoloMyCRM" className="w-full h-full object-contain relative z-10 drop-shadow-[0_10px_10px_rgba(0,0,0,0.05)] transition-transform duration-500 group-hover:scale-110" />
+                    <img src={logocrmoneycall} alt="CRMoneyCall" className="w-full h-full object-contain relative z-10 drop-shadow-[0_10px_10px_rgba(0,0,0,0.05)] transition-transform duration-500 group-hover:scale-110" />
                   </div>
                   <div className="text-center">
                     <h2 className="text-3xl font-black tracking-tighter text-(--theme-600) leading-tight">Inicia sesión</h2>

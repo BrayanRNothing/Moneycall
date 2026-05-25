@@ -14,7 +14,7 @@ const BrandGlyph = () => (
     </svg>
 );
 
-const FloatingSidebar = ({ menuItems, userInfo, title = 'solomycrm', subtitle = 'Workspace', logo, onCollapseChange, mode = 'light' }) => {
+const FloatingSidebar = ({ menuItems, userInfo, title = 'crmoneycall', subtitle = 'Workspace', logo, onCollapseChange, mode = 'light' }) => {
     const location = useLocation();
     const [isCollapsed, setIsCollapsed] = useState(true);
     const [openAccordions, setOpenAccordions] = useState({});

@@ -23,7 +23,7 @@ export const THEMES = [
 const useThemeStore = create(
   persist(
     (set) => ({
-      currentThemeId: 'blue', // Por defecto cambiamos a Azul como pidió originalmente.
+      currentThemeId: 'midnight', // Por defecto cambiamos a Midnight.
       setTheme: (themeId) => set({ currentThemeId: themeId }),
     }),
     {

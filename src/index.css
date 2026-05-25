@@ -2,6 +2,8 @@
 @import "react-day-picker/dist/style.css";
 
 @theme {
+  --font-sans: "Plus Jakarta Sans", "Inter", sans-serif;
+
   /* 
    * THEME COLORS MAPPING
    * We map the 'primary' color palette to CSS variables that change depending on the active theme
@@ -17,6 +19,10 @@
   --color-primary-800: var(--theme-800);
   --color-primary-900: var(--theme-900);
   --color-primary-950: var(--theme-950);
+}
+
+body {
+  font-family: "Plus Jakarta Sans", "Inter", sans-serif;
 }
 
 /* THEME: GREEN (Default) */

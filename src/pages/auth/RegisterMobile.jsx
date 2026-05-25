@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Lock, User, Phone, Eye, EyeOff, Shield, Check, ArrowRight, Zap } from 'lucide-react';
 import { getUser, saveUser, saveToken } from '../../utils/authUtils';
 import API_URL from '../../config/api';
-import logosolomycrm from '../../assets/logosolomycrm.png';
+import logocrmoneycall from '../../assets/logocrmoneycall.png';
 
 const DEFAULT_ROL = 'vendedor';
 
@@ -108,9 +108,9 @@ const RegisterMobile = () => {
         <div className="flex items-center justify-between py-4 border-b border-slate-200/60">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl bg-white shadow-sm border border-slate-100 p-1.5 flex items-center justify-center">
-              <img src={logosolomycrm} alt="SoloMyCRM" className="w-full h-full object-contain" />
+              <img src={logocrmoneycall} alt="CRMoneyCall" className="w-full h-full object-contain" />
             </div>
-            <span className="text-[11px] font-black tracking-[0.2em] uppercase text-slate-700">SoloMyCRM</span>
+            <span className="text-[11px] font-black tracking-[0.2em] uppercase text-slate-700">CRMoneyCall</span>
           </div>
           <Link to="/" className="text-[9px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-700 transition-colors">
             ← Ingresar
@@ -118,8 +118,8 @@ const RegisterMobile = () => {
         </div>
         <div className="flex items-center gap-5 overflow-x-auto no-scrollbar py-2.5">
           {[
-            { name: 'Página web', to: 'https://solomycrm.com/', isExternal: true },
-            { name: 'Contáctanos', to: 'https://www.solomycrm.com/#/contacto', isExternal: true },
+            { name: 'Página web', to: 'https://crmoneycall.com/', isExternal: true },
+            { name: 'Contáctanos', to: 'https://www.crmoneycall.com/#/contacto', isExternal: true },
             { name: 'Términos', to: '/terminos-y-condiciones', targetBlank: true },
             { name: 'Privacidad', to: '/politica-de-privacidad', targetBlank: true }
           ].map((link) => (

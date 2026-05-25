@@ -3,7 +3,7 @@ import { Outlet, useLocation } from 'react-router-dom';
 import AnimatedGridBackground from '../components/ui/AnimatedGridBackground';
 import FloatingSidebar from '../components/ui/FloatingSidebar';
 import { getUser } from '../utils/authUtils';
-import logosolomycrm from '../assets/logosolomycrm.png';
+import logocrmoneycall from '../assets/logocrmoneycall.png';
 import useWindowSize from '../hooks/useWindowSize';
 import MainLayoutMobile from './MainLayoutMobile';
 
@@ -130,9 +130,9 @@ const MainLayout = () => {
                 <FloatingSidebar
                     menuItems={menuItems}
                     userInfo={{ ...usuario, rol: getRoleLabel() }}
-                    title="solomycrm"
+                    title="crmoneycall"
                     subtitle="Sales Full"
-                    logo={<img src={logosolomycrm} alt="solomycrm" className="w-8 h-8 object-contain" />}
+                    logo={<img src={logocrmoneycall} alt="crmoneycall" className="w-8 h-8 object-contain" />}
                     onCollapseChange={setSidebarCollapsed}
                     mode="light"
                 />

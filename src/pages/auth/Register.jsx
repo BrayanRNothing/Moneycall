@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import { getUser, saveUser, saveToken } from '../../utils/authUtils';
 import API_URL from '../../config/api';
-import logosolomycrm from '../../assets/logosolomycrm.png';
+import logocrmoneycall from '../../assets/logocrmoneycall.png';
 import AnimatedGridBackground from '../../components/ui/AnimatedGridBackground';
 import Typewriter from 'typewriter-effect';
 import RegisterMobile from './RegisterMobile';
@@ -237,7 +237,7 @@ const Register = () => {
               <strong className="text-xs font-black tracking-[0.25em] uppercase text-slate-900">
                 <Typewriter
                   options={{
-                    strings: ['solomycrm.com'],
+                    strings: ['crmoneycall.com'],
                     autoStart: true, loop: true, delay: 100, deleteSpeed: 50, pauseFor: 30000, cursor: '|'
                   }}
                 />
@@ -246,8 +246,8 @@ const Register = () => {
 
             <div className="hidden md:flex items-center justify-between flex-1 max-w-5xl ml-12 relative z-10">
               {[
-                { name: 'Página web', to: 'https://solomycrm.com/', isExternal: true },
-                { name: 'Contáctanos', to: 'https://www.solomycrm.com/#/contacto', isExternal: true },
+                { name: 'Página web', to: 'https://crmoneycall.com/', isExternal: true },
+                { name: 'Contáctanos', to: 'https://www.crmoneycall.com/#/contacto', isExternal: true },
                 { name: 'Términos y condiciones de uso', to: '/terminos-y-condiciones', targetBlank: true },
                 { name: 'Política de privacidad', to: '/politica-de-privacidad', targetBlank: true }
               ].map((link) => (
@@ -310,7 +310,7 @@ const Register = () => {
                 <div className="flex flex-col items-center mb-8">
                   <div className="w-20 h-20 flex items-center justify-center p-2 mb-4 relative group">
                     <div className="absolute inset-0 bg-(--theme-500)/5 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-                    <img src={logosolomycrm} alt="SoloMyCRM" className="w-full h-full object-contain relative z-10 drop-shadow-[0_10px_10px_rgba(0,0,0,0.05)] transition-transform duration-500 group-hover:scale-110" />
+                    <img src={logocrmoneycall} alt="CRMoneyCall" className="w-full h-full object-contain relative z-10 drop-shadow-[0_10px_10px_rgba(0,0,0,0.05)] transition-transform duration-500 group-hover:scale-110" />
                   </div>
                   <div className="text-center">
                     <h2 className="text-3xl font-black tracking-tighter text-(--theme-600) leading-tight">Crea tu cuenta</h2>
