@@ -1548,7 +1548,7 @@ export default function ClienteDetalle({
                                         <button
                                             onClick={() => setLlamadaFlow(f => ({ ...f, paso: 'otro' }))}
                                             className="py-2.5 bg-blue-500 text-white rounded-lg font-bold hover:bg-blue-600 transition-colors text-sm"
-                                        >📝 Otro</button>
+                                        >📝 Notas</button>
 
                                         <button
                                             onClick={() => setLlamadaFlow(null)}
@@ -1648,25 +1648,25 @@ export default function ClienteDetalle({
                                 </div>
                             )}
 
-                            {/* 3e: Otro */}
+                            {/* 3e: Notas */}
                             {llamadaFlow.paso === 'otro' && (
                                 <div className="space-y-3">
-                                    <p className="font-semibold text-blue-700">📝 Describe qué pasó en la llamada</p>
+                                    <p className="font-semibold text-blue-700">📝 Notas de la llamada</p>
                                     <textarea
                                         rows={2}
                                         value={llamadaFlow.notas || ''}
                                         onChange={e => setLlamadaFlow(f => ({ ...f, notas: e.target.value }))}
-                                        placeholder="Ej: Cliente preguntará de presupuesto luego, prometió repasar propuesta..."
+                                        placeholder="Escribe las notas de la llamada aquí..."
                                         className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400"
                                     />
                                     <button
                                         onClick={async () => {
                                             const prefix = llamadaFlow.tipoCall ? `[${llamadaFlow.tipoCall}] ` : '';
-                                            const notaFinal = llamadaFlow.notas ? `${prefix}Otro resultado - ${llamadaFlow.notas}` : `${prefix}Otro resultado de llamada`;
+                                            const notaFinal = llamadaFlow.notas ? `${prefix}${llamadaFlow.notas}` : `${prefix}Notas de la llamada`;
                                             const ok = await registrarActividadConDelay({ tipo: 'llamada', resultado: 'exitoso', notas: notaFinal });
                                             if (!ok) return;
                                             setLlamadaFlow(null);
-                                            toast('Resultado guardado', { icon: '✓' });
+                                            toast('Notas guardadas', { icon: '📝' });
                                         }}
                                         disabled={estaBloqueadoRegistro}
                                         className="w-full py-2 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed"
