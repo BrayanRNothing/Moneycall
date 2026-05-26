@@ -163,6 +163,16 @@ const Clientes = () => {
         return () => clearInterval(interval);
     }, [filtroVisibilidad]);
 
+    // Escuchar cambios en location.state para navegación interna desde recordatorios o citas
+    useEffect(() => {
+        if (location.state?.selectedId && clientes.length > 0) {
+            const found = clientes.find(c => String(c.id || c._id) === String(location.state.selectedId));
+            if (found) {
+                handleVerDetalles(found);
+            }
+        }
+    }, [location.state?.selectedId, clientes]);
+
     const handleToggleCompartido = async (cliente, nuevoEstado) => {
         const id = cliente.id || cliente._id;
         const prev = clientes;

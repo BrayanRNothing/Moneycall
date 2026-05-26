@@ -179,21 +179,19 @@ const ProactiveRatioDoughnut = ({ proactiveCount, reactiveCount }) => {
                 </div>
             </div>
             
-            <div className="flex justify-between w-full mt-4 gap-2 border-t border-gray-100 pt-3 px-2">
-                <div className="flex items-center gap-1.5 min-w-0">
+            <div className="flex justify-between w-full mt-4 gap-4 border-t border-gray-100 pt-3 px-2">
+                <div className="flex items-center gap-2 min-w-0">
                     <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0"></span>
-                    <div className="min-w-0">
-                        <span className="text-[9px] font-black text-gray-700 uppercase tracking-tighter block truncate">Proactiva (Outbound)</span>
-                        <span className="text-[10px] font-extrabold text-emerald-600">{pctProactive.toFixed(1)}%</span>
-                    </div>
+                    <span className="text-[10px] font-black text-gray-600 uppercase tracking-tight truncate">
+                        Proactiva <span className="text-[9px] text-gray-400 font-bold">(Outbound)</span>: <span className="text-emerald-600 font-black ml-1 text-xs">{pctProactive.toFixed(1)}%</span>
+                    </span>
                 </div>
                 
-                <div className="flex items-center gap-1.5 min-w-0">
+                <div className="flex items-center gap-2 min-w-0">
                     <span className="w-2.5 h-2.5 rounded-full bg-amber-400 shrink-0"></span>
-                    <div className="min-w-0">
-                        <span className="text-[9px] font-black text-gray-700 uppercase tracking-tighter block truncate">Reactiva (Inbound)</span>
-                        <span className="text-[10px] font-extrabold text-amber-600">{pctReactive.toFixed(1)}%</span>
-                    </div>
+                    <span className="text-[10px] font-black text-gray-600 uppercase tracking-tight truncate">
+                        Reactiva <span className="text-[9px] text-gray-400 font-bold">(Inbound)</span>: <span className="text-amber-500 font-black ml-1 text-xs">{pctReactive.toFixed(1)}%</span>
+                    </span>
                 </div>
             </div>
         </div>

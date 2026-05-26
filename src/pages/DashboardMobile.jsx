@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
     TrendingUp, Users, Phone, Target, 
@@ -23,6 +24,7 @@ const DashboardMobile = ({
     periodo, 
     setPeriodo 
 }) => {
+    const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('resumen');
 
     // Cálculos rápidos (reutilizados del dashboard original pero simplificados)
@@ -139,7 +141,17 @@ const DashboardMobile = ({
                             <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-4">Próximas Citas</h3>
                             <div className="space-y-3">
                                 {reuniones.slice(0, 3).map((r, i) => (
-                                    <div key={i} className="flex items-center justify-between p-3 bg-white rounded-2xl border border-slate-100 shadow-sm">
+                                    <div 
+                                        key={i} 
+                                        onClick={() => {
+                                            if (r.esCliente) {
+                                                navigate('/vendedor/clientes', { state: { selectedId: r.cliente?.id || r.clienteId } });
+                                            } else {
+                                                navigate('/vendedor/prospectos', { state: { selectedId: r.cliente?.id || r.clienteId } });
+                                            }
+                                        }}
+                                        className="flex items-center justify-between p-3 bg-white rounded-2xl border border-slate-100 shadow-sm cursor-pointer hover:shadow-md transition-all"
+                                    >
                                         <div className="flex items-center gap-3">
                                             <div className="w-10 h-10 rounded-xl bg-(--theme-50) flex items-center justify-center text-(--theme-600)">
                                                 <Calendar size={18} />
@@ -166,9 +178,19 @@ const DashboardMobile = ({
                             <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-4">Recordatorios Urgentes</h3>
                             <div className="space-y-3">
                                 {recordatorios.slice(0, 5).map((rec, i) => (
-                                    <div key={i} className={`flex items-center justify-between p-3 rounded-2xl border shadow-sm ${
-                                        new Date(rec.proximaLlamada) < new Date() ? 'bg-rose-50 border-rose-100' : 'bg-white border-slate-100'
-                                    }`}>
+                                    <div 
+                                        key={i} 
+                                        onClick={() => {
+                                            if (rec.esCliente) {
+                                                navigate('/vendedor/clientes', { state: { selectedId: rec.id || rec._id } });
+                                            } else {
+                                                navigate('/vendedor/prospectos', { state: { selectedId: rec.id || rec._id } });
+                                            }
+                                        }}
+                                        className={`flex items-center justify-between p-3 rounded-2xl border shadow-sm cursor-pointer hover:shadow-md transition-all ${
+                                            new Date(rec.proximaLlamada) < new Date() ? 'bg-rose-50 border-rose-100' : 'bg-white border-slate-100'
+                                        }`}
+                                    >
                                         <div className="flex items-center gap-3">
                                             <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
                                                 new Date(rec.proximaLlamada) < new Date() ? 'bg-rose-100 text-rose-500' : 'bg-orange-50 text-orange-500'
