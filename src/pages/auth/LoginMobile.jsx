@@ -80,7 +80,7 @@ const LoginMobile = () => {
       <div className="relative z-10 px-5 pt-safe">
         <div className="flex items-center justify-between py-4 border-b border-slate-200/60">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-white shadow-sm border border-slate-100 p-1.5 flex items-center justify-center">
+            <div className="w-18 h-8 rounded-lg bg-white shadow-sm border border-slate-100 p-1 flex items-center justify-center">
               <img src={logocrmoneycall} alt="CRMoneyCall" className="w-full h-full object-contain" />
             </div>
             <span className="text-[11px] font-black tracking-[0.2em] uppercase text-slate-700">CRMoneyCall</span>

@@ -69,7 +69,7 @@ const FloatingSidebar = ({ menuItems, userInfo, title = 'crmoneycall', subtitle 
                         className="relative flex items-center justify-center w-full group py-1"
                         title="Expandir menú"
                     >
-                        <div className="w-12 h-12 flex items-center justify-center transition-all duration-300 group-hover:scale-95">
+                        <div className="w-14 h-10 flex items-center justify-center transition-all duration-300 group-hover:scale-95">
                             {logo ? logo : <BrandGlyph />}
                         </div>
                         <span className="absolute -bottom-1 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-white" />
@@ -94,7 +94,7 @@ const FloatingSidebar = ({ menuItems, userInfo, title = 'crmoneycall', subtitle 
                     <div className="flex items-center gap-2.5">
                         <button
                             onClick={handleToggle}
-                            className="shrink-0 w-11 h-11 flex items-center justify-center hover:scale-[0.98] transition-transform"
+                            className="shrink-0 w-14 h-10 flex items-center justify-center hover:scale-[0.98] transition-transform"
                             title="Contraer/Expandir menú"
                         >
                             {logo ? logo : <BrandGlyph />}

@@ -141,7 +141,7 @@ const MainLayout = () => {
                     userInfo={{ ...usuario, rol: getRoleLabel() }}
                     title="crmoneycall"
                     subtitle="Sales Full"
-                    logo={<img src={logocrmoneycall} alt="crmoneycall" className="w-8 h-8 object-contain" />}
+                    logo={<img src={logocrmoneycall} alt="crmoneycall" className="w-full h-full object-contain" />}
                     onCollapseChange={setSidebarCollapsed}
                     mode="light"
                 />

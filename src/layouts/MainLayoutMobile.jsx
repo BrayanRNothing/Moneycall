@@ -16,7 +16,7 @@ const MainLayoutMobile = ({ menuItems, userInfo }) => {
                 <header className="px-5 pt-safe bg-white/70 backdrop-blur-xl border-b border-white/40 sticky top-0 z-50">
                     <div className="flex items-center justify-between h-16">
                         <div className="flex items-center gap-3">
-                            <div className="w-9 h-9 rounded-xl bg-white shadow-sm border border-slate-100 p-2 flex items-center justify-center">
+                            <div className="w-18 h-8 rounded-lg bg-white shadow-sm border border-slate-100 p-1 flex items-center justify-center">
                                 <img src={logocrmoneycall} alt="SoloMyCRM" className="w-full h-full object-contain" />
                             </div>
                             <div className="flex flex-col">

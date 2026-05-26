@@ -313,9 +313,8 @@ const Login = () => {
 
               <div className="flex-1 flex flex-col justify-center px-10 sm:px-14 py-8 relative z-10">
                 <div className="flex flex-col items-center mb-10">
-                  <div className="w-24 h-24 flex items-center justify-center p-2 mb-4 relative group">
-                    <div className="absolute inset-0 bg-(--theme-500)/5 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-                    <img src={logocrmoneycall} alt="CRMoneyCall" className="w-full h-full object-contain relative z-10 drop-shadow-[0_10px_10px_rgba(0,0,0,0.05)] transition-transform duration-500 group-hover:scale-110" />
+                  <div className="w-72 h-24 flex items-center justify-center mb-4 relative group">
+                    <img src={logocrmoneycall} alt="CRMoneyCall" className="w-full h-full object-contain relative z-10 transition-transform duration-500 group-hover:scale-105" />
                   </div>
                   <div className="text-center">
                     <h2 className="text-3xl font-black tracking-tighter text-(--theme-600) leading-tight">Inicia sesión</h2>
