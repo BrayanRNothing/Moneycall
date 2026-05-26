@@ -10,6 +10,9 @@ import {
 } from 'lucide-react';
 
 const ManualMetodologia = () => {
+    const [mostrarManualModal, setMostrarManualModal] = React.useState(false);
+    const [mostrarNomenclaturaModal, setMostrarNomenclaturaModal] = React.useState(false);
+
     return (
         <div className="flex-1 p-6 lg:p-10 overflow-y-auto bg-slate-50 relative hide-scrollbar pb-24">
             <style>{`
@@ -29,6 +32,31 @@ const ManualMetodologia = () => {
                     </div>
                 </div>
                 <div className="h-1 w-20 bg-gradient-to-r from-indigo-500 to-indigo-300 rounded-full mt-4"></div>
+            </div>
+
+            {/* Bloque Interactivo de Modales */}
+            <div className="max-w-4xl mx-auto mb-8 bg-gradient-to-br from-indigo-50/50 to-slate-100/50 border border-indigo-100/80 rounded-2xl p-6 shadow-xs flex flex-col md:flex-row items-center justify-between gap-4">
+                <div>
+                    <h3 className="font-extrabold text-slate-800 text-sm md:text-base">Guías Interactivas de Nomenclatura</h3>
+                    <p className="text-xs text-slate-500 mt-1">Explora visualmente el manual de registro de llamadas o la guía rápida de procesos de la metodología.</p>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto shrink-0">
+                    {/* Botón para abrir el Manual de Registro */}
+                    <button 
+                      onClick={() => setMostrarManualModal(true)}
+                      className="flex items-center justify-center gap-1.5 px-4 py-2.5 bg-white text-slate-700 border border-slate-300/50 hover:bg-slate-100 font-bold text-xs rounded-xl shadow-xs transition-all active:scale-95 cursor-pointer"
+                    >
+                      ⚡ Ver Manual de Registro
+                    </button>
+
+                    {/* Botón para abrir la Guía Rápida de Nomenclatura */}
+                    <button 
+                      onClick={() => setMostrarNomenclaturaModal(true)}
+                      className="flex items-center justify-center gap-1.5 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-xs rounded-xl hover:opacity-90 shadow-sm transition-all active:scale-95 cursor-pointer"
+                    >
+                      📖 Guía de Metodología
+                    </button>
+                </div>
             </div>
 
             <div className="max-w-4xl mx-auto space-y-8">
@@ -154,6 +182,309 @@ const ManualMetodologia = () => {
                 </section>
 
             </div>
+
+            {/* Modal 1: Manual de Registro y Metodología */}
+            {mostrarManualModal && (
+              <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center z-50 p-4">
+                <div className="bg-slate-100 rounded-3xl shadow-2xl max-w-5xl w-full p-6 relative border border-white/40 flex flex-col gap-4 text-slate-800 animate-in fade-in zoom-in-95 duration-200">
+                  {/* Botón de Cerrar Esquina Superior Derecha */}
+                  <button 
+                    onClick={() => setMostrarManualModal(false)}
+                    className="absolute top-4 right-4 p-2 bg-slate-200 hover:bg-slate-300 rounded-full text-slate-500 hover:text-slate-700 shadow-sm transition-all cursor-pointer"
+                    aria-label="Cerrar"
+                  >
+                    <span className="text-xs font-bold block leading-none">✕</span>
+                  </button>
+
+                  {/* Título Principal */}
+                  <div className="flex items-center gap-2 text-blue-600 font-extrabold text-base md:text-lg border-b border-slate-200 pb-3">
+                    <span className="text-xl">⚡</span>
+                    <h2>Manual de Registro y Metodología Moneycall</h2>
+                  </div>
+
+                  {/* Contenido en 3 Columnas */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2 overflow-y-auto max-h-[60vh] pr-2">
+                    
+                    {/* Columna 1: S1 & S2 */}
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-2 font-black text-slate-800 text-sm border-b border-slate-200/60 pb-1.5">
+                        <span className="text-rose-500 text-base">📞</span>
+                        <span className="text-rose-500">S1 & S2 (Llamadas de Cuadrante)</span>
+                      </div>
+                      <div className="space-y-3 text-xs leading-normal">
+                        <p className="text-slate-600">
+                          <strong className="text-slate-800 font-bold block mb-0.5">S1 (Cuadrante 1 - Recuperación):</strong> 
+                          Revisa el historial de pedidos del cliente. Si solía comprar un producto (ej. compresores) y lleva &gt;45 días sin comprarlo, llámale proactivamente para indagar la razón y recuperarlo.
+                        </p>
+                        <p className="text-slate-600">
+                          <strong className="text-slate-800 font-bold block mb-0.5">S2 (Cuadrante 2 - Venta Cruzada):</strong> 
+                          Identifica productos complementarios que clientes similares compran pero este no (ej. kits de instalación para minisplits). Llama para ofrecerlos proactivamente y subir tu ticket promedio.
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Columna 2: F1 & F2 */}
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-2 font-black text-slate-800 text-sm border-b border-slate-200/60 pb-1.5">
+                        <span className="text-amber-500 text-base">⌛</span>
+                        <span className="text-amber-500">F1 & F2 (Pipeline de Cotización)</span>
+                      </div>
+                      <div className="space-y-3 text-xs leading-normal">
+                        <p className="text-slate-600">
+                          <strong className="text-slate-800 font-bold block mb-0.5">F1 (Seguimiento 1):</strong> 
+                          ¡Meta 100%! Llama a las 24 horas de enviar cualquier cotización para confirmar recepción y resolver dudas. Su objetivo principal es <span className="underline decoration-slate-400 font-semibold text-slate-800">acordar una fecha de decisión</span> con el cliente.
+                        </p>
+                        <p className="text-slate-600">
+                          <strong className="text-slate-800 font-bold block mb-0.5">F2 (Seguimiento 2):</strong> 
+                          Llamada de cierre definitivo. Se realiza de forma puntual en la fecha de decisión acordada en F1. ¡Aquí se rescata la mayor parte de las ventas en duda!
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Columna 3: DC, RC, PT */}
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-2 font-black text-slate-800 text-sm border-b border-slate-200/60 pb-1.5">
+                        <span className="text-emerald-600 text-base">🚚</span>
+                        <span className="text-emerald-600">DC, RC, PT y el Secreto McDonald's</span>
+                      </div>
+                      <div className="space-y-3 text-xs leading-normal">
+                        <p className="text-slate-600">
+                          <strong className="text-slate-800 font-bold block mb-0.5">DC (Delivery Check):</strong> 
+                          Llamada post-entrega física. ¿Llegó todo conforme? 100% obligatorio. 10 DCs perfectas te dan derecho a hacer una llamada <strong className="text-slate-800 font-bold">RC (Referencia)</strong> para pedir testimonios (Plan A/B/C).
+                        </p>
+                        <p className="text-slate-600">
+                          <strong className="text-slate-800 font-bold block mb-0.5">PT (Contacto Personal):</strong> 
+                          Llamada trimestral sin agenda comercial. "Solo llamaba para saludarte".
+                        </p>
+                        <p className="text-slate-600 bg-blue-50/50 p-2.5 rounded-xl border border-blue-100/50">
+                          <strong className="text-slate-800 font-bold block mb-0.5">🍔 Pregunta McDonald's:</strong> 
+                          Al terminar toda interacción, pregunta siempre: <span className="italic text-slate-700">"¿Qué más te resulta difícil encontrar hoy que yo pueda localizar para ti?"</span>. ¡Captura compras que el cliente asumía que no vendías!
+                        </p>
+                      </div>
+                    </div>
+
+                  </div>
+
+                  {/* Footer con Botón Neumórfico de Cierre */}
+                  <div className="flex justify-end pt-3 border-t border-slate-200/50 mt-2">
+                    <button 
+                      onClick={() => setMostrarManualModal(false)}
+                      className="px-6 py-2.5 rounded-2xl bg-slate-200 text-slate-700 font-bold text-xs hover:scale-105 active:scale-95 transition-all shadow-[4px_4px_10px_rgba(0,0,0,0.08),-4px_-4px_10px_rgba(255,255,255,0.9)] cursor-pointer"
+                    >
+                      Cerrar Guía
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Modal 2: Guía rápida de nomenclatura */}
+            {mostrarNomenclaturaModal && (
+              <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center z-50 p-4">
+                <div className="bg-slate-100 rounded-3xl shadow-2xl max-w-4xl w-full overflow-hidden border border-white/50 flex flex-col animate-in fade-in zoom-in-95 duration-200">
+                  
+                  {/* Cabecera Azul */}
+                  <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4 flex items-center justify-between text-white shadow-sm">
+                    <div className="flex items-center gap-3">
+                      <span className="text-xl">📖</span>
+                      <div>
+                        <h2 className="text-sm md:text-base font-extrabold tracking-tight">Metodología Moneycall</h2>
+                        <span className="text-[10px] md:text-xs text-blue-100 font-medium block">Guía rápida de nomenclatura y procesos</span>
+                      </div>
+                    </div>
+                    <button 
+                      onClick={() => setMostrarNomenclaturaModal(false)}
+                      className="p-1.5 rounded-full hover:bg-white/10 text-white/80 hover:text-white transition-colors cursor-pointer"
+                      aria-label="Cerrar"
+                    >
+                      <span className="text-lg font-bold block leading-none">✕</span>
+                    </button>
+                  </div>
+
+                  {/* Cuerpo del Modal */}
+                  <div className="p-6 space-y-6 overflow-y-auto max-h-[70vh]">
+                    
+                    {/* Sección: El Pipeline de Cotizaciones */}
+                    <div className="space-y-2">
+                      <h3 className="text-xs font-black text-slate-800 uppercase tracking-wide">El Pipeline de Cotizaciones</h3>
+                      <p className="text-xs text-slate-500 leading-normal">
+                        En Moneycall, <strong className="text-slate-700">nunca se envía una cotización sin darle seguimiento</strong>. El proceso es:
+                      </p>
+                      
+                      {/* Flujo de Estados */}
+                      <div className="flex items-center gap-2 pt-2 flex-wrap text-slate-600">
+                        <span className="px-3 py-1.5 rounded-lg border border-slate-200 text-[10px] font-extrabold text-slate-700 bg-white shadow-xs">
+                          Cotización (Pendiente)
+                        </span>
+                        <span className="text-slate-400 font-bold text-xs shrink-0">➔</span>
+                        <span className="px-3 py-1.5 rounded-lg border border-amber-200 text-[10px] font-extrabold text-amber-700 bg-amber-50/50 shadow-xs">
+                          F1 (1er Seguimiento)
+                        </span>
+                        <span className="text-slate-400 font-bold text-xs shrink-0">➔</span>
+                        <span className="px-3 py-1.5 rounded-lg border border-pink-200 text-[10px] font-extrabold text-pink-700 bg-pink-50/50 shadow-xs">
+                          F2 (Cierre/Decisión)
+                        </span>
+                        <span className="text-slate-400 font-bold text-xs shrink-0">➔</span>
+                        <span className="px-3 py-1.5 rounded-lg border border-emerald-200 text-[10px] font-extrabold text-emerald-700 bg-emerald-50/50 shadow-xs">
+                          Ganada / Perdida
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Sección: Tipos de Llamadas (Nomenclatura) */}
+                    <div className="space-y-3">
+                      <h3 className="text-xs font-black text-slate-800 uppercase tracking-wide border-t border-slate-200/80 pt-4">
+                        Tipos de Llamadas (Nomenclatura)
+                      </h3>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        
+                        {/* Card S1 */}
+                        <div className="bg-white border border-slate-200 rounded-2xl p-4 flex gap-3 shadow-xs hover:border-slate-300 transition-colors">
+                          <div className="w-9 h-9 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center shrink-0 font-bold text-base">
+                            📞
+                          </div>
+                          <div className="flex-1 min-w-0 space-y-1.5">
+                            <h4 className="text-xs font-extrabold text-blue-600">S1 - Cuadrante de Recuperación</h4>
+                            <p className="text-[10px] text-slate-500 leading-relaxed">
+                              Clientes inactivos en ciertos productos por más de 45 días.
+                            </p>
+                            <div className="px-2.5 py-1 bg-amber-50 border border-amber-100 rounded-lg text-[9px] text-slate-600 font-medium">
+                              🔑 Llama para averiguar por qué dejaron de comprar y recupera el negocio.
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Card S2 */}
+                        <div className="bg-white border border-slate-200 rounded-2xl p-4 flex gap-3 shadow-xs hover:border-slate-300 transition-colors">
+                          <div className="w-9 h-9 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center shrink-0 font-bold text-base">
+                            ⚡
+                          </div>
+                          <div className="flex-1 min-w-0 space-y-1.5">
+                            <h4 className="text-xs font-extrabold text-indigo-600">S2 - Venta Cruzada</h4>
+                            <p className="text-[10px] text-slate-500 leading-relaxed">
+                              Ofrecer productos complementarios basados en compras de clientes similares.
+                            </p>
+                            <div className="px-2.5 py-1 bg-amber-50 border border-amber-100 rounded-lg text-[9px] text-slate-600 font-medium">
+                              🔑 Aumenta el ticket promedio con sugerencias relevantes al negocio del cliente.
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Card F1 */}
+                        <div className="bg-white border border-slate-200 rounded-2xl p-4 flex gap-3 shadow-xs hover:border-slate-300 transition-colors">
+                          <div className="w-9 h-9 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center shrink-0 font-bold text-base">
+                            🕒
+                          </div>
+                          <div className="flex-1 min-w-0 space-y-1.5">
+                            <h4 className="text-xs font-extrabold text-amber-600">F1 - Primer Seguimiento</h4>
+                            <p className="text-[10px] text-slate-500 leading-relaxed">
+                              Llamada obligatoria post-cotización (100% cobertura).
+                            </p>
+                            <div className="px-2.5 py-1 bg-amber-50 border border-amber-100 rounded-lg text-[9px] text-slate-600 font-medium">
+                              🔑 No dejes cotizaciones sueltas. En esta llamada se fija la fecha F2 de decisión.
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Card F2 */}
+                        <div className="bg-white border border-slate-200 rounded-2xl p-4 flex gap-3 shadow-xs hover:border-slate-300 transition-colors">
+                          <div className="w-9 h-9 rounded-xl bg-pink-100 text-pink-600 flex items-center justify-center shrink-0 font-bold text-base">
+                            ⌛
+                          </div>
+                          <div className="flex-1 min-w-0 space-y-1.5">
+                            <h4 className="text-xs font-extrabold text-pink-600">F2 - Segundo Seguimiento</h4>
+                            <p className="text-[10px] text-slate-500 leading-relaxed">
+                              Llamada de cierre basada en la fecha acordada en F1.
+                            </p>
+                            <div className="px-2.5 py-1 bg-amber-50 border border-amber-100 rounded-lg text-[9px] text-slate-600 font-medium">
+                              🔑 El 40% restante de las ventas se cierra aquí. ¡Llama puntual en la fecha acordada!
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Card DC */}
+                        <div className="bg-white border border-slate-200 rounded-2xl p-4 flex gap-3 shadow-xs hover:border-slate-300 transition-colors">
+                          <div className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0 font-bold text-base">
+                            🚚
+                          </div>
+                          <div className="flex-1 min-w-0 space-y-1.5">
+                            <h4 className="text-xs font-extrabold text-emerald-600">DC - Delivery Check</h4>
+                            <p className="text-[10px] text-slate-500 leading-relaxed">
+                              Confirmar satisfacción en la entrega del pedido.
+                            </p>
+                            <div className="px-2.5 py-1 bg-amber-50 border border-amber-100 rounded-lg text-[9px] text-slate-600 font-medium">
+                              💡 Asegura que el cliente recibió todo bien. Si acumulas 10 DCs perfectas, puedes pedir RC.
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Card RC */}
+                        <div className="bg-white border border-slate-200 rounded-2xl p-4 flex gap-3 shadow-xs hover:border-slate-300 transition-colors">
+                          <div className="w-9 h-9 rounded-xl bg-amber-100 text-amber-500 flex items-center justify-center shrink-0 font-bold text-base">
+                            ⭐
+                          </div>
+                          <div className="flex-1 min-w-0 space-y-1.5">
+                            <h4 className="text-xs font-extrabold text-amber-500 font-black">RC - Referencia / Testimonio</h4>
+                            <p className="text-[10px] text-slate-500 leading-relaxed">
+                              Pedir testimonio en video, texto o un referido.
+                            </p>
+                            <div className="px-2.5 py-1 bg-amber-50 border border-amber-100 rounded-lg text-[9px] text-slate-600 font-medium">
+                              💡 Solo se pide después de 10 entregas perfectas. Inicia pidiendo video (Plan A).
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Card PT */}
+                        <div className="bg-white border border-slate-200 rounded-2xl p-4 flex gap-3 shadow-xs hover:border-slate-300 transition-colors">
+                          <div className="w-9 h-9 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center shrink-0 font-bold text-base">
+                            ♡
+                          </div>
+                          <div className="flex-1 min-w-0 space-y-1.5">
+                            <h4 className="text-xs font-extrabold text-slate-600 font-black">PT - Contacto Personal</h4>
+                            <p className="text-[10px] text-slate-500 leading-relaxed">
+                              Llamada de relación, sin intención de venta.
+                            </p>
+                            <div className="px-2.5 py-1 bg-amber-50 border border-amber-100 rounded-lg text-[9px] text-slate-600 font-medium">
+                              💡 Meta: 1 por cliente al trimestre. Mantén la relación cálida ("Solo quería saludarte").
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Card IN */}
+                        <div className="bg-white border border-slate-200 rounded-2xl p-4 flex gap-3 shadow-xs hover:border-slate-300 transition-colors">
+                          <div className="w-9 h-9 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center shrink-0 font-bold text-base">
+                            📞
+                          </div>
+                          <div className="flex-1 min-w-0 space-y-1.5">
+                            <h4 className="text-xs font-extrabold text-slate-600 font-black">IN - Entrante</h4>
+                            <p className="text-[10px] text-slate-500 leading-relaxed">
+                              El cliente te llama a ti.
+                            </p>
+                            <div className="px-2.5 py-1 bg-amber-50 border border-amber-100 rounded-lg text-[9px] text-slate-600 font-medium">
+                              💡 Atiende su solicitud, pero antes de colgar ofrece venta cruzada (S2) o promociones.
+                            </div>
+                          </div>
+                        </div>
+
+                      </div>
+                    </div>
+
+                  </div>
+
+                  {/* Footer */}
+                  <div className="px-6 py-4 bg-slate-50 border-t border-slate-200/50 flex justify-end gap-3">
+                    <button 
+                      onClick={() => setMostrarNomenclaturaModal(false)}
+                      className="px-5 py-2 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 font-bold text-xs hover:bg-slate-200 transition-colors shadow-xs cursor-pointer"
+                    >
+                      Entendido, cerrar
+                    </button>
+                  </div>
+
+                </div>
+              </div>
+            )}
         </div>
     );
 };
