@@ -5,7 +5,7 @@ import toast from 'react-hot-toast';
 import {
     Phone, MessageSquare, Mail, Calendar, CheckCircle2,
     XCircle, Clock, Star, ArrowLeft, RefreshCw, X, Building2, MapPin, Globe, Edit2, Bell, Send, Trash2, Eye, Copy, ExternalLink, DollarSign, Plus, FileText, ChevronDown, Save, History, TrendingUp,
-    CreditCard, Package, FolderOpen, Upload, ArrowRightLeft, BadgeDollarSign, AlertTriangle, RotateCcw, FilePlus
+    CreditCard, Package, FolderOpen, Upload, ArrowRightLeft, BadgeDollarSign, AlertTriangle, RotateCcw, FilePlus, Target, HelpCircle, List
 } from 'lucide-react';
 
 import { getToken, getUser } from '../utils/authUtils';
@@ -116,6 +116,10 @@ export default function ClienteDetalle({
     const [modalVenta, setModalVenta] = useState(false);
     const [ventaForm, setVentaForm] = useState({ descripcion: '', monto: '', tipo: 'venta', notas: '' });
     const [guardandoVenta, setGuardandoVenta] = useState(false);
+
+    // ESTADOS PARA DIAGNÓSTICO MONEYCALL
+    const [modalDiagnosticoAbierto, setModalDiagnosticoAbierto] = useState(false);
+    const [formDiagnostico, setFormDiagnostico] = useState({ p1: '', p2: '', p3: '', p4: '', p5: '' });
 
     // SECCIONES PERSONALIZADAS
     const [customSections, setCustomSections] = useState(() => {
@@ -348,6 +352,94 @@ export default function ClienteDetalle({
         if (onActualizado) onActualizado();
     };
 
+    // METODOLOGÍA MONEYCALL: LOGICA DE DIAGNÓSTICO Y COMPRAS
+    const diagnosticoMoneycall = useMemo(() => {
+        return customSections.find(s => s.tipo === 'moneycall_diagnostic');
+    }, [customSections]);
+
+    const seccionesDinamicas = useMemo(() => {
+        return customSections.filter(s => s.tipo !== 'moneycall_diagnostic');
+    }, [customSections]);
+
+    const abrirDiagnostico = () => {
+        if (diagnosticoMoneycall?.contenido) {
+            setFormDiagnostico({
+                p1: diagnosticoMoneycall.contenido.p1 || '',
+                p2: diagnosticoMoneycall.contenido.p2 || '',
+                p3: diagnosticoMoneycall.contenido.p3 || '',
+                p4: diagnosticoMoneycall.contenido.p4 || '',
+                p5: diagnosticoMoneycall.contenido.p5 || ''
+            });
+        } else {
+            setFormDiagnostico({ p1: '', p2: '', p3: '', p4: '', p5: '' });
+        }
+        setModalDiagnosticoAbierto(true);
+    };
+
+    const guardarDiagnostico = async () => {
+        const diagnosticSectionId = diagnosticoMoneycall?.id || `mc_${Date.now()}`;
+        const nuevaSeccion = {
+            id: diagnosticSectionId,
+            tipo: 'moneycall_diagnostic',
+            titulo: 'Diagnóstico Moneycall',
+            contenido: formDiagnostico
+        };
+
+        let updated;
+        if (diagnosticoMoneycall) {
+            updated = customSections.map(s => s.tipo === 'moneycall_diagnostic' ? nuevaSeccion : s);
+        } else {
+            updated = [...customSections, nuevaSeccion];
+        }
+
+        setCustomSections(updated);
+        await handleGuardarSeccionesPersonalizadas(updated);
+        setModalDiagnosticoAbierto(false);
+        toast.success('Diagnóstico guardado con éxito');
+    };
+
+    const comprasRegistradas = useMemo(() => {
+        const list = [];
+        // 1. De las actividades del historial
+        actividadesContext.forEach(act => {
+            if (act.tipo === 'venta') {
+                list.push({
+                    tipo: 'venta',
+                    nombre: act.descripcion || 'Venta',
+                    valor: act.notas || '',
+                    fecha: act.fecha
+                });
+            }
+        });
+        // 2. De los módulos dinámicos
+        customSections.forEach(s => {
+            if (s.tipo === 'products' && Array.isArray(s.contenido)) {
+                s.contenido.forEach(p => {
+                    if (p.nombre) {
+                        list.push({
+                            tipo: 'producto',
+                            nombre: p.nombre,
+                            valor: p.precio ? `$${p.precio}` : '',
+                            cantidad: p.cantidad
+                        });
+                    }
+                });
+            }
+            if (s.tipo === 'sales' && Array.isArray(s.contenido)) {
+                s.contenido.forEach(v => {
+                    if (v.descripcion) {
+                        list.push({
+                            tipo: 'venta_modulo',
+                            nombre: v.descripcion,
+                            valor: v.monto ? `$${v.monto}` : '',
+                            fecha: v.fecha
+                        });
+                    }
+                });
+            }
+        });
+        return list;
+    }, [actividadesContext, customSections]);
 
     // Helpers para vista detallada
     const llamadasExitosas = actividadesContext.filter(a => a.tipo === 'llamada' && a.resultado === 'exitoso').length;
@@ -934,7 +1026,7 @@ export default function ClienteDetalle({
                                 {/* Botón principal intercambiable: Registrar Venta / Registrar Llamada */}
                                 <div className="relative group/main">
                                     <button
-                                        onClick={modoBotonPrincipal === 'venta' ? manejarRegistrarVenta : () => setLlamadaFlow({ paso: 'contesto' })}
+                                        onClick={modoBotonPrincipal === 'venta' ? manejarRegistrarVenta : () => setLlamadaFlow({ paso: 'tipo_llamada', tipoCall: '', contesto: null, fechaProxima: '', notas: '' })}
                                         className={`flex flex-col items-center justify-center gap-2 border-2 rounded-xl p-4 transition-all shadow-sm font-bold text-sm text-center leading-tight w-full ${
                                             modoBotonPrincipal === 'venta'
                                                 ? 'bg-emerald-50 border-emerald-300 text-emerald-700 hover:border-emerald-500'
@@ -969,7 +1061,13 @@ export default function ClienteDetalle({
                                 </button>
                                 {/* Agendar reunión */}
                                 <button
-                                    onClick={() => navigate(`/${calendarRolePath}/calendario`, { state: { prospecto: ClienteSeleccionado, Cliente: ClienteSeleccionado, cliente: ClienteSeleccionado } })}
+                                    onClick={() => navigate(`/${calendarRolePath}/calendario`, { 
+                                        state: { 
+                                            cliente: ClienteSeleccionado,
+                                            activeTab: 'agendar',
+                                            fromCall: true 
+                                        } 
+                                    })}
                                     className="flex flex-col items-center justify-center gap-2 bg-white border-2 border-slate-200 hover:border-(--theme-500) rounded-xl p-4 text-gray-700 hover:text-(--theme-600) transition-all shadow-sm font-bold text-sm text-center leading-tight"
                                 >
                                     <Calendar className="w-6 h-6" />
@@ -977,173 +1075,220 @@ export default function ClienteDetalle({
                                 </button>
                             </div>
 
-                            <ModulosCliente
-                                customSections={customSections}
-                                updateSeccion={updateSeccion}
-                                commitSecciones={commitSecciones}
-                                deleteSeccion={deleteSeccion}
-                                onAgregar={() => setModalNuevaSeccion(true)}
-                                clienteId={pid}
-                                rolePath={rolePath}
-                                handleGuardarSeccionesPersonalizadas={handleGuardarSeccionesPersonalizadas}
-                                containerClassName="mt-0"
-                                fixedCardHeightClass="h-[240px]"
-                            >
-                                {/* Slot 1: Recordatorios / Notas Toggle */}
-                                {mostrarNotasDefault ? (
-                                    <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex flex-col h-[240px] animate-in fade-in slide-in-from-right-4 duration-300">
-                                        <div className="flex items-center justify-between">
-                                            <div className="flex items-center gap-2">
-                                                <FileText className="w-3.5 h-3.5 text-(--theme-500)" />
-                                                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Notas del Cliente</p>
-                                            </div>
-                                            <div className="flex items-center gap-1.5">
-                                                <button
-                                                    onClick={handleGuardarNotasRapidas}
-                                                    disabled={loadingNotas}
-                                                    className={`p-1.5 rounded-lg transition-colors ${notasRapidas !== (ClienteSeleccionado?.notas || '') ? 'bg-(--theme-500) text-white hover:bg-(--theme-600) shadow-sm' : 'text-slate-300 hover:bg-slate-50'}`}
-                                                    title="Guardar notas"
-                                                >
-                                                    <Save className="w-3.5 h-3.5" />
-                                                </button>
-                                                <button
-                                                    onClick={toggleNotasDefault}
-                                                    className="text-[9px] font-bold text-(--theme-600) hover:text-(--theme-700) flex items-center gap-1 bg-(--theme-50) px-2 py-1 rounded-lg transition-colors"
-                                                    title="Ver Recordatorios"
-                                                >
-                                                    <Bell className="w-3 h-3" /> Ver Recordatorios
-                                                </button>
-                                            </div>
+                            <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+                                {/* Slot 1: Próximos Pasos (Alertas) */}
+                                <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex flex-col h-[240px] animate-in fade-in slide-in-from-right-4 duration-300">
+                                    <div className="flex items-center justify-between shrink-0 mb-3">
+                                        <div className="flex items-center gap-2">
+                                            <Bell className="w-4 h-4 text-(--theme-500)" />
+                                            <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Alertas y Pasos</p>
                                         </div>
-                                        <textarea
-                                            value={notasRapidas}
-                                            onChange={(e) => setNotasRapidas(e.target.value)}
-                                            placeholder="Escribe notas importantes aquí..."
-                                            className="w-full flex-1 bg-slate-50/50 border border-slate-100 rounded-lg p-3 text-sm focus:ring-2 focus:ring-(--theme-400)/20 focus:border-(--theme-400) outline-none resize-none scrollbar-hide mt-3"
-                                        />
+                                        <span className="text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider bg-(--theme-50) text-(--theme-700)">
+                                            Próximos
+                                        </span>
                                     </div>
-                                ) : (
-                                    <div className="bg-white border border-slate-200 rounded-xl p-3 flex flex-col gap-2 shadow-sm relative h-[240px] animate-in fade-in slide-in-from-left-4 duration-300">
-                                        <div className="flex items-center justify-between gap-2 shrink-0">
-                                            <div className="flex items-center gap-2">
-                                                <Bell className="w-3.5 h-3.5 text-(--theme-500)" />
-                                                <p className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">Recordatorios</p>
-                                            </div>
-                                            <button 
-                                                onClick={toggleNotasDefault}
-                                                className="text-[9px] font-bold text-(--theme-600) hover:text-(--theme-700) flex items-center gap-1 bg-(--theme-50) px-2 py-1 rounded-lg transition-colors"
-                                            >
-                                                <FileText className="w-3 h-3" /> Mostrar Notas
-                                            </button>
-                                        </div>
+                                    
+                                    {alertasOrdenadas.length > 0 ? (
+                                        <div className="relative flex-1 overflow-hidden flex flex-col">
+                                            {/* Contenido con altura fija y scroll */}
+                                                <div className="overflow-y-auto hide-scrollbar flex flex-col gap-2 shrink-0 h-[160px]">
 
-                                        {/* Contenido con altura fija y scroll */}
-                                        <div className="overflow-y-auto hide-scrollbar flex flex-col gap-2 shrink-0 h-[160px]">
+                                                    {alertasOrdenadas.map((alerta) => {
+                                                        if (alerta.tipo === 'cita') {
+                                                            const cita = alerta.data;
+                                                            const fechaCita = cita.fechaCita || cita.fecha;
+                                                            return (
+                                                                <div key={`cita-${alerta.id}`} className="bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 space-y-1.5 shadow-sm">
+                                                                    <div className="flex items-center justify-between gap-2">
+                                                                        <div className="flex items-center gap-2">
+                                                                             <Calendar className="w-3.5 h-3.5 text-blue-600" />
+                                                                             <p className="text-xs font-semibold text-blue-900">Reunión agendada</p>
+                                                                        </div>
+                                                                        <p className="text-[10px] text-gray-400 shrink-0">
+                                                                            {new Date(fechaCita).toLocaleString('es-MX', { dateStyle: 'short', timeStyle: 'short' })}
+                                                                        </p>
+                                                                    </div>
 
-                                            {alertasOrdenadas.map((alerta) => {
-                                                if (alerta.tipo === 'cita') {
-                                                    const cita = alerta.data;
-                                                    const fechaCita = cita.fechaCita || cita.fecha;
-                                                    return (
-                                                        <div key={`cita-${alerta.id}`} className="bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 space-y-1.5 shadow-sm">
-                                                            <div className="flex items-center justify-between gap-2">
-                                                                <div className="flex items-center gap-2">
-                                                                     <Calendar className="w-3.5 h-3.5 text-blue-600" />
-                                                                     <p className="text-xs font-semibold text-blue-900">Reunión agendada</p>
+                                                                    <div className="flex gap-1.5">
+                                                                        <button
+                                                                            onClick={() => handleMarcarCitaRealizada(cita)}
+                                                                            disabled={loadingCitaId === cita.id}
+                                                                            title="Marcar como realizada"
+                                                                            className="flex-1 flex items-center justify-center gap-1.5 bg-(--theme-600) hover:bg-(--theme-700) text-white rounded py-1.5 text-[10px] font-bold transition-colors disabled:opacity-50"
+                                                                        >
+                                                                            <CheckCircle2 className="w-3 h-3" />
+                                                                            {loadingCitaId === cita.id ? '...' : 'Realizada'}
+                                                                        </button>
+                                                                        <button
+                                                                            onClick={() => setModalCita({ abierto: true, cita, editando: false })}
+                                                                            className="flex items-center justify-center bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 rounded px-2 py-1.5 transition-colors shadow-sm"
+                                                                            title="Ver"
+                                                                        >
+                                                                            <Eye className="w-3.5 h-3.5" />
+                                                                        </button>
+                                                                        <button
+                                                                            onClick={() => {
+                                                                                setEditDataCita({ fecha: fechaCita, notas: cita.notas || '' });
+                                                                                setModalCita({ abierto: true, cita, editando: true });
+                                                                            }}
+                                                                            className="flex items-center justify-center bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 rounded px-2 py-1.5 transition-colors shadow-sm"
+                                                                            title="Editar"
+                                                                        >
+                                                                            <Edit2 className="w-3.5 h-3.5" />
+                                                                        </button>
+                                                                        <button
+                                                                            onClick={() => handleDescartarCita(cita)}
+                                                                            className="flex items-center justify-center bg-white border border-rose-200 hover:bg-rose-50 text-rose-600 rounded px-2 py-1.5 transition-colors shadow-sm"
+                                                                            title="Descartar"
+                                                                        >
+                                                                            <Trash2 className="w-3.5 h-3.5" />
+                                                                        </button>
+                                                                    </div>
                                                                 </div>
-                                                                <p className="text-[10px] text-gray-400 shrink-0">
-                                                                    {new Date(fechaCita).toLocaleString('es-MX', { dateStyle: 'short', timeStyle: 'short' })}
-                                                                </p>
-                                                            </div>
+                                                            );
+                                                        }
 
-                                                            <div className="flex gap-1.5">
-                                                                <button
-                                                                    onClick={() => handleMarcarCitaRealizada(cita)}
-                                                                    disabled={loadingCitaId === cita.id}
-                                                                    title="Marcar como realizada"
-                                                                    className="flex-1 flex items-center justify-center gap-1.5 bg-(--theme-600) hover:bg-(--theme-700) text-white rounded py-1.5 text-[10px] font-bold transition-colors disabled:opacity-50"
-                                                                >
-                                                                    <CheckCircle2 className="w-3 h-3" />
-                                                                    {loadingCitaId === cita.id ? '...' : 'Realizada'}
-                                                                </button>
-                                                                <button
-                                                                    onClick={() => setModalCita({ abierto: true, cita, editando: false })}
-                                                                    className="flex items-center justify-center bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 rounded px-2 py-1.5 transition-colors shadow-sm"
-                                                                    title="Ver"
-                                                                >
-                                                                    <Eye className="w-3.5 h-3.5" />
-                                                                </button>
-                                                                <button
-                                                                    onClick={() => {
-                                                                        setEditDataCita({ fecha: fechaCita, notas: cita.notas || '' });
-                                                                        setModalCita({ abierto: true, cita, editando: true });
-                                                                    }}
-                                                                    className="flex items-center justify-center bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 rounded px-2 py-1.5 transition-colors shadow-sm"
-                                                                    title="Editar"
-                                                                >
-                                                                    <Edit2 className="w-3.5 h-3.5" />
-                                                                </button>
-                                                                <button
-                                                                    onClick={() => handleDescartarCita(cita)}
-                                                                    className="flex items-center justify-center bg-white border border-rose-200 hover:bg-rose-50 text-rose-600 rounded px-2 py-1.5 transition-colors shadow-sm"
-                                                                    title="Descartar"
-                                                                >
-                                                                    <Trash2 className="w-3.5 h-3.5" />
-                                                                </button>
+                                                        const rec = alerta.data;
+                                                        return (
+                                                            <div key={`rec-${alerta.id}`} className="bg-(--theme-50) border border-(--theme-100) rounded-lg px-3 py-2 space-y-1.5 shadow-sm">
+                                                                <div className="flex justify-between items-start gap-2">
+                                                                    <p className="text-[10px] font-bold text-(--theme-700) bg-white/50 px-1.5 py-0.5 rounded border border-(--theme-100)">
+                                                                        📌 {new Date(rec.fechaLimite).toLocaleDateString()} - {new Date(rec.fechaLimite).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                                    </p>
+                                                                </div>
+                                                                {rec.descripcion && (
+                                                                    <p className="text-[10px] text-slate-500 italic">{rec.descripcion}</p>
+                                                                )}
+                                                                <div className="flex gap-1.5">
+                                                                    <button
+                                                                        onClick={() => handleEditarRecordatorio(rec)}
+                                                                        className="flex-1 flex items-center justify-center gap-1 bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 rounded py-1.5 text-[10px] font-bold transition-colors"
+                                                                    >
+                                                                        <Edit2 className="w-3 h-3" /> Editar
+                                                                    </button>
+                                                                    <button
+                                                                        onClick={() => descartarRecordatorio(rec.id)}
+                                                                        className="flex-1 flex items-center justify-center gap-1 bg-white border border-rose-200 hover:bg-rose-50 text-rose-600 rounded py-1.5 text-[10px] font-bold transition-colors"
+                                                                    >
+                                                                        <Trash2 className="w-3 h-3" /> Quitar
+                                                                    </button>
+                                                                </div>
                                                             </div>
-                                                        </div>
-                                                    );
-                                                }
+                                                        );
+                                                    })}
 
-                                                const rec = alerta.data;
-                                                return (
-                                                    <div key={`rec-${alerta.id}`} className="bg-(--theme-50) border border-(--theme-100) rounded-lg px-3 py-2 space-y-1.5 shadow-sm">
-                                                        <div className="flex justify-between items-start gap-2">
-                                                            <p className="text-[10px] font-bold text-(--theme-700) bg-white/50 px-1.5 py-0.5 rounded border border-(--theme-100)">
-                                                                📌 {new Date(rec.fechaLimite).toLocaleDateString()} - {new Date(rec.fechaLimite).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                            </p>
-                                                        </div>
-                                                        {rec.descripcion && (
-                                                            <p className="text-[10px] text-slate-500 italic">{rec.descripcion}</p>
-                                                        )}
-                                                        <div className="flex gap-1.5">
-                                                            <button
-                                                                onClick={() => handleEditarRecordatorio(rec)}
-                                                                className="flex-1 flex items-center justify-center gap-1 bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 rounded py-1.5 text-[10px] font-bold transition-colors"
-                                                            >
-                                                                <Edit2 className="w-3 h-3" /> Editar
-                                                            </button>
-                                                            <button
-                                                                onClick={() => descartarRecordatorio(rec.id)}
-                                                                className="flex-1 flex items-center justify-center gap-1 bg-white border border-rose-200 hover:bg-rose-50 text-rose-600 rounded py-1.5 text-[10px] font-bold transition-colors"
-                                                            >
-                                                                <Trash2 className="w-3 h-3" /> Quitar
-                                                            </button>
-                                                        </div>
+                                                    {citasPendientes.length === 0 && recordatoriosLlamada.length === 0 && (
+                                                        <p className="text-[11px] text-slate-500 px-1 italic">Sin alertas por ahora.</p>
+                                                    )}
+                                                </div>
+
+                                                {/* Indicador de scroll discreto */}
+                                                {(citasPendientes.length + recordatoriosLlamada.length > 2) && (
+                                                    <div className="absolute left-0 right-0 flex justify-center pointer-events-none bottom-1">
+                                                        <svg className="w-5 h-5 text-slate-400 animate-bounce" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                                                            <path d="M7 10l5 5 5-5z" />
+                                                        </svg>
                                                     </div>
-                                                );
-                                            })}
-
-                                            {citasPendientes.length === 0 && recordatoriosLlamada.length === 0 && (
-                                                <p className="text-[11px] text-slate-500 px-1 italic">Sin alertas por ahora.</p>
-                                            )}
-                                        </div>
-
-                                        {/* Indicador de scroll discreto */}
-                                        {(citasPendientes.length + recordatoriosLlamada.length > 2) && (
-                                            <div className="absolute left-0 right-0 flex justify-center pointer-events-none bottom-1">
-                                                <svg className="w-5 h-5 text-slate-400 animate-bounce" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                                                    <path d="M7 10l5 5 5-5z" />
-                                                </svg>
+                                                )}
+                                            </div>
+                                        ) : (
+                                            <div className="flex flex-col items-center justify-center h-full text-center py-2 opacity-60">
+                                                <Bell className="w-8 h-8 text-slate-300 mb-2" />
+                                                <p className="text-[11px] text-slate-500 max-w-[180px]">No hay alertas pendientes.<br/>¡Todo al día!</p>
                                             </div>
                                         )}
                                     </div>
-                                )}
-                            </ModulosCliente>
-                        </div>
-                    </div>
 
-                    {/* ===================== COLUMNA DERECHA: HISTORIAL (Drawer en Mobile) ===================== */}
+                                        {/* Slot 2: Diagnóstico Moneycall (5 Preguntas Clave) */}
+                                        <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex flex-col h-[240px] animate-in fade-in slide-in-from-right-4 duration-300">
+                                            <div className="flex items-center justify-between shrink-0">
+                                                <div className="flex items-center gap-2">
+                                                    <Target className="w-4 h-4 text-emerald-600" />
+                                                    <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Diagnóstico Moneycall</p>
+                                                </div>
+                                                <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${
+                                                    diagnosticoMoneycall ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500 animate-pulse'
+                                                }`}>
+                                                    {diagnosticoMoneycall ? 'Completado' : 'Pendiente S1'}
+                                                </span>
+                                            </div>
+
+                                            <div className="flex-1 overflow-y-auto mt-3 space-y-2 text-xs text-slate-600 hide-scrollbar min-h-0">
+                                                {diagnosticoMoneycall?.contenido ? (
+                                                    <div className="space-y-1.5 font-medium pr-1">
+                                                        <p className="truncate" title={diagnosticoMoneycall.contenido.p1}><strong className="text-slate-800">1. Gusto:</strong> {diagnosticoMoneycall.contenido.p1 || '-'}</p>
+                                                        <p className="truncate" title={diagnosticoMoneycall.contenido.p2}><strong className="text-slate-800">2. Comp:</strong> {diagnosticoMoneycall.contenido.p2 || '-'}</p>
+                                                        <p className="truncate" title={diagnosticoMoneycall.contenido.p3}><strong className="text-slate-800">3. Share:</strong> {diagnosticoMoneycall.contenido.p3 || '-'}</p>
+                                                        <p className="truncate" title={diagnosticoMoneycall.contenido.p4}><strong className="text-slate-800">4. Dificultad:</strong> {diagnosticoMoneycall.contenido.p4 || '-'}</p>
+                                                        <p className="truncate" title={diagnosticoMoneycall.contenido.p5}><strong className="text-slate-800">5. Crecer:</strong> {diagnosticoMoneycall.contenido.p5 || '-'}</p>
+                                                    </div>
+                                                ) : (
+                                                    <div className="flex flex-col items-center justify-center h-full text-center py-2">
+                                                        <HelpCircle className="w-8 h-8 text-slate-300 mb-1.5" />
+                                                        <p className="text-[11px] text-slate-400">Entrevista de diagnóstico inicial pendiente para recolectar información.</p>
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            <button
+                                                onClick={abrirDiagnostico}
+                                                className="w-full mt-3 py-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 hover:text-slate-800 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 shrink-0 shadow-xs"
+                                            >
+                                                <Phone className="w-3.5 h-3.5 text-slate-500" />
+                                                {diagnosticoMoneycall ? 'Ver respuestas / Editar' : 'Iniciar Entrevista S1'}
+                                            </button>
+                                        </div>
+
+                                        {/* Slot 3: Historial & Cuadrantes B2B */}
+                                        <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex flex-col h-[240px] animate-in fade-in slide-in-from-right-4 duration-300">
+                                            <div className="flex items-center justify-between shrink-0">
+                                                <div className="flex items-center gap-2">
+                                                    <TrendingUp className="w-4 h-4 text-indigo-600" />
+                                                    <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Historial de Compras B2B</p>
+                                                </div>
+                                                <span className="text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider bg-indigo-50 text-indigo-700">
+                                                    Cuadrantes
+                                                </span>
+                                            </div>
+
+                                            <div className="flex-1 overflow-y-auto mt-3 space-y-2 text-xs hide-scrollbar min-h-0">
+                                                {comprasRegistradas.length > 0 ? (
+                                                    <div className="space-y-1.5">
+                                                        <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider mb-1">
+                                                            Productos / Ventas ({comprasRegistradas.length})
+                                                        </p>
+                                                        {comprasRegistradas.slice(0, 4).map((compra, index) => (
+                                                            <div key={index} className="flex justify-between items-center bg-slate-50 px-2 py-1 rounded border border-slate-100">
+                                                                <div className="overflow-hidden mr-2">
+                                                                    <p className="font-bold text-slate-700 truncate text-[10px]">{compra.nombre}</p>
+                                                                    {compra.cantidad && <p className="text-[8px] text-slate-400 leading-none">Cant: {compra.cantidad}</p>}
+                                                                </div>
+                                                                <span className="font-black text-slate-500 text-[10px] shrink-0">{compra.valor}</span>
+                                                            </div>
+                                                        ))}
+                                                        {comprasRegistradas.length > 4 && (
+                                                            <p className="text-[9px] text-slate-400 italic text-center mt-1">
+                                                                + {comprasRegistradas.length - 4} compras más en el historial
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                ) : (
+                                                    <p className="text-slate-400 text-[10px] italic flex-1 flex items-center justify-center text-center">
+                                                        No hay historial de compras registrado.<br/>La actividad de ventas nutrirá este cuadrante.
+                                                    </p>
+                                                )}
+                                            </div>
+                                            <button
+                                                onClick={() => setDrawerHistorialAbierto(true)}
+                                                className="w-full mt-3 py-2 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-700 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 shrink-0 shadow-xs"
+                                            >
+                                                <List className="w-3.5 h-3.5" />
+                                                Abrir Historial Completo
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                     {/* Overlay Backdrop (solo visible en mobile) */}
                     <div 
                         className={`fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 lg:hidden transition-opacity duration-300 ${drawerHistorialAbierto ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} 
@@ -1312,6 +1457,34 @@ export default function ClienteDetalle({
                         </div>
 
                         <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+                            {/* Paso 0: Selección de Tipo de Llamada B2B */}
+                            {llamadaFlow.paso === 'tipo_llamada' && (
+                                <div className="space-y-4">
+                                    <p className="font-semibold text-gray-800 text-sm">Selecciona el tipo de llamada B2B (Moneycall):</p>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                                        {[
+                                            { code: 'S1', label: 'S1 - Recuperación (Cuadrante 1)', desc: 'Llamada proactiva sobre productos actuales' },
+                                            { code: 'S2', label: 'S2 - Venta Cruzada (Cuadrante 2)', desc: 'Llamada proactiva de productos complementarios' },
+                                            { code: 'F1', label: 'F1 - Seguimiento Caliente', desc: 'Para prospectos calificados en caliente' },
+                                            { code: 'F2', label: 'F2 - Seguimiento Propuesta', desc: 'Para prospectos con propuesta enviada' },
+                                            { code: 'DC', label: 'DC - Diagnóstico Continuo', desc: 'Llamadas periódicas de actualización' },
+                                            { code: 'PT', label: 'PT - Proactiva Técnica / Cortesía', desc: 'Llamada técnica o de cortesía' },
+                                            { code: 'IN', label: 'IN - Llamada Entrante', desc: 'Llamada reactiva recibida' },
+                                            { code: 'RC', label: 'RC - Reclamo o Soporte', desc: 'Llamada reactiva de soporte o reclamo' }
+                                        ].map((tipo) => (
+                                            <button
+                                                key={tipo.code}
+                                                onClick={() => setLlamadaFlow(f => ({ ...f, paso: 'contesto', tipoCall: tipo.code }))}
+                                                className="p-3 border border-slate-200 rounded-xl text-left hover:border-indigo-500 hover:bg-indigo-50/50 transition-all flex flex-col justify-between"
+                                            >
+                                                <span className="font-black text-indigo-600 text-xs">{tipo.label}</span>
+                                                <span className="text-[10px] text-gray-400 font-bold leading-snug mt-1">{tipo.desc}</span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
                             {/* Paso 1: ¿Contestó? */}
                             {llamadaFlow.paso === 'contesto' && (
                                 <div className="space-y-3">
@@ -1324,7 +1497,8 @@ export default function ClienteDetalle({
                                         <button
                                             onClick={async () => {
                                                 // Registrar llamada fallida
-                                                const ok = await registrarActividadConDelay({ tipo: 'llamada', resultado: 'fallido', notas: 'No contestó' });
+                                                const prefix = llamadaFlow.tipoCall ? `[${llamadaFlow.tipoCall}] ` : '';
+                                                const ok = await registrarActividadConDelay({ tipo: 'llamada', resultado: 'fallido', notas: `${prefix}No contestó` });
                                                 if (ok) setLlamadaFlow(null);
                                             }}
                                             disabled={estaBloqueadoRegistro}
@@ -1341,7 +1515,8 @@ export default function ClienteDetalle({
                                     <div className="grid grid-cols-2 gap-3">
                                         <button
                                             onClick={async () => {
-                                                const ok = await registrarActividadConDelay({ tipo: 'llamada', resultado: 'exitoso', notas: 'Agendó reunión' });
+                                                const prefix = llamadaFlow.tipoCall ? `[${llamadaFlow.tipoCall}] ` : '';
+                                                const ok = await registrarActividadConDelay({ tipo: 'llamada', resultado: 'exitoso', notas: `${prefix}Agendó reunión` });
                                                 if (!ok) return;
                                                 setLlamadaFlow(null);
                                                 navigate(`/${calendarRolePath}/calendario`, { state: { prospecto: ClienteSeleccionado, Cliente: ClienteSeleccionado, cliente: ClienteSeleccionado } });
@@ -1427,14 +1602,15 @@ export default function ClienteDetalle({
                                     <p className="font-semibold text-green-700">💬 Añadir nota para WhatsApp/Correo</p>
                                     <textarea
                                         rows={2}
-                                        value={llamadaFlow.notas || ''}
-                                        onChange={e => setLlamadaFlow(f => ({ ...f, notas: e.target.value }))}
+                                        value={llamadaFlow.notes || ''}
+                                        onChange={e => setLlamadaFlow(f => ({ ...f, notes: e.target.value }))}
                                         placeholder="Ej: Enviar brochure PDF..."
                                         className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-400"
                                     />
                                     <button
                                         onClick={async () => {
-                                            const notaFinal = llamadaFlow.notas ? `Prefiere atención por WhatsApp o correo - ${llamadaFlow.notas}` : 'Prefiere atención por WhatsApp o correo';
+                                            const prefix = llamadaFlow.tipoCall ? `[${llamadaFlow.tipoCall}] ` : '';
+                                            const notaFinal = llamadaFlow.notes ? `${prefix}Prefiere atención por WhatsApp o correo - ${llamadaFlow.notes}` : `${prefix}Prefiere atención por WhatsApp o correo`;
                                             const ok = await registrarActividadConDelay({ tipo: 'llamada', resultado: 'exitoso', notas: notaFinal });
                                             if (!ok) return;
                                             setLlamadaFlow(null);
@@ -1459,7 +1635,8 @@ export default function ClienteDetalle({
                                     />
                                     <button
                                         onClick={async () => {
-                                            const notaFinal = llamadaFlow.notas ? `Sin interés - ${llamadaFlow.notas}` : 'Contestó, sin interés';
+                                            const prefix = llamadaFlow.tipoCall ? `[${llamadaFlow.tipoCall}] ` : '';
+                                            const notaFinal = llamadaFlow.notas ? `${prefix}Sin interés - ${llamadaFlow.notas}` : `${prefix}Contestó, sin interés`;
                                             const ok = await registrarActividadConDelay({ tipo: 'llamada', resultado: 'exitoso', notas: notaFinal });
                                             if (!ok) return;
                                             setLlamadaFlow(null);
@@ -1484,7 +1661,8 @@ export default function ClienteDetalle({
                                     />
                                     <button
                                         onClick={async () => {
-                                            const notaFinal = llamadaFlow.notas ? `Otro resultado - ${llamadaFlow.notas}` : 'Otro resultado de llamada';
+                                            const prefix = llamadaFlow.tipoCall ? `[${llamadaFlow.tipoCall}] ` : '';
+                                            const notaFinal = llamadaFlow.notas ? `${prefix}Otro resultado - ${llamadaFlow.notas}` : `${prefix}Otro resultado de llamada`;
                                             const ok = await registrarActividadConDelay({ tipo: 'llamada', resultado: 'exitoso', notas: notaFinal });
                                             if (!ok) return;
                                             setLlamadaFlow(null);
@@ -1514,14 +1692,15 @@ export default function ClienteDetalle({
                                     <button
                                         onClick={async () => {
                                             try {
-                                                const notasFin = llamadaFlow.notas || 'Interesado, llamar después';
+                                                const prefix = llamadaFlow.tipoCall ? `[${llamadaFlow.tipoCall}] ` : '';
+                                                const notasFin = llamadaFlow.notas ? `${prefix}${llamadaFlow.notas}` : `${prefix}Interesado, llamar después`;
                                                 const pidLocal = ClienteSeleccionado.id || ClienteSeleccionado._id;
 
                                                 // 1. Registrar Actividad (usa el helper que auto-promueve la etapa)
                                                 const ok = await registrarActividadConDelay({
                                                     tipo: 'llamada',
                                                     resultado: 'exitoso',
-                                                    notas: notasFin
+                                                    notes: notasFin
                                                 });
                                                 if (!ok) return;
 
@@ -1904,7 +2083,7 @@ export default function ClienteDetalle({
             {/* MODAL REGISTRO DE VENTA */}
             {modalVenta && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden">
+                    <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden animate-in fade-in zoom-in duration-200">
                         <div className="px-5 py-4 border-b border-slate-100 bg-gradient-to-r from-emerald-50 to-white flex items-center justify-between">
                             <span className="font-bold text-emerald-700 flex items-center gap-2">
                                 <TrendingUp className="w-4 h-4" /> Registrar Venta
@@ -1960,7 +2139,7 @@ export default function ClienteDetalle({
                                 <label className="text-xs font-bold text-slate-600 uppercase tracking-wider mb-1 block">Notas adicionales</label>
                                 <textarea
                                     rows={2}
-                                    value={ventaForm.notas}
+                                    value={ventaForm.notes || ventaForm.notas}
                                     onChange={(e) => setVentaForm(f => ({ ...f, notas: e.target.value }))}
                                     placeholder="Ej: Pagó con tarjeta, incluye instalación..."
                                     className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-400/20 focus:border-emerald-400 outline-none resize-none"
@@ -1972,6 +2151,126 @@ export default function ClienteDetalle({
                                 className="w-full py-2.5 bg-emerald-600 text-white rounded-lg font-bold text-sm hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 {guardandoVenta ? '⏳ Guardando...' : '✓ Registrar en historial'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* MODAL DIAGNÓSTICO MONEYCALL (LAS 5 PREGUNTAS CLAVE) */}
+            {modalDiagnosticoAbierto && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full flex flex-col max-h-[90vh] overflow-hidden animate-in fade-in zoom-in duration-200">
+                        {/* Header con gradiente elegante */}
+                        <div className="px-6 py-4 border-b border-slate-100 bg-linear-to-r from-emerald-50 to-white flex justify-between items-center shrink-0">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center">
+                                    <Target className="w-5 h-5 text-emerald-700" />
+                                </div>
+                                <div>
+                                    <h2 className="text-base font-bold text-gray-900 leading-tight">Diagnóstico Inicial (Llamada S1)</h2>
+                                    <p className="text-[10px] text-slate-400 font-medium">Metodología Moneycall · Recolección de Información</p>
+                                </div>
+                            </div>
+                            <button onClick={() => setModalDiagnosticoAbierto(false)} className="p-1.5 hover:bg-slate-100 rounded-full transition-colors text-slate-400">
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+
+                        {/* Contenido scrolleable */}
+                        <div className="p-6 overflow-y-auto space-y-6 flex-1 hide-scrollbar">
+                            {/* Guión sugerido */}
+                            <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 text-xs text-slate-600 space-y-1.5 shadow-xs">
+                                <span className="font-extrabold text-slate-500 uppercase tracking-widest text-[9px] flex items-center gap-1">
+                                    🗣️ Guión de Apertura Sugerido:
+                                </span>
+                                <p className="italic font-medium leading-relaxed">
+                                    "Sr/Sra. <strong className="text-slate-800">{ClienteSeleccionado.nombres}</strong>, me han asignado su cuenta para brindarle un servicio más personalizado. ¿Podría darme 13-17 minutos para hacerle unas preguntas y entender cómo podemos servirle mejor?"
+                                </p>
+                            </div>
+
+                            {/* Formulario con las 5 preguntas */}
+                            <div className="space-y-4">
+                                <div className="space-y-1">
+                                    <label className="text-[11px] font-black text-slate-500 uppercase tracking-wider block">
+                                        1. ¿Qué le gusta de hacer negocios con nosotros?
+                                    </label>
+                                    <textarea
+                                        rows={2}
+                                        value={formDiagnostico.p1}
+                                        onChange={e => setFormDiagnostico(f => ({ ...f, p1: e.target.value }))}
+                                        placeholder="Ej: La atención rápida, la calidad de la marca..."
+                                        className="w-full bg-slate-50/50 border border-slate-200 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-emerald-400/20 focus:border-emerald-400 outline-none resize-none font-medium text-slate-700"
+                                    />
+                                </div>
+
+                                <div className="space-y-1">
+                                    <label className="text-[11px] font-black text-slate-500 uppercase tracking-wider block">
+                                        2. ¿Qué le gusta de hacer negocios con la competencia?
+                                    </label>
+                                    <textarea
+                                        rows={2}
+                                        value={formDiagnostico.p2}
+                                        onChange={e => setFormDiagnostico(f => ({ ...f, p2: e.target.value }))}
+                                        placeholder="Ej: Precios ligeramente más bajos, catálogo extendido..."
+                                        className="w-full bg-slate-50/50 border border-slate-200 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-emerald-400/20 focus:border-emerald-400 outline-none resize-none font-medium text-slate-700"
+                                    />
+                                </div>
+
+                                <div className="space-y-1">
+                                    <label className="text-[11px] font-black text-slate-500 uppercase tracking-wider block">
+                                        3. ¿Qué porcentaje de lo que compra, nos lo compra a nosotros?
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={formDiagnostico.p3}
+                                        onChange={e => setFormDiagnostico(f => ({ ...f, p3: e.target.value }))}
+                                        placeholder="Ej: Compras estimadas en 40% (competencia tiene el otro 60%)..."
+                                        className="w-full bg-slate-50/50 border border-slate-200 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-emerald-400/20 focus:border-emerald-400 outline-none font-medium text-slate-700"
+                                    />
+                                </div>
+
+                                <div className="space-y-1">
+                                    <label className="text-[11px] font-black text-slate-500 uppercase tracking-wider block">
+                                        4. ¿Qué productos o servicios se le hace difícil encontrar hoy en día?
+                                    </label>
+                                    <textarea
+                                        rows={2}
+                                        value={formDiagnostico.p4}
+                                        onChange={e => setFormDiagnostico(f => ({ ...f, p4: e.target.value }))}
+                                        placeholder="Ej: Equipamiento X, refacciones para línea Y..."
+                                        className="w-full bg-slate-50/50 border border-slate-200 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-emerald-400/20 focus:border-emerald-400 outline-none resize-none font-medium text-slate-700"
+                                    />
+                                </div>
+
+                                <div className="space-y-1">
+                                    <label className="text-[11px] font-black text-slate-500 uppercase tracking-wider block">
+                                        5. ¿En qué segmento de mercado le gustaría crecer y no ha podido?
+                                    </label>
+                                    <textarea
+                                        rows={2}
+                                        value={formDiagnostico.p5}
+                                        onChange={e => setFormDiagnostico(f => ({ ...f, p5: e.target.value }))}
+                                        placeholder="Ej: Clientes corporativos medianos, licitaciones de gobierno..."
+                                        className="w-full bg-slate-50/50 border border-slate-200 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-emerald-400/20 focus:border-emerald-400 outline-none resize-none font-medium text-slate-700"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Footer con botones de guardado */}
+                        <div className="px-6 py-4 border-t border-slate-100 bg-slate-50 flex justify-end gap-3 shrink-0">
+                            <button
+                                onClick={() => setModalDiagnosticoAbierto(false)}
+                                className="px-5 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl text-xs font-bold hover:bg-slate-50 shadow-xs"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                onClick={guardarDiagnostico}
+                                className="px-7 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-md shadow-emerald-500/10"
+                            >
+                                ✓ Guardar Diagnóstico
                             </button>
                         </div>
                     </div>

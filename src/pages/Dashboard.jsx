@@ -120,6 +120,79 @@ import DashboardMobile from './DashboardMobile';
 
 const getAuthHeaders = () => ({ 'x-auth-token': getToken() || '' });
 
+const ProactiveRatioDoughnut = ({ proactiveCount, reactiveCount }) => {
+    const total = proactiveCount + reactiveCount;
+    const pctProactive = total > 0 ? (proactiveCount / total) * 100 : 80;
+    const pctReactive = total > 0 ? (reactiveCount / total) * 100 : 20;
+
+    const size = 160;
+    const strokeWidth = 14;
+    const radius = 70;
+    const circumference = 2 * Math.PI * radius;
+    
+    const strokeDashoffsetProactive = circumference - (pctProactive / 100) * circumference;
+
+    return (
+        <div className="flex flex-col items-center justify-center w-full">
+            <div className="relative w-40 h-40 flex items-center justify-center">
+                <svg width={size} height={size} className="transform -rotate-90">
+                    <circle
+                        cx={size/2}
+                        cy={size/2}
+                        r={radius}
+                        fill="transparent"
+                        className="stroke-amber-100"
+                        strokeWidth={strokeWidth}
+                    />
+                    <circle
+                        cx={size/2}
+                        cy={size/2}
+                        r={radius}
+                        fill="transparent"
+                        className="stroke-amber-400 transition-all duration-700 ease-out"
+                        strokeWidth={strokeWidth}
+                        strokeDasharray={circumference}
+                        strokeDashoffset={0}
+                    />
+                    <circle
+                        cx={size/2}
+                        cy={size/2}
+                        r={radius}
+                        fill="transparent"
+                        className="stroke-emerald-500 transition-all duration-700 ease-out"
+                        strokeWidth={strokeWidth}
+                        strokeDasharray={circumference}
+                        strokeDashoffset={strokeDashoffsetProactive}
+                        strokeLinecap="round"
+                    />
+                </svg>
+                <div className="absolute flex flex-col items-center justify-center">
+                    <span className="text-3xl font-black text-gray-800 tracking-tight">{pctProactive.toFixed(0)}%</span>
+                    <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest mt-0.5">SALIENTE</span>
+                </div>
+            </div>
+            
+            <div className="flex justify-between w-full mt-4 gap-2 border-t border-gray-100 pt-3 px-2">
+                <div className="flex items-center gap-1.5 min-w-0">
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0"></span>
+                    <div className="min-w-0">
+                        <span className="text-[9px] font-black text-gray-700 uppercase tracking-tighter block truncate">Proactiva (Outbound)</span>
+                        <span className="text-[10px] font-extrabold text-emerald-600">{pctProactive.toFixed(1)}%</span>
+                    </div>
+                </div>
+                
+                <div className="flex items-center gap-1.5 min-w-0">
+                    <span className="w-2.5 h-2.5 rounded-full bg-amber-400 shrink-0"></span>
+                    <div className="min-w-0">
+                        <span className="text-[9px] font-black text-gray-700 uppercase tracking-tighter block truncate">Reactiva (Inbound)</span>
+                        <span className="text-[10px] font-extrabold text-amber-600">{pctReactive.toFixed(1)}%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 const Dashboard = () => {
     const { width } = useWindowSize();
     const [loading, setLoading] = useState(true);
@@ -128,6 +201,11 @@ const Dashboard = () => {
     const [closerData, setCloserData] = useState(null);
     const [recordatorios, setRecordatorios] = useState([]);
     const [reuniones, setReuniones] = useState([]);
+    
+    // Moneycall states
+    const [estructuraScore, setEstructuraScore] = useState(85);
+    const [sistemaScore, setSistemaScore] = useState(75);
+    const [operacionesScore, setOperacionesScore] = useState(90);
     const [loadingReuniones, setLoadingReuniones] = useState(true);
     const [periodo, setPeriodo] = useState('dia');
     const [healthTab, setHealthTab] = useState('resumen');
@@ -151,7 +229,7 @@ const Dashboard = () => {
     };
 
     useEffect(() => {
-        if (healthTab === 'acciones') {
+        if (healthTab === 'acciones' || healthTab === 'moneycall') {
             fetchActividades();
         }
     }, [healthTab]);
@@ -450,17 +528,20 @@ const Dashboard = () => {
         cargarDatos();
         cargarListas();
         cargarMetasEquipo();
+        fetchActividades();
 
         const interval = setInterval(() => {
             cargarDatos(true);
             cargarListas(true);
             cargarMetasEquipo();
+            fetchActividades();
         }, 5 * 60 * 1000);
 
         const handleSocketUpdate = () => {
             cargarDatos(true);
             cargarListas(true);
             cargarMetasEquipo();
+            fetchActividades();
         };
         socket.on('prospectos_actualizados', handleSocketUpdate);
 
@@ -495,6 +576,69 @@ const Dashboard = () => {
         );
     }
 
+
+    // Moneycall calculations
+    const clasificarActividad = (act) => {
+        const tipo = String(act.tipo || '').toUpperCase();
+        const desc = String(act.descripcion || '').toUpperCase();
+        const notas = String(act.notas || '').toUpperCase();
+        
+        const isOutbound = ['S1', 'S2', 'F1', 'F2', 'DC', 'PT'].some(code => 
+            tipo === code || 
+            desc.includes(`[${code}]`) || 
+            desc.includes(`${code}:`) ||
+            notas.includes(`[${code}]`) ||
+            notas.includes(`${code}:`) ||
+            (code === 'S1' && (desc.includes('DIAGNÓSTICO') || desc.includes('S1'))) ||
+            (code === 'S2' && (desc.includes('VENTA CRUZADA') || desc.includes('S2')))
+        ) || (tipo === 'LLAMADA' && !desc.includes('ENTRANTE') && !desc.includes('REACTIVA') && !desc.includes('[IN]') && !notas.includes('[IN]'));
+        
+        const isInbound = ['IN', 'RC'].some(code => 
+            tipo === code || 
+            desc.includes(`[${code}]`) || 
+            desc.includes(`${code}:`) ||
+            notas.includes(`[${code}]`) ||
+            notas.includes(`${code}:`) ||
+            desc.includes('ENTRANTE') || 
+            desc.includes('REACTIVA') ||
+            notas.includes('ENTRANTE') || 
+            notas.includes('REACTIVA')
+        );
+        
+        return { isOutbound, isInbound };
+    };
+
+    const esHoy = (dateStr) => {
+        if (!dateStr) return false;
+        const d = new Date(dateStr);
+        const hoy = new Date();
+        return d.getDate() === hoy.getDate() &&
+               d.getMonth() === hoy.getMonth() &&
+               d.getFullYear() === hoy.getFullYear();
+    };
+
+    const actividadesHoy = actividades.filter(a => esHoy(a.fecha || a.createdAt));
+    const llamadasSalientesHoy = actividadesHoy.filter(a => {
+        const { isOutbound } = clasificarActividad(a);
+        return isOutbound && (a.tipo === 'llamada' || a.tipo === 'S1' || a.tipo === 'S2' || a.tipo === 'F1' || a.tipo === 'F2' || a.tipo === 'DC' || a.tipo === 'PT');
+    }).length;
+
+    const llamadasDeHoyFinal = Math.max(vendedorData?.periodos?.dia?.llamadas || 0, llamadasSalientesHoy);
+
+    const llamadasProactivas = actividades.filter(a => clasificarActividad(a).isOutbound).length;
+    const llamadasReactivas = actividades.filter(a => clasificarActividad(a).isInbound).length;
+    const totalLlamadasClasificadas = llamadasProactivas + llamadasReactivas;
+    const pctProactive = totalLlamadasClasificadas > 0 ? (llamadasProactivas / totalLlamadasClasificadas) * 100 : 80;
+    const pctReactive = totalLlamadasClasificadas > 0 ? (llamadasReactivas / totalLlamadasClasificadas) * 100 : 20;
+
+    const maxSalesCoef = (estructuraScore / 100) * (sistemaScore / 100) * (operacionesScore / 100) * 100;
+    const minScore = Math.min(estructuraScore, sistemaScore, operacionesScore);
+    let minScoreFactor = 'perfect';
+    if (minScore < 100) {
+        if (minScore === estructuraScore) minScoreFactor = 'estructura';
+        else if (minScore === sistemaScore) minScoreFactor = 'sistema';
+        else minScoreFactor = 'operaciones';
+    }
 
     const mP = vendedorData.periodos?.[periodo] || EMPTY_PERIODO;
     const periodoSuffix = PERIODOS.find(p => p.key === periodo)?.suffix || 'hoy';
@@ -636,6 +780,7 @@ const Dashboard = () => {
                             {[
                                 { key: 'resumen', label: 'Resumen', Icon: TrendingUp },
                                 { key: 'kpis', label: 'Métricas', Icon: BarChart3 },
+                                { key: 'moneycall', label: 'Proactividad Moneycall', Icon: Phone },
                                 { key: 'tareas', label: 'Tareas', Icon: Bell },
                                 { key: 'acciones', label: 'Acciones', Icon: Activity },
                                 { key: 'proximamente', label: 'Próximamente', Icon: Zap }
@@ -1163,6 +1308,192 @@ const Dashboard = () => {
                                     <div className="mt-8 flex gap-3">
                                         <div className="px-4 py-2 bg-white border border-gray-100 rounded-xl shadow-xs text-[10px] font-black text-gray-500 uppercase tracking-widest">
                                             Feedback v2.0
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {healthTab === 'moneycall' && (
+                                <div className="h-full flex flex-col gap-4 animate-in fade-in duration-500 pb-2">
+                                    {/* Fila superior: Termómetro y Ratio */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 shrink-0">
+                                        <div className="h-72">
+                                            {/* Termómetro de Llamadas */}
+                                            <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm flex flex-col h-full justify-between">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-10 h-10 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600 shadow-xs border border-emerald-100">
+                                                        <Phone className="w-5 h-5" />
+                                                    </div>
+                                                    <div>
+                                                        <h3 className="text-sm font-black uppercase tracking-widest text-gray-800">Termómetro Proactivo</h3>
+                                                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tight">Llamadas Salientes Hoy</p>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div className="flex-1 flex flex-col justify-center items-center py-2">
+                                                    <div className="text-5xl font-black text-gray-800 mb-1 flex items-baseline gap-1">
+                                                        {llamadasDeHoyFinal}
+                                                        <span className="text-sm text-gray-400 font-bold">/ 30</span>
+                                                    </div>
+                                                    
+                                                    <div className="mb-3">
+                                                        <span className={`text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider border ${
+                                                            llamadasDeHoyFinal < 10 ? 'bg-amber-50 text-amber-600 border-amber-100' :
+                                                            llamadasDeHoyFinal < 20 ? 'bg-blue-50 text-blue-600 border-blue-100' :
+                                                            llamadasDeHoyFinal < 30 ? 'bg-emerald-50 text-emerald-600 border-emerald-100 animate-pulse' :
+                                                            'bg-emerald-500 text-white border-emerald-600 shadow-xs'
+                                                        }`}>
+                                                            {llamadasDeHoyFinal < 10 ? 'Ritmo Bajo (Proactividad requerida)' :
+                                                             llamadasDeHoyFinal < 20 ? 'Buen Ritmo (¡Casi en la meta!)' :
+                                                             llamadasDeHoyFinal < 30 ? '¡Meta Mínima Superada! 🚀' :
+                                                             '¡Ventas Máximas Desbloqueadas! 🔥'}
+                                                        </span>
+                                                    </div>
+
+                                                    <div className="w-full space-y-2 mt-1">
+                                                        <div className="relative h-6 bg-gray-100 rounded-full overflow-hidden border border-gray-200">
+                                                            <div className="absolute left-[66.6%] top-0 bottom-0 w-0.5 bg-gray-400/30 z-20">
+                                                                <span className="text-[8px] font-extrabold text-gray-400 -mt-3.5 absolute transform -translate-x-1/2">20</span>
+                                                            </div>
+                                                            <div className="absolute left-[100%] top-0 bottom-0 w-0.5 bg-gray-400/30 z-20">
+                                                                <span className="text-[8px] font-extrabold text-gray-400 -mt-3.5 absolute right-0">30</span>
+                                                            </div>
+
+                                                            <div 
+                                                                className={`h-full rounded-full transition-all duration-1000 ease-out bg-linear-to-r ${
+                                                                    llamadasDeHoyFinal < 10 ? 'from-amber-400 to-amber-500' :
+                                                                    llamadasDeHoyFinal < 20 ? 'from-indigo-500 to-indigo-600' :
+                                                                    'from-emerald-500 to-emerald-600'
+                                                                }`}
+                                                                style={{ width: `${Math.min((llamadasDeHoyFinal / 30) * 100, 100)}%` }}
+                                                            />
+                                                        </div>
+                                                        
+                                                        <div className="flex justify-between text-[8px] font-extrabold text-gray-400 uppercase tracking-widest px-1">
+                                                            <span>Inicio</span>
+                                                            <span>Meta Mínima (20)</span>
+                                                            <span>Meta Óptima (30)</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="h-72">
+                                            {/* Ratio Proactivo Doughnut */}
+                                            <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm flex flex-col h-full justify-between">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-10 h-10 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600 shadow-xs border border-indigo-100">
+                                                        <Target className="w-5 h-5" />
+                                                    </div>
+                                                    <div>
+                                                        <h3 className="text-sm font-black uppercase tracking-widest text-gray-800">Ratio de Proactividad</h3>
+                                                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tight">Meta Metodología 80/20</p>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div className="flex-1 flex flex-col items-center justify-center py-1">
+                                                    <ProactiveRatioDoughnut proactiveCount={llamadasProactivas} reactiveCount={llamadasReactivas} />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Fila inferior: Fórmula de Ventas Máximas */}
+                                    <div className="flex-1 min-h-[300px]">
+                                        <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm flex flex-col h-full justify-between">
+                                            <div className="flex items-center justify-between mb-4 border-b border-gray-100 pb-3 shrink-0">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-10 h-10 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600 shadow-xs border border-indigo-100">
+                                                        <Award className="w-5 h-5" />
+                                                    </div>
+                                                    <div>
+                                                        <h3 className="text-sm font-black uppercase tracking-widest text-gray-800">Fórmula de Ventas Máximas</h3>
+                                                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tight">Estructura × Sistema × Operaciones</p>
+                                                    </div>
+                                                </div>
+                                                <div className="bg-indigo-600 text-white rounded-xl px-4 py-1.5 text-center shadow-md">
+                                                    <div className="text-lg font-black">{maxSalesCoef.toFixed(1)}%</div>
+                                                    <div className="text-[7px] font-bold uppercase tracking-widest leading-none">COEFICIENTE DE EFECTIVIDAD</div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-5 items-stretch min-h-0">
+                                                <div className="lg:col-span-2 space-y-4 flex flex-col justify-around">
+                                                    {/* Factor 1: Estructura */}
+                                                    <div className="space-y-1">
+                                                        <div className="flex justify-between items-center text-xs">
+                                                            <span className="font-black text-gray-700 uppercase tracking-wider">1. Estructura (Gente/Vendedores): {estructuraScore}%</span>
+                                                        </div>
+                                                        <input 
+                                                            type="range" 
+                                                            min="10" 
+                                                            max="100" 
+                                                            value={estructuraScore} 
+                                                            onChange={(e) => setEstructuraScore(Number(e.target.value))}
+                                                            className="w-full accent-indigo-600 h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                                                        />
+                                                        <p className="text-[9px] text-gray-400 font-bold uppercase leading-tight">
+                                                            Capacitación del equipo, cobertura del territorio y dominio del guión S1.
+                                                        </p>
+                                                    </div>
+                                                    
+                                                    {/* Factor 2: Sistema */}
+                                                    <div className="space-y-1">
+                                                        <div className="flex justify-between items-center text-xs">
+                                                            <span className="font-black text-gray-700 uppercase tracking-wider">2. Sistema (Proceso/CRM): {sistemaScore}%</span>
+                                                        </div>
+                                                        <input 
+                                                            type="range" 
+                                                            min="10" 
+                                                            max="100" 
+                                                            value={sistemaScore} 
+                                                            onChange={(e) => setSistemaScore(Number(e.target.value))}
+                                                            className="w-full accent-indigo-600 h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                                                        />
+                                                        <p className="text-[9px] text-gray-400 font-bold uppercase leading-tight">
+                                                            Disciplina de llamadas de recuperación S1 y venta cruzada S2.
+                                                        </p>
+                                                    </div>
+                                                    
+                                                    {/* Factor 3: Operaciones */}
+                                                    <div className="space-y-1">
+                                                        <div className="flex justify-between items-center text-xs">
+                                                            <span className="font-black text-gray-700 uppercase tracking-wider">3. Operaciones (Cumplimiento/OTD): {operacionesScore}%</span>
+                                                        </div>
+                                                        <input 
+                                                            type="range" 
+                                                            min="10" 
+                                                            max="100" 
+                                                            value={operacionesScore} 
+                                                            onChange={(e) => setOperacionesScore(Number(e.target.value))}
+                                                            className="w-full accent-indigo-600 h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                                                        />
+                                                        <p className="text-[9px] text-gray-400 font-bold uppercase leading-tight">
+                                                            Calidad de entrega, servicio al cliente y cumplimiento del OTD (On-Time Delivery).
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div className="bg-gray-50 rounded-xl p-4 border border-gray-100 flex flex-col justify-between">
+                                                    <div>
+                                                        <h4 className="text-[9px] font-black uppercase tracking-widest text-indigo-700 mb-2 border-b border-indigo-100 pb-1">Evaluación de Ventas Coeficiente</h4>
+                                                        <p className="text-[11px] text-gray-600 font-medium leading-relaxed">
+                                                            {minScoreFactor === 'estructura' && '⚠️ Alerta de Estructura: Tu equipo de ventas necesita capacitación inmediata en la metodología Moneycall. Asegúrate de que dominen el guión de apertura S1 y que la cobertura de clientes sea completa.'}
+                                                            {minScoreFactor === 'sistema' && '⚠️ Falta de Disciplina en Proceso: Tu mayor debilidad es la falta de uso riguroso del CRM. Asegúrate de registrar todas las llamadas de recuperación S1 y venta cruzada S2 en el CRM.'}
+                                                            {minScoreFactor === 'operaciones' && '⚠️ Peligro Operativo: De nada sirve un excelente equipo y un gran proceso de venta si la entrega o la calidad fallan. Los problemas operativos (OTD bajo) están ahogando tus ventas recurrentes.'}
+                                                            {minScoreFactor === 'perfect' && '🔥 ¡Felicidades! Tienes una base de ventas sólida. Mantén el ritmo de 30 llamadas diarias para maximizar tus ingresos.'}
+                                                        </p>
+                                                    </div>
+                                                    
+                                                    <div className="mt-2 pt-2 border-t border-gray-200/60 flex items-center gap-1.5">
+                                                        <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest block shrink-0">Fórmula:</span>
+                                                        <code className="text-[9px] font-bold text-indigo-600 bg-white border border-gray-100 rounded px-1.5 py-0.5 truncate">
+                                                            {estructuraScore}% × {sistemaScore}% × {operacionesScore}% = {maxSalesCoef.toFixed(1)}%
+                                                        </code>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

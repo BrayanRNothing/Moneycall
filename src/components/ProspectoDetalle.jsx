@@ -1001,7 +1001,7 @@ export default function ProspectoDetalle({
                             <div className="grid grid-cols-3 gap-3">
                                 {/* Registrar Llamada */}
                                 <button
-                                    onClick={() => setLlamadaFlow({ paso: 'contesto', contesto: null, fechaProxima: '', notas: '' })}
+                                    onClick={() => setLlamadaFlow({ paso: 'tipo_llamada', tipoCall: '', contesto: null, fechaProxima: '', notas: '' })}
                                     className="flex flex-col items-center justify-center gap-2 bg-white border-2 border-slate-200 hover:border-(--theme-500) rounded-xl p-4 text-gray-700 hover:text-(--theme-600) transition-all shadow-sm font-bold text-sm text-center leading-tight"
                                 >
                                     <Phone className="w-6 h-6 text-(--theme-500)" />
@@ -1443,6 +1443,34 @@ export default function ProspectoDetalle({
                         </div>
 
                         <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+                            {/* Paso 0: Selección de Tipo de Llamada B2B */}
+                            {llamadaFlow.paso === 'tipo_llamada' && (
+                                <div className="space-y-4">
+                                    <p className="font-semibold text-gray-800 text-sm">Selecciona el tipo de llamada B2B (Moneycall):</p>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                                        {[
+                                            { code: 'S1', label: 'S1 - Recuperación (Cuadrante 1)', desc: 'Llamada proactiva sobre productos actuales' },
+                                            { code: 'S2', label: 'S2 - Venta Cruzada (Cuadrante 2)', desc: 'Llamada proactiva de productos complementarios' },
+                                            { code: 'F1', label: 'F1 - Seguimiento Caliente', desc: 'Para prospectos calificados en caliente' },
+                                            { code: 'F2', label: 'F2 - Seguimiento Propuesta', desc: 'Para prospectos con propuesta enviada' },
+                                            { code: 'DC', label: 'DC - Diagnóstico Continuo', desc: 'Llamadas periódicas de actualización' },
+                                            { code: 'PT', label: 'PT - Proactiva Técnica / Cortesía', desc: 'Llamada técnica o de cortesía' },
+                                            { code: 'IN', label: 'IN - Llamada Entrante', desc: 'Llamada reactiva recibida' },
+                                            { code: 'RC', label: 'RC - Reclamo o Soporte', desc: 'Llamada reactiva de soporte o reclamo' }
+                                        ].map((tipo) => (
+                                            <button
+                                                key={tipo.code}
+                                                onClick={() => setLlamadaFlow(f => ({ ...f, paso: 'contesto', tipoCall: tipo.code }))}
+                                                className="p-3 border border-slate-200 rounded-xl text-left hover:border-indigo-500 hover:bg-indigo-50/50 transition-all flex flex-col justify-between"
+                                            >
+                                                <span className="font-black text-indigo-600 text-xs">{tipo.label}</span>
+                                                <span className="text-[10px] text-gray-400 font-bold leading-snug mt-1">{tipo.desc}</span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
                             {/* Paso 1: ¿Contestó? */}
                             {llamadaFlow.paso === 'contesto' && (
                                 <div className="space-y-3">
@@ -1455,7 +1483,8 @@ export default function ProspectoDetalle({
                                         <button
                                             onClick={async () => {
                                                 // Registrar llamada fallida
-                                                const ok = await registrarActividadConDelay({ tipo: 'llamada', resultado: 'fallido', notas: 'No contestó' });
+                                                const prefix = llamadaFlow.tipoCall ? `[${llamadaFlow.tipoCall}] ` : '';
+                                                const ok = await registrarActividadConDelay({ tipo: 'llamada', resultado: 'fallido', notas: `${prefix}No contestó` });
                                                 if (ok) setLlamadaFlow(null);
                                             }}
                                             disabled={estaBloqueadoRegistro}
@@ -1471,18 +1500,16 @@ export default function ProspectoDetalle({
                                     <p className="font-semibold text-gray-800">¿Cuál fue el resultado de la llamada?</p>
                                     <div className="grid grid-cols-2 gap-3">
                                         <button
-                                            onClick={() => {
+                                            onClick={async () => {
+                                                const prefix = llamadaFlow.tipoCall ? `[${llamadaFlow.tipoCall}] ` : '';
+                                                const ok = await registrarActividadConDelay({ tipo: 'llamada', resultado: 'exitoso', notas: `${prefix}Agendó reunión` });
+                                                if (!ok) return;
                                                 setLlamadaFlow(null);
-                                                navigate(`/${calendarRolePath}/calendario`, { 
-                                                    state: { 
-                                                        prospecto: prospectoSeleccionado,
-                                                        activeTab: 'agendar',
-                                                        fromCall: true
-                                                    } 
-                                                });
+                                                navigate(`/${calendarRolePath}/calendario`, { state: { prospecto: prospectoSeleccionado, Cliente: prospectoSeleccionado, cliente: prospectoSeleccionado } });
                                             }}
-                                            className="py-2.5 bg-(--theme-500) text-white rounded-lg font-bold hover:bg-(--theme-600) transition-colors text-sm"
-                                        >📅 Agendó reunión</button>
+                                            disabled={estaBloqueadoRegistro}
+                                            className="py-2.5 bg-(--theme-500) text-white rounded-lg font-bold hover:bg-(--theme-600) transition-colors text-sm disabled:opacity-60 disabled:cursor-not-allowed"
+                                        >{estaBloqueadoRegistro ? '⏳ Validando...' : '📅 Agendó reunión'}</button>
 
                                         <button
                                             onClick={() => {
@@ -1593,7 +1620,8 @@ export default function ProspectoDetalle({
                                     />
                                     <button
                                         onClick={async () => {
-                                            const notaFinal = llamadaFlow.notas ? `Prefiere atención por WhatsApp o correo - ${llamadaFlow.notas}` : 'Prefiere atención por WhatsApp o correo';
+                                            const prefix = llamadaFlow.tipoCall ? `[${llamadaFlow.tipoCall}] ` : '';
+                                            const notaFinal = llamadaFlow.notas ? `${prefix}Prefiere atención por WhatsApp o correo - ${llamadaFlow.notas}` : `${prefix}Prefiere atención por WhatsApp o correo`;
                                             const ok = await registrarActividadConDelay({ tipo: 'llamada', resultado: 'exitoso', notas: notaFinal });
                                             if (!ok) return;
                                             setLlamadaFlow(null);
@@ -1618,7 +1646,8 @@ export default function ProspectoDetalle({
                                     />
                                     <button
                                         onClick={async () => {
-                                            const notaFinal = llamadaFlow.notas ? `Sin interés - ${llamadaFlow.notas}` : 'Contestó, sin interés';
+                                            const prefix = llamadaFlow.tipoCall ? `[${llamadaFlow.tipoCall}] ` : '';
+                                            const notaFinal = llamadaFlow.notas ? `${prefix}Sin interés - ${llamadaFlow.notas}` : `${prefix}Contestó, sin interés`;
                                             const ok = await registrarActividadConDelay({ tipo: 'llamada', resultado: 'exitoso', notas: notaFinal });
                                             if (!ok) return;
                                             setLlamadaFlow(null);
@@ -1643,7 +1672,8 @@ export default function ProspectoDetalle({
                                     />
                                     <button
                                         onClick={async () => {
-                                            const notaFinal = llamadaFlow.notas ? `Otro resultado - ${llamadaFlow.notas}` : 'Otro resultado de llamada';
+                                            const prefix = llamadaFlow.tipoCall ? `[${llamadaFlow.tipoCall}] ` : '';
+                                            const notaFinal = llamadaFlow.notas ? `${prefix}Otro resultado - ${llamadaFlow.notas}` : `${prefix}Otro resultado de llamada`;
                                             const ok = await registrarActividadConDelay({ tipo: 'llamada', resultado: 'exitoso', notas: notaFinal });
                                             if (!ok) return;
                                             setLlamadaFlow(null);
@@ -1692,7 +1722,8 @@ export default function ProspectoDetalle({
                                     <button
                                         onClick={async () => {
                                             try {
-                                                const notasFin = llamadaFlow.notas || 'Interesado, llamar después';
+                                                const prefix = llamadaFlow.tipoCall ? `[${llamadaFlow.tipoCall}] ` : '';
+                                                const notasFin = llamadaFlow.notas ? `${prefix}${llamadaFlow.notas}` : `${prefix}Interesado, llamar después`;
                                                 const pidLocal = prospectoSeleccionado.id || prospectoSeleccionado._id;
 
                                                 // 1. Registrar Actividad (usa el helper que auto-promueve la etapa)
