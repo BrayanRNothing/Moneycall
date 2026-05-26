@@ -122,15 +122,20 @@ const getAuthHeaders = () => ({ 'x-auth-token': getToken() || '' });
 
 const ProactiveRatioDoughnut = ({ proactiveCount, reactiveCount }) => {
     const total = proactiveCount + reactiveCount;
-    const pctProactive = total > 0 ? (proactiveCount / total) * 100 : 80;
-    const pctReactive = total > 0 ? (reactiveCount / total) * 100 : 20;
+    const pctProactive = total > 0 ? (proactiveCount / total) * 100 : 0;
+    const pctReactive = total > 0 ? (reactiveCount / total) * 100 : 0;
 
     const size = 160;
     const strokeWidth = 14;
     const radius = 70;
     const circumference = 2 * Math.PI * radius;
     
-    const strokeDashoffsetProactive = circumference - (pctProactive / 100) * circumference;
+    const strokeDashoffsetProactive = total > 0 
+        ? circumference - (pctProactive / 100) * circumference 
+        : circumference;
+
+    const strokeDashoffsetReactive = total > 0 ? 0 : circumference;
+    const bgCircleClass = total > 0 ? "stroke-amber-100" : "stroke-slate-100";
 
     return (
         <div className="flex flex-col items-center justify-center w-full">
@@ -141,7 +146,7 @@ const ProactiveRatioDoughnut = ({ proactiveCount, reactiveCount }) => {
                         cy={size/2}
                         r={radius}
                         fill="transparent"
-                        className="stroke-amber-100"
+                        className={bgCircleClass}
                         strokeWidth={strokeWidth}
                     />
                     <circle
@@ -152,7 +157,7 @@ const ProactiveRatioDoughnut = ({ proactiveCount, reactiveCount }) => {
                         className="stroke-amber-400 transition-all duration-700 ease-out"
                         strokeWidth={strokeWidth}
                         strokeDasharray={circumference}
-                        strokeDashoffset={0}
+                        strokeDashoffset={strokeDashoffsetReactive}
                     />
                     <circle
                         cx={size/2}
@@ -168,7 +173,9 @@ const ProactiveRatioDoughnut = ({ proactiveCount, reactiveCount }) => {
                 </svg>
                 <div className="absolute flex flex-col items-center justify-center">
                     <span className="text-3xl font-black text-gray-800 tracking-tight">{pctProactive.toFixed(0)}%</span>
-                    <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest mt-0.5">SALIENTE</span>
+                    <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest mt-0.5">
+                        {total > 0 ? "SALIENTE" : "SIN LLAMADAS"}
+                    </span>
                 </div>
             </div>
             
@@ -201,11 +208,7 @@ const Dashboard = () => {
     const [closerData, setCloserData] = useState(null);
     const [recordatorios, setRecordatorios] = useState([]);
     const [reuniones, setReuniones] = useState([]);
-    
-    // Moneycall states
-    const [estructuraScore, setEstructuraScore] = useState(85);
-    const [sistemaScore, setSistemaScore] = useState(75);
-    const [operacionesScore, setOperacionesScore] = useState(90);
+
     const [loadingReuniones, setLoadingReuniones] = useState(true);
     const [periodo, setPeriodo] = useState('dia');
     const [healthTab, setHealthTab] = useState('resumen');
@@ -628,17 +631,9 @@ const Dashboard = () => {
     const llamadasProactivas = actividades.filter(a => clasificarActividad(a).isOutbound).length;
     const llamadasReactivas = actividades.filter(a => clasificarActividad(a).isInbound).length;
     const totalLlamadasClasificadas = llamadasProactivas + llamadasReactivas;
-    const pctProactive = totalLlamadasClasificadas > 0 ? (llamadasProactivas / totalLlamadasClasificadas) * 100 : 80;
-    const pctReactive = totalLlamadasClasificadas > 0 ? (llamadasReactivas / totalLlamadasClasificadas) * 100 : 20;
+    const pctProactive = totalLlamadasClasificadas > 0 ? (llamadasProactivas / totalLlamadasClasificadas) * 100 : 0;
+    const pctReactive = totalLlamadasClasificadas > 0 ? (llamadasReactivas / totalLlamadasClasificadas) * 100 : 0;
 
-    const maxSalesCoef = (estructuraScore / 100) * (sistemaScore / 100) * (operacionesScore / 100) * 100;
-    const minScore = Math.min(estructuraScore, sistemaScore, operacionesScore);
-    let minScoreFactor = 'perfect';
-    if (minScore < 100) {
-        if (minScore === estructuraScore) minScoreFactor = 'estructura';
-        else if (minScore === sistemaScore) minScoreFactor = 'sistema';
-        else minScoreFactor = 'operaciones';
-    }
 
     const mP = vendedorData.periodos?.[periodo] || EMPTY_PERIODO;
     const periodoSuffix = PERIODOS.find(p => p.key === periodo)?.suffix || 'hoy';
@@ -1394,104 +1389,6 @@ const Dashboard = () => {
                                                 
                                                 <div className="flex-1 flex flex-col items-center justify-center py-1">
                                                     <ProactiveRatioDoughnut proactiveCount={llamadasProactivas} reactiveCount={llamadasReactivas} />
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Fila inferior: Fórmula de Ventas Máximas */}
-                                    <div className="flex-1 min-h-[300px]">
-                                        <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm flex flex-col h-full justify-between">
-                                            <div className="flex items-center justify-between mb-4 border-b border-gray-100 pb-3 shrink-0">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-10 h-10 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600 shadow-xs border border-indigo-100">
-                                                        <Award className="w-5 h-5" />
-                                                    </div>
-                                                    <div>
-                                                        <h3 className="text-sm font-black uppercase tracking-widest text-gray-800">Fórmula de Ventas Máximas</h3>
-                                                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tight">Estructura × Sistema × Operaciones</p>
-                                                    </div>
-                                                </div>
-                                                <div className="bg-indigo-600 text-white rounded-xl px-4 py-1.5 text-center shadow-md">
-                                                    <div className="text-lg font-black">{maxSalesCoef.toFixed(1)}%</div>
-                                                    <div className="text-[7px] font-bold uppercase tracking-widest leading-none">COEFICIENTE DE EFECTIVIDAD</div>
-                                                </div>
-                                            </div>
-                                            
-                                            <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-5 items-stretch min-h-0">
-                                                <div className="lg:col-span-2 space-y-4 flex flex-col justify-around">
-                                                    {/* Factor 1: Estructura */}
-                                                    <div className="space-y-1">
-                                                        <div className="flex justify-between items-center text-xs">
-                                                            <span className="font-black text-gray-700 uppercase tracking-wider">1. Estructura (Gente/Vendedores): {estructuraScore}%</span>
-                                                        </div>
-                                                        <input 
-                                                            type="range" 
-                                                            min="10" 
-                                                            max="100" 
-                                                            value={estructuraScore} 
-                                                            onChange={(e) => setEstructuraScore(Number(e.target.value))}
-                                                            className="w-full accent-indigo-600 h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-                                                        />
-                                                        <p className="text-[9px] text-gray-400 font-bold uppercase leading-tight">
-                                                            Capacitación del equipo, cobertura del territorio y dominio del guión S1.
-                                                        </p>
-                                                    </div>
-                                                    
-                                                    {/* Factor 2: Sistema */}
-                                                    <div className="space-y-1">
-                                                        <div className="flex justify-between items-center text-xs">
-                                                            <span className="font-black text-gray-700 uppercase tracking-wider">2. Sistema (Proceso/CRM): {sistemaScore}%</span>
-                                                        </div>
-                                                        <input 
-                                                            type="range" 
-                                                            min="10" 
-                                                            max="100" 
-                                                            value={sistemaScore} 
-                                                            onChange={(e) => setSistemaScore(Number(e.target.value))}
-                                                            className="w-full accent-indigo-600 h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-                                                        />
-                                                        <p className="text-[9px] text-gray-400 font-bold uppercase leading-tight">
-                                                            Disciplina de llamadas de recuperación S1 y venta cruzada S2.
-                                                        </p>
-                                                    </div>
-                                                    
-                                                    {/* Factor 3: Operaciones */}
-                                                    <div className="space-y-1">
-                                                        <div className="flex justify-between items-center text-xs">
-                                                            <span className="font-black text-gray-700 uppercase tracking-wider">3. Operaciones (Cumplimiento/OTD): {operacionesScore}%</span>
-                                                        </div>
-                                                        <input 
-                                                            type="range" 
-                                                            min="10" 
-                                                            max="100" 
-                                                            value={operacionesScore} 
-                                                            onChange={(e) => setOperacionesScore(Number(e.target.value))}
-                                                            className="w-full accent-indigo-600 h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-                                                        />
-                                                        <p className="text-[9px] text-gray-400 font-bold uppercase leading-tight">
-                                                            Calidad de entrega, servicio al cliente y cumplimiento del OTD (On-Time Delivery).
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                                
-                                                <div className="bg-gray-50 rounded-xl p-4 border border-gray-100 flex flex-col justify-between">
-                                                    <div>
-                                                        <h4 className="text-[9px] font-black uppercase tracking-widest text-indigo-700 mb-2 border-b border-indigo-100 pb-1">Evaluación de Ventas Coeficiente</h4>
-                                                        <p className="text-[11px] text-gray-600 font-medium leading-relaxed">
-                                                            {minScoreFactor === 'estructura' && '⚠️ Alerta de Estructura: Tu equipo de ventas necesita capacitación inmediata en la metodología Moneycall. Asegúrate de que dominen el guión de apertura S1 y que la cobertura de clientes sea completa.'}
-                                                            {minScoreFactor === 'sistema' && '⚠️ Falta de Disciplina en Proceso: Tu mayor debilidad es la falta de uso riguroso del CRM. Asegúrate de registrar todas las llamadas de recuperación S1 y venta cruzada S2 en el CRM.'}
-                                                            {minScoreFactor === 'operaciones' && '⚠️ Peligro Operativo: De nada sirve un excelente equipo y un gran proceso de venta si la entrega o la calidad fallan. Los problemas operativos (OTD bajo) están ahogando tus ventas recurrentes.'}
-                                                            {minScoreFactor === 'perfect' && '🔥 ¡Felicidades! Tienes una base de ventas sólida. Mantén el ritmo de 30 llamadas diarias para maximizar tus ingresos.'}
-                                                        </p>
-                                                    </div>
-                                                    
-                                                    <div className="mt-2 pt-2 border-t border-gray-200/60 flex items-center gap-1.5">
-                                                        <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest block shrink-0">Fórmula:</span>
-                                                        <code className="text-[9px] font-bold text-indigo-600 bg-white border border-gray-100 rounded px-1.5 py-0.5 truncate">
-                                                            {estructuraScore}% × {sistemaScore}% × {operacionesScore}% = {maxSalesCoef.toFixed(1)}%
-                                                        </code>
-                                                    </div>
                                                 </div>
                                             </div>
                                         </div>

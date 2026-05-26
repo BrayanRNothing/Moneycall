@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import {
     User, Lock, Shield, Monitor, LogOut,
     Link2, Link2Off, CheckCircle2, Mail, Phone,
-    AlertCircle, Bell, Save, KeyRound, Palette, Camera
+    AlertCircle, Bell, Save, KeyRound, Palette, Camera,
+    Award
 } from 'lucide-react';
 import Avatar from '../components/ui/Avatar';
 import toast from 'react-hot-toast';
@@ -44,6 +45,31 @@ export default function VendedorAjustes() {
     const [activeTab, setActiveTab] = useState('perfil');
     const [googleAccountInfo, setGoogleAccountInfo] = useState(null);
     const [loadingGoogle, setLoadingGoogle] = useState(false);
+    // Moneycall states (saved in localStorage for premium persistence)
+    const [estructuraScore, setEstructuraScore] = useState(() => Number(localStorage.getItem('crm_estructura_score') || 85));
+    const [sistemaScore, setSistemaScore] = useState(() => Number(localStorage.getItem('crm_sistema_score') || 75));
+    const [operacionesScore, setOperacionesScore] = useState(() => Number(localStorage.getItem('crm_operaciones_score') || 90));
+
+    useEffect(() => {
+        localStorage.setItem('crm_estructura_score', estructuraScore);
+    }, [estructuraScore]);
+
+    useEffect(() => {
+        localStorage.setItem('crm_sistema_score', sistemaScore);
+    }, [sistemaScore]);
+
+    useEffect(() => {
+        localStorage.setItem('crm_operaciones_score', operacionesScore);
+    }, [operacionesScore]);
+
+    const maxSalesCoef = (estructuraScore / 100) * (sistemaScore / 100) * (operacionesScore / 100) * 100;
+    const minScore = Math.min(estructuraScore, sistemaScore, operacionesScore);
+    let minScoreFactor = 'perfect';
+    if (minScore < 100) {
+        if (minScore === estructuraScore) minScoreFactor = 'estructura';
+        else if (minScore === sistemaScore) minScoreFactor = 'sistema';
+        else minScoreFactor = 'operaciones';
+    }
 
     // Theme Global State
     const { currentThemeId, setTheme } = useThemeStore();
@@ -206,6 +232,7 @@ export default function VendedorAjustes() {
         { id: 'seguridad', label: 'Seguridad', icon: KeyRound },
         { id: 'integraciones', label: 'Google', icon: Link2 },
         { id: 'colores', label: 'Colores del Sistema', icon: Palette },
+        { id: 'formula', label: 'Fórmula de Ventas', icon: Award },
         { id: 'notificaciones', label: 'Notificaciones', icon: Bell },
     ];
 
@@ -581,6 +608,107 @@ export default function VendedorAjustes() {
                                                     </button>
                                                 )
                                             })}
+                                        </div>
+                                    </div>
+                                </section>
+                            )}
+
+                            {activeTab === 'formula' && (
+                                <section className="bg-white md:rounded-3xl md:shadow-xl border-b md:border border-slate-200 overflow-x-hidden overflow-y-auto max-h-[72vh] lg:max-h-none lg:overflow-visible lg:min-h-[460px]">
+                                    <div className="p-6 sm:p-8 h-full flex flex-col justify-between">
+                                        <div>
+                                            <h2 className="text-base font-bold text-slate-800 mb-5 flex items-center justify-between border-b border-gray-100 pb-3">
+                                                <div className="flex items-center gap-2">
+                                                    <div className={`p-2 rounded-xl bg-linear-to-br ${roleBg} text-white shadow-sm`}>
+                                                        <Award size={15} />
+                                                    </div>
+                                                    <div>
+                                                        <span className="font-black">Fórmula de Ventas Máximas</span>
+                                                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tight mt-0.5">Estructura × Sistema × Operaciones</p>
+                                                    </div>
+                                                </div>
+                                                <div className="bg-indigo-600 text-white rounded-xl px-4 py-1 text-center shadow-md">
+                                                    <div className="text-sm font-black">{maxSalesCoef.toFixed(1)}%</div>
+                                                    <div className="text-[6px] font-bold uppercase tracking-widest leading-none">Efectividad</div>
+                                                </div>
+                                            </h2>
+                                            
+                                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
+                                                <div className="lg:col-span-2 space-y-6 flex flex-col justify-around">
+                                                    {/* Factor 1: Estructura */}
+                                                    <div className="space-y-1">
+                                                        <div className="flex justify-between items-center text-xs">
+                                                            <span className="font-black text-gray-700 uppercase tracking-wider">1. Estructura (Gente/Vendedores): {estructuraScore}%</span>
+                                                        </div>
+                                                        <input 
+                                                            type="range" 
+                                                            min="10" 
+                                                            max="100" 
+                                                            value={estructuraScore} 
+                                                            onChange={(e) => setEstructuraScore(Number(e.target.value))}
+                                                            className="w-full accent-indigo-600 h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                                                        />
+                                                        <p className="text-[9.5px] text-gray-400 font-bold uppercase leading-tight">
+                                                            Capacitación del equipo, cobertura del territorio y dominio del guión S1.
+                                                        </p>
+                                                    </div>
+                                                    
+                                                    {/* Factor 2: Sistema */}
+                                                    <div className="space-y-1">
+                                                        <div className="flex justify-between items-center text-xs">
+                                                            <span className="font-black text-gray-700 uppercase tracking-wider">2. Sistema (Proceso/CRM): {sistemaScore}%</span>
+                                                        </div>
+                                                        <input 
+                                                            type="range" 
+                                                            min="10" 
+                                                            max="100" 
+                                                            value={sistemaScore} 
+                                                            onChange={(e) => setSistemaScore(Number(e.target.value))}
+                                                            className="w-full accent-indigo-600 h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                                                        />
+                                                        <p className="text-[9.5px] text-gray-400 font-bold uppercase leading-tight">
+                                                            Disciplina de llamadas de recuperación S1 y venta cruzada S2.
+                                                        </p>
+                                                    </div>
+                                                    
+                                                    {/* Factor 3: Operaciones */}
+                                                    <div className="space-y-1">
+                                                        <div className="flex justify-between items-center text-xs">
+                                                            <span className="font-black text-gray-700 uppercase tracking-wider">3. Operaciones (Cumplimiento/OTD): {operacionesScore}%</span>
+                                                        </div>
+                                                        <input 
+                                                            type="range" 
+                                                            min="10" 
+                                                            max="100" 
+                                                            value={operacionesScore} 
+                                                            onChange={(e) => setOperacionesScore(Number(e.target.value))}
+                                                            className="w-full accent-indigo-600 h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                                                        />
+                                                        <p className="text-[9.5px] text-gray-400 font-bold uppercase leading-tight">
+                                                            Calidad de entrega, servicio al cliente y cumplimiento del OTD (On-Time Delivery).
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100 flex flex-col justify-between">
+                                                    <div>
+                                                        <h4 className="text-[9.5px] font-black uppercase tracking-widest text-indigo-700 mb-3 border-b border-indigo-100 pb-1">Evaluación de Ventas Coeficiente</h4>
+                                                        <p className="text-[11px] text-gray-600 font-semibold leading-relaxed">
+                                                            {minScoreFactor === 'estructura' && '⚠️ Alerta de Estructura: Tu equipo de ventas necesita capacitación inmediata en la metodología Moneycall. Asegúrate de que dominen el guión de apertura S1 y que la cobertura de clientes sea completa.'}
+                                                            {minScoreFactor === 'sistema' && '⚠️ Falta de Disciplina en Proceso: Tu mayor debilidad es la falta de uso riguroso del CRM. Asegúrate de registrar todas las llamadas de recuperación S1 y venta cruzada S2 en el CRM.'}
+                                                            {minScoreFactor === 'operaciones' && '⚠️ Peligro Operativo: De nada sirve un excelente equipo y un gran proceso de venta si la entrega o la calidad fallan. Los problemas operativos (OTD bajo) están ahogando tus ventas recurrentes.'}
+                                                            {minScoreFactor === 'perfect' && '🔥 ¡Felicidades! Tienes una base de ventas sólida. Mantén el ritmo de 30 llamadas diarias para maximizar tus ingresos.'}
+                                                        </p>
+                                                    </div>
+                                                    
+                                                    <div className="mt-4 pt-3 border-t border-gray-200/60 flex items-center gap-1.5">
+                                                        <span className="text-[8.5px] font-black text-gray-400 uppercase tracking-widest block shrink-0">Fórmula:</span>
+                                                        <code className="text-[10px] font-bold text-indigo-600 bg-white border border-gray-100 rounded px-2 py-1 truncate">
+                                                            {estructuraScore}% × {sistemaScore}% × {operacionesScore}% = {maxSalesCoef.toFixed(1)}%
+                                                        </code>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </section>
