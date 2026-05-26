@@ -7,7 +7,8 @@ import {
     MessageCircleQuestion,
     PhoneOutgoing,
     Clock,
-    TrendingUp
+    TrendingUp,
+    PieChart
 } from 'lucide-react';
 
 const ManualMetodologia = () => {
@@ -101,11 +102,54 @@ const ManualMetodologia = () => {
                     </div>
                 </section>
 
-                {/* Sección 3: El Pipeline de Cotizaciones */}
+                {/* Sección 3: El Cuadrante de Ventas (Nomenclaturas) */}
+                <section className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-xs">
+                    <div className="flex items-center gap-3 mb-5">
+                        <PieChart className="w-5.5 h-5.5 text-amber-500" />
+                        <h2 className="text-lg font-black text-slate-800">3. El Cuadrante de Ventas (Nomenclaturas)</h2>
+                    </div>
+                    <p className="text-xs sm:text-sm text-slate-600 mb-6 font-medium">
+                        Todo seguimiento y llamada se clasifica utilizando el <strong>Cuadrante de Ventas</strong>. En la etapa inicial del sistema Moneycall, <strong>solo nos enfocamos en el Cuadrante 1 y 2</strong> (Clientes actuales), nunca prospectamos clientes nuevos (Cuadrantes 3 y 4).
+                    </p>
+                    <div className="space-y-4">
+                        <div className="border border-slate-200 rounded-2xl p-5 hover:border-amber-300 transition-colors bg-white">
+                            <div className="flex items-center gap-2 mb-2 flex-wrap">
+                                <span className="bg-amber-100 text-amber-800 font-extrabold px-2.5 py-0.5 rounded-lg text-[10px] tracking-wider uppercase">S1 (Cuadrante 1)</span>
+                                <h4 className="font-bold text-slate-800 text-xs sm:text-sm">Clientes Actuales + Productos Actuales</h4>
+                            </div>
+                            <p className="text-xs text-slate-600 leading-normal font-medium">
+                                Clientes que compran actualmente lo que ya les vendemos. El objetivo es que compren con mayor volumen o frecuencia. Se cierra la llamada con la pregunta de McDonald's: <span className="italic text-slate-700">"¿Qué más le apetece añadir a su pedido hoy?"</span>.
+                            </p>
+                        </div>
+
+                        <div className="border border-slate-200 rounded-2xl p-5 hover:border-amber-300 transition-colors bg-white">
+                            <div className="flex items-center gap-2 mb-2 flex-wrap">
+                                <span className="bg-amber-100 text-amber-800 font-extrabold px-2.5 py-0.5 rounded-lg text-[10px] tracking-wider uppercase">S2 (Cuadrante 2)</span>
+                                <h4 className="font-bold text-slate-800 text-xs sm:text-sm">Clientes Actuales + Productos NUEVOS</h4>
+                            </div>
+                            <p className="text-xs text-slate-600 leading-normal font-medium">
+                                Clientes de nuestra base de datos pero que le compran ciertos productos a la competencia. El objetivo es descubrir qué productos les faltan (usando la información de las 5 Preguntas Clave) y ofrecérselos para ganar esa cuota de mercado.
+                            </p>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2 opacity-50">
+                            <div className="border border-slate-200 border-dashed rounded-2xl p-4 bg-slate-50">
+                                <span className="text-slate-500 font-bold text-xs">S3 (Cuadrante 3)</span>
+                                <p className="text-[10px] text-slate-400 mt-1 font-medium">Clientes Nuevos + Prod. Actuales (Prospección pura, no aplica inicialmente)</p>
+                            </div>
+                            <div className="border border-slate-200 border-dashed rounded-2xl p-4 bg-slate-50">
+                                <span className="text-slate-500 font-bold text-xs">S4 (Cuadrante 4)</span>
+                                <p className="text-[10px] text-slate-400 mt-1 font-medium">Clientes Nuevos + Prod. Nuevos (No aplica a nuestro modelo)</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                {/* Sección 4: El Pipeline de Cotizaciones */}
                 <section className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-xs">
                     <div className="flex items-center gap-3 mb-4">
                         <Clock className="w-5.5 h-5.5 text-amber-500" />
-                        <h2 className="text-lg font-black text-slate-800">3. El Pipeline de Cotizaciones</h2>
+                        <h2 className="text-lg font-black text-slate-800">4. El Pipeline de Cotizaciones</h2>
                     </div>
                     <p className="text-xs sm:text-sm text-slate-600 leading-normal font-medium mb-6">
                         En la metodología Moneycall, <strong>ninguna cotización se envía sin darle seguimiento absoluto</strong>. El flujo de estados se controla rigurosamente:
@@ -131,11 +175,11 @@ const ManualMetodologia = () => {
                     </div>
                 </section>
 
-                {/* Sección 4: Tipos de Llamadas (Nomenclatura) */}
+                {/* Sección 5: Tipos de Llamadas (Nomenclatura) */}
                 <section className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-xs">
                     <div className="flex items-center gap-3 mb-5">
                         <PhoneOutgoing className="w-5.5 h-5.5 text-indigo-600" />
-                        <h2 className="text-lg font-black text-slate-800">4. Tipos de Llamadas (Nomenclatura de Procesos)</h2>
+                        <h2 className="text-lg font-black text-slate-800">5. Tipos de Llamadas (Nomenclatura de Procesos)</h2>
                     </div>
                     <p className="text-xs sm:text-sm text-slate-600 mb-6 font-medium">
                         Todas las llamadas e interacciones del CRM deben registrarse bajo la nomenclatura estricta de la metodología para mantener consistencia métrica:
@@ -274,11 +318,11 @@ const ManualMetodologia = () => {
                       </div>
                 </section>
 
-                {/* Sección 5: El Secreto McDonald's */}
+                {/* Sección 6: El Secreto McDonald's */}
                 <section className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-xs">
                     <div className="flex items-center gap-3 mb-5">
                         <span className="text-xl">🍔</span>
-                        <h2 className="text-lg font-black text-slate-800">5. La Pregunta McDonald's</h2>
+                        <h2 className="text-lg font-black text-slate-800">6. La Pregunta McDonald's</h2>
                     </div>
                     <div className="text-slate-600 leading-relaxed text-xs sm:text-sm space-y-4 font-medium">
                         <p>
@@ -293,11 +337,11 @@ const ManualMetodologia = () => {
                     </div>
                 </section>
 
-                {/* Sección 6: KPIs del Sistema */}
+                {/* Sección 7: KPIs del Sistema */}
                 <section className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-xs">
                     <div className="flex items-center gap-3 mb-5">
                         <BarChart3 className="w-5.5 h-5.5 text-blue-600" />
-                        <h2 className="text-lg font-black text-slate-800">6. Indicadores Clave de Rendimiento (KPIs)</h2>
+                        <h2 className="text-lg font-black text-slate-800">7. Indicadores Clave de Rendimiento (KPIs)</h2>
                     </div>
                     <div className="space-y-4">
                         <div className="flex gap-3 items-start">
