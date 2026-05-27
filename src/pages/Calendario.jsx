@@ -1232,7 +1232,7 @@ const Calendario = () => {
             </p>
             <div className="space-y-3">
               <button
-                onClick={() => navigate("/vendedor/ajustes")}
+                onClick={() => navigate("/vendedor/ajustes", { state: { activeTab: "integraciones" } })}
                 className="w-full py-4 bg-(--theme-500) text-white rounded-2xl font-black text-sm hover:bg-[#7cb342] transition-all shadow-lg shadow-(--theme-500)/20"
               >
                 IR A VINCULAR AHORA

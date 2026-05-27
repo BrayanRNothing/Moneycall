@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import Avatar from '../components/ui/Avatar';
 import toast from 'react-hot-toast';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useGoogleLogin } from '@react-oauth/google';
 import API_URL from '../config/api';
 import { getUser, saveUser, getToken } from '../utils/authUtils';
@@ -34,6 +34,7 @@ const Toggle = ({ value, onChange }) => (
 
 export default function VendedorAjustes() {
     const navigate = useNavigate();
+    const location = useLocation();
     const [user, setUser] = useState({ nombre: 'Usuario', usuario: 'usuario', email: '', telefono: '', rol: 'vendedor', id: null });
     const [notifs, setNotifs] = useState({ email: true, tasks: true, updates: false });
     const [googleConnected, setGoogleConnected] = useState(false);
@@ -42,7 +43,7 @@ export default function VendedorAjustes() {
     const [savingPass, setSavingPass] = useState(false);
     const [profileForm, setProfileForm] = useState({ nombre: '', email: '', telefono: '' });
     const [passForm, setPassForm] = useState({ next: '', confirm: '' });
-    const [activeTab, setActiveTab] = useState('perfil');
+    const [activeTab, setActiveTab] = useState(location.state?.activeTab || 'perfil');
     const [googleAccountInfo, setGoogleAccountInfo] = useState(null);
     const [loadingGoogle, setLoadingGoogle] = useState(false);
     // Moneycall states (saved in localStorage for premium persistence)
