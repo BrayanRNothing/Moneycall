@@ -633,14 +633,21 @@ const Calendario = () => {
     const endOfDay = new Date(date);
     endOfDay.setHours(23, 59, 0, 0); // End 11:59 PM
 
+    const now = new Date();
+
     while (current < endOfDay) {
       const slotStart = new Date(current);
       const slotEnd = new Date(current.getTime() + 30 * 60000); // 30 mins
 
       if (slotEnd <= endOfDay) {
-        const isBusy = busySlots.some((busy) => {
+        let isBusy = busySlots.some((busy) => {
           return slotStart < busy.end && slotEnd > busy.start;
         });
+
+        // Bloquear horarios pasados si el día es hoy o en el pasado
+        if (slotStart.getTime() < now.getTime()) {
+          isBusy = true;
+        }
 
         // We always push the slot, but we mark it as isBusy so we can render it grayed out
         slots.push({ start: slotStart, end: slotEnd, isBusy });
@@ -1301,6 +1308,11 @@ const Calendario = () => {
                   {calendarDays.map((date, index) => {
                     const isSelected = date && isSameDay(date, selectedDate);
                     const isTodayDate = date && isToday(date);
+                    
+                    const todayDate = new Date();
+                    todayDate.setHours(0, 0, 0, 0);
+                    const isPastDay = date && date.getTime() < todayDate.getTime();
+                    
                     return (
                       <button
                         key={index}
@@ -1311,13 +1323,14 @@ const Calendario = () => {
                             setCreatedEventLink(null);
                           }
                         }}
-                        disabled={!date || !selectedCloser}
+                        disabled={!date || !selectedCloser || isPastDay}
                         className={`
                                                     relative rounded-2xl transition-all border flex items-center justify-center p-1 md:p-2 min-h-[44px] md:min-h-[72px] aspect-square md:aspect-auto
                                                     ${!date ? "bg-transparent border-transparent cursor-default select-none" : ""}
                                                     ${date && !selectedCloser ? "opacity-40 cursor-not-allowed bg-slate-50 border-slate-100" : ""}
-                                                    ${date && selectedCloser && !isSelected ? "bg-white border-slate-200 hover:border-(--theme-500)/50 hover:shadow-sm text-slate-700" : ""}
-                                                    ${isSelected ? "bg-(--theme-500) text-white shadow-lg shadow-(--theme-500)/30 scale-105 border-(--theme-500) z-20" : ""}
+                                                    ${isPastDay ? "opacity-30 cursor-not-allowed bg-slate-50 border-slate-100/70 text-slate-300 line-through select-none" : ""}
+                                                    ${date && selectedCloser && !isSelected && !isPastDay ? "bg-white border-slate-200 hover:border-(--theme-500)/50 hover:shadow-sm text-slate-700" : ""}
+                                                    ${isSelected && !isPastDay ? "bg-(--theme-500) text-white shadow-lg shadow-(--theme-500)/30 scale-105 border-(--theme-500) z-20" : ""}
                                                     ${isTodayDate && !isSelected ? "bg-(--theme-50) border-(--theme-200) text-(--theme-700)" : ""}
                                                     ${isTodayDate && !isSelected ? 'after:content-["HOY"] after:absolute after:top-1 lg:after:top-1.5 after:right-1 lg:after:right-1.5 after:text-[6px] lg:after:text-[8px] after:font-black after:text-(--theme-500) after:bg-white after:px-1 after:py-0.5 after:rounded-sm after:shadow-sm' : ""}
                                                 `}
