@@ -170,11 +170,10 @@ const normalizeGoogleTokenExpiryValue = (value) => {
 
   if (value instanceof Date) {
     const time = value.getTime();
-    return Number.isNaN(time) ? value : value.toISOString();
+    return Number.isNaN(time) ? value : time;
   }
 
   if (typeof value === 'number' && Number.isFinite(value)) {
-    if (value > 100000000000) return new Date(value).toISOString();
     return value;
   }
 
@@ -182,15 +181,12 @@ const normalizeGoogleTokenExpiryValue = (value) => {
     const trimmed = value.trim();
     if (/^\d+$/.test(trimmed)) {
       const numeric = Number(trimmed);
-      if (Number.isFinite(numeric) && numeric > 100000000000) {
-        return new Date(numeric).toISOString();
-      }
-      return value;
+      if (Number.isFinite(numeric)) return numeric;
     }
 
     const parsed = Date.parse(trimmed);
     if (!Number.isNaN(parsed)) {
-      return new Date(parsed).toISOString();
+      return parsed;
     }
   }
 
