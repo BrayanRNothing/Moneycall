@@ -52,6 +52,25 @@ const parseScope = (scope) => {
     return 'mine';
 };
 
+const isValidEmail = (email) => {
+    if (!email || typeof email !== 'string') return false;
+    const trimmed = email.trim();
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed);
+};
+
+const isGoogleAuthError = (error) => {
+    const msg = (error?.message || '').toLowerCase();
+    const dataError = (error?.response?.data?.error || '').toLowerCase();
+    const dataDesc = (error?.response?.data?.error_description || '').toLowerCase();
+    const combined = `${msg} ${dataError} ${dataDesc}`;
+
+    return (
+        combined.includes('invalid_grant') ||
+        combined.includes('token has been expired or revoked') ||
+        combined.includes('access_denied')
+    );
+};
+
 const CLIENT_STAGES = ['venta_ganada', 'cotizacion_realizada', 'contrato_firmado', 'esperando_pago', 'cliente_activo'];
 const NON_PROSPECT_STAGES = [...CLIENT_STAGES, 'perdido'];
 
@@ -1406,9 +1425,12 @@ router.post('/agendar-reunion', [auth, esVendedor], async (req, res) => {
 
                 const calendar = google.calendar({ version: 'v3', auth: client });
 
-                const attendeesList = [{ email: closerDetails.email }];
-                if (cliente.correo && cliente.correo.trim() !== '') {
-                    attendeesList.push({ email: cliente.correo });
+                const attendeesList = [];
+                if (isValidEmail(closerDetails.email)) {
+                    attendeesList.push({ email: closerDetails.email.trim() });
+                }
+                if (isValidEmail(cliente.correo)) {
+                    attendeesList.push({ email: cliente.correo.trim() });
                 }
 
                 const event = {
@@ -1471,7 +1493,7 @@ router.post('/agendar-reunion', [auth, esVendedor], async (req, res) => {
         });
     } catch (error) {
         console.error('Error al agendar reunión:', error);
-        res.status(500).json({ msg: 'Error del servidor' });
+        res.status(500).json({ msg: 'Error del servidor', error: error.message });
     }
 });
 
