@@ -1,383 +1,295 @@
-import React from 'react';
-import { 
-    BookOpen, 
-    Target, 
-    ListChecks,
-    BarChart3,
+import React, { useState } from 'react';
+import {
+    BookOpen,
+    Target,
     MessageCircleQuestion,
     PhoneOutgoing,
     Clock,
+    PieChart,
+    BarChart3,
     TrendingUp,
-    PieChart
+    ChevronLeft,
+    ChevronRight
 } from 'lucide-react';
 
 const ManualMetodologia = () => {
-    return (
-        <div className="flex-1 p-6 lg:p-10 overflow-y-auto bg-slate-50 relative hide-scrollbar pb-24">
-            <style>{`
-                .hide-scrollbar::-webkit-scrollbar { display: none; }
-                .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-            `}</style>
-            
-            {/* Header Principal */}
-            <div className="max-w-4xl mx-auto mb-8">
-                <div className="flex items-center gap-4 mb-3">
-                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-200">
-                        <BookOpen className="w-6 h-6" />
-                    </div>
-                    <div>
-                        <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">Metodología Moneycall</h1>
-                        <p className="text-xs md:text-sm font-semibold text-slate-500 mt-1">Guía Oficial del Sistema Proactivo de Ventas Recurrentes B2B</p>
-                    </div>
+    const [currentPage, setCurrentPage] = useState(0);
+
+    const pages = [
+        // 0: Portada
+        <div key="page-0" className="flex flex-col items-center justify-center h-full text-center px-4">
+            <div className="w-20 h-20 rounded-2xl bg-slate-900 flex items-center justify-center mb-8 shadow-sm">
+                <BookOpen className="w-10 h-10 text-white" strokeWidth={1} />
+            </div>
+            <h1 className="text-4xl sm:text-5xl font-light text-slate-900 tracking-tight mb-4">
+                Manual<span className="font-semibold">Operativo</span>
+            </h1>
+            <div className="h-px w-24 bg-slate-200 mb-8"></div>
+            <h2 className="text-sm font-medium text-slate-500 tracking-widest uppercase">
+                Sistema Moneycall
+            </h2>
+            <p className="text-slate-400 mt-6 max-w-sm font-light leading-relaxed mx-auto text-sm">
+                Ventas recurrentes B2B proactivas y controladas.
+            </p>
+        </div>,
+
+        // 1: Visión General
+        <div key="page-1" className="flex flex-col h-full justify-center px-4 sm:px-12 max-w-3xl mx-auto w-full">
+            <div className="mb-8">
+                <span className="text-xs font-semibold text-blue-500 tracking-widest uppercase mb-2 block">Fundamento</span>
+                <h2 className="text-3xl font-light text-slate-900">De reactivo a <span className="font-semibold">proactivo</span></h2>
+            </div>
+            <div className="space-y-6 text-slate-600 font-light leading-relaxed">
+                <p>
+                    La mayoría de las empresas operan respondiendo llamadas. El control lo tiene el cliente.
+                </p>
+                <p>
+                    El objetivo es tomar el control nutriendo una cartera exclusiva. <br/>
+                    <span className="text-slate-900 font-medium">Vender es obtener información escuchando, no proporcionarla.</span>
+                </p>
+                <div className="border-l border-slate-200 pl-6 text-slate-500 italic mt-8 text-sm">
+                    "El 20% de tus clientes genera el 80% de tus ingresos. Enfócate en desarrollar al otro 80%."
                 </div>
-                <div className="h-1 w-20 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full mt-4"></div>
+            </div>
+        </div>,
+
+        // 2: Diagnóstico
+        <div key="page-2" className="flex flex-col h-full justify-center px-4 sm:px-12 w-full">
+            <div className="mb-8">
+                <span className="text-xs font-semibold text-blue-500 tracking-widest uppercase mb-2 block">Paso 1</span>
+                <h2 className="text-3xl font-light text-slate-900">Llamada de <span className="font-semibold">Diagnóstico</span></h2>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 pr-2 pb-2">
+                {[
+                    { title: '¿Qué le gusta de nosotros?', desc: 'Identifica puntos fuertes y de valor.' },
+                    { title: '¿Qué le gusta de la competencia?', desc: 'Entiende las fortalezas de otros.' },
+                    { title: '¿Qué % compra con nosotros?', desc: 'Mide la participación (Share of Wallet).' },
+                    { title: '¿Qué le es difícil encontrar?', desc: 'Detecta desabastos o necesidades.' },
+                    { title: '¿En qué nicho le gustaría crecer?', desc: 'Mercados que no ha podido penetrar aún.' },
+                ].map((q, i) => (
+                    <div key={i} className="bg-slate-50 rounded-xl p-5 hover:bg-slate-100 transition-colors border border-transparent">
+                        <span className="text-slate-300 font-mono text-sm mb-3 block">0{i + 1}</span>
+                        <h4 className="font-medium text-slate-800 mb-2 text-sm">{q.title}</h4>
+                        <p className="text-slate-500 text-xs font-light">{q.desc}</p>
+                    </div>
+                ))}
+                <div className="bg-blue-50/50 rounded-xl p-5 border border-blue-100">
+                    <span className="text-blue-400 font-mono text-sm mb-3 block">TIP</span>
+                    <h4 className="font-medium text-blue-900 mb-2 text-sm">Profundizar a fondo</h4>
+                    <p className="text-blue-700/80 text-xs font-light">Pregunta "¿Qué más?" repetidamente hasta agotar respuestas.</p>
+                </div>
+            </div>
+        </div>,
+
+        // 3: Cuadrante de Ventas
+        <div key="page-3" className="flex flex-col h-full justify-center px-4 sm:px-12 max-w-4xl mx-auto w-full">
+            <div className="mb-10">
+                <span className="text-xs font-semibold text-blue-500 tracking-widest uppercase mb-2 block">Enfoque</span>
+                <h2 className="text-3xl font-light text-slate-900">Cuadrante de <span className="font-semibold">Ventas</span></h2>
+            </div>
+            <div className="grid sm:grid-cols-2 gap-6">
+                <div className="group border border-slate-100 rounded-2xl p-8 hover:border-slate-200 transition-colors bg-white">
+                    <div className="flex items-center justify-between mb-6">
+                        <span className="text-xs font-mono bg-slate-100 text-slate-600 px-2 py-1 rounded">S1</span>
+                        <Target className="w-5 h-5 text-slate-300 group-hover:text-blue-500 transition-colors" />
+                    </div>
+                    <h4 className="font-medium text-slate-900 text-lg mb-3">Actuales + Actuales</h4>
+                    <p className="text-slate-500 font-light text-sm leading-relaxed">
+                        Aumentar volumen o frecuencia de compra. Cierre con la Pregunta final.
+                    </p>
+                </div>
+                <div className="group border border-slate-100 rounded-2xl p-8 hover:border-slate-200 transition-colors bg-white">
+                    <div className="flex items-center justify-between mb-6">
+                        <span className="text-xs font-mono bg-slate-100 text-slate-600 px-2 py-1 rounded">S2</span>
+                        <PieChart className="w-5 h-5 text-slate-300 group-hover:text-blue-500 transition-colors" />
+                    </div>
+                    <h4 className="font-medium text-slate-900 text-lg mb-3">Actuales + Nuevos</h4>
+                    <p className="text-slate-500 font-light text-sm leading-relaxed">
+                        Descubrir proactivamente qué le compran a la competencia y ofrecérselos.
+                    </p>
+                </div>
+            </div>
+        </div>,
+
+        // 4: Pipeline de Cotizaciones
+        <div key="page-4" className="flex flex-col h-full justify-center px-4 sm:px-12 max-w-2xl mx-auto w-full">
+            <div className="mb-10">
+                <span className="text-xs font-semibold text-blue-500 tracking-widest uppercase mb-2 block">Proceso</span>
+                <h2 className="text-3xl font-light text-slate-900">Pipeline de <span className="font-semibold">Cotizaciones</span></h2>
+            </div>
+            <div className="space-y-8 relative before:absolute before:inset-0 before:ml-2 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-200 before:to-transparent">
+                {[
+                    { step: '1', title: 'Emitida', desc: 'Se genera y envía la cotización formal al cliente.' },
+                    { step: '2', title: 'F1 (24h)', desc: 'Seguimiento para confirmar recepción y agendar decisión.' },
+                    { step: '3', title: 'F2 (Cierre)', desc: 'Llamada en la fecha acordada para cerrar la venta.' }
+                ].map((item, i) => (
+                    <div key={i} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                        <div className="flex items-center justify-center w-5 h-5 rounded-full border-2 border-white bg-slate-200 group-hover:bg-blue-500 text-slate-500 shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 transition-colors"></div>
+                        <div className="w-[calc(100%-2rem)] md:w-[calc(50%-1.5rem)] p-4 rounded-xl border border-slate-100 bg-white shadow-sm">
+                            <div className="flex items-center justify-between mb-1">
+                                <h4 className="font-medium text-slate-900 text-sm">{item.title}</h4>
+                            </div>
+                            <p className="text-slate-500 text-xs font-light">{item.desc}</p>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>,
+
+        // 5: Nomenclatura (I)
+        <div key="page-5" className="flex flex-col h-full justify-center px-4 sm:px-12 w-full max-w-4xl mx-auto">
+            <div className="mb-10">
+                <span className="text-xs font-semibold text-blue-500 tracking-widest uppercase mb-2 block">Glosario</span>
+                <h2 className="text-3xl font-light text-slate-900">Nomenclatura <span className="font-semibold">Comercial</span></h2>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-6">
+                {[
+                    { id: 'S1', title: 'Recuperación', desc: 'Inactivos >45 días. Recupéralos.' },
+                    { id: 'S2', title: 'Venta Cruzada', desc: 'Productos complementarios.' },
+                    { id: 'F1', title: '1er Seguimiento', desc: 'Primeras 24h post-cotización.' },
+                    { id: 'F2', title: '2do Seguimiento', desc: 'Llamada de cierre definitivo.' },
+                ].map((call, idx) => (
+                    <div key={idx} className="flex gap-4 items-start pb-4 border-b border-slate-100 last:border-0 sm:last:border-b sm:[&:nth-last-child(-n+2)]:border-0">
+                        <span className="font-mono text-xs font-medium text-slate-400 w-6 pt-0.5">{call.id}</span>
+                        <div>
+                            <h4 className="font-medium text-slate-900 text-sm mb-1">{call.title}</h4>
+                            <p className="text-slate-500 text-xs font-light">{call.desc}</p>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>,
+
+        // 6: Nomenclatura (II)
+        <div key="page-6" className="flex flex-col h-full justify-center px-4 sm:px-12 w-full max-w-4xl mx-auto">
+            <div className="mb-10">
+                <span className="text-xs font-semibold text-blue-500 tracking-widest uppercase mb-2 block">Glosario</span>
+                <h2 className="text-3xl font-light text-slate-900">Nomenclatura <span className="font-semibold">Relacional</span></h2>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-6">
+                {[
+                    { id: 'DC', title: 'Delivery Check', desc: 'Confirma que la entrega fue perfecta.' },
+                    { id: 'RC', title: 'Referencia', desc: 'Pide referido tras 10 DCs perfectas.' },
+                    { id: 'PT', title: 'Contacto Personal', desc: 'Relación 100% sin agenda comercial.' },
+                    { id: 'IN', title: 'Entrante', desc: 'Cliente inicia. Intentar un S2.' }
+                ].map((call, idx) => (
+                    <div key={idx} className="flex gap-4 items-start pb-4 border-b border-slate-100 last:border-0 sm:last:border-b sm:[&:nth-last-child(-n+2)]:border-0">
+                        <span className="font-mono text-xs font-medium text-slate-400 w-6 pt-0.5">{call.id}</span>
+                        <div>
+                            <h4 className="font-medium text-slate-900 text-sm mb-1">{call.title}</h4>
+                            <p className="text-slate-500 text-xs font-light">{call.desc}</p>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>,
+
+        // 7: Cierre & Métricas
+        <div key="page-7" className="flex flex-col h-full justify-center px-4 sm:px-12 w-full max-w-3xl mx-auto">
+            <div className="mb-12">
+                <h2 className="text-2xl font-light text-slate-900 mb-6">La pregunta <span className="font-semibold">definitiva</span></h2>
+                <div className="pl-6 border-l-2 border-blue-500">
+                    <p className="text-xl font-light text-slate-700 italic leading-relaxed">
+                        "¿Qué más le resulta difícil encontrar hoy en día que yo pueda localizar para usted?"
+                    </p>
+                </div>
             </div>
 
-            <div className="max-w-4xl mx-auto space-y-8">
-
-                {/* Sección 1: Visión General */}
-                <section className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-xs">
-                    <div className="flex items-center gap-3 mb-5">
-                        <Target className="w-5.5 h-5.5 text-blue-600" />
-                        <h2 className="text-lg font-black text-slate-800">1. De Reactivo a Proactivo</h2>
+            <div className="pt-8 border-t border-slate-100">
+                <h3 className="text-sm font-medium text-slate-900 mb-6 uppercase tracking-widest">Métricas Clave</h3>
+                <div className="grid grid-cols-2 gap-8">
+                    <div>
+                        <div className="text-2xl font-light text-slate-900 mb-1">20-30</div>
+                        <div className="text-xs text-slate-500 font-light">Llamadas proactivas / día</div>
                     </div>
-                    <div className="text-slate-600 leading-relaxed text-xs sm:text-sm space-y-4 font-medium">
-                        <p>
-                          En la industria de distribución B2B, la mayoría de las empresas operan de manera <strong>reactiva</strong>, esperando a que el cliente llame. Los datos demuestran que en estos entornos, entre el 93% y el 99% de las interacciones son llamadas entrantes, lo que deja el control comercial en manos del cliente.
-                        </p>
-                        <p>
-                          La metodología <strong>Moneycall</strong> propone cambiar esto radicalmente hacia una <strong>proactividad controlada</strong>. El objetivo del asesor no es hacer marketing masivo o prospección en frío, sino <strong>desarrollar y recuperar a la base de clientes actual</strong>.
-                        </p>
-                        <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4 text-blue-800 italic font-semibold my-2">
-                          "La regla del 80/20: El 20% de tus clientes ya genera el 80% de tus ingresos. Moneycall se enfoca proactivamente en el restante 80% de los clientes registrados que compran de forma irregular o le compran más a la competencia."
-                        </div>
+                    <div>
+                        <div className="text-2xl font-light text-slate-900 mb-1">20-25%</div>
+                        <div className="text-xs text-slate-500 font-light">Tasa de cierre esperada</div>
                     </div>
-                </section>
+                </div>
+            </div>
+        </div>,
 
-                {/* Sección 2: Las 5 Preguntas Clave */}
-                <section className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-xs">
-                    <div className="flex items-center gap-3 mb-5">
-                        <MessageCircleQuestion className="w-5.5 h-5.5 text-emerald-600" />
-                        <h2 className="text-lg font-black text-slate-800">2. Las 5 Preguntas Clave (Llamada de Diagnóstico)</h2>
+        // 8: Fin
+        <div key="page-8" className="flex flex-col items-center justify-center h-full text-center px-4">
+            <div className="w-16 h-16 rounded-full border border-slate-100 bg-white flex items-center justify-center mb-6 shadow-sm">
+                <Target className="w-6 h-6 text-slate-400" strokeWidth={1} />
+            </div>
+            <h1 className="text-2xl font-light text-slate-900 tracking-tight mb-2">
+                Fin del Manual
+            </h1>
+            <h2 className="text-xs font-medium text-slate-400 tracking-widest uppercase mt-4">
+                Estás listo para comenzar
+            </h2>
+        </div>
+    ];
+
+    const handleNext = () => {
+        if (currentPage < pages.length - 1) {
+            setCurrentPage(currentPage + 1);
+        }
+    };
+
+    const handlePrev = () => {
+        if (currentPage > 0) {
+            setCurrentPage(currentPage - 1);
+        }
+    };
+
+    return (
+        <div className="flex-1 bg-[#FAFAFA] h-[calc(100vh-64px)] flex items-center justify-center p-4 sm:p-8 overflow-hidden relative">
+            <div className="w-full max-w-4xl h-full max-h-[700px] bg-white rounded-2xl shadow-sm border border-slate-200/60 overflow-hidden flex flex-col relative">
+                
+                {/* Main Content Area */}
+                <div className="flex-1 overflow-x-hidden overflow-y-auto bg-white flex flex-col relative w-full">
+                    <div className="min-h-full w-full flex flex-col justify-center py-8">
+                        {pages[currentPage]}
                     </div>
-                    <p className="text-xs sm:text-sm text-slate-600 mb-6 font-medium">
-                        La primera llamada (S1) con cada cliente es una <strong>entrevista de diagnóstico inicial</strong>. El objetivo único es escuchar activamente, no vender un producto en ese instante:
-                    </p>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="bg-emerald-50/50 border border-emerald-100 p-4 rounded-2xl flex gap-3">
-                            <span className="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-800 font-extrabold flex items-center justify-center text-xs shrink-0 mt-0.5">1</span>
-                            <div>
-                                <h4 className="font-extrabold text-slate-800 text-xs">¿Qué le gusta de hacer negocios con nosotros?</h4>
-                                <p className="text-[10px] text-slate-500 mt-1 leading-snug">Identifica los puntos fuertes y de valor para retener al cliente.</p>
-                            </div>
-                        </div>
-                        <div className="bg-emerald-50/50 border border-emerald-100 p-4 rounded-2xl flex gap-3">
-                            <span className="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-800 font-extrabold flex items-center justify-center text-xs shrink-0 mt-0.5">2</span>
-                            <div>
-                                <h4 className="font-extrabold text-slate-800 text-xs">¿Qué le gusta de hacer negocios con la competencia?</h4>
-                                <p className="text-[10px] text-slate-500 mt-1 leading-snug">Entiende las fortalezas de otros proveedores para reaccionar.</p>
-                            </div>
-                        </div>
-                        <div className="bg-emerald-50/50 border border-emerald-100 p-4 rounded-2xl flex gap-3">
-                            <span className="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-800 font-extrabold flex items-center justify-center text-xs shrink-0 mt-0.5">3</span>
-                            <div>
-                                <h4 className="font-extrabold text-slate-800 text-xs">¿Qué porcentaje de lo que compra nos lo compra a nosotros?</h4>
-                                <p className="text-[10px] text-slate-500 mt-1 leading-snug">Mide la participación de mercado de la cuenta (Share of Wallet).</p>
-                            </div>
-                        </div>
-                        <div className="bg-emerald-50/50 border border-emerald-100 p-4 rounded-2xl flex gap-3">
-                            <span className="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-800 font-extrabold flex items-center justify-center text-xs shrink-0 mt-0.5">4</span>
-                            <div>
-                                <h4 className="font-extrabold text-slate-800 text-xs">¿Qué le resulta difícil encontrar últimamente?</h4>
-                                <p className="text-[10px] text-slate-500 mt-1 leading-snug">Detecta desabastos o necesidades insatisfechas que puedas cubrir.</p>
-                            </div>
-                        </div>
-                        <div className="bg-emerald-50/50 border border-emerald-100 p-4 rounded-2xl flex gap-3 md:col-span-2">
-                            <span className="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-800 font-extrabold flex items-center justify-center text-xs shrink-0 mt-0.5">5</span>
-                            <div>
-                                <h4 className="font-extrabold text-slate-800 text-xs">¿En qué segmento de mercado le gustaría crecer y no ha podido?</h4>
-                                <p className="text-[10px] text-slate-500 mt-1 leading-snug">Posiciona a tu empresa como un aliado estratégico enfocado en su crecimiento comercial.</p>
-                            </div>
-                        </div>
+                </div>
+
+                {/* Footer Controls */}
+                <div className="h-16 px-6 sm:px-8 flex items-center justify-between border-t border-slate-100 bg-white z-10 shrink-0">
+                    <button 
+                        onClick={handlePrev}
+                        disabled={currentPage === 0}
+                        className={`flex items-center gap-2 text-sm font-medium transition-colors ${
+                            currentPage === 0 
+                            ? 'text-slate-300 cursor-not-allowed opacity-50' 
+                            : 'text-slate-500 hover:text-slate-900'
+                        }`}
+                    >
+                        <ChevronLeft className="w-4 h-4" />
+                        <span className="hidden sm:inline">Anterior</span>
+                    </button>
+
+                    <div className="flex gap-1.5 items-center">
+                        {pages.map((_, idx) => (
+                            <div 
+                                key={idx} 
+                                className={`h-1.5 rounded-full transition-all duration-300 ${
+                                    idx === currentPage ? 'w-4 bg-slate-800' : 'w-1.5 bg-slate-200'
+                                }`}
+                            />
+                        ))}
                     </div>
-                </section>
 
-                {/* Sección 3: El Cuadrante de Ventas (Nomenclaturas) */}
-                <section className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-xs">
-                    <div className="flex items-center gap-3 mb-5">
-                        <PieChart className="w-5.5 h-5.5 text-amber-500" />
-                        <h2 className="text-lg font-black text-slate-800">3. El Cuadrante de Ventas (Nomenclaturas)</h2>
-                    </div>
-                    <p className="text-xs sm:text-sm text-slate-600 mb-6 font-medium">
-                        Todo seguimiento y llamada se clasifica utilizando el <strong>Cuadrante de Ventas</strong>. En la etapa inicial del sistema Moneycall, <strong>solo nos enfocamos en el Cuadrante 1 y 2</strong> (Clientes actuales), nunca prospectamos clientes nuevos (Cuadrantes 3 y 4).
-                    </p>
-                    <div className="space-y-4">
-                        <div className="border border-slate-200 rounded-2xl p-5 hover:border-amber-300 transition-colors bg-white">
-                            <div className="flex items-center gap-2 mb-2 flex-wrap">
-                                <span className="bg-amber-100 text-amber-800 font-extrabold px-2.5 py-0.5 rounded-lg text-[10px] tracking-wider uppercase">S1 (Cuadrante 1)</span>
-                                <h4 className="font-bold text-slate-800 text-xs sm:text-sm">Clientes Actuales + Productos Actuales</h4>
-                            </div>
-                            <p className="text-xs text-slate-600 leading-normal font-medium">
-                                Clientes que compran actualmente lo que ya les vendemos. El objetivo es que compren con mayor volumen o frecuencia. Se cierra la llamada con la pregunta de McDonald's: <span className="italic text-slate-700">"¿Qué más le apetece añadir a su pedido hoy?"</span>.
-                            </p>
-                        </div>
-
-                        <div className="border border-slate-200 rounded-2xl p-5 hover:border-amber-300 transition-colors bg-white">
-                            <div className="flex items-center gap-2 mb-2 flex-wrap">
-                                <span className="bg-amber-100 text-amber-800 font-extrabold px-2.5 py-0.5 rounded-lg text-[10px] tracking-wider uppercase">S2 (Cuadrante 2)</span>
-                                <h4 className="font-bold text-slate-800 text-xs sm:text-sm">Clientes Actuales + Productos NUEVOS</h4>
-                            </div>
-                            <p className="text-xs text-slate-600 leading-normal font-medium">
-                                Clientes de nuestra base de datos pero que le compran ciertos productos a la competencia. El objetivo es descubrir qué productos les faltan (usando la información de las 5 Preguntas Clave) y ofrecérselos para ganar esa cuota de mercado.
-                            </p>
-                        </div>
-                        
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2 opacity-50">
-                            <div className="border border-slate-200 border-dashed rounded-2xl p-4 bg-slate-50">
-                                <span className="text-slate-500 font-bold text-xs">S3 (Cuadrante 3)</span>
-                                <p className="text-[10px] text-slate-400 mt-1 font-medium">Clientes Nuevos + Prod. Actuales (Prospección pura, no aplica inicialmente)</p>
-                            </div>
-                            <div className="border border-slate-200 border-dashed rounded-2xl p-4 bg-slate-50">
-                                <span className="text-slate-500 font-bold text-xs">S4 (Cuadrante 4)</span>
-                                <p className="text-[10px] text-slate-400 mt-1 font-medium">Clientes Nuevos + Prod. Nuevos (No aplica a nuestro modelo)</p>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                {/* Sección 4: El Pipeline de Cotizaciones */}
-                <section className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-xs">
-                    <div className="flex items-center gap-3 mb-4">
-                        <Clock className="w-5.5 h-5.5 text-amber-500" />
-                        <h2 className="text-lg font-black text-slate-800">4. El Pipeline de Cotizaciones</h2>
-                    </div>
-                    <p className="text-xs sm:text-sm text-slate-600 leading-normal font-medium mb-6">
-                        En la metodología Moneycall, <strong>ninguna cotización se envía sin darle seguimiento absoluto</strong>. El flujo de estados se controla rigurosamente:
-                    </p>
-                    
-                    {/* Flujo de Estados Visualizado */}
-                    <div className="flex items-center gap-2.5 pt-2 flex-wrap text-slate-600 bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                        <div className="px-3 py-2 rounded-xl border border-slate-200 text-[10px] font-extrabold text-slate-700 bg-white shadow-xs">
-                            📝 Cotización Emitida
-                        </div>
-                        <span className="text-slate-400 font-bold text-xs shrink-0">➔</span>
-                        <div className="px-3 py-2 rounded-xl border border-amber-200 text-[10px] font-extrabold text-amber-700 bg-amber-50/50 shadow-xs">
-                            🕒 F1 (Primer Seguimiento a las 24h)
-                        </div>
-                        <span className="text-slate-400 font-bold text-xs shrink-0">➔</span>
-                        <div className="px-3 py-2 rounded-xl border border-pink-200 text-[10px] font-extrabold text-pink-700 bg-pink-50/50 shadow-xs">
-                            ⌛ F2 (Segundo Seguimiento / Cierre)
-                        </div>
-                        <span className="text-slate-400 font-bold text-xs shrink-0">➔</span>
-                        <div className="px-3 py-2 rounded-xl border border-emerald-200 text-[10px] font-extrabold text-emerald-700 bg-emerald-50/50 shadow-xs">
-                            🏆 Venta Ganada / Perdida
-                        </div>
-                    </div>
-                </section>
-
-                {/* Sección 5: Tipos de Llamadas (Nomenclatura) */}
-                <section className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-xs">
-                    <div className="flex items-center gap-3 mb-5">
-                        <PhoneOutgoing className="w-5.5 h-5.5 text-indigo-600" />
-                        <h2 className="text-lg font-black text-slate-800">5. Tipos de Llamadas (Nomenclatura de Procesos)</h2>
-                    </div>
-                    <p className="text-xs sm:text-sm text-slate-600 mb-6 font-medium">
-                        Todas las llamadas e interacciones del CRM deben registrarse bajo la nomenclatura estricta de la metodología para mantener consistencia métrica:
-                    </p>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        
-                        {/* Card S1 */}
-                        <div className="bg-white border border-slate-200 rounded-2xl p-4 flex gap-3 shadow-xs hover:border-slate-300 transition-colors">
-                          <div className="w-9 h-9 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center shrink-0 font-bold text-base">
-                            📞
-                          </div>
-                          <div className="flex-1 min-w-0 space-y-1.5">
-                            <h4 className="text-xs font-extrabold text-blue-600">S1 - Cuadrante de Recuperación</h4>
-                            <p className="text-[10px] text-slate-500 leading-relaxed font-medium">
-                              Clientes inactivos en ciertos productos por más de 45 días.
-                            </p>
-                            <div className="px-2.5 py-1 bg-amber-50 border border-amber-100 rounded-lg text-[9px] text-slate-600 font-semibold">
-                              🔑 Llama para averiguar por qué dejaron de comprar y recupera el negocio.
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Card S2 */}
-                        <div className="bg-white border border-slate-200 rounded-2xl p-4 flex gap-3 shadow-xs hover:border-slate-300 transition-colors">
-                          <div className="w-9 h-9 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center shrink-0 font-bold text-base">
-                            ⚡
-                          </div>
-                          <div className="flex-1 min-w-0 space-y-1.5">
-                            <h4 className="text-xs font-extrabold text-indigo-600">S2 - Venta Cruzada</h4>
-                            <p className="text-[10px] text-slate-500 leading-relaxed font-medium">
-                              Ofrecer productos complementarios basados en compras de clientes similares.
-                            </p>
-                            <div className="px-2.5 py-1 bg-amber-50 border border-amber-100 rounded-lg text-[9px] text-slate-600 font-semibold">
-                              🔑 Aumenta el ticket promedio con sugerencias relevantes al negocio del cliente.
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Card F1 */}
-                        <div className="bg-white border border-slate-200 rounded-2xl p-4 flex gap-3 shadow-xs hover:border-slate-300 transition-colors">
-                          <div className="w-9 h-9 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center shrink-0 font-bold text-base">
-                            🕒
-                          </div>
-                          <div className="flex-1 min-w-0 space-y-1.5">
-                            <h4 className="text-xs font-extrabold text-amber-600">F1 - Primer Seguimiento</h4>
-                            <p className="text-[10px] text-slate-500 leading-relaxed font-medium">
-                              Llamada obligatoria post-cotización dentro de las primeras 24 horas (cobertura 100%).
-                            </p>
-                            <div className="px-2.5 py-1 bg-amber-50 border border-amber-100 rounded-lg text-[9px] text-slate-600 font-semibold">
-                              🔑 No dejes cotizaciones sueltas. En esta llamada se fija la fecha F2 de decisión.
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Card F2 */}
-                        <div className="bg-white border border-slate-200 rounded-2xl p-4 flex gap-3 shadow-xs hover:border-slate-300 transition-colors">
-                          <div className="w-9 h-9 rounded-xl bg-pink-100 text-pink-600 flex items-center justify-center shrink-0 font-bold text-base">
-                            ⌛
-                          </div>
-                          <div className="flex-1 min-w-0 space-y-1.5">
-                            <h4 className="text-xs font-extrabold text-pink-600">F2 - Segundo Seguimiento</h4>
-                            <p className="text-[10px] text-slate-500 leading-relaxed font-medium">
-                              Llamada de cierre basada exactamente en la fecha de decisión acordada en F1.
-                            </p>
-                            <div className="px-2.5 py-1 bg-amber-50 border border-amber-100 rounded-lg text-[9px] text-slate-600 font-semibold">
-                              🔑 El 40% restante de las ventas se cierra aquí. ¡Llama puntual en la fecha acordada!
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Card DC */}
-                        <div className="bg-white border border-slate-200 rounded-2xl p-4 flex gap-3 shadow-xs hover:border-slate-300 transition-colors">
-                          <div className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0 font-bold text-base">
-                            🚚
-                          </div>
-                          <div className="flex-1 min-w-0 space-y-1.5">
-                            <h4 className="text-xs font-extrabold text-emerald-600">DC - Delivery Check</h4>
-                            <p className="text-[10px] text-slate-500 leading-relaxed font-medium">
-                              Llamada de servicio para confirmar satisfacción en la entrega física del pedido.
-                            </p>
-                            <div className="px-2.5 py-1 bg-amber-50 border border-amber-100 rounded-lg text-[9px] text-slate-600 font-semibold">
-                              💡 Asegura que el cliente recibió todo bien. Si acumulas 10 DCs perfectas, puedes pedir RC.
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Card RC */}
-                        <div className="bg-white border border-slate-200 rounded-2xl p-4 flex gap-3 shadow-xs hover:border-slate-300 transition-colors">
-                          <div className="w-9 h-9 rounded-xl bg-amber-100 text-amber-500 flex items-center justify-center shrink-0 font-bold text-base">
-                            ⭐
-                          </div>
-                          <div className="flex-1 min-w-0 space-y-1.5">
-                            <h4 className="text-xs font-extrabold text-amber-500">RC - Referencia / Testimonio</h4>
-                            <p className="text-[10px] text-slate-500 leading-relaxed font-medium">
-                              Pedir un referido o un testimonio en video/texto para mercadotecnia.
-                            </p>
-                            <div className="px-2.5 py-1 bg-amber-50 border border-amber-100 rounded-lg text-[9px] text-slate-600 font-semibold">
-                              💡 Solo se pide después de 10 entregas perfectas. Inicia pidiendo video (Plan A).
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Card PT */}
-                        <div className="bg-white border border-slate-200 rounded-2xl p-4 flex gap-3 shadow-xs hover:border-slate-300 transition-colors">
-                          <div className="w-9 h-9 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center shrink-0 font-bold text-base">
-                            ♡
-                          </div>
-                          <div className="flex-1 min-w-0 space-y-1.5">
-                            <h4 className="text-xs font-extrabold text-slate-600">PT - Contacto Personal</h4>
-                            <p className="text-[10px] text-slate-500 leading-relaxed font-medium">
-                              Llamada de mantenimiento de relación, 100% libre de agenda comercial.
-                            </p>
-                            <div className="px-2.5 py-1 bg-amber-50 border border-amber-100 rounded-lg text-[9px] text-slate-600 font-semibold">
-                              💡 Meta: 1 por cliente al trimestre. Mantén la relación cálida ("Solo quería saludarte").
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Card IN */}
-                        <div className="bg-white border border-slate-200 rounded-2xl p-4 flex gap-3 shadow-xs hover:border-slate-300 transition-colors">
-                          <div className="w-9 h-9 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center shrink-0 font-bold text-base">
-                            📞
-                          </div>
-                          <div className="flex-1 min-w-0 space-y-1.5">
-                            <h4 className="text-xs font-extrabold text-slate-600">IN - Entrante (Reactiva)</h4>
-                            <p className="text-[10px] text-slate-500 leading-relaxed font-medium">
-                              El cliente inicia la llamada por dudas, compras o soporte reactivo.
-                            </p>
-                            <div className="px-2.5 py-1 bg-amber-50 border border-amber-100 rounded-lg text-[9px] text-slate-600 font-semibold">
-                              💡 Resuelve su duda, y antes de colgar realiza siempre venta cruzada (S2) o pregunta de McDonald's.
-                            </div>
-                          </div>
-                        </div>
-
-                      </div>
-                </section>
-
-                {/* Sección 6: El Secreto McDonald's */}
-                <section className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-xs">
-                    <div className="flex items-center gap-3 mb-5">
-                        <span className="text-xl">🍔</span>
-                        <h2 className="text-lg font-black text-slate-800">6. La Pregunta McDonald's</h2>
-                    </div>
-                    <div className="text-slate-600 leading-relaxed text-xs sm:text-sm space-y-4 font-medium">
-                        <p>
-                          Al terminar cualquier interacción B2B, es mandatorio que el asesor proactivo realice la pregunta de cierre de diagnóstico secundario:
-                        </p>
-                        <div className="bg-indigo-50 border border-indigo-100 rounded-2xl p-4 text-indigo-800 font-black text-center text-sm md:text-base my-2">
-                          "¿Qué más le resulta difícil encontrar hoy en día que yo pueda localizar para usted?"
-                        </div>
-                        <p>
-                          Esta simple frase desencadena que el cliente recuerde compras de baja rotación o productos complejos que asumía que no distribuías, abriendo oportunidades directas de venta inmediata.
-                        </p>
-                    </div>
-                </section>
-
-                {/* Sección 7: KPIs del Sistema */}
-                <section className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-xs">
-                    <div className="flex items-center gap-3 mb-5">
-                        <BarChart3 className="w-5.5 h-5.5 text-blue-600" />
-                        <h2 className="text-lg font-black text-slate-800">7. Indicadores Clave de Rendimiento (KPIs)</h2>
-                    </div>
-                    <div className="space-y-4">
-                        <div className="flex gap-3 items-start">
-                            <span className="w-2 h-2 rounded-full bg-blue-500 shrink-0 mt-2"></span>
-                            <div>
-                                <h4 className="text-xs md:text-sm font-extrabold text-slate-800">Volumen Proactivo Diario</h4>
-                                <p className="text-[11px] text-slate-600 mt-0.5 font-medium">Meta: 20 a 30 llamadas proactivas (S1 / S2) al día por vendedor. El ratio del departamento debe ser del 80% salientes y 20% entrantes.</p>
-                            </div>
-                        </div>
-                        <div className="flex gap-3 items-start">
-                            <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0 mt-2"></span>
-                            <div>
-                                <h4 className="text-xs md:text-sm font-extrabold text-slate-800">Generación de Oportunidades</h4>
-                                <p className="text-[11px] text-slate-600 mt-0.5 font-medium">Meta: Al menos el 50% de las llamadas proactivas S1/S2 deben resultar en una cotización solicitada.</p>
-                            </div>
-                        </div>
-                        <div className="flex gap-3 items-start">
-                            <span className="w-2 h-2 rounded-full bg-pink-500 shrink-0 mt-2"></span>
-                            <div>
-                                <h4 className="text-xs md:text-sm font-extrabold text-slate-800">Seguimiento de Pipeline (F1/F2)</h4>
-                                <p className="text-[11px] text-slate-600 mt-0.5 font-medium">Meta: Cobertura del 100% de las cotizaciones emitidas con llamada F1 (a las 24 horas) y al menos el 50% de llamadas F2 de cierre.</p>
-                            </div>
-                        </div>
-                        <div className="flex gap-3 items-start">
-                            <span className="w-2 h-2 rounded-full bg-indigo-500 shrink-0 mt-2"></span>
-                            <div>
-                                <h4 className="text-xs md:text-sm font-extrabold text-slate-800">Tasa de Cierre Comercial</h4>
-                                <p className="text-[11px] text-slate-600 mt-0.5 font-medium">Meta: Al menos el 20% a 25% de todas las cotizaciones emitidas deben ser cerradas como Ganadas.</p>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
+                    <button 
+                        onClick={handleNext}
+                        disabled={currentPage === pages.length - 1}
+                        className={`flex items-center gap-2 text-sm font-medium transition-colors ${
+                            currentPage === pages.length - 1 
+                            ? 'text-slate-300 cursor-not-allowed opacity-50' 
+                            : 'text-slate-500 hover:text-slate-900'
+                        }`}
+                    >
+                        <span className="hidden sm:inline">Siguiente</span>
+                        <ChevronRight className="w-4 h-4" />
+                    </button>
+                </div>
             </div>
         </div>
     );
 };
 
 export default ManualMetodologia;
+

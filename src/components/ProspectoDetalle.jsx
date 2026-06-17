@@ -14,6 +14,7 @@ import TimeWheelPicker from './TimeWheelPicker';
 import HistorialInteracciones from './HistorialInteracciones';
 import PlantillasMensajesModal from './PlantillasMensajesModal';
 import GmailIcon from '../assets/google-gmail-svgrepo-com.svg';
+import { useBotStore } from '../store/useBotStore';
 
 const ETAPAS_EMBUDO = {
     'prospecto_nuevo': { label: 'Sin contacto', color: 'bg-red-100 text-red-600' },
@@ -70,6 +71,7 @@ export default function ProspectoDetalle({
 }) {
     const navigate = useNavigate();
     const calendarRolePath = getCalendarRolePath();
+    const { currentStep, botActions } = useBotStore();
 
     const [prospectoSeleccionado, setProspectoSeleccionado] = useState(initialProspecto);
     const pid = prospectoSeleccionado?.id || prospectoSeleccionado?._id;
@@ -104,6 +106,30 @@ export default function ProspectoDetalle({
     const [valorProspecto, setValorProspecto] = useState(initialProspecto?.customMetricValue || '');
     const [guardandoMetrica, setGuardandoMetrica] = useState(false);
 
+    useEffect(() => {
+        if (modalAccionesCierreAbierto && currentStep?.id === 'tour_detail_cierre') {
+            if (botActions?.stepTourDetailCierreOptions) {
+                botActions.stepTourDetailCierreOptions();
+            }
+        }
+    }, [modalAccionesCierreAbierto, currentStep, botActions]);
+
+    useEffect(() => {
+        if (!modalAccionesCierreAbierto && currentStep?.id === 'tour_detail_cierre_options') {
+            if (botActions?.stepContactMethod) {
+                botActions.stepContactMethod();
+            }
+        }
+    }, [modalAccionesCierreAbierto, currentStep, botActions]);
+
+    // Bot: avanza cuando el modal de llamada se cierra durante el tutorial
+    useEffect(() => {
+        if (llamadaFlow === null && (currentStep?.id === 'call_modal_contesto' || currentStep?.id === 'call_opciones_contesto' || currentStep?.id === 'call_ask_close')) {
+            botActions?.stepCallRegistrationDone?.();
+        }
+    }, [llamadaFlow, currentStep, botActions]);
+
+
     const parseSafeArray = (val) => {
         if (Array.isArray(val)) return val;
         if (typeof val === 'string' && val.trim()) {
@@ -125,9 +151,16 @@ export default function ProspectoDetalle({
     }, [prospectoSeleccionado?.telefono, prospectoSeleccionado?.telefono2]);
 
     const telefonoWhatsApp = telefonosContacto[0] || '';
-    const correoContacto = (prospectoSeleccionado?.correo || '').trim();
+    const correosContacto = useMemo(() => {
+        return (prospectoSeleccionado?.correo || '')
+            .split(',')
+            .map((e) => e.trim())
+            .filter(Boolean);
+    }, [prospectoSeleccionado?.correo]);
+
     const tieneWhatsApp = Boolean(telefonoWhatsApp);
-    const tieneCorreo = Boolean(correoContacto);
+    const tieneCorreo = correosContacto.length > 0;
+    const correoPrincipal = correosContacto[0] || '';
 
     // Solo actualizar estado local al recibir nuevos datos
     useEffect(() => {
@@ -771,7 +804,7 @@ export default function ProspectoDetalle({
 
                                     {/* Derecha: Interés + Cierre */}
                                     <div className="flex flex-col items-end gap-2">
-                                        <div className="flex items-center gap-2 py-1">
+                                        <div id="detalle-prospecto-interes" className="flex items-center gap-2 py-1">
                                             <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Interés:</span>
                                             <div className="flex items-center gap-0.5 text-yellow-500">
                                                 {[1, 2, 3, 4, 5].map((value) => (
@@ -788,6 +821,7 @@ export default function ProspectoDetalle({
                                             </div>
                                         </div>
                                         <button
+                                            id="detalle-prospecto-cierre"
                                             onClick={() => setModalAccionesCierreAbierto(true)}
                                             className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 hover:bg-slate-100 text-slate-600 rounded-lg text-[10px] font-extrabold uppercase tracking-widest transition-all border border-slate-200"
                                         >
@@ -828,9 +862,14 @@ export default function ProspectoDetalle({
                                                 </div>
                                                 <div className="flex flex-col overflow-hidden">
                                                     <span className="text-[9px] uppercase tracking-wider font-extrabold text-slate-400 leading-none mb-0.5">Correo</span>
-                                                    <span className="text-xs font-bold text-slate-700 truncate" title={correoContacto}>
-                                                        {correoContacto}
-                                                    </span>
+                                                    <div className="flex flex-wrap text-xs font-bold text-slate-700 truncate" title={correosContacto.join(', ')}>
+                                                        {correosContacto.slice(0, 1).map((e, idx) => (
+                                                            <span key={idx}>{e}</span>
+                                                        ))}
+                                                        {correosContacto.length > 1 && (
+                                                            <span className="ml-1 text-slate-400 text-[10px]">...</span>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </div>
                                         )}
@@ -886,7 +925,7 @@ export default function ProspectoDetalle({
                                         )}
 
                                         {/* Botones de acción — siempre al final derecho */}
-                                        <div className="ml-auto flex items-center gap-2 shrink-0">
+                                        <div id="detalle-prospecto-contacto-rapido" className="ml-auto flex items-center gap-2 shrink-0">
                                             <PlantillasMensajesModal contacto={prospectoSeleccionado} scope="prospecto" />
 
                                             <a
@@ -904,11 +943,11 @@ export default function ProspectoDetalle({
                                             </a>
 
                                             <a
-                                                href={tieneCorreo ? `mailto:${correoContacto}` : undefined}
+                                                href={tieneCorreo ? `mailto:${correoPrincipal}` : undefined}
                                                 aria-disabled={!tieneCorreo}
                                                 onClick={!tieneCorreo ? (e) => e.preventDefault() : undefined}
                                                 className={`h-8 w-8 inline-flex items-center justify-center rounded-md transition-colors shadow-xs ring-1 ${tieneCorreo ? 'bg-slate-50 hover:bg-slate-100 ring-slate-200' : 'bg-slate-100 ring-slate-200 cursor-not-allowed opacity-60'}`}
-                                                title={tieneCorreo ? 'Enviar correo por Gmail' : 'No hay correo para Gmail'}
+                                                title={tieneCorreo ? `Enviar correo por Gmail a ${correoPrincipal} (Total: ${correosContacto.length})` : 'No hay correo para Gmail'}
                                             >
                                                 <img src={GmailIcon} alt="Gmail" className={`w-4.5 h-4.5 object-contain ${tieneCorreo ? '' : 'grayscale opacity-60'}`} />
                                             </a>
@@ -919,7 +958,7 @@ export default function ProspectoDetalle({
                         </div>
 
                         {/* Estadísticas de Seguimiento */}
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <div id="detalle-prospecto-metricas" className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                             {/* Cuadro 1: Antigüedad */}
                             <div className="bg-white border border-slate-200 rounded-xl p-4 text-center shadow-sm flex flex-col justify-center">
                                 <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Antigüedad</p>
@@ -956,7 +995,7 @@ export default function ProspectoDetalle({
                             </div>
 
                             {/* Cuadro 4: Valor del Prospecto (Editable) */}
-                            <div className="bg-white border border-slate-200 rounded-xl p-4 text-center shadow-sm flex flex-col justify-center relative min-h-[100px] overflow-hidden group">
+                            <div id="detalle-prospecto-valor" className="bg-white border border-slate-200 rounded-xl p-4 text-center shadow-sm flex flex-col justify-center relative min-h-[100px] overflow-hidden group">
                                 <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Valor del Prospecto</p>
                                 
                                 <div className="flex items-center justify-center gap-1 w-full">
@@ -998,10 +1037,17 @@ export default function ProspectoDetalle({
 
                         {/* ==================== ÁRBOL DE LLAMADA ==================== */}
                         <div className="space-y-3">
-                            <div className="grid grid-cols-3 gap-3">
+                            <div id="detalle-prospecto-acciones-llamada" className="grid grid-cols-3 gap-3">
                                 {/* Registrar Llamada */}
                                 <button
-                                    onClick={() => setLlamadaFlow({ paso: 'tipo_llamada', tipoCall: '', contesto: null, fechaProxima: '', notas: '' })}
+                                    id="detalle-prospecto-btn-registrar-llamada"
+                                    onClick={() => {
+                                        setLlamadaFlow({ paso: 'contesto', tipoCall: '', contesto: null, fechaProxima: '', notas: '' });
+                                        // Avanzar bot si está en modo tutorial de llamada
+                                        if (currentStep?.id === 'call_reg_waiting') {
+                                            botActions?.stepCallModalContesto?.();
+                                        }
+                                    }}
                                     className="flex flex-col items-center justify-center gap-2 bg-white border-2 border-slate-200 hover:border-(--theme-500) rounded-xl p-4 text-gray-700 hover:text-(--theme-600) transition-all shadow-sm font-bold text-sm text-center leading-tight"
                                 >
                                     <Phone className="w-6 h-6 text-(--theme-500)" />
@@ -1032,7 +1078,7 @@ export default function ProspectoDetalle({
                             </div>
 
                             <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-                                <div className="bg-white border border-slate-200 rounded-xl p-3 flex flex-col gap-2 shadow-sm relative max-h-[280px]">
+                                <div id="detalle-prospecto-recordatorios-lista" className="bg-white border border-slate-200 rounded-xl p-3 flex flex-col gap-2 shadow-sm relative max-h-[280px]">
                                     <div className="flex items-center gap-2 shrink-0">
                                         <Bell className="w-3.5 h-3.5 text-(--theme-500)" />
                                         <p className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">Recordatorios</p>
@@ -1145,7 +1191,7 @@ export default function ProspectoDetalle({
                                 </div>
 
                                 {/* ========= CUADRO DE NOTAS EDITABLE ========= */}
-                                <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex flex-col h-full">
+                                <div id="detalle-prospecto-notas" className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex flex-col h-full">
                                     <div className="flex items-center justify-between">
                                         <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Notas del Prospecto</p>
                                         <button
@@ -1158,6 +1204,7 @@ export default function ProspectoDetalle({
                                         </button>
                                     </div>
                                     <textarea
+                                        id="detalle-prospecto-notes-textarea"
                                         value={notasRapidas}
                                         onChange={(e) => setNotasRapidas(e.target.value)}
                                         placeholder="Escribe notas importantes aquí..."
@@ -1259,6 +1306,7 @@ export default function ProspectoDetalle({
                                 {/* Botón para agregar nueva sección */}
                                 <div className={`${customSections.length % 2 === 0 ? 'xl:col-span-2' : ''}`}>
                                     <button
+                                        id="detalle-prospecto-add-modulo"
                                         onClick={() => setModalNuevaSeccion(true)}
                                         className="w-full group flex flex-col items-center justify-center gap-3 p-8 bg-slate-50 hover:bg-(--theme-50)/30 border-2 border-dashed border-slate-300 hover:border-(--theme-400) rounded-2xl transition-all duration-300 min-h-[140px] h-full"
                                     >
@@ -1282,7 +1330,7 @@ export default function ProspectoDetalle({
                         onClick={() => setDrawerHistorialAbierto(false)} 
                     />
 
-                    <div className={`fixed inset-x-0 bottom-0 z-50 lg:static lg:z-auto transition-transform duration-300 ease-out transform ${drawerHistorialAbierto ? 'translate-y-0' : 'translate-y-full lg:translate-y-0'} lg:transform-none bg-white lg:bg-white border-t lg:border-t-0 lg:border lg:border-slate-200 rounded-t-2xl lg:rounded-xl shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.3)] lg:shadow-sm flex flex-col overflow-hidden h-[88vh] lg:h-full min-h-0`}>
+                    <div id="detalle-prospecto-historial" className={`fixed inset-x-0 bottom-0 z-50 lg:static lg:z-auto transition-transform duration-300 ease-out transform ${drawerHistorialAbierto ? 'translate-y-0' : 'translate-y-full lg:translate-y-0'} lg:transform-none bg-white lg:bg-white border-t lg:border-t-0 lg:border lg:border-slate-200 rounded-t-2xl lg:rounded-xl shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.3)] lg:shadow-sm flex flex-col overflow-hidden h-[88vh] lg:h-full min-h-0`}>
                         {/* Pequeña barra tirador en móvil */}
                         <div className="w-full flex justify-center py-2 lg:hidden" onTouchMove={(e) => {
                                 // Touch prevent o close on swipe (opcional, por ahora solo visual)
@@ -1439,45 +1487,31 @@ export default function ProspectoDetalle({
                     <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden">
                         <div className="px-6 py-4 border-b border-slate-100 bg-linear-to-r from-(--theme-50) to-white flex items-center justify-between gap-3">
                             <span className="font-bold text-(--theme-700) flex items-center gap-2"><Phone className="w-4 h-4" /> Registrando llamada...</span>
-                            <button onClick={() => setLlamadaFlow(null)} className="text-xs text-gray-400 hover:text-gray-600 px-2 py-1 rounded hover:bg-white/60">✕ Cancelar</button>
+                            <button
+                                id="llamada-btn-cancelar"
+                                onClick={() => {
+                                    setLlamadaFlow(null);
+                                    // El useEffect se encarga de avanzar el bot si está en tutorial
+                                }}
+                                className="text-xs text-gray-400 hover:text-gray-600 px-2 py-1 rounded hover:bg-white/60"
+                            >✕ Cancelar</button>
                         </div>
 
                         <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
-                            {/* Paso 0: Selección de Tipo de Llamada B2B */}
-                            {llamadaFlow.paso === 'tipo_llamada' && (
-                                <div className="space-y-4">
-                                    <p className="font-semibold text-gray-800 text-sm">Selecciona el tipo de llamada B2B (Moneycall):</p>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                                        {[
-                                            { code: 'S1', label: 'S1 - Recuperación (Cuadrante 1)', desc: 'Llamada proactiva sobre productos actuales' },
-                                            { code: 'S2', label: 'S2 - Venta Cruzada (Cuadrante 2)', desc: 'Llamada proactiva de productos complementarios' },
-                                            { code: 'F1', label: 'F1 - Seguimiento Caliente', desc: 'Para prospectos calificados en caliente' },
-                                            { code: 'F2', label: 'F2 - Seguimiento Propuesta', desc: 'Para prospectos con propuesta enviada' },
-                                            { code: 'DC', label: 'DC - Diagnóstico Continuo', desc: 'Llamadas periódicas de actualización' },
-                                            { code: 'PT', label: 'PT - Proactiva Técnica / Cortesía', desc: 'Llamada técnica o de cortesía' },
-                                            { code: 'IN', label: 'IN - Llamada Entrante', desc: 'Llamada reactiva recibida' },
-                                            { code: 'RC', label: 'RC - Reclamo o Soporte', desc: 'Llamada reactiva de soporte o reclamo' }
-                                        ].map((tipo) => (
-                                            <button
-                                                key={tipo.code}
-                                                onClick={() => setLlamadaFlow(f => ({ ...f, paso: 'contesto', tipoCall: tipo.code }))}
-                                                className="p-3 border border-slate-200 rounded-xl text-left hover:border-indigo-500 hover:bg-indigo-50/50 transition-all flex flex-col justify-between"
-                                            >
-                                                <span className="font-black text-indigo-600 text-xs">{tipo.label}</span>
-                                                <span className="text-[10px] text-gray-400 font-bold leading-snug mt-1">{tipo.desc}</span>
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
 
                             {/* Paso 1: ¿Contestó? */}
                             {llamadaFlow.paso === 'contesto' && (
-                                <div className="space-y-3">
+                                <div id="llamada-paso-contesto" className="space-y-3">
                                     <p className="font-semibold text-gray-800">¿Contestó la llamada?</p>
                                     <div className="flex gap-3">
                                         <button
-                                            onClick={() => setLlamadaFlow(f => ({ ...f, paso: 'opciones_contesto', contesto: true }))}
+                                            onClick={() => {
+                                                setLlamadaFlow(f => ({ ...f, paso: 'opciones_contesto', contesto: true }));
+                                                // Avanzar bot si está en modo tutorial
+                                                if (currentStep?.id === 'call_modal_contesto') {
+                                                    botActions?.stepCallOpcionesContesto?.();
+                                                }
+                                            }}
                                             className="flex-1 py-2.5 bg-(--theme-500) text-white rounded-lg font-bold hover:bg-(--theme-600) transition-colors"
                                         >✓ Sí, contestó</button>
                                         <button
@@ -1496,7 +1530,7 @@ export default function ProspectoDetalle({
 
                             {/* Paso 2: Opciones al contestar */}
                             {llamadaFlow.paso === 'opciones_contesto' && (
-                                <div className="space-y-3">
+                                <div id="llamada-paso-opciones" className="space-y-3">
                                     <p className="font-semibold text-gray-800">¿Cuál fue el resultado de la llamada?</p>
                                     <div className="grid grid-cols-2 gap-3">
                                         <button
@@ -2033,8 +2067,9 @@ export default function ProspectoDetalle({
                                 <X className="w-5 h-5 text-slate-400" />
                             </button>
                         </div>
-                        <div className="p-6 space-y-3">
+                        <div id="cierre-modal-cuerpo" className="p-6 space-y-3">
                             <button
+                                id="cierre-pasar-cliente"
                                 onClick={() => { setModalPasarClienteAbierto(true); setModalAccionesCierreAbierto(false); }}
                                 className="w-full flex items-center justify-between p-4 border-2 border-(--theme-100) hover:border-(--theme-500) bg-white hover:bg-(--theme-50) rounded-xl transition-all group"
                             >
@@ -2051,6 +2086,7 @@ export default function ProspectoDetalle({
                             </button>
 
                             <button
+                                id="cierre-descartar-prospecto"
                                 onClick={() => { setModalDescartarAbierto(true); setModalAccionesCierreAbierto(false); }}
                                 className="w-full flex items-center justify-between p-4 border-2 border-rose-100 hover:border-rose-300 bg-white hover:bg-rose-50 rounded-xl transition-all group"
                             >
@@ -2068,6 +2104,7 @@ export default function ProspectoDetalle({
                         </div>
                         <div className="px-6 py-4 bg-slate-50 border-t border-slate-100">
                             <button
+                                id="cierre-volver-atras"
                                 onClick={() => setModalAccionesCierreAbierto(false)}
                                 className="w-full py-2 text-sm font-bold text-slate-500 hover:text-slate-700 transition-colors"
                             >

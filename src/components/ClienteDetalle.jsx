@@ -79,6 +79,16 @@ export default function ClienteDetalle({
     const [ClienteSeleccionado, setClienteSeleccionado] = useState(initialCliente);
     const pid = ClienteSeleccionado?.id || ClienteSeleccionado?._id;
 
+    const correosContacto = useMemo(() => {
+        return (ClienteSeleccionado?.correo || '')
+            .split(',')
+            .map((e) => e.trim())
+            .filter(Boolean);
+    }, [ClienteSeleccionado?.correo]);
+
+    const tieneCorreo = correosContacto.length > 0;
+    const correoPrincipal = correosContacto[0] || '';
+
     const [actividadesContext, setActividadesContext] = useState([]);
     const [loadingContext, setLoadingContext] = useState(false);
 
@@ -121,17 +131,41 @@ export default function ClienteDetalle({
     const [modalDiagnosticoAbierto, setModalDiagnosticoAbierto] = useState(false);
     const [formDiagnostico, setFormDiagnostico] = useState({ p1: '', p2: '', p3: '', p4: '', p5: '' });
 
-    // SECCIONES PERSONALIZADAS
     const [customSections, setCustomSections] = useState(() => {
         const val = initialCliente?.customSections;
-        if (!val) return [];
-        if (Array.isArray(val)) return val;
-        try {
-            return JSON.parse(val);
-        } catch (e) {
-            console.error("Error parsing customSections:", e);
-            return [];
+        let parsed = [];
+        if (Array.isArray(val)) {
+            parsed = [...val];
+        } else if (typeof val === 'string' && val.trim() !== '') {
+            try {
+                parsed = JSON.parse(val);
+            } catch (e) {
+                console.error("Error parsing customSections:", e);
+                parsed = [];
+            }
         }
+        
+        const hasContracts = parsed.some(s => s.tipo === 'contracts');
+        const hasPayments = parsed.some(s => s.tipo === 'payments');
+        
+        if (!hasContracts) {
+            parsed.push({
+                id: `default_contracts_${Date.now()}`,
+                tipo: 'contracts',
+                titulo: 'Baúl de Contratos',
+                contenido: []
+            });
+        }
+        if (!hasPayments) {
+            parsed.push({
+                id: `default_payments_${Date.now()}`,
+                tipo: 'payments',
+                titulo: 'Estado de Pagos',
+                contenido: []
+            });
+        }
+        
+        return parsed;
     });
     const [modalNuevaSeccion, setModalNuevaSeccion] = useState(false);
     const [drawerHistorialAbierto, setDrawerHistorialAbierto] = useState(false);
@@ -157,7 +191,7 @@ export default function ClienteDetalle({
                 let parsedSections = [];
                 if (initialCliente.customSections) {
                     if (Array.isArray(initialCliente.customSections)) {
-                        parsedSections = initialCliente.customSections;
+                        parsedSections = [...initialCliente.customSections];
                     } else {
                         try {
                             parsedSections = JSON.parse(initialCliente.customSections);
@@ -166,6 +200,27 @@ export default function ClienteDetalle({
                         }
                     }
                 }
+                
+                const hasContracts = parsedSections.some(s => s.tipo === 'contracts');
+                const hasPayments = parsedSections.some(s => s.tipo === 'payments');
+                
+                if (!hasContracts) {
+                    parsedSections.push({
+                        id: `default_contracts_${Date.now()}`,
+                        tipo: 'contracts',
+                        titulo: 'Baúl de Contratos',
+                        contenido: []
+                    });
+                }
+                if (!hasPayments) {
+                    parsedSections.push({
+                        id: `default_payments_${Date.now()}`,
+                        tipo: 'payments',
+                        titulo: 'Estado de Pagos',
+                        contenido: []
+                    });
+                }
+                
                 setCustomSections(parsedSections);
             }
         }
@@ -328,18 +383,22 @@ export default function ClienteDetalle({
     };
 
     const updateSeccion = (id, campo, valor) => {
-        const updated = customSections.map(s => s.id === id ? { ...s, [campo]: valor } : s);
-        setCustomSections(updated);
+        setCustomSections(prev => prev.map(s => s.id === id ? { ...s, [campo]: valor } : s));
     };
 
     const commitSecciones = () => {
-        handleGuardarSeccionesPersonalizadas(customSections);
+        setCustomSections(prev => {
+            handleGuardarSeccionesPersonalizadas(prev);
+            return prev;
+        });
     };
 
     const deleteSeccion = (id) => {
-        const updated = customSections.filter(s => s.id !== id);
-        setCustomSections(updated);
-        handleGuardarSeccionesPersonalizadas(updated);
+        setCustomSections(prev => {
+            const updated = prev.filter(s => s.id !== id);
+            handleGuardarSeccionesPersonalizadas(updated);
+            return updated;
+        });
     };
 
     const toggleNotasDefault = () => {
@@ -881,7 +940,7 @@ export default function ClienteDetalle({
                                                     </button>
                                                 </div>
                                             )}
-                                            <div className="md:absolute top-4 right-4 sm:top-6 sm:right-6 flex items-center gap-1.5 px-3 py-1 bg-green-100/80 backdrop-blur-sm text-green-700 rounded-lg text-xs font-black uppercase tracking-widest border border-green-200 shadow-sm z-10">
+                                            <div id="detalle-cliente-ganado" className="md:absolute top-4 right-4 sm:top-6 sm:right-6 flex items-center gap-1.5 px-3 py-1 bg-green-100/80 backdrop-blur-sm text-green-700 rounded-lg text-xs font-black uppercase tracking-widest border border-green-200 shadow-sm z-10">
                                                 <Star className="w-4 h-4 fill-green-500 text-green-500" />
                                                 Cliente Ganado
                                             </div>
@@ -897,7 +956,7 @@ export default function ClienteDetalle({
 
                                 {/* Grid de Información de Contacto (Solo si hay datos) - Ahora más compacto */}
                                 {(ClienteSeleccionado.telefono || ClienteSeleccionado.correo || ClienteSeleccionado.ubicacion || ClienteSeleccionado.sitioWeb) && (
-                                    <div className="pt-3 border-t border-slate-100">
+                                    <div id="detalle-cliente-acciones-contacto" className="pt-3 border-t border-slate-100">
                                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-2 items-stretch">
                                             {/* Teléfonos */}
                                             {(ClienteSeleccionado.telefono || ClienteSeleccionado.telefono2) && (
@@ -920,16 +979,21 @@ export default function ClienteDetalle({
                                             )}
 
                                             {/* Correo */}
-                                            {ClienteSeleccionado.correo && (
+                                            {tieneCorreo && (
                                                 <div className="flex items-center gap-2">
                                                     <div className="w-7 h-7 flex items-center justify-center bg-slate-50 rounded-lg text-slate-400 shrink-0">
                                                         <Mail className="w-3.5 h-3.5" />
                                                     </div>
                                                     <div className="flex flex-col overflow-hidden">
                                                         <span className="text-[9px] uppercase tracking-wider font-extrabold text-slate-400 leading-none mb-0.5">Correo</span>
-                                                        <span className="text-xs font-bold text-slate-700 truncate" title={ClienteSeleccionado.correo}>
-                                                            {ClienteSeleccionado.correo}
-                                                        </span>
+                                                        <div className="flex flex-wrap text-xs font-bold text-slate-700 truncate" title={correosContacto.join(', ')}>
+                                                            {correosContacto.slice(0, 1).map((e, idx) => (
+                                                                <span key={idx}>{e}</span>
+                                                            ))}
+                                                            {correosContacto.length > 1 && (
+                                                                <span className="ml-1 text-slate-400 text-[10px]">...</span>
+                                                            )}
+                                                        </div>
                                                     </div>
                                                 </div>
                                             )}
@@ -989,13 +1053,13 @@ export default function ClienteDetalle({
                                                 </a>
 
                                                 <a
-                                                    href={ClienteSeleccionado.correo ? `mailto:${ClienteSeleccionado.correo}` : undefined}
-                                                    aria-disabled={!ClienteSeleccionado.correo}
-                                                    onClick={!ClienteSeleccionado.correo ? (e) => e.preventDefault() : undefined}
-                                                    className={`h-8 w-8 inline-flex items-center justify-center rounded-md transition-colors shadow-xs ring-1 ${ClienteSeleccionado.correo ? 'bg-slate-50 hover:bg-slate-100 ring-slate-200' : 'bg-slate-100 ring-slate-200 cursor-not-allowed opacity-60'}`}
-                                                    title={ClienteSeleccionado.correo ? 'Enviar correo por Gmail' : 'No hay correo para Gmail'}
+                                                    href={tieneCorreo ? `mailto:${correoPrincipal}` : undefined}
+                                                    aria-disabled={!tieneCorreo}
+                                                    onClick={!tieneCorreo ? (e) => e.preventDefault() : undefined}
+                                                    className={`h-8 w-8 inline-flex items-center justify-center rounded-md transition-colors shadow-xs ring-1 ${tieneCorreo ? 'bg-slate-50 hover:bg-slate-100 ring-slate-200' : 'bg-slate-100 ring-slate-200 cursor-not-allowed opacity-60'}`}
+                                                    title={tieneCorreo ? `Enviar correo por Gmail a ${correoPrincipal} (Total: ${correosContacto.length})` : 'No hay correo para Gmail'}
                                                 >
-                                                    <img src={GmailIcon} alt="Gmail" className={`w-4.5 h-4.5 object-contain ${ClienteSeleccionado.correo ? '' : 'grayscale opacity-60'}`} />
+                                                    <img src={GmailIcon} alt="Gmail" className={`w-4.5 h-4.5 object-contain ${tieneCorreo ? '' : 'grayscale opacity-60'}`} />
                                                 </a>
                                             </div>
                                         </div>
@@ -1022,7 +1086,7 @@ export default function ClienteDetalle({
 
                         {/* ==================== ÁRBOL DE LLAMADA ==================== */}
                         <div className="space-y-3">
-                            <div className="grid grid-cols-3 gap-3">
+                            <div id="detalle-cliente-acciones-seguimiento" className="grid grid-cols-3 gap-3">
                                 {/* Botón principal intercambiable: Registrar Venta / Registrar Llamada */}
                                 <div className="relative group/main">
                                     <button
@@ -1077,7 +1141,7 @@ export default function ClienteDetalle({
 
                             <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
                                 {/* Slot 1: Próximos Pasos (Alertas) */}
-                                <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex flex-col h-[240px] animate-in fade-in slide-in-from-right-4 duration-300">
+                                <div id="detalle-cliente-alertas" className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex flex-col h-[240px] animate-in fade-in slide-in-from-right-4 duration-300">
                                     <div className="flex items-center justify-between shrink-0 mb-3">
                                         <div className="flex items-center gap-2">
                                             <Bell className="w-4 h-4 text-(--theme-500)" />
@@ -1200,7 +1264,7 @@ export default function ClienteDetalle({
                                     </div>
 
                                         {/* Slot 2: Diagnóstico Moneycall (5 Preguntas Clave) */}
-                                        <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex flex-col h-[240px] animate-in fade-in slide-in-from-right-4 duration-300">
+                                        <div id="detalle-cliente-diagnostico" className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex flex-col h-[240px] animate-in fade-in slide-in-from-right-4 duration-300">
                                             <div className="flex items-center justify-between shrink-0">
                                                 <div className="flex items-center gap-2">
                                                     <Target className="w-4 h-4 text-emerald-600" />
@@ -1240,7 +1304,7 @@ export default function ClienteDetalle({
                                         </div>
 
                                         {/* Slot 3: Historial & Cuadrantes B2B */}
-                                        <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex flex-col h-[240px] animate-in fade-in slide-in-from-right-4 duration-300">
+                                        <div id="detalle-cliente-historial-compras" className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex flex-col h-[240px] animate-in fade-in slide-in-from-right-4 duration-300">
                                             <div className="flex items-center justify-between shrink-0">
                                                 <div className="flex items-center gap-2">
                                                     <TrendingUp className="w-4 h-4 text-indigo-600" />
@@ -1278,17 +1342,42 @@ export default function ClienteDetalle({
                                                     </p>
                                                 )}
                                             </div>
-                                            <button
-                                                onClick={() => setDrawerHistorialAbierto(true)}
-                                                className="w-full mt-3 py-2 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-700 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 shrink-0 shadow-xs"
-                                            >
-                                                <List className="w-3.5 h-3.5" />
-                                                Abrir Historial Completo
-                                            </button>
+                                            <div className="flex gap-2 mt-3 shrink-0">
+                                                <button
+                                                    onClick={manejarRegistrarVenta}
+                                                    className="flex-1 py-2 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-xs"
+                                                    title="Registrar Compra/Venta"
+                                                >
+                                                    <Plus className="w-3.5 h-3.5" />
+                                                    Registrar
+                                                </button>
+                                                <button
+                                                    onClick={() => setDrawerHistorialAbierto(true)}
+                                                    className="flex-1 py-2 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-700 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-xs"
+                                                    title="Abrir Historial Completo"
+                                                >
+                                                    <List className="w-3.5 h-3.5" />
+                                                    Historial
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
+
+                                {/* Módulos Opcionales */}
+                                <ModulosCliente
+                                    containerClassName="mt-0"
+                                    customSections={seccionesDinamicas}
+                                    updateSeccion={updateSeccion}
+                                    commitSecciones={commitSecciones}
+                                    deleteSeccion={deleteSeccion}
+                                    onAgregar={() => setModalNuevaSeccion(true)}
+                                    clienteId={pid}
+                                    rolePath={rolePath}
+                                    handleGuardarSeccionesPersonalizadas={commitSecciones}
+                                />
                             </div>
+
                     {/* Overlay Backdrop (solo visible en mobile) */}
                     <div 
                         className={`fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 lg:hidden transition-opacity duration-300 ${drawerHistorialAbierto ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} 

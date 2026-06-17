@@ -125,9 +125,9 @@ const ProactiveRatioDoughnut = ({ proactiveCount, reactiveCount }) => {
     const pctProactive = total > 0 ? (proactiveCount / total) * 100 : 0;
     const pctReactive = total > 0 ? (reactiveCount / total) * 100 : 0;
 
-    const size = 160;
+    const size = 150;
     const strokeWidth = 14;
-    const radius = 70;
+    const radius = 65;
     const circumference = 2 * Math.PI * radius;
     
     const strokeDashoffsetProactive = total > 0 
@@ -135,12 +135,23 @@ const ProactiveRatioDoughnut = ({ proactiveCount, reactiveCount }) => {
         : circumference;
 
     const strokeDashoffsetReactive = total > 0 ? 0 : circumference;
-    const bgCircleClass = total > 0 ? "stroke-amber-100" : "stroke-slate-100";
+    const bgCircleClass = "stroke-gray-100";
 
     return (
         <div className="flex flex-col items-center justify-center w-full">
-            <div className="relative w-40 h-40 flex items-center justify-center">
-                <svg width={size} height={size} className="transform -rotate-90">
+            <div className="relative flex items-center justify-center" style={{ width: size, height: size }}>
+                <svg width={size} height={size} className="transform -rotate-90 relative z-10">
+                    <defs>
+                        <linearGradient id="proactiveGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stopColor="#10b981" />
+                            <stop offset="100%" stopColor="#059669" />
+                        </linearGradient>
+                        <linearGradient id="reactiveGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stopColor="#fbbf24" />
+                            <stop offset="100%" stopColor="#d97706" />
+                        </linearGradient>
+                    </defs>
+                    {/* Background circle */}
                     <circle
                         cx={size/2}
                         cy={size/2}
@@ -149,49 +160,63 @@ const ProactiveRatioDoughnut = ({ proactiveCount, reactiveCount }) => {
                         className={bgCircleClass}
                         strokeWidth={strokeWidth}
                     />
+                    {/* Reactive (Inbound) circle */}
                     <circle
                         cx={size/2}
                         cy={size/2}
                         r={radius}
                         fill="transparent"
-                        className="stroke-amber-400 transition-all duration-700 ease-out"
+                        stroke="url(#reactiveGrad)"
+                        className="transition-all duration-1000 ease-out"
                         strokeWidth={strokeWidth}
                         strokeDasharray={circumference}
                         strokeDashoffset={strokeDashoffsetReactive}
                     />
+                    {/* Proactive (Outbound) circle */}
                     <circle
                         cx={size/2}
                         cy={size/2}
                         r={radius}
                         fill="transparent"
-                        className="stroke-emerald-500 transition-all duration-700 ease-out"
+                        stroke="url(#proactiveGrad)"
+                        className="transition-all duration-1000 ease-out"
                         strokeWidth={strokeWidth}
                         strokeDasharray={circumference}
                         strokeDashoffset={strokeDashoffsetProactive}
                         strokeLinecap="round"
                     />
                 </svg>
-                <div className="absolute flex flex-col items-center justify-center">
-                    <span className="text-3xl font-black text-gray-800 tracking-tight">{pctProactive.toFixed(0)}%</span>
-                    <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest mt-0.5">
-                        {total > 0 ? "SALIENTE" : "SIN LLAMADAS"}
+                
+                {/* Central Value */}
+                <div className="absolute flex flex-col items-center justify-center z-20">
+                    <span className="text-3xl font-black text-gray-800 tracking-tighter">
+                        {pctProactive.toFixed(0)}<span className="text-xl text-gray-400">%</span>
+                    </span>
+                    <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest mt-1">
+                        {total > 0 ? "PROACTIVO" : "SIN DATOS"}
                     </span>
                 </div>
             </div>
             
-            <div className="flex justify-between w-full mt-4 gap-4 border-t border-gray-100 pt-3 px-2">
-                <div className="flex items-center gap-2 min-w-0">
-                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0"></span>
-                    <span className="text-[10px] font-black text-gray-600 uppercase tracking-tight truncate">
-                        Proactiva <span className="text-[9px] text-gray-400 font-bold">(Outbound)</span>: <span className="text-emerald-600 font-black ml-1 text-xs">{pctProactive.toFixed(1)}%</span>
-                    </span>
+            <div className="flex justify-center w-full mt-4 gap-6 pt-4 border-t border-gray-100/80">
+                {/* Proactiva Legend */}
+                <div className="flex items-center gap-2">
+                    <div className="w-2.5 h-2.5 rounded-full bg-linear-to-br from-emerald-400 to-emerald-600 shadow-xs"></div>
+                    <div className="flex flex-col">
+                        <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">Saliente</span>
+                        <span className="text-emerald-600 font-black text-xs leading-none">{pctProactive.toFixed(1)}%</span>
+                    </div>
                 </div>
                 
-                <div className="flex items-center gap-2 min-w-0">
-                    <span className="w-2.5 h-2.5 rounded-full bg-amber-400 shrink-0"></span>
-                    <span className="text-[10px] font-black text-gray-600 uppercase tracking-tight truncate">
-                        Reactiva <span className="text-[9px] text-gray-400 font-bold">(Inbound)</span>: <span className="text-amber-500 font-black ml-1 text-xs">{pctReactive.toFixed(1)}%</span>
-                    </span>
+                <div className="w-px h-5 bg-gray-200 rounded-full"></div>
+
+                {/* Reactiva Legend */}
+                <div className="flex items-center gap-2">
+                    <div className="w-2.5 h-2.5 rounded-full bg-linear-to-br from-amber-400 to-amber-600 shadow-xs"></div>
+                    <div className="flex flex-col">
+                        <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">Entrante</span>
+                        <span className="text-amber-500 font-black text-xs leading-none">{pctReactive.toFixed(1)}%</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1307,87 +1332,122 @@ const Dashboard = () => {
                             )}
 
                             {healthTab === 'moneycall' && (
-                                <div className="h-full flex flex-col gap-4 animate-in fade-in duration-500 pb-2">
-                                    {/* Fila superior: Termómetro y Ratio */}
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 shrink-0">
-                                        <div className="h-72">
-                                            {/* Termómetro de Llamadas */}
-                                            <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm flex flex-col h-full justify-between">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-10 h-10 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600 shadow-xs border border-emerald-100">
+                                <div className="flex flex-col gap-6 animate-in fade-in duration-500 pb-4">
+                                    <div className="flex items-center justify-between px-2">
+                                        <div>
+                                            <h2 className="text-lg font-black text-gray-800 tracking-tight">Proactividad y Esfuerzo</h2>
+                                            <p className="text-[11px] text-gray-500 font-bold uppercase tracking-widest mt-0.5">Monitoreo de la metodología 80/20 y ritmo de llamadas</p>
+                                        </div>
+                                        <div className="hidden sm:flex items-center gap-2">
+                                            <div className="flex items-center gap-2 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-100 shadow-xs">
+                                                <div className="relative flex h-2.5 w-2.5">
+                                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                                                </div>
+                                                <span className="text-[10px] font-black text-emerald-700 uppercase tracking-widest">Métricas en Vivo</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                                        {/* Termómetro de Llamadas */}
+                                        <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm flex flex-col justify-between min-h-[300px]">
+                                            <div className="flex items-start justify-between mb-4">
+                                                <div className="flex items-center gap-4">
+                                                    <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600 shadow-xs border border-emerald-100 shrink-0">
                                                         <Phone className="w-5 h-5" />
                                                     </div>
                                                     <div>
-                                                        <h3 className="text-sm font-black uppercase tracking-widest text-gray-800">Termómetro Proactivo</h3>
-                                                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tight">Llamadas Salientes Hoy</p>
+                                                        <h3 className="text-sm font-black uppercase tracking-widest text-gray-800">Termómetro</h3>
+                                                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tight mt-0.5">Llamadas Salientes Hoy</p>
                                                     </div>
                                                 </div>
                                                 
-                                                <div className="flex-1 flex flex-col justify-center items-center py-2">
-                                                    <div className="text-5xl font-black text-gray-800 mb-1 flex items-baseline gap-1">
-                                                        {llamadasDeHoyFinal}
-                                                        <span className="text-sm text-gray-400 font-bold">/ 30</span>
+                                                <div className="text-right flex flex-col items-end">
+                                                    <div className="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-1.5">Ritmo Actual</div>
+                                                    <span className={`text-[10px] font-black px-3 py-1.5 rounded-lg uppercase tracking-wider border transition-colors ${
+                                                        llamadasDeHoyFinal < 10 ? 'bg-amber-50 text-amber-600 border-amber-200' :
+                                                        llamadasDeHoyFinal < 20 ? 'bg-blue-50 text-blue-600 border-blue-200' :
+                                                        llamadasDeHoyFinal < 30 ? 'bg-emerald-50 text-emerald-600 border-emerald-200' :
+                                                        'bg-emerald-500 text-white border-emerald-600 shadow-xs'
+                                                    }`}>
+                                                        {llamadasDeHoyFinal < 10 ? 'Bajo' :
+                                                         llamadasDeHoyFinal < 20 ? 'Buen Ritmo' :
+                                                         llamadasDeHoyFinal < 30 ? 'Óptimo' : '¡Máximo!'}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="flex-1 flex flex-col justify-center items-center py-4">
+                                                <div className="flex items-baseline gap-2 mb-8">
+                                                    <span className="text-6xl font-black text-gray-800 tracking-tighter leading-none">{llamadasDeHoyFinal}</span>
+                                                    <span className="text-2xl font-black text-gray-300">/ 30</span>
+                                                </div>
+                                                
+                                                <div className="w-full space-y-3 px-2">
+                                                    <div className="relative h-4 bg-gray-100 rounded-full overflow-hidden border border-gray-200/80 shadow-inner">
+                                                        {/* Marcadores de meta */}
+                                                        <div className="absolute left-[66.6%] top-0 bottom-0 w-0.5 bg-white z-20 mix-blend-overlay"></div>
+                                                        <div className="absolute left-[100%] top-0 bottom-0 w-0.5 bg-white z-20 mix-blend-overlay"></div>
+
+                                                        {/* Barra de progreso */}
+                                                        <div 
+                                                            className={`absolute top-0 bottom-0 left-0 rounded-full transition-all duration-1000 ease-out bg-linear-to-r ${
+                                                                llamadasDeHoyFinal < 10 ? 'from-amber-400 to-amber-500' :
+                                                                llamadasDeHoyFinal < 20 ? 'from-blue-400 to-blue-500' :
+                                                                'from-emerald-400 to-emerald-500'
+                                                            }`}
+                                                            style={{ width: `${Math.min((llamadasDeHoyFinal / 30) * 100, 100)}%` }}
+                                                        >
+                                                            <div className="absolute top-0 left-0 right-0 h-1/2 bg-white/20 rounded-t-full"></div>
+                                                        </div>
                                                     </div>
                                                     
-                                                    <div className="mb-3">
-                                                        <span className={`text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider border ${
-                                                            llamadasDeHoyFinal < 10 ? 'bg-amber-50 text-amber-600 border-amber-100' :
-                                                            llamadasDeHoyFinal < 20 ? 'bg-blue-50 text-blue-600 border-blue-100' :
-                                                            llamadasDeHoyFinal < 30 ? 'bg-emerald-50 text-emerald-600 border-emerald-100 animate-pulse' :
-                                                            'bg-emerald-500 text-white border-emerald-600 shadow-xs'
-                                                        }`}>
-                                                            {llamadasDeHoyFinal < 10 ? 'Ritmo Bajo (Proactividad requerida)' :
-                                                             llamadasDeHoyFinal < 20 ? 'Buen Ritmo (¡Casi en la meta!)' :
-                                                             llamadasDeHoyFinal < 30 ? '¡Meta Mínima Superada! 🚀' :
-                                                             '¡Ventas Máximas Desbloqueadas! 🔥'}
-                                                        </span>
-                                                    </div>
-
-                                                    <div className="w-full space-y-2 mt-1">
-                                                        <div className="relative h-6 bg-gray-100 rounded-full overflow-hidden border border-gray-200">
-                                                            <div className="absolute left-[66.6%] top-0 bottom-0 w-0.5 bg-gray-400/30 z-20">
-                                                                <span className="text-[8px] font-extrabold text-gray-400 -mt-3.5 absolute transform -translate-x-1/2">20</span>
-                                                            </div>
-                                                            <div className="absolute left-[100%] top-0 bottom-0 w-0.5 bg-gray-400/30 z-20">
-                                                                <span className="text-[8px] font-extrabold text-gray-400 -mt-3.5 absolute right-0">30</span>
-                                                            </div>
-
-                                                            <div 
-                                                                className={`h-full rounded-full transition-all duration-1000 ease-out bg-linear-to-r ${
-                                                                    llamadasDeHoyFinal < 10 ? 'from-amber-400 to-amber-500' :
-                                                                    llamadasDeHoyFinal < 20 ? 'from-indigo-500 to-indigo-600' :
-                                                                    'from-emerald-500 to-emerald-600'
-                                                                }`}
-                                                                style={{ width: `${Math.min((llamadasDeHoyFinal / 30) * 100, 100)}%` }}
-                                                            />
-                                                        </div>
-                                                        
-                                                        <div className="flex justify-between text-[8px] font-extrabold text-gray-400 uppercase tracking-widest px-1">
-                                                            <span>Inicio</span>
-                                                            <span>Meta Mínima (20)</span>
-                                                            <span>Meta Óptima (30)</span>
-                                                        </div>
+                                                    <div className="flex justify-between text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">
+                                                        <span>Inicio (0)</span>
+                                                        <span className="relative left-2">Meta (20)</span>
+                                                        <span>Óptimo (30)</span>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                         
-                                        <div className="h-72">
-                                            {/* Ratio Proactivo Doughnut */}
-                                            <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm flex flex-col h-full justify-between">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-10 h-10 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600 shadow-xs border border-indigo-100">
-                                                        <Target className="w-5 h-5" />
+                                        {/* Ratio Proactivo Doughnut */}
+                                        <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm flex flex-col justify-between min-h-[300px]">
+                                            <div className="flex items-start justify-between mb-2">
+                                                <div className="flex items-center gap-4">
+                                                    <div className="w-12 h-12 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600 shadow-xs border border-indigo-100 shrink-0">
+                                                        <Target className="w-6 h-6" />
                                                     </div>
                                                     <div>
-                                                        <h3 className="text-sm font-black uppercase tracking-widest text-gray-800">Ratio de Proactividad</h3>
-                                                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tight">Meta Metodología 80/20</p>
+                                                        <h3 className="text-sm font-black uppercase tracking-widest text-gray-800">Ratio 80/20</h3>
+                                                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tight mt-0.5">Metodología Moneycall</p>
                                                     </div>
                                                 </div>
-                                                
-                                                <div className="flex-1 flex flex-col items-center justify-center py-1">
-                                                    <ProactiveRatioDoughnut proactiveCount={llamadasProactivas} reactiveCount={llamadasReactivas} />
+                                                <div className="w-10 h-10 rounded-full border border-gray-100 flex items-center justify-center bg-gray-50 text-gray-400 shrink-0">
+                                                    <PercentCircle className="w-5 h-5" />
                                                 </div>
+                                            </div>
+                                            
+                                            <div className="flex-1 flex flex-col items-center justify-center py-2 relative z-10">
+                                                <ProactiveRatioDoughnut proactiveCount={llamadasProactivas} reactiveCount={llamadasReactivas} />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    {/* Footer Insight Card - Light Theme */}
+                                    <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4 shadow-xs">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 rounded-[10px] bg-blue-100 flex items-center justify-center text-blue-600 shrink-0">
+                                                <Zap className="w-5 h-5 fill-current" />
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <h4 className="text-[10px] font-black uppercase tracking-widest mb-0.5 text-blue-800">Insight del Día</h4>
+                                                <p className="text-[11px] text-blue-700/80 font-medium leading-relaxed">
+                                                    {llamadasDeHoyFinal >= 20 ? 
+                                                        '¡Excelente ritmo de prospección! Tu embudo está sano y tu probabilidad de cierre ha aumentado. Sigue así.' : 
+                                                        'Un alto volumen de llamadas salientes (mínimo 20) es la clave de la metodología. ¡Toma el teléfono y llena tu embudo!'}
+                                                </p>
                                             </div>
                                         </div>
                                     </div>

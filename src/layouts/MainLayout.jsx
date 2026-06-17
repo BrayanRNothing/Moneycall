@@ -6,6 +6,7 @@ import { getUser } from '../utils/authUtils';
 import logocrmoneycall from '../assets/logocrmoneycall.png';
 import useWindowSize from '../hooks/useWindowSize';
 import MainLayoutMobile from './MainLayoutMobile';
+import MoneycallBot from '../components/BotAssistant/MoneycallBot';
 
 const MainLayout = () => {
     const { width } = useWindowSize();
@@ -121,10 +122,13 @@ const MainLayout = () => {
 
     if (width < 1024) {
         return (
-            <MainLayoutMobile
-                menuItems={menuItems}
-                userInfo={{ ...usuario, rol: 'Vendedor' }}
-            />
+            <>
+                <MainLayoutMobile
+                    menuItems={menuItems}
+                    userInfo={{ ...usuario, rol: 'Vendedor' }}
+                />
+                <MoneycallBot />
+            </>
         );
     }
 
@@ -155,6 +159,7 @@ const MainLayout = () => {
                     </div>
                 </main>
             </div>
+            <MoneycallBot />
         </AnimatedGridBackground>
     );
 };

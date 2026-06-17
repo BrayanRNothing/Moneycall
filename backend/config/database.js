@@ -824,11 +824,7 @@ const initDb = async () => {
       }
     }
 
-    // Asegurar que la contraseña del adminRoot principal coincida con la credencial configurada
-    if (adminRoot) {
-      const hashAdmin = await bcrypt.hash(creds.password, 10);
-      await db.prepare('UPDATE usuarios SET contraseña = ? WHERE id = ?').run(hashAdmin, adminRoot.id);
-    }
+
 
     if (creds2.username && creds2.password && creds2.nombre) {
       const admin2 = await db.prepare('SELECT id FROM usuarios WHERE LOWER(usuario) = LOWER(?)').get(creds2.username);

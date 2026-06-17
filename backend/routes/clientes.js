@@ -15,13 +15,31 @@ const getOwnerId = (cliente) => parseInt(
 const isShared = (cliente) => cliente?.compartido === true || cliente?.compartido === 1 || cliente?.compartido === '1';
 
 const canReadCliente = (cliente, usuarioId, equipoId) => {
-    if (getOwnerId(cliente) === usuarioId) return true;
+    const uid = parseInt(usuarioId, 10);
+    if (!uid) return false;
+    if (uid === parseInt(cliente?.propietarioId || 0, 10) ||
+        uid === parseInt(cliente?.prospectorAsignado || 0, 10) ||
+        uid === parseInt(cliente?.closerAsignado || 0, 10) ||
+        uid === parseInt(cliente?.vendedorAsignado || 0, 10)) {
+        return true;
+    }
     if (!isShared(cliente)) return false;
     if (!equipoId || !cliente?.equipo_id) return false;
     return String(cliente.equipo_id) === String(equipoId);
 };
 
-const canWriteCliente = (cliente, usuarioId) => getOwnerId(cliente) === usuarioId;
+const canWriteCliente = (cliente, usuarioId, userRole = '') => {
+    if (userRole === 'admin') return true;
+    const uid = parseInt(usuarioId, 10);
+    if (!uid) return false;
+    
+    const ownerId = parseInt(cliente?.propietarioId || 0, 10);
+    const prospectorId = parseInt(cliente?.prospectorAsignado || 0, 10);
+    const closerId = parseInt(cliente?.closerAsignado || 0, 10);
+    const vendedorId = parseInt(cliente?.vendedorAsignado || 0, 10);
+    
+    return uid === ownerId || uid === prospectorId || uid === closerId || uid === vendedorId;
+};
 
 router.get('/', auth, esSuperUser, async (req, res) => {
     try {
@@ -307,7 +325,7 @@ router.put('/:id', auth, esSuperUser, async (req, res) => {
         const c = await db.prepare('SELECT * FROM clientes WHERE id = ?').get(parseInt(req.params.id));
         if (!c) return res.status(404).json({ mensaje: 'Cliente no encontrado' });
         const usuarioId = parseInt(req.usuario.id, 10);
-        if (!canWriteCliente(c, usuarioId)) {
+        if (!canWriteCliente(c, usuarioId, req.usuario.rol)) {
             return res.status(403).json({ mensaje: 'Solo el propietario puede editar este cliente' });
         }
 
@@ -387,7 +405,7 @@ router.delete('/:id', auth, esSuperUser, async (req, res) => {
         if (!existe) return res.status(404).json({ mensaje: 'Cliente no encontrado' });
 
         const cliente = await db.prepare('SELECT * FROM clientes WHERE id = ?').get(clienteId);
-        if (!canWriteCliente(cliente, parseInt(req.usuario.id, 10))) {
+        if (!canWriteCliente(cliente, parseInt(req.usuario.id, 10), req.usuario.rol)) {
             return res.status(403).json({ mensaje: 'Solo el propietario puede eliminar este cliente' });
         }
 
@@ -410,7 +428,7 @@ router.patch('/:id/etapa', auth, esSuperUser, async (req, res) => {
         if (!etapaNueva) return res.status(400).json({ mensaje: 'etapaNueva requerida' });
         const c = await db.prepare('SELECT * FROM clientes WHERE id = ?').get(parseInt(req.params.id));
         if (!c) return res.status(404).json({ mensaje: 'Cliente no encontrado' });
-        if (!canWriteCliente(c, parseInt(req.usuario.id, 10))) {
+        if (!canWriteCliente(c, parseInt(req.usuario.id, 10), req.usuario.rol)) {
             return res.status(403).json({ mensaje: 'Solo el propietario puede cambiar la etapa' });
         }
         const now = new Date().toISOString();

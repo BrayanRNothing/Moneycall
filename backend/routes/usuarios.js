@@ -375,6 +375,10 @@ router.put('/:id', auth, esSuperUser, async (req, res) => {
         const row = await db.prepare('SELECT * FROM usuarios WHERE id = ?').get(id);
         if (!row) return res.status(404).json({ mensaje: 'Usuario no encontrado' });
 
+        if (row.rol === 'admin' && req.usuario.rol !== 'admin') {
+            return res.status(403).json({ mensaje: 'No tiene permisos para modificar una cuenta de administrador' });
+        }
+
         if (rol && !ROLES_PERMITIDOS.includes(rol)) {
             return res.status(400).json({ mensaje: `Rol inválido. Roles permitidos: ${ROLES_PERMITIDOS.join(', ')}` });
         }
@@ -411,7 +415,15 @@ router.put('/:id', auth, esSuperUser, async (req, res) => {
 // @access  Private (Admin)
 router.delete('/:id', auth, esSuperUser, async (req, res) => {
     try {
-        await db.prepare('UPDATE usuarios SET activo = 0 WHERE id = ?').run(parseInt(req.params.id));
+        const id = parseInt(req.params.id);
+        const row = await db.prepare('SELECT * FROM usuarios WHERE id = ?').get(id);
+        if (!row) return res.status(404).json({ mensaje: 'Usuario no encontrado' });
+
+        if (row.rol === 'admin' && req.usuario.rol !== 'admin') {
+            return res.status(403).json({ mensaje: 'No tiene permisos para desactivar una cuenta de administrador' });
+        }
+
+        await db.prepare('UPDATE usuarios SET activo = 0 WHERE id = ?').run(id);
         res.json({ mensaje: 'Usuario desactivado' });
     } catch (error) {
         res.status(500).json({ mensaje: 'Error del servidor' });

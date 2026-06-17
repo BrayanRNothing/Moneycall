@@ -14,7 +14,7 @@ const isLocalApiUrl = (url) => /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?/i.te
 // This prevents stale env values (e.g. old domains) from breaking auth calls.
 const forceSameOriginHosts = new Set(['crm-dr-production.up.railway.app', 'api.crmoneycall.com', 'crmoneycall.com']);
 const DEFAULT_REMOTE_API = 'https://api.crmoneycall.com';
-const safeEnvApiUrl = isLocalApiUrl(rawEnvApiUrl) ? '' : rawEnvApiUrl;
+const safeEnvApiUrl = (isLocalApiUrl(rawEnvApiUrl) && !isLocalHost) ? '' : rawEnvApiUrl;
 const API_URL = forceSameOriginHosts.has(currentHost)
     ? normalizeBaseUrl(currentOrigin)
     : normalizeBaseUrl(safeEnvApiUrl || (isLocalHost ? DEFAULT_REMOTE_API : currentOrigin) || DEFAULT_REMOTE_API);

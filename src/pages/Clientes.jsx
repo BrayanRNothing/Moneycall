@@ -8,6 +8,7 @@ import { HistorialInteracciones } from '../components/HistorialInteracciones';
 import TimeWheelPicker from '../components/TimeWheelPicker';
 import ClienteDetalle from '../components/ClienteDetalle';
 import SourcePicker from '../components/ui/SourcePicker';
+import { useBotStore } from '../store/useBotStore';
 
 import API_URL from '../config/api';
 
@@ -64,7 +65,7 @@ const Clientes = () => {
     const [formCliente, setFormCliente] = useState({
         nombreCompleto: '',
         telefono: '',
-        correo: '',
+        correos: [''],
         empresa: '',
         fuente: ''
     });
@@ -233,17 +234,28 @@ const Clientes = () => {
             return;
         }
         await cargarTimelineCliente(cliente);
+
+        // Si el bot está activo y esperando que seleccionemos el cliente, avanzar al tour
+        const botState = useBotStore.getState();
+        if (botState.isOpen && botState.currentStep?.id === 'select_cliente') {
+            if (botState.botActions?.stepTourDetailClienteEtapa) {
+                setTimeout(() => {
+                    botState.botActions.stepTourDetailClienteEtapa();
+                }, 300);
+            }
+        }
     };
 
     const abrirModalEditar = (p) => {
         const tels = [p.telefono, p.telefono2].filter(Boolean);
+        const ems = (p.correo || '').split(',').map(e => e.trim()).filter(Boolean);
         setClienteAEditar({
             id: p._id || p.id,
             nombres: p.nombres || '',
             apellidoPaterno: p.apellidoPaterno || '',
             apellidoMaterno: p.apellidoMaterno || '',
             telefonos: tels.length > 0 ? tels : [''],
-            correo: p.correo || '',
+            correos: ems.length > 0 ? ems : [''],
             empresa: p.empresa || '',
             sitioWeb: p.sitioWeb || '',
             ubicacion: p.ubicacion || '',
@@ -260,12 +272,15 @@ const Clientes = () => {
             const rolePath = 'vendedor'; // O corregir según rol real
             const id = clienteAEditar.id;
             const telefonosLimpios = (clienteAEditar.telefonos || []).filter(t => t.trim());
+            const correosLimpios = (clienteAEditar.correos || []).filter(e => e.trim());
             const payload = { 
                 ...clienteAEditar, 
                 telefono: telefonosLimpios[0] || '', 
-                telefono2: telefonosLimpios.slice(1).join(', ') || '' 
+                telefono2: telefonosLimpios.slice(1).join(', ') || '',
+                correo: correosLimpios.join(', ') || ''
             };
             delete payload.telefonos;
+            delete payload.correos;
 
             await axios.put(`${API_URL}/api/${rolePath}/prospectos/${id}/editar`, payload, {
                 headers: getAuthHeaders()
@@ -394,14 +409,39 @@ const Clientes = () => {
                                         </div>
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wider">Correo Electrónico</label>
-                                        <input
-                                            type="email"
-                                            value={clienteAEditar.correo}
-                                            onChange={(e) => setClienteAEditar((f) => ({ ...f, correo: e.target.value }))}
-                                            className="w-full border border-slate-200 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-(--theme-400) focus:border-transparent transition-all outline-none hover:border-slate-300 font-medium"
-                                            placeholder="ejemplo@empresa.com"
-                                        />
+                                        <div className="flex items-center justify-between mb-2">
+                                            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider">Correos Electrónicos</label>
+                                            <button
+                                                type="button"
+                                                onClick={() => setClienteAEditar((f) => ({ ...f, correos: [...(f.correos || ['']), ''] }))}
+                                                className="flex items-center gap-1.5 text-xs text-(--theme-600) hover:text-(--theme-700) font-bold hover:bg-(--theme-50) px-2.5 py-1.5 rounded-lg transition-all"
+                                            >
+                                                <Plus className="w-3.5 h-3.5" /> Agregar
+                                            </button>
+                                        </div>
+                                        <div className="space-y-2">
+                                            {(clienteAEditar.correos || ['']).map((cor, idx) => (
+                                                <div key={idx} className="flex gap-3 items-center bg-linear-to-r from-slate-50 to-white p-3 rounded-lg border border-slate-200 hover:border-slate-300 transition-all group">
+                                                    <Mail className="w-4 h-4 text-slate-400 group-hover:text-slate-600 transition-colors shrink-0" />
+                                                    <input
+                                                        type="email"
+                                                        value={cor}
+                                                        onChange={(e) => setClienteAEditar((f) => { const c = [...(f.correos || [''])]; c[idx] = e.target.value; return { ...f, correos: c }; })}
+                                                        className="flex-1 bg-transparent border-0 focus:ring-0 text-sm py-1 outline-none font-medium"
+                                                        placeholder="ejemplo@correo.com"
+                                                    />
+                                                    {(clienteAEditar.correos || ['']).length > 1 && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setClienteAEditar((f) => ({ ...f, correos: (f.correos || ['']).filter((_, i) => i !== idx) }))}
+                                                            className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-all"
+                                                        >
+                                                            <X className="w-4 h-4" />
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            ))}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -503,16 +543,6 @@ const Clientes = () => {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">Correo *</label>
-                                <input
-                                    type="email"
-                                    value={formCliente.correo}
-                                    onChange={(e) => setFormCliente({ ...formCliente, correo: e.target.value })}
-                                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-(--theme-500)/20 focus:border-(--theme-500)"
-                                    placeholder="juan@empresa.com"
-                                />
-                            </div>
-                            <div>
                                 <label className="block text-sm font-semibold text-gray-700 mb-2">Empresa</label>
                                 <input
                                     type="text"
@@ -521,6 +551,40 @@ const Clientes = () => {
                                     className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-(--theme-500)/20 focus:border-(--theme-500)"
                                     placeholder="Mi Empresa S.A."
                                 />
+                            </div>
+                            <div className="md:col-span-2">
+                                <div className="flex items-center justify-between mb-2">
+                                    <label className="block text-sm font-semibold text-gray-700">Correos *</label>
+                                    <button
+                                        type="button"
+                                        onClick={() => setFormCliente((f) => ({ ...f, correos: [...f.correos, ''] }))}
+                                        className="text-xs text-(--theme-600) hover:text-(--theme-700) font-bold"
+                                    >
+                                        + Añadir otro
+                                    </button>
+                                </div>
+                                <div className="space-y-2">
+                                    {formCliente.correos.map((cor, idx) => (
+                                        <div key={idx} className="flex gap-2 items-center">
+                                            <input
+                                                type="email"
+                                                value={cor}
+                                                onChange={(e) => setFormCliente((f) => { const c = [...f.correos]; c[idx] = e.target.value; return { ...f, correos: c }; })}
+                                                className="flex-1 px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-(--theme-500)/20 focus:border-(--theme-500)"
+                                                placeholder="juan@empresa.com"
+                                            />
+                                            {formCliente.correos.length > 1 && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setFormCliente((f) => ({ ...f, correos: f.correos.filter((_, i) => i !== idx) }))}
+                                                    className="p-2 text-slate-400 hover:text-red-500 rounded transition-all"
+                                                >
+                                                    <X className="w-4 h-4" />
+                                                </button>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                             <div className="md:col-span-2">
                                 <label className="block text-sm font-semibold text-gray-700 mb-2">Origen / Fuente</label>
@@ -801,9 +865,9 @@ const Clientes = () => {
         }
     };
 
-    const handleCrearCliente = async () => {
-        if (!formCliente.nombreCompleto || !formCliente.telefono || !formCliente.correo) {
-            alert('Complete los campos requeridos: nombre completo, teléfono y correo.');
+     const handleCrearCliente = async () => {
+        if (!formCliente.nombreCompleto || !formCliente.telefono || !formCliente.correos || !formCliente.correos.filter(c => c.trim()).length) {
+            alert('Complete los campos requeridos: nombre completo, teléfono y al menos un correo.');
             return;
         }
 
@@ -815,6 +879,7 @@ const Clientes = () => {
 
         setCreandoCliente(true);
         try {
+            const correosLimpios = formCliente.correos.filter(e => e.trim());
             await axios.post(
                 `${API_URL}/api/clientes`,
                 {
@@ -822,7 +887,7 @@ const Clientes = () => {
                     apellidoPaterno,
                     apellidoMaterno,
                     telefono: formCliente.telefono,
-                    correo: formCliente.correo,
+                    correo: correosLimpios.join(', '),
                     empresa: formCliente.empresa,
                     estado: 'ganado',
                     etapaEmbudo: 'venta_ganada',
@@ -836,7 +901,7 @@ const Clientes = () => {
             setFormCliente({
                 nombreCompleto: '',
                 telefono: '',
-                correo: '',
+                correos: [''],
                 empresa: '',
                 fuente: ''
             });
@@ -913,6 +978,7 @@ const Clientes = () => {
                             onChange={handleImportarClientes}
                         />
                         <button
+                            id="btn-importar-csv-clientes"
                             onClick={() => fileInputRef.current?.click()}
                             disabled={importando}
                             className="flex-1 sm:flex-none justify-center flex items-center gap-1.5 px-3 py-2 md:px-4 md:py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-50 transition-colors text-[11px] md:text-sm font-medium"
@@ -921,6 +987,7 @@ const Clientes = () => {
                             {importando ? 'Importando...' : 'Importar CSV'}
                         </button>
                         <button
+                            id="btn-exportar-csv-clientes"
                             onClick={exportarClientesCsv}
                             disabled={loading || !clientesFiltrados.length}
                             className="flex-1 sm:flex-none justify-center flex items-center gap-1.5 px-3 py-2 md:px-4 md:py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-800 disabled:opacity-50 transition-colors text-[11px] md:text-sm font-medium"
@@ -929,6 +996,7 @@ const Clientes = () => {
                             Exportar CSV
                         </button>
                         <button
+                            id="btn-crear-cliente"
                             onClick={() => setMostrarModalCrear(true)}
                             className="w-full sm:w-auto justify-center flex items-center gap-2 px-3 py-2 md:px-4 md:py-2 bg-(--theme-600) text-white rounded-lg hover:bg-(--theme-700) transition-colors text-xs md:text-sm font-medium"
                         >
@@ -938,7 +1006,7 @@ const Clientes = () => {
                     </div>
                 </div>
 
-                <div className="bg-white border-b border-slate-100 md:border md:border-slate-200 md:rounded-2xl p-4 md:shadow-sm mb-6">
+                <div id="seccion-filtros-busqueda-clientes" className="bg-white border-b border-slate-100 md:border md:border-slate-200 md:rounded-2xl p-4 md:shadow-sm mb-6">
                     <div className="grid grid-cols-1 lg:grid-cols-[30%_1fr] gap-4 items-center">
                         <div className="relative w-full">
                             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 md:w-5 md:h-5 text-gray-400" />
@@ -972,7 +1040,7 @@ const Clientes = () => {
                                 ))}
                             </div>
                             <div className="w-px h-6 bg-slate-200 mx-1 shrink-0 hidden md:block"></div>
-                            <div className="flex flex-nowrap md:flex-wrap gap-1.5 shrink-0">
+                            <div id="seccion-filtros-recordatorio-clientes" className="flex flex-nowrap md:flex-wrap gap-1.5 shrink-0">
                                 {[
                                     { value: 'todos', label: 'Todos' },
                                     { value: 'con_recordatorio', label: 'Con recordatorio' },
@@ -1077,7 +1145,7 @@ const Clientes = () => {
                 ) : (
                     <div className="bg-white md:border md:border-slate-200 md:rounded-2xl md:shadow-sm overflow-hidden">
                         <div className="overflow-x-auto">
-                            <table className="min-w-full text-sm">
+                            <table id="tabla-clientes" className="min-w-full text-sm">
                                 <thead className="bg-slate-100/70 text-slate-500 uppercase">
                                     <tr>
                                         <th className="px-2 md:px-4 py-2 md:py-3 text-left font-semibold text-[10px] md:text-xs">Cliente</th>
@@ -1118,12 +1186,15 @@ const Clientes = () => {
                                                             {cliente.telefono}
                                                         </p>
                                                     ) : null}
-                                                    {cliente.correo ? (
-                                                        <p className="flex items-center gap-1.5 text-gray-500 text-sm">
-                                                            <Mail className="w-3.5 h-3.5 text-gray-400 shrink-0" />
-                                                            <span>{cliente.correo}</span>
-                                                        </p>
-                                                    ) : null}
+                                                    {cliente.correo ? (() => {
+                                                        const emails = cliente.correo.split(',').map(e => e.trim()).filter(Boolean);
+                                                        return (
+                                                            <p className="flex items-center gap-1.5 text-gray-500 text-sm" title={cliente.correo}>
+                                                                <Mail className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                                                                <span>{emails[0]}{emails.length > 1 ? ' ...' : ''}</span>
+                                                            </p>
+                                                        );
+                                                    })() : null}
                                                     {!cliente.telefono && !cliente.correo && (
                                                         <span className="text-xs text-slate-400 italic">Sin contacto</span>
                                                     )}

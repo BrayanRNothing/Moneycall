@@ -1403,6 +1403,7 @@ const Calendario = () => {
                   Agenda
                 </button>
                 <button
+                  id="btn-calendario-agendar-tab"
                   onClick={() => setActiveTab("agendar")}
                   className={`flex-1 py-3 text-xs font-black uppercase tracking-widest transition-all border-b-2 ${activeTab === "agendar" ? "border-(--theme-500) text-(--theme-600)" : "border-transparent text-slate-400 hover:text-slate-600"}`}
                 >

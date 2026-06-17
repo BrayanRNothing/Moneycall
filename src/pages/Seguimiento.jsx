@@ -41,6 +41,7 @@ import TimeWheelPicker from '../components/TimeWheelPicker';
 import API_URL from '../config/api';
 import socket from '../config/socket';
 import SourcePicker from '../components/ui/SourcePicker';
+import { useBotStore } from '../store/useBotStore';
 
 // --- CSV helpers ---
 const CSV_HEADERS = ['nombres', 'apellidoPaterno', 'apellidoMaterno', 'telefono', 'correo', 'empresa', 'sitioWeb', 'ubicacion', 'notas', 'fuente'];
@@ -166,7 +167,7 @@ const Seguimiento = () => {
         apellidoPaterno: '',
         apellidoMaterno: '',
         telefonos: [''],
-        correo: '',
+        correos: [''],
         empresa: '',
         sitioWeb: '',
         ubicacion: '',
@@ -203,13 +204,14 @@ const Seguimiento = () => {
 
     const abrirModalEditar = (p) => {
         const tels = [p.telefono, p.telefono2].filter(Boolean);
+        const ems = (p.correo || '').split(',').map(e => e.trim()).filter(Boolean);
         setProspectoAEditar({
             id: p._id || p.id,
             nombres: p.nombres || '',
             apellidoPaterno: p.apellidoPaterno || '',
             apellidoMaterno: p.apellidoMaterno || '',
             telefonos: tels.length > 0 ? tels : [''],
-            correo: p.correo || '',
+            correos: ems.length > 0 ? ems : [''],
             empresa: p.empresa || '',
             sitioWeb: p.sitioWeb || '',
             ubicacion: p.ubicacion || '',
@@ -226,8 +228,17 @@ const Seguimiento = () => {
         setLoadingEditar(true);
         try {
             const telefonosLimpios = (prospectoAEditar.telefonos || []).filter(t => t.trim());
-            const payload = { ...prospectoAEditar, telefono: telefonosLimpios[0] || '', telefono2: telefonosLimpios.slice(1).join(', ') || '', interes: prospectoAEditar.interes || 0, fuente: prospectoAEditar.fuente || '' };
+            const correosLimpios = (prospectoAEditar.correos || []).filter(e => e.trim());
+            const payload = { 
+                ...prospectoAEditar, 
+                telefono: telefonosLimpios[0] || '', 
+                telefono2: telefonosLimpios.slice(1).join(', ') || '', 
+                correo: correosLimpios.join(', ') || '',
+                interes: prospectoAEditar.interes || 0, 
+                fuente: prospectoAEditar.fuente || '' 
+            };
             delete payload.telefonos;
+            delete payload.correos;
             await axios.put(`${API_URL}/api/${rolePath}/prospectos/${prospectoAEditar.id}/editar`, payload, {
                 headers: getAuthHeaders()
             });
@@ -337,6 +348,62 @@ const Seguimiento = () => {
             socket.off('prospectos_actualizados', handleSocketUpdate);
         };
     }, [searchParams, filtroVisibilidad]);
+
+    const { currentStep } = useBotStore();
+
+    const handleInputFocus = (stepId) => {
+        const botState = useBotStore.getState();
+        if (!botState.isOpen || !botState.currentStep) return;
+        if (!botState.currentStep.id.startsWith('create_prospect')) return;
+        if (botState.currentStep.id === stepId) return;
+        
+        const actions = botState.botActions;
+        if (!actions) return;
+        
+        switch (stepId) {
+            case 'create_prospect':
+                actions.stepCreateProspect?.();
+                break;
+            case 'create_prospect_surnames':
+                actions.stepCreateProspectSurnames?.();
+                break;
+            case 'create_prospect_surname_materno':
+                actions.stepCreateProspectSurnameMaterno?.();
+                break;
+            case 'create_prospect_phone':
+                actions.stepCreateProspectPhone?.();
+                break;
+            case 'create_prospect_emails':
+                actions.stepCreateProspectEmails?.();
+                break;
+            case 'create_prospect_company':
+                actions.stepCreateProspectCompany?.();
+                break;
+            case 'create_prospect_website':
+                actions.stepCreateProspectWebsite?.();
+                break;
+            case 'create_prospect_location':
+                actions.stepCreateProspectLocation?.();
+                break;
+            case 'create_prospect_notes':
+                actions.stepCreateProspectNotes?.();
+                break;
+            case 'create_prospect_source':
+                actions.stepCreateProspectSource?.();
+                break;
+            case 'create_prospect_confirm':
+                actions.stepCreateProspectConfirm?.();
+                break;
+            default:
+                break;
+        }
+    };
+
+    useEffect(() => {
+        if (currentStep?.id === 'create_prospect') {
+            setModalCrearAbierto(true);
+        }
+    }, [currentStep]);
 
     const handleToggleCompartido = async (prospecto, nuevoEstado) => {
         const id = prospecto.id || prospecto._id;
@@ -557,15 +624,25 @@ const Seguimiento = () => {
         setLoadingCrear(true);
         try {
             const telefonosLimpios = formCrear.telefonos.filter(t => t.trim());
-            const payload = { ...formCrear, telefono: telefonosLimpios[0] || '', telefono2: telefonosLimpios.slice(1).join(', ') || '' };
+            const correosLimpios = formCrear.correos.filter(e => e.trim());
+            const payload = { ...formCrear, telefono: telefonosLimpios[0] || '', telefono2: telefonosLimpios.slice(1).join(', ') || '', correo: correosLimpios.join(', ') || '' };
             delete payload.telefonos;
+            delete payload.correos;
             await axios.post(`${API_URL}/api/${rolePath}/crear-prospecto`, payload, {
                 headers: getAuthHeaders()
             });
             toast.success('Prospecto creado');
             setModalCrearAbierto(false);
-            setFormCrear({ nombres: '', apellidoPaterno: '', apellidoMaterno: '', telefonos: [''], correo: '', empresa: '', sitioWeb: '', ubicacion: '', notas: '', fuente: '' });
+            setFormCrear({ nombres: '', apellidoPaterno: '', apellidoMaterno: '', telefonos: [''], correos: [''], empresa: '', sitioWeb: '', ubicacion: '', notas: '', fuente: '' });
             cargarDatos();
+
+            // Avanzar el bot automáticamente si está en el flujo de creación de prospecto
+            const botState = useBotStore.getState();
+            if (botState.currentStep && botState.currentStep.id.startsWith('create_prospect')) {
+                if (botState.botActions?.stepSelectProspectAfterCreation) {
+                    botState.botActions.stepSelectProspectAfterCreation();
+                }
+            }
         } catch (error) {
             toast.error(error.response?.data?.msg || 'Error al crear');
         } finally {
@@ -577,6 +654,15 @@ const Seguimiento = () => {
         setProspectoSeleccionado(p);
         if (p) {
             setSearchParams({ p: p.id || p._id });
+            // Si el bot está activo y esperando que abramos el prospecto, avanzar al tour
+            const botState = useBotStore.getState();
+            if (botState.isOpen && (botState.currentStep?.id === 'select_created' || botState.currentStep?.id === 'select_prospect')) {
+                if (botState.botActions?.stepTourDetailInteres) {
+                    setTimeout(() => {
+                        botState.botActions.stepTourDetailInteres();
+                    }, 300);
+                }
+            }
         } else {
             setSearchParams({});
         }
@@ -652,7 +738,7 @@ const Seguimiento = () => {
                             <button 
                                 onClick={() => {
                                     setModalCrearAbierto(false);
-                                    setFormCrear({ nombres: '', apellidoPaterno: '', apellidoMaterno: '', telefonos: [''], correo: '', empresa: '', sitioWeb: '', ubicacion: '', notas: '', fuente: '' });
+                                    setFormCrear({ nombres: '', apellidoPaterno: '', apellidoMaterno: '', telefonos: [''], correos: [''], empresa: '', sitioWeb: '', ubicacion: '', notas: '', fuente: '' });
                                 }} 
                                 className="p-2 hover:bg-slate-100 rounded-xl transition-all text-slate-400 hover:text-slate-600"
                             >
@@ -674,9 +760,11 @@ const Seguimiento = () => {
                                         <div>
                                             <label className="block text-[10px] font-black text-slate-500 mb-1.5 uppercase tracking-wider">Nombres *</label>
                                             <input
+                                                id="crear-prospecto-nombres"
                                                 type="text"
                                                 value={formCrear.nombres}
                                                 onChange={(e) => setFormCrear((f) => ({ ...f, nombres: e.target.value }))}
+                                                onFocus={() => handleInputFocus('create_prospect')}
                                                 className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-(--theme-500) focus:bg-white transition-all outline-none font-medium"
                                                 placeholder="Juan"
                                             />
@@ -685,9 +773,11 @@ const Seguimiento = () => {
                                             <div>
                                                 <label className="block text-[10px] font-black text-slate-500 mb-1.5 uppercase tracking-wider">Apellido Paterno</label>
                                                 <input
+                                                    id="crear-prospecto-apellido-paterno"
                                                     type="text"
                                                     value={formCrear.apellidoPaterno}
                                                     onChange={(e) => setFormCrear((f) => ({ ...f, apellidoPaterno: e.target.value }))}
+                                                    onFocus={() => handleInputFocus('create_prospect_surnames')}
                                                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-(--theme-500) focus:bg-white transition-all outline-none font-medium"
                                                     placeholder="García"
                                                 />
@@ -695,9 +785,11 @@ const Seguimiento = () => {
                                             <div>
                                                 <label className="block text-[10px] font-black text-slate-500 mb-1.5 uppercase tracking-wider">Apellido Materno</label>
                                                 <input
+                                                    id="crear-prospecto-apellido-materno"
                                                     type="text"
                                                     value={formCrear.apellidoMaterno}
                                                     onChange={(e) => setFormCrear((f) => ({ ...f, apellidoMaterno: e.target.value }))}
+                                                    onFocus={() => handleInputFocus('create_prospect_surname_materno')}
                                                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-(--theme-500) focus:bg-white transition-all outline-none font-medium"
                                                     placeholder="López"
                                                 />
@@ -729,9 +821,11 @@ const Seguimiento = () => {
                                                     <div key={idx} className="relative group">
                                                         <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 group-focus-within:text-(--theme-500) transition-colors" />
                                                         <input
+                                                            id={`crear-prospecto-telefonos-${idx}`}
                                                             type="tel"
                                                             value={tel}
                                                             onChange={(e) => setFormCrear((f) => { const t = [...f.telefonos]; t[idx] = e.target.value; return { ...f, telefonos: t }; })}
+                                                            onFocus={() => handleInputFocus('create_prospect_phone')}
                                                             className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-10 py-3 text-sm focus:ring-2 focus:ring-(--theme-500) focus:bg-white transition-all outline-none font-medium"
                                                             placeholder="55 1234 5678"
                                                         />
@@ -749,16 +843,40 @@ const Seguimiento = () => {
                                             </div>
                                         </div>
                                         <div>
-                                            <label className="block text-[10px] font-black text-slate-500 mb-1.5 uppercase tracking-wider">Correo Electrónico</label>
-                                            <div className="relative group">
-                                                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 group-focus-within:text-(--theme-500) transition-colors" />
-                                                <input
-                                                    type="email"
-                                                    value={formCrear.correo}
-                                                    onChange={(e) => setFormCrear((f) => ({ ...f, correo: e.target.value }))}
-                                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 py-3 text-sm focus:ring-2 focus:ring-(--theme-500) focus:bg-white transition-all outline-none font-medium"
-                                                    placeholder="ejemplo@correo.com"
-                                                />
+                                            <div className="flex items-center justify-between mb-1.5">
+                                                <label className="block text-[10px] font-black text-slate-500 uppercase tracking-wider">Correos Electrónicos</label>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setFormCrear((f) => ({ ...f, correos: [...f.correos, ''] }))}
+                                                    className="text-[10px] text-(--theme-600) hover:text-(--theme-700) font-black uppercase tracking-tighter"
+                                                >
+                                                    + Añadir otro
+                                                </button>
+                                            </div>
+                                            <div className="space-y-2">
+                                                {formCrear.correos.map((cor, idx) => (
+                                                    <div key={idx} className="relative group">
+                                                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 group-focus-within:text-(--theme-500) transition-colors" />
+                                                        <input
+                                                            id={`crear-prospecto-correos-${idx}`}
+                                                            type="email"
+                                                            value={cor}
+                                                            onChange={(e) => setFormCrear((f) => { const c = [...f.correos]; c[idx] = e.target.value; return { ...f, correos: c }; })}
+                                                            onFocus={() => handleInputFocus('create_prospect_emails')}
+                                                            className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-10 py-3 text-sm focus:ring-2 focus:ring-(--theme-500) focus:bg-white transition-all outline-none font-medium"
+                                                            placeholder="ejemplo@correo.com"
+                                                        />
+                                                        {formCrear.correos.length > 1 && (
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => setFormCrear((f) => ({ ...f, correos: f.correos.filter((_, i) => i !== idx) }))}
+                                                                className="absolute right-3 top-1/2 -translate-y-1/2 text-red-300 hover:text-red-500 transition-colors"
+                                                            >
+                                                                <X className="w-4 h-4" />
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                ))}
                                             </div>
                                         </div>
                                     </div>
@@ -776,9 +894,11 @@ const Seguimiento = () => {
                                             <div className="relative group">
                                                 <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 group-focus-within:text-(--theme-500) transition-colors" />
                                                 <input
+                                                    id="crear-prospecto-empresa"
                                                     type="text"
                                                     value={formCrear.empresa}
                                                     onChange={(e) => setFormCrear((f) => ({ ...f, empresa: e.target.value }))}
+                                                    onFocus={() => handleInputFocus('create_prospect_company')}
                                                     className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 py-3 text-sm focus:ring-2 focus:ring-(--theme-500) focus:bg-white transition-all outline-none font-medium"
                                                     placeholder="Empresa S.A."
                                                 />
@@ -789,9 +909,11 @@ const Seguimiento = () => {
                                             <div className="relative group">
                                                 <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 group-focus-within:text-(--theme-500) transition-colors" />
                                                 <input
+                                                    id="crear-prospecto-sitio-web"
                                                     type="url"
                                                     value={formCrear.sitioWeb}
                                                     onChange={(e) => setFormCrear((f) => ({ ...f, sitioWeb: e.target.value }))}
+                                                    onFocus={() => handleInputFocus('create_prospect_website')}
                                                     className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 py-3 text-sm focus:ring-2 focus:ring-(--theme-500) focus:bg-white transition-all outline-none font-medium"
                                                     placeholder="https://google.com"
                                                 />
@@ -802,9 +924,11 @@ const Seguimiento = () => {
                                             <div className="relative group">
                                                 <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 group-focus-within:text-(--theme-500) transition-colors" />
                                                 <input
+                                                    id="crear-prospecto-ubicacion"
                                                     type="text"
                                                     value={formCrear.ubicacion}
                                                     onChange={(e) => setFormCrear((f) => ({ ...f, ubicacion: e.target.value }))}
+                                                    onFocus={() => handleInputFocus('create_prospect_location')}
                                                     className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 py-3 text-sm focus:ring-2 focus:ring-(--theme-500) focus:bg-white transition-all outline-none font-medium"
                                                     placeholder="CDMX, México"
                                                 />
@@ -819,9 +943,11 @@ const Seguimiento = () => {
                                         Notas & Contexto Inicial
                                     </h3>
                                     <textarea
+                                        id="crear-prospecto-notas"
                                         rows={2}
                                         value={formCrear.notas}
                                         onChange={(e) => setFormCrear((f) => ({ ...f, notas: e.target.value }))}
+                                        onFocus={() => handleInputFocus('create_prospect_notes')}
                                         className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm focus:ring-2 focus:ring-(--theme-500) focus:bg-white transition-all outline-none font-medium resize-none mb-2"
                                         placeholder="Escribe aquí cualquier detalle relevante sobre el prospecto antes de crearlo..."
                                     />
@@ -830,10 +956,16 @@ const Seguimiento = () => {
                                         <div className="w-1 h-3 bg-indigo-500 rounded-full"></div>
                                         Fuente del Prospecto
                                     </h3>
-                                    <SourcePicker 
-                                        selectedSource={formCrear.fuente} 
-                                        onChange={(val) => setFormCrear(f => ({ ...f, fuente: val }))} 
-                                    />
+                                    <div 
+                                        id="crear-prospecto-fuente"
+                                        onFocus={() => handleInputFocus('create_prospect_source')}
+                                        onClick={() => handleInputFocus('create_prospect_source')}
+                                    >
+                                        <SourcePicker 
+                                            selectedSource={formCrear.fuente} 
+                                            onChange={(val) => setFormCrear(f => ({ ...f, fuente: val }))} 
+                                        />
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -843,15 +975,17 @@ const Seguimiento = () => {
                             <button
                                 onClick={() => {
                                     setModalCrearAbierto(false);
-                                    setFormCrear({ nombres: '', apellidoPaterno: '', apellidoMaterno: '', telefonos: [''], correo: '', empresa: '', sitioWeb: '', ubicacion: '', notas: '', fuente: '' });
+                                    setFormCrear({ nombres: '', apellidoPaterno: '', apellidoMaterno: '', telefonos: [''], correos: [''], empresa: '', sitioWeb: '', ubicacion: '', notas: '', fuente: '' });
                                 }}
                                 className="flex-1 px-6 py-3.5 bg-white border border-slate-200 text-slate-500 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-slate-50 hover:text-slate-700 transition-all shadow-sm"
                             >
                                 Cancelar
                             </button>
                             <button
+                                id="crear-prospecto-confirmar"
                                 onClick={handleCrearProspecto}
                                 disabled={loadingCrear}
+                                onFocus={() => handleInputFocus('create_prospect_confirm')}
                                 className="flex-2 px-6 py-3.5 bg-linear-to-r from-(--theme-600) to-(--theme-700) text-white rounded-xl text-xs font-black uppercase tracking-widest hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-(--theme-500)/25"
                             >
                                 {loadingCrear ? 'Procesando...' : 'Confirmar y Crear Prospecto'}
@@ -964,14 +1098,39 @@ const Seguimiento = () => {
                                         </div>
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wider">Correo Electrónico</label>
-                                        <input
-                                            type="email"
-                                            value={prospectoAEditar.correo}
-                                            onChange={(e) => setProspectoAEditar((f) => ({ ...f, correo: e.target.value }))}
-                                            className="w-full border border-slate-200 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-(--theme-400) focus:border-transparent transition-all outline-none hover:border-slate-300"
-                                            placeholder="ejemplo@empresa.com"
-                                        />
+                                        <div className="flex items-center justify-between mb-2">
+                                            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider">Correos Electrónicos</label>
+                                            <button
+                                                type="button"
+                                                onClick={() => setProspectoAEditar((f) => ({ ...f, correos: [...(f.correos || ['']), ''] }))}
+                                                className="flex items-center gap-1.5 text-xs text-(--theme-600) hover:text-(--theme-700) font-bold hover:bg-(--theme-50) px-2.5 py-1.5 rounded-lg transition-all"
+                                            >
+                                                <Plus className="w-3.5 h-3.5" /> Agregar
+                                            </button>
+                                        </div>
+                                        <div className="space-y-2">
+                                            {(prospectoAEditar.correos || ['']).map((cor, idx) => (
+                                                <div key={idx} className="flex gap-3 items-center bg-linear-to-r from-slate-50 to-white p-3 rounded-lg border border-slate-200 hover:border-slate-300 transition-all group">
+                                                    <Mail className="w-4 h-4 text-slate-400 group-hover:text-slate-600 transition-colors shrink-0" />
+                                                    <input
+                                                        type="email"
+                                                        value={cor}
+                                                        onChange={(e) => setProspectoAEditar((f) => { const c = [...(f.correos || [''])]; c[idx] = e.target.value; return { ...f, correos: c }; })}
+                                                        className="flex-1 bg-transparent border-0 focus:ring-0 text-sm py-1 outline-none"
+                                                        placeholder="ejemplo@correo.com"
+                                                    />
+                                                    {(prospectoAEditar.correos || ['']).length > 1 && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setProspectoAEditar((f) => ({ ...f, correos: (f.correos || ['']).filter((_, i) => i !== idx) }))}
+                                                            className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-all"
+                                                        >
+                                                            <X className="w-4 h-4" />
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            ))}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -1300,6 +1459,7 @@ const Seguimiento = () => {
                     </div>
                     <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap w-full sm:w-auto mt-2 sm:mt-0">
                         <button
+                            id="btn-importar-csv"
                             onClick={() => setIsImportModalAbierto(true)}
                             disabled={importando}
                             className="flex-1 sm:flex-none justify-center flex items-center gap-1.5 px-3 py-2 md:px-4 md:py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-50 transition-colors text-[11px] md:text-sm font-medium"
@@ -1309,6 +1469,7 @@ const Seguimiento = () => {
                             {importando ? 'Importando...' : 'Importar CSV'}
                         </button>
                         <button
+                            id="btn-exportar-csv"
                             onClick={handleExportCsv}
                             disabled={loading || !prospectosFiltrados.length}
                             className="flex-1 sm:flex-none justify-center flex items-center gap-1.5 px-3 py-2 md:px-4 md:py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-800 disabled:opacity-50 transition-colors text-[11px] md:text-sm font-medium"
@@ -1318,6 +1479,7 @@ const Seguimiento = () => {
                             Exportar CSV
                         </button>
                         <button
+                            id="btn-crear-prospecto"
                             onClick={() => setModalCrearAbierto(true)}
                             className="w-full sm:w-auto justify-center flex items-center gap-2 px-3 py-2 md:px-4 md:py-2 bg-(--theme-600) text-white rounded-lg hover:bg-(--theme-700) transition-colors text-xs md:text-sm font-medium"
                         >
@@ -1328,7 +1490,7 @@ const Seguimiento = () => {
                 </div>
 
                 {/* Buscador + Filtros 30/70 */}
-                <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+                <div id="seccion-filtros-busqueda" className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
                     <div className="grid grid-cols-1 lg:grid-cols-[30%_1fr] gap-4 items-center">
                         {/* 30% Búsqueda */}
                         <div className="relative w-full">
@@ -1365,14 +1527,15 @@ const Seguimiento = () => {
                                 ))}
                             </div>
                             <div className="w-px h-6 bg-slate-200 mx-1 shrink-0 hidden md:block"></div>
-                            <div className="flex flex-nowrap md:flex-wrap gap-1.5 shrink-0">
+                            <div id="seccion-filtros-etapa" className="flex flex-nowrap md:flex-wrap gap-1.5 shrink-0">
                                 {[
                                     { value: 'todos', label: 'Todos' },
                                     { value: 'en_contacto', label: 'En contacto' },
-                                    { value: 'sin_respuesta', label: 'Sin respuesta' },
+                                    { value: 'sin_respuesta', label: 'Sin contacto' },
                                     { value: 'no_contactado', label: 'No contactado' },
                                     { value: 'con_cita', label: 'Con cita' },
                                 ].map(btn => (
+
                                     <button
                                         key={btn.value}
                                         onClick={() => setFiltroEtapa(btn.value)}
@@ -1475,7 +1638,7 @@ const Seguimiento = () => {
                 ) : (
                     <div className="bg-white md:border md:border-slate-200 md:rounded-2xl md:shadow-sm overflow-hidden">
                         <div className="overflow-x-auto">
-                            <table className="min-w-full text-sm">
+                            <table id="tabla-prospectos" className="min-w-full text-sm">
                                 <thead className="bg-slate-100/70 text-slate-500 uppercase">
                                     <tr>
                                         <th className="px-2 md:px-4 py-2 md:py-3 text-left font-semibold text-[10px] md:text-xs">Cliente</th>
@@ -1515,12 +1678,15 @@ const Seguimiento = () => {
                                                             <Phone className="w-3.5 h-3.5 text-gray-400 shrink-0" />
                                                             {p.telefono}
                                                         </p>
-                                                    ) : p.correo ? (
-                                                        <p className="flex items-center gap-1 text-gray-500 text-sm">
-                                                            <Mail className="w-3.5 h-3.5 text-gray-400 shrink-0" />
-                                                            <span>{p.correo}</span>
-                                                        </p>
-                                                    ) : (
+                                                    ) : p.correo ? (() => {
+                                                        const emails = p.correo.split(',').map(e => e.trim()).filter(Boolean);
+                                                        return (
+                                                            <p className="flex items-center gap-1 text-gray-500 text-sm" title={p.correo}>
+                                                                <Mail className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                                                                <span>{emails[0]}{emails.length > 1 ? ' ...' : ''}</span>
+                                                            </p>
+                                                        );
+                                                    })() : (
                                                         <span className="text-xs text-slate-400 italic">Sin contacto</span>
                                                     )}
                                                 </div>
@@ -1613,7 +1779,7 @@ const Seguimiento = () => {
                                                                 e.stopPropagation();
                                                                 handleToggleCompartido(p, !p.compartido);
                                                             }}
-                                                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold border transition-colors ${p.compartido
+                                                            className={`btn-compartir-prospecto inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold border transition-colors ${p.compartido
                                                                 ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
                                                                 : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
                                                                 }`}
