@@ -1125,13 +1125,19 @@ export default function ClienteDetalle({
                                 </button>
                                 {/* Agendar reunión */}
                                 <button
-                                    onClick={() => navigate(`/${calendarRolePath}/calendario`, { 
-                                        state: { 
-                                            cliente: ClienteSeleccionado,
-                                            activeTab: 'agendar',
-                                            fromCall: true 
-                                        } 
-                                    })}
+                                    onClick={() => {
+                                        if (!ClienteSeleccionado.correo) {
+                                            toast.error("El cliente no tiene un correo electrónico registrado.");
+                                            return;
+                                        }
+                                        navigate(`/${calendarRolePath}/calendario`, { 
+                                            state: { 
+                                                cliente: ClienteSeleccionado,
+                                                activeTab: 'agendar',
+                                                fromCall: true 
+                                            } 
+                                        });
+                                    }}
                                     className="flex flex-col items-center justify-center gap-2 bg-white border-2 border-slate-200 hover:border-(--theme-500) rounded-xl p-4 text-gray-700 hover:text-(--theme-600) transition-all shadow-sm font-bold text-sm text-center leading-tight"
                                 >
                                     <Calendar className="w-6 h-6" />

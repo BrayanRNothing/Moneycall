@@ -824,6 +824,10 @@ const Calendario = () => {
       toast.error(contactType === "cliente" ? "Selecciona un cliente" : "Selecciona un prospecto");
       return;
     }
+    if (!prospect.correo) {
+      toast.error(`El ${contactType} seleccionado no tiene un correo electrónico registrado.`);
+      return;
+    }
 
     const loadingToast = toast.loading(
       "Agendando cita y creando sala virtual...",
@@ -1795,8 +1799,8 @@ const Calendario = () => {
                                     <div className="flex items-start gap-4 mb-4">
                                       <div className="flex-1 min-w-0">
                                         {/* 1. Title Top */}
-                                        <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block mb-1">
-                                          Reunión con prospecto
+                                        <span className={`text-[10px] font-extrabold uppercase tracking-widest block mb-1 ${['venta_ganada', 'cotizacion_realizada', 'contrato_firmado', 'esperando_pago', 'cliente_activo'].includes(r?.cliente?.etapaEmbudo) ? 'text-indigo-500' : 'text-slate-400'}`}>
+                                          {['venta_ganada', 'cotizacion_realizada', 'contrato_firmado', 'esperando_pago', 'cliente_activo'].includes(r?.cliente?.etapaEmbudo) ? "Reunión con cliente" : "Reunión con prospecto"}
                                         </span>
 
                                         {/* 2. Name + Shortcut */}
@@ -1806,13 +1810,15 @@ const Calendario = () => {
                                             {r?.cliente?.apellidoPaterno}
                                           </h4>
                                           <button
-                                            onClick={() =>
-                                              navigate("/vendedor/prospectos", {
-                                                state: { prospecto: r.cliente },
-                                              })
-                                            }
+                                            onClick={() => {
+                                              const isClient = ['venta_ganada', 'cotizacion_realizada', 'contrato_firmado', 'esperando_pago', 'cliente_activo'].includes(r?.cliente?.etapaEmbudo);
+                                              const path = isClient ? "/vendedor/clientes" : "/vendedor/prospectos";
+                                              navigate(path, {
+                                                state: { selectedId: r.cliente?.id || r.cliente?._id },
+                                              });
+                                            }}
                                             className="p-1 text-(--theme-500) hover:bg-(--theme-50) rounded transition-colors"
-                                            title="Ver panel del prospecto"
+                                            title="Ver panel"
                                           >
                                             <ExternalLink className="w-3 h-3.5" />
                                           </button>
@@ -1842,7 +1848,7 @@ const Calendario = () => {
                                       </div>
 
                                       {/* Mini Actions (Edit/Delete) */}
-                                      <div className="flex gap-1 shrink-0">
+                                      <div className="flex gap-2 shrink-0">
                                         <button
                                           onClick={() => {
                                             setSelectedMeetingForEdit(r);
@@ -1855,19 +1861,21 @@ const Calendario = () => {
                                             });
                                             setShowEditModal(true);
                                           }}
-                                          className="p-1.5 text-slate-300 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
-                                          title="Editar"
+                                          className="flex items-center gap-1 px-2.5 py-1.5 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-all shadow-sm font-bold text-[10px]"
+                                          title="Editar Reunión"
                                         >
                                           <Edit2 className="w-3.5 h-3.5" />
+                                          <span className="hidden sm:inline">Editar</span>
                                         </button>
                                         <button
                                           onClick={() =>
                                             handleEliminarReunion(r.id)
                                           }
-                                          className="p-1.5 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-all"
-                                          title="Eliminar"
+                                          className="flex items-center gap-1 px-2.5 py-1.5 text-rose-600 bg-rose-50 hover:bg-rose-100 rounded-lg transition-all shadow-sm font-bold text-[10px]"
+                                          title="Borrar Reunión"
                                         >
                                           <Trash2 className="w-3.5 h-3.5" />
+                                          <span className="hidden sm:inline">Borrar</span>
                                         </button>
                                       </div>
                                     </div>

@@ -526,7 +526,8 @@ router.get('/calendario', [auth, esVendedor], async (req, res) => {
             return fechaCita >= ahora;
         }).map(r => ({
             ...toMongoFormat(r),
-            cliente: { nombres: r.c_nombres, apellidoPaterno: r.c_apellido, empresa: r.c_empresa, telefono: r.c_telefono, correo: r.c_correo, etapaEmbudo: r.c_etapa },
+            clienteId: r.cliente, // preserve original cliente id
+            cliente: { id: r.cliente, _id: r.cliente, nombres: r.c_nombres, apellidoPaterno: r.c_apellido, empresa: r.c_empresa, telefono: r.c_telefono, correo: r.c_correo, etapaEmbudo: r.c_etapa },
             vendedor: { nombre: r.v_nombre }
         }));
 
