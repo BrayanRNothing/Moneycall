@@ -288,8 +288,9 @@ router.post('/', auth, esSuperUser, async (req, res) => {
         const now = new Date().toISOString();
         const hist = JSON.stringify([{ etapa, fecha: now, vendedor: vendedorId }]);
 
-        const prospectorAsignado = usuarioId;
-        const closerAsignado = usuarioId;
+        const prospectorAsignado = vendedorId;
+        const closerAsignado = vendedorId;
+        const propietarioId = vendedorId;
 
         await db.prepare(`
             INSERT INTO clientes (nombres, apellidoPaterno, apellidoMaterno, telefono, correo, empresa, estado, etapaEmbudo, historialEmbudo, vendedorAsignado, prospectorAsignado, closerAsignado, fechaUltimaEtapa, "equipo_id", "propietarioId", compartido, fuente)
@@ -309,7 +310,7 @@ router.post('/', auth, esSuperUser, async (req, res) => {
             closerAsignado,
             now,
             equipoId,
-            usuarioId,
+            propietarioId,
             false,
             (fuente || 'Desconocido').trim()
         );
@@ -396,9 +397,17 @@ router.put('/:id', auth, esSuperUser, async (req, res) => {
 
         // Roles permitidos para reasignar
         const esAdmin = req.usuario.rol === 'admin';
-        if (esAdmin && vendedorAsignado) {
+        const esAsignador = req.usuario.rol === 'asignador';
+        if ((esAdmin || esAsignador) && vendedorAsignado) {
+            const newVendedorId = parseInt(vendedorAsignado);
             updates.push('vendedorAsignado = ?');
-            params.push(parseInt(vendedorAsignado));
+            params.push(newVendedorId);
+            updates.push('prospectorAsignado = ?');
+            params.push(newVendedorId);
+            updates.push('closerAsignado = ?');
+            params.push(newVendedorId);
+            updates.push('"propietarioId" = ?');
+            params.push(newVendedorId);
         }
 
         updates.push('ultimaInteraccion = ?');
