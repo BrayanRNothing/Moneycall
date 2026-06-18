@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import AnimatedGridBackground from '../components/ui/AnimatedGridBackground';
 import FloatingSidebar from '../components/ui/FloatingSidebar';
-import { getUser, saveUser, getToken } from '../utils/authUtils';
+import { getUser, saveUser, getToken, logout } from '../utils/authUtils';
 import API_URL from '../config/api';
 import logocrmoneycall from '../assets/logocrmoneycall.png';
 import useWindowSize from '../hooks/useWindowSize';
@@ -20,10 +20,12 @@ const MainLayout = () => {
     React.useEffect(() => {
         const userGuardado = getUser();
         if (!userGuardado) {
+            logout(); // Limpia cualquier dato residual
             window.location.href = '/'; // Force redirect if no session
             return;
         }
         if (userGuardado.rol && userGuardado.rol !== 'vendedor' && userGuardado.rol !== 'admin' && userGuardado.rol !== 'asignador') {
+            logout(); // Limpia storage antes de redirigir para evitar bucle
             window.location.href = '/';
             return;
         }
@@ -35,14 +37,27 @@ const MainLayout = () => {
             fetch(`${API_URL}/api/auth/me`, {
                 headers: { 'x-auth-token': token }
             })
-                .then(res => res.ok ? res.json() : Promise.reject('Failed to fetch'))
+                .then(res => {
+                    // Si el token expiró o es inválido, limpiar sesión y redirigir
+                    if (res.status === 401 || res.status === 403) {
+                        logout();
+                        window.location.href = '/?expired=1&msg=Tu+sesión+ha+expirado.+Por+favor+inicia+sesión+de+nuevo.';
+                        return Promise.reject('unauthorized');
+                    }
+                    if (!res.ok) return Promise.reject('server_error');
+                    return res.json();
+                })
                 .then(freshUser => {
                     if (freshUser && freshUser.id) {
                         setUsuario(freshUser);
                         saveUser(freshUser, !!localStorage.getItem('user'));
                     }
                 })
-                .catch(err => console.error('Failed to refresh user data:', err));
+                .catch(err => {
+                    if (err !== 'unauthorized') {
+                        console.error('Failed to refresh user data:', err);
+                    }
+                });
         }
     }, []);
 
