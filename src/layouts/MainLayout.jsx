@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import AnimatedGridBackground from '../components/ui/AnimatedGridBackground';
 import FloatingSidebar from '../components/ui/FloatingSidebar';
-import { getUser } from '../utils/authUtils';
+import { getUser, saveUser, getToken } from '../utils/authUtils';
+import API_URL from '../config/api';
 import logocrmoneycall from '../assets/logocrmoneycall.png';
 import useWindowSize from '../hooks/useWindowSize';
 import MainLayoutMobile from './MainLayoutMobile';
@@ -21,12 +22,27 @@ const MainLayout = () => {
             window.location.href = '/'; // Force redirect if no session
             return;
         }
-        // Protección de rol: permitir solo admin o vendedor en este layout
         if (userGuardado.rol && userGuardado.rol !== 'vendedor' && userGuardado.rol !== 'admin') {
             window.location.href = '/';
             return;
         }
         setUsuario(userGuardado);
+
+        // Fetch fresh user data to ensure we have latest properties like esOwner
+        const token = getToken();
+        if (token) {
+            fetch(`${API_URL}/api/auth/me`, {
+                headers: { 'x-auth-token': token }
+            })
+            .then(res => res.ok ? res.json() : Promise.reject('Failed to fetch'))
+            .then(freshUser => {
+                if (freshUser && freshUser.id) {
+                    setUsuario(freshUser);
+                    saveUser(freshUser, !!localStorage.getItem('user'));
+                }
+            })
+            .catch(err => console.error('Failed to refresh user data:', err));
+        }
     }, []);
 
     const isAdminRoot = usuario?.rol === 'admin';
@@ -98,6 +114,16 @@ const MainLayout = () => {
     const menuItems = [
         ...(isAdminRoot ? [panelAdminItem, { name: '__admin-separator__', isSpacer: true }] : []),
         ...vendedorMainItems,
+        ...(isAdminRoot || usuario?.esOwner ? [{
+            name: 'Monitoreo',
+            path: '/vendedor/monitoreo',
+            icon: (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+            )
+        }] : []),
         {
             name: 'Equipo',
             path: '/vendedor/equipo',

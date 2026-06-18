@@ -530,4 +530,61 @@ router.get('/exportar-miembros.csv', auth, esTeamOwner, async (req, res) => {
     }
 });
 
+// @route   GET /api/equipos/monitoreo/actividades
+// @desc    Obtener actividades recientes de todos los miembros del equipo
+// @access  Private (Team Owner)
+router.get('/monitoreo/actividades', auth, esTeamOwner, async (req, res) => {
+    try {
+        const equipoId = req.equipoId;
+        const { limit = 100, miembro_id } = req.query;
+
+        let sql = `
+            SELECT a.*, v.nombre as vendedorNombre, v.usuario as vendedorUsuario, v.email as vendedorEmail,
+                   c.nombres as c_nombres, c.apellidoPaterno as c_apellido, c.empresa as c_empresa
+            FROM actividades a
+            JOIN usuarios v ON a.vendedor = v.id
+            LEFT JOIN clientes c ON a.cliente = c.id
+            WHERE v."equipo_id" = ?
+        `;
+        const params = [equipoId];
+
+        if (miembro_id) {
+            sql += ' AND a.vendedor = ?';
+            params.push(parseInt(miembro_id));
+        }
+
+        sql += ' ORDER BY a.fecha DESC LIMIT ?';
+        params.push(parseInt(limit) || 100);
+
+        const rows = await db.prepare(sql).all(...params);
+        
+        const actividades = rows.map(r => ({
+            id: r.id,
+            tipo: r.tipo,
+            descripcion: r.descripcion,
+            resultado: r.resultado,
+            notas: r.notas,
+            fecha: r.fecha,
+            createdAt: r.createdAt,
+            vendedor: {
+                id: r.vendedor,
+                nombre: r.vendedorNombre,
+                usuario: r.vendedorUsuario,
+                email: r.vendedorEmail
+            },
+            cliente: r.cliente ? {
+                id: r.cliente,
+                nombres: r.c_nombres,
+                apellidoPaterno: r.c_apellido,
+                empresa: r.c_empresa
+            } : null
+        }));
+
+        res.json({ actividades });
+    } catch (error) {
+        console.error('Error en GET /api/equipos/monitoreo/actividades:', error);
+        res.status(500).json({ mensaje: 'Error del servidor' });
+    }
+});
+
 module.exports = router;

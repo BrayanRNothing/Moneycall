@@ -73,6 +73,12 @@ router.post('/login', async (req, res) => {
                     console.error('Error al registrar actividad de login:', actError);
                 }
 
+                let esOwner = false;
+                if (row.equipo_id) {
+                    const equipo = await db.prepare('SELECT owner_id FROM equipos WHERE id = ?').get(row.equipo_id);
+                    if (equipo && String(equipo.owner_id) === String(row.id)) esOwner = true;
+                }
+
                 res.json({
                     token,
                     usuario: {
@@ -82,7 +88,8 @@ router.post('/login', async (req, res) => {
                         rol: row.rol,
                         email: row.email,
                         telefono: row.telefono,
-                        equipo_id: row.equipo_id || null
+                        equipo_id: row.equipo_id || null,
+                        esOwner
                     }
                 });
             }
@@ -170,7 +177,12 @@ router.post('/register', async (req, res) => {
 router.get('/me', auth, async (req, res) => {
     try {
         const user = await db.prepare('SELECT id, usuario, nombre, rol, email, telefono, activo, "equipo_id" FROM usuarios WHERE id = ?').get(req.usuario.id);
-        res.json(user);
+        let esOwner = false;
+        if (user && user.equipo_id) {
+            const equipo = await db.prepare('SELECT owner_id FROM equipos WHERE id = ?').get(user.equipo_id);
+            if (equipo && String(equipo.owner_id) === String(user.id)) esOwner = true;
+        }
+        res.json({ ...user, esOwner });
     } catch (error) {
         console.error('Error en auth/me:', error);
         res.status(500).json({ mensaje: 'Error del servidor' });
