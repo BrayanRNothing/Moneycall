@@ -450,7 +450,7 @@ export const useMoneycallBotLogic = () => {
   const stepEquipoRoles = () => {
     setCurrentStep({
       id: 'equipo_roles',
-      text: 'Por defecto, los nuevos miembros tienen el rol de Vendedor. Esto les permite ver sus propios prospectos. Si cambias el estado de un prospecto a "Compartido", tus compañeros también podrán gestionarlo.',
+      text: 'El sistema cuenta con los siguientes roles clave:\n\n👑 **Dueño de Equipo (Owner)**: Gestiona la configuración, las fórmulas de ventas y supervisa todo el equipo.\n💼 **Asignador**: Registra prospectos y los distribuye equitativamente entre los vendedores.\n👥 **Vendedor**: Gestiona su cartera de clientes, realiza llamadas de seguimiento y cierra ventas.\n🛡️ **Admin Root**: Administrador global del sistema con control total de propietarios y configuraciones.',
       options: [
         { label: 'Volver', action: () => stepEquipoIntro() }
       ]

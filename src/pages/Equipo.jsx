@@ -36,6 +36,16 @@ export default function Equipo() {
   const userAuth = getUser();
   const token = getToken();
 
+  if (!userAuth?.esOwner && userAuth?.rol !== 'admin') {
+      return (
+          <div className="flex flex-col items-center justify-center py-20 min-h-screen">
+              <AlertTriangle size={64} className="text-rose-500 mb-4" />
+              <h2 className="text-2xl font-bold text-gray-900">{t('Acceso Denegado')}</h2>
+              <p className="text-gray-500">{t('Solo el propietario del equipo puede acceder a esta sección.')}</p>
+          </div>
+      );
+  }
+
   const [equipo, setEquipo] = useState(null);
   const [miembros, setMiembros] = useState([]);
   const [resumen, setResumen] = useState({ total: 0, activos: 0, inactivos: 0 });
