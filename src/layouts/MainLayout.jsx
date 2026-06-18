@@ -178,7 +178,7 @@ const MainLayout = () => {
             <>
                 <MainLayoutMobile
                     menuItems={menuItems}
-                    userInfo={{ ...usuario, rol: 'Vendedor' }}
+                    userInfo={{ ...usuario, rol: getRoleLabel() }}
                 />
                 <MoneycallBot />
             </>

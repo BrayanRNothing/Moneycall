@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react';
 import Avatar from './Avatar';
+import { useTranslation } from '../../utils/translations';
 
 const SIDEBAR_HINT_KEY = 'crm_sidebar_hint_seen';
 
@@ -15,6 +16,7 @@ const BrandGlyph = () => (
 );
 
 const FloatingSidebar = ({ menuItems, userInfo, title = 'crmoneycall', subtitle = 'Workspace', logo, onCollapseChange, mode = 'light' }) => {
+    const { t } = useTranslation();
     const location = useLocation();
     const [isCollapsed, setIsCollapsed] = useState(true);
     const [openAccordions, setOpenAccordions] = useState({});
@@ -108,7 +110,7 @@ const FloatingSidebar = ({ menuItems, userInfo, title = 'crmoneycall', subtitle 
                                 {userInfo?.nombre || title}
                             </p>
                             <p className={`text-[11px] font-semibold mt-1 leading-none truncate transition-opacity ${isDark ? 'text-gray-400 group-hover:text-gray-300' : 'text-gray-400 group-hover:text-gray-600'}`}>
-                                {userInfo?.rol || subtitle}
+                                {t(userInfo?.rol) || t(subtitle)}
                             </p>
                         </button>
                         <button
@@ -134,7 +136,7 @@ const FloatingSidebar = ({ menuItems, userInfo, title = 'crmoneycall', subtitle 
                                     <div key={`sp-${index}`} className="h-3" />
                                 ) : (
                                     <div key={`sp-${index}`} className={`my-2 pt-2 border-t ${borderClass}`}>
-                                        <p className="px-3 text-[10px] font-bold uppercase tracking-[0.16em] opacity-50">Módulos de Vendedor</p>
+                                        <p className="px-3 text-[10px] font-bold uppercase tracking-[0.16em] opacity-50">{t('Módulos de Vendedor')}</p>
                                     </div>
                                 );
                             }
@@ -158,12 +160,12 @@ const FloatingSidebar = ({ menuItems, userInfo, title = 'crmoneycall', subtitle 
                                                 }
                                             }}
                                             className={`w-full flex items-center ${isCollapsed ? 'justify-center px-0' : 'gap-3 px-3'} py-3 rounded-xl transition-all ${hasActiveChild && isCollapsed ? activeClasses : `${inactiveClasses} ${hoverClasses}`}`}
-                                            title={isCollapsed ? item.name : ''}
+                                            title={isCollapsed ? t(item.name) : ''}
                                         >
                                             <div className="shrink-0">{item.icon}</div>
                                             {!isCollapsed && (
                                                 <>
-                                                    <span className="font-medium truncate flex-1 text-left">{item.name}</span>
+                                                    <span className="font-medium truncate flex-1 text-left">{t(item.name)}</span>
                                                     <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
                                                 </>
                                             )}
@@ -174,7 +176,7 @@ const FloatingSidebar = ({ menuItems, userInfo, title = 'crmoneycall', subtitle 
                                             <div className="fixed left-22 ml-1 invisible group-hover/accordion:visible opacity-0 group-hover/accordion:opacity-100 transition-all duration-200 z-100">
                                                 <div className={`${containerClasses} border rounded-2xl p-2 min-w-[180px] backdrop-blur-xl`}>
                                                     <div className={`px-3 py-2 border-b ${borderClass} mb-1`}>
-                                                        <p className="text-xs font-bold uppercase tracking-wider opacity-50">{item.name}</p>
+                                                        <p className="text-xs font-bold uppercase tracking-wider opacity-50">{t(item.name)}</p>
                                                     </div>
                                                     <div className="space-y-1">
                                                         {item.children.map((child, childIndex) => {
@@ -184,7 +186,7 @@ const FloatingSidebar = ({ menuItems, userInfo, title = 'crmoneycall', subtitle 
                                                                     className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all text-sm ${isChildActive ? activeClasses : `${inactiveClasses} ${hoverClasses}`}`}
                                                                 >
                                                                     <div className="shrink-0">{child.icon}</div>
-                                                                    <span className="font-medium truncate">{child.name}</span>
+                                                                    <span className="font-medium truncate">{t(child.name)}</span>
                                                                 </Link>
                                                             );
                                                         })}
@@ -203,7 +205,7 @@ const FloatingSidebar = ({ menuItems, userInfo, title = 'crmoneycall', subtitle 
                                                             className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all text-sm ${isChildActive ? activeClasses : `${inactiveClasses} ${hoverClasses}`}`}
                                                         >
                                                             <div className="shrink-0">{child.icon}</div>
-                                                            <span className="font-medium truncate">{child.name}</span>
+                                                            <span className="font-medium truncate">{t(child.name)}</span>
                                                         </Link>
                                                     );
                                                 })}
@@ -215,10 +217,10 @@ const FloatingSidebar = ({ menuItems, userInfo, title = 'crmoneycall', subtitle 
                             return (
                                 <Link key={index} to={item.path}
                                     className={`flex items-center ${isCollapsed ? 'justify-center px-0' : 'gap-3 px-3'} py-3 rounded-xl transition-all ${isActive ? activeClasses : `${inactiveClasses} ${hoverClasses}`}`}
-                                    title={isCollapsed ? item.name : ''}
+                                    title={isCollapsed ? t(item.name) : ''}
                                 >
                                     <div className="shrink-0">{item.icon}</div>
-                                    {!isCollapsed && <span className="font-medium truncate">{item.name}</span>}
+                                    {!isCollapsed && <span className="font-medium truncate">{t(item.name)}</span>}
                                 </Link>
                             );
                         })}
@@ -249,12 +251,12 @@ const FloatingSidebar = ({ menuItems, userInfo, title = 'crmoneycall', subtitle 
                                                 }
                                             }}
                                             className={`w-full flex items-center ${isCollapsed ? 'justify-center px-0' : 'gap-3 px-3'} py-3 rounded-xl transition-all ${hasActiveChild && isCollapsed ? activeClasses : `${inactiveClasses} ${hoverClasses}`}`}
-                                            title={isCollapsed ? item.name : ''}
+                                            title={isCollapsed ? t(item.name) : ''}
                                         >
                                             <div className="shrink-0">{item.icon}</div>
                                             {!isCollapsed && (
                                                 <>
-                                                    <span className="font-medium truncate flex-1 text-left">{item.name}</span>
+                                                    <span className="font-medium truncate flex-1 text-left">{t(item.name)}</span>
                                                     <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
                                                 </>
                                             )}
@@ -265,7 +267,7 @@ const FloatingSidebar = ({ menuItems, userInfo, title = 'crmoneycall', subtitle 
                                             <div className="fixed left-22 bottom-4 ml-1 invisible group-hover/accordion:visible opacity-0 group-hover/accordion:opacity-100 transition-all duration-200 z-100">
                                                 <div className={`${containerClasses} border rounded-2xl p-2 min-w-[180px] backdrop-blur-xl`}>
                                                     <div className={`px-3 py-2 border-b ${borderClass} mb-1`}>
-                                                        <p className="text-xs font-bold uppercase tracking-wider opacity-50">{item.name}</p>
+                                                        <p className="text-xs font-bold uppercase tracking-wider opacity-50">{t(item.name)}</p>
                                                     </div>
                                                     <div className="space-y-1">
                                                         {item.children.map((child, childIndex) => {
@@ -275,7 +277,7 @@ const FloatingSidebar = ({ menuItems, userInfo, title = 'crmoneycall', subtitle 
                                                                     className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all text-sm ${isChildActive ? activeClasses : `${inactiveClasses} ${hoverClasses}`}`}
                                                                 >
                                                                     <div className="shrink-0">{child.icon}</div>
-                                                                    <span className="font-medium truncate">{child.name}</span>
+                                                                    <span className="font-medium truncate">{t(child.name)}</span>
                                                                 </Link>
                                                             );
                                                         })}
@@ -293,7 +295,7 @@ const FloatingSidebar = ({ menuItems, userInfo, title = 'crmoneycall', subtitle 
                                                             className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all text-sm ${isChildActive ? activeClasses : `${inactiveClasses} ${hoverClasses}`}`}
                                                         >
                                                             <div className="shrink-0">{child.icon}</div>
-                                                            <span className="font-medium truncate">{child.name}</span>
+                                                            <span className="font-medium truncate">{t(child.name)}</span>
                                                         </Link>
                                                     );
                                                 })}
@@ -305,10 +307,10 @@ const FloatingSidebar = ({ menuItems, userInfo, title = 'crmoneycall', subtitle 
                             return (
                                 <Link key={`bot-${index}`} to={item.path}
                                     className={`flex items-center ${isCollapsed ? 'justify-center px-0' : 'gap-3 px-3'} py-3 rounded-xl transition-all ${isActive ? activeClasses : `${inactiveClasses} ${hoverClasses}`}`}
-                                    title={isCollapsed ? item.name : ''}
+                                    title={isCollapsed ? t(item.name) : ''}
                                 >
                                     <div className="shrink-0">{item.icon}</div>
-                                    {!isCollapsed && <span className="font-medium truncate">{item.name}</span>}
+                                    {!isCollapsed && <span className="font-medium truncate">{t(item.name)}</span>}
                                 </Link>
                             );
                         })}

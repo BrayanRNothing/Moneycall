@@ -1,10 +1,12 @@
 import React from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from '../utils/translations';
 import AnimatedGridBackground from '../components/ui/AnimatedGridBackground';
 import logocrmoneycall from '../assets/logocrmoneycall.png';
 
 const MainLayoutMobile = ({ menuItems, userInfo }) => {
+    const { t } = useTranslation();
     const location = useLocation();
     const isDashboard = location.pathname === '/' || location.pathname === '/dashboard';
 
@@ -21,7 +23,7 @@ const MainLayoutMobile = ({ menuItems, userInfo }) => {
                             </div>
                             <div className="flex flex-col">
                                 <span className="text-[11px] font-black tracking-[0.15em] uppercase text-slate-800 leading-none">CRMoneyCall</span>
-                                <span className="text-[9px] font-bold text-(--theme-500) uppercase tracking-widest mt-0.5">{userInfo?.rol || 'Workspace'}</span>
+                                <span className="text-[9px] font-bold text-(--theme-500) uppercase tracking-widest mt-0.5">{t(userInfo?.rol) || t('Workspace')}</span>
                             </div>
                         </div>
                         
@@ -30,7 +32,7 @@ const MainLayoutMobile = ({ menuItems, userInfo }) => {
                                 <span className="text-[10px] font-black text-slate-700 leading-none">{userInfo?.nombre || 'User'}</span>
                                 <div className="flex items-center gap-1 mt-0.5">
                                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                                    <span className="text-[8px] font-bold uppercase tracking-widest text-slate-400">Online</span>
+                                    <span className="text-[8px] font-bold uppercase tracking-widest text-slate-400">{t('En línea')}</span>
                                 </div>
                             </div>
                         </div>
@@ -80,7 +82,7 @@ const MainLayoutMobile = ({ menuItems, userInfo }) => {
                                     <span className={`text-[8.5px] font-bold uppercase tracking-tight text-center leading-tight w-full truncate px-0.5 ${
                                         isActive ? 'text-(--theme-600)' : 'text-slate-400'
                                     }`}>
-                                        {item.name}
+                                        {t(item.name)}
                                     </span>
                                     
                                     {isActive && (

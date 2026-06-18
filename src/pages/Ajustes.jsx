@@ -270,15 +270,15 @@ export default function VendedorAjustes() {
                                 </div>
 
                                 <div className="flex-1 pb-0">
-                                    <h1 className="text-xl sm:text-2xl font-black text-(--theme-900) leading-tight">{user?.nombre || 'Usuario'}</h1>
+                                    <h1 className="text-xl sm:text-2xl font-black text-(--theme-900) leading-tight">{user?.nombre || t('Usuario')}</h1>
                                     <div className="flex flex-wrap items-center gap-2 mt-1.5">
                                         <span className="text-(--theme-500) text-sm font-medium">@{user?.usuario || 'usuario'}</span>
                                         <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold text-white bg-linear-to-r ${roleBg}`}>
-                                            {user?.rol || 'Rol'}
+                                            {t(user?.rol) || t('Rol')}
                                         </span>
                                         {googleConnected && (
                                             <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-(--theme-50) text-(--theme-600) border border-(--theme-200)">
-                                                <GoogleIcon size={11} /> Vinculado
+                                                <GoogleIcon size={11} /> {t('Vinculado')}
                                             </span>
                                         )}
                                     </div>
@@ -289,7 +289,7 @@ export default function VendedorAjustes() {
                                     className="self-start sm:self-end flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-red-500 bg-red-50 hover:bg-red-100 border border-red-100 transition-all mt-3 md:mt-0"
                                 >
                                     <LogOut size={15} />
-                                    <span>Salir</span>
+                                    <span>{t('Salir')}</span>
                                 </button>
                             </div>
                         </div>
@@ -322,15 +322,15 @@ export default function VendedorAjustes() {
                             {/* Info Card desktop only */}
                             <div className="hidden lg:flex mt-6 p-5 bg-linear-to-br from-(--theme-50) to-white rounded-3xl border border-(--theme-200) shadow-sm overflow-hidden relative group flex-col">
                                 <div className={`absolute top-0 right-0 w-24 h-24 bg-linear-to-br ${roleBg} opacity-5 rounded-full -translate-y-8 translate-x-8 group-hover:scale-110 transition-transform duration-700`} />
-                                <h3 className="text-xs font-black text-(--theme-400) uppercase tracking-widest mb-2">Estado de Cuenta</h3>
+                                <h3 className="text-xs font-black text-(--theme-400) uppercase tracking-widest mb-2">{t('Estado de Cuenta')}</h3>
                                 <div className="space-y-3">
                                     <div className="flex items-center justify-between">
-                                        <span className="text-sm font-bold text-(--theme-600)">Plan</span>
+                                        <span className="text-sm font-bold text-(--theme-600)">{t('Plan')}</span>
                                         <span className={`px-2 py-0.5 rounded-lg text-[10px] font-black text-white bg-linear-to-r ${roleBg}`}>PREMIUM</span>
                                     </div>
                                     <div className="flex items-center justify-between">
-                                        <span className="text-sm font-bold text-(--theme-600)">Sesión</span>
-                                        <span className="text-xs font-medium text-(--theme-500)">Activa</span>
+                                        <span className="text-sm font-bold text-(--theme-600)">{t('Sesión')}</span>
+                                        <span className="text-xs font-medium text-(--theme-500)">{t('Activa')}</span>
                                     </div>
                                 </div>
                             </div>
@@ -349,20 +349,20 @@ export default function VendedorAjustes() {
                                                 <div className={`p-2 rounded-xl bg-linear-to-br ${roleBg}`}>
                                                     <User className="text-white" size={16} />
                                                 </div>
-                                                Información Personal
+                                                {t('Información Personal')}
                                             </h2>
                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 flex-1 content-start">
                                                 <div className="sm:col-span-2">
-                                                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Nombre Completo</label>
+                                                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">{t('Nombre Completo')}</label>
                                                     <div className="relative">
                                                         <User className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
                                                         <input type="text" value={profileForm.nombre}
                                                             onChange={e => setProfileForm(p => ({ ...p, nombre: e.target.value }))}
-                                                            className={`${inp} pl-10`} placeholder="Tu nombre completo" />
+                                                            className={`${inp} pl-10`} placeholder={t('Tu nombre completo')} />
                                                     </div>
                                                 </div>
                                                 <div>
-                                                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Email</label>
+                                                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">{t('Email')}</label>
                                                     <div className="relative">
                                                         <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
                                                         <input type="email" value={profileForm.email}
@@ -371,7 +371,7 @@ export default function VendedorAjustes() {
                                                     </div>
                                                 </div>
                                                 <div>
-                                                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Teléfono</label>
+                                                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">{t('Teléfono')}</label>
                                                     <div className="relative">
                                                         <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
                                                         <input type="tel" value={profileForm.telefono}
@@ -384,7 +384,7 @@ export default function VendedorAjustes() {
                                                 <button type="submit" disabled={savingProfile}
                                                     className={`flex items-center gap-2 px-8 py-3 rounded-xl text-white font-bold text-sm shadow-lg bg-linear-to-r ${roleBg} hover:opacity-90 active:scale-95 transition-all disabled:opacity-50`}>
                                                     <Save size={16} />
-                                                    {savingProfile ? 'Guardando...' : 'Guardar Cambios'}
+                                                    {savingProfile ? t('Guardando...') : t('Guardar Cambios')}
                                                 </button>
                                             </div>
                                         </div>
@@ -402,11 +402,11 @@ export default function VendedorAjustes() {
                                                 <div className={`p-2 rounded-xl bg-linear-to-br ${roleBg}`}>
                                                     <Shield className="text-white" size={16} />
                                                 </div>
-                                                Cambiar Contraseña
+                                                {t('Cambiar Contraseña')}
                                             </h2>
                                             <div className="w-full space-y-5 flex-1">
                                                 <div>
-                                                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Nueva Contraseña</label>
+                                                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">{t('Nueva Contraseña')}</label>
                                                     <div className="relative">
                                                         <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
                                                         <input type="password" value={passForm.next}
@@ -415,17 +415,17 @@ export default function VendedorAjustes() {
                                                     </div>
                                                 </div>
                                                 <div>
-                                                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Confirmar Contraseña</label>
+                                                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">{t('Confirmar Contraseña')}</label>
                                                     <div className="relative">
                                                         <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
                                                         <input type="password" value={passForm.confirm}
                                                             onChange={e => setPassForm(p => ({ ...p, confirm: e.target.value }))}
                                                             className={`${inp} pl-10 ${passForm.confirm && passForm.confirm !== passForm.next ? 'border-red-400 ring-2 ring-red-400/20' : ''}`}
-                                                            placeholder="Repite la contraseña" />
+                                                            placeholder={t('Repite la contraseña')} />
                                                     </div>
                                                     {passForm.confirm && passForm.confirm !== passForm.next && (
                                                         <p className="text-xs text-red-500 mt-1.5 flex items-center gap-1">
-                                                            <AlertCircle size={12} /> Las contraseñas no coinciden
+                                                            <AlertCircle size={12} /> {t('Las contraseñas no coinciden')}
                                                         </p>
                                                     )}
                                                 </div>
@@ -433,14 +433,14 @@ export default function VendedorAjustes() {
                                                 {/* Password strength indicator */}
                                                 {passForm.next && (
                                                     <div>
-                                                        <p className="text-xs text-slate-500 mb-1.5">Fortaleza</p>
+                                                        <p className="text-xs text-slate-500 mb-1.5">{t('Fortaleza')}</p>
                                                         <div className="flex gap-1">
                                                             {[6, 10, 14].map((len, i) => (
                                                                 <div key={i} className={`h-1.5 flex-1 rounded-full transition-colors ${passForm.next.length >= len ? ['bg-red-400', 'bg-yellow-400', 'bg-green-500'][i] : 'bg-slate-100'}`} />
                                                             ))}
                                                         </div>
                                                         <p className="text-xs text-slate-400 mt-1">
-                                                            {passForm.next.length < 6 ? 'Muy corta' : passForm.next.length < 10 ? 'Débil' : passForm.next.length < 14 ? 'Buena' : 'Excelente'}
+                                                            {passForm.next.length < 6 ? t('Muy corta') : passForm.next.length < 10 ? t('Débil') : passForm.next.length < 14 ? t('Buena') : t('Excelente')}
                                                         </p>
                                                     </div>
                                                 )}
@@ -449,7 +449,7 @@ export default function VendedorAjustes() {
                                                     <button type="submit" disabled={savingPass}
                                                         className={`flex items-center gap-2 px-8 py-3 rounded-xl text-white font-bold text-sm shadow-lg bg-linear-to-r ${roleBg} hover:opacity-90 active:scale-95 transition-all disabled:opacity-50`}>
                                                         <KeyRound size={16} />
-                                                        {savingPass ? 'Actualizando...' : 'Actualizar Contraseña'}
+                                                        {savingPass ? t('Actualizando...') : t('Actualizar Contraseña')}
                                                     </button>
                                                 </div>
                                             </div>
@@ -465,7 +465,7 @@ export default function VendedorAjustes() {
                                             <div className="p-1.5 rounded-lg bg-white border border-slate-200 shadow-sm">
                                                 <GoogleIcon size={14} />
                                             </div>
-                                            Cuenta Google
+                                            {t('Cuenta Google')}
                                         </h2>
 
                                         {googleConnected ? (
@@ -507,13 +507,13 @@ export default function VendedorAjustes() {
                                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                                     <div className="p-4 bg-(--theme-50)/50 border border-(--theme-100) rounded-xl">
                                                         <h4 className="text-[10px] font-black text-(--theme-400) uppercase tracking-widest mb-2 flex items-center gap-2">
-                                                            <Shield size={12} /> Permisos
+                                                            <Shield size={12} /> {t('Permisos')}
                                                         </h4>
                                                         <div className="space-y-1">
                                                             {['Calendario', 'Eventos', 'Perfil'].map((p, i) => (
                                                                 <div key={i} className="flex items-center gap-2 text-xs font-semibold text-(--theme-600)">
                                                                     <div className="w-1 h-1 rounded-full bg-(--theme-500)" />
-                                                                    {p}
+                                                                    {t(p)}
                                                                 </div>
                                                             ))}
                                                         </div>
@@ -521,12 +521,12 @@ export default function VendedorAjustes() {
 
                                                     <div className="p-4 bg-(--theme-50)/50 border border-(--theme-100) rounded-xl">
                                                         <h4 className="text-[10px] font-black text-(--theme-400) uppercase tracking-widest mb-2 flex items-center gap-2">
-                                                            <Monitor size={12} /> Estado
+                                                            <Monitor size={12} /> {t('Estado')}
                                                         </h4>
                                                         <div className="space-y-1.5">
                                                             <div className="flex justify-between text-[11px] font-semibold">
-                                                                <span className="text-(--theme-500)">Sesión:</span>
-                                                                <span className="text-(--theme-600) uppercase">Activa</span>
+                                                                <span className="text-(--theme-500)">{t('Sesión')}:</span>
+                                                                <span className="text-(--theme-600) uppercase">{t('Activa')}</span>
                                                             </div>
                                                             <div className="flex justify-between text-[11px] font-semibold">
                                                                 <span className="text-(--theme-500)">ID:</span>
@@ -538,13 +538,13 @@ export default function VendedorAjustes() {
 
                                                 <div className="flex items-start gap-3 p-3 bg-amber-50/50 rounded-xl border border-amber-100 text-[11px] text-amber-700 font-medium">
                                                     <AlertCircle size={16} className="shrink-0" />
-                                                    <span>Para cambiar de cuenta, desvincula la actual primero. Esto detendrá la sincronización.</span>
+                                                    <span>{t('Para cambiar de cuenta, desvincula la actual primero. Esto detendrá la sincronización.')}</span>
                                                 </div>
 
                                                 <button onClick={handleDisconnectGoogle}
                                                     className="w-full sm:w-auto flex items-center justify-center gap-2 py-2.5 px-6 bg-white border border-red-100 text-red-500 font-bold rounded-xl hover:bg-red-50 hover:border-red-200 active:scale-95 transition-all text-xs shadow-xs mt-auto">
                                                     <Link2Off size={14} />
-                                                    Desvincular Google
+                                                    {t('Desvincular Google')}
                                                 </button>
                                             </div>
                                         ) : (
@@ -553,16 +553,16 @@ export default function VendedorAjustes() {
                                                     <div className="absolute inset-0 bg-linear-to-br from-blue-50 to-red-50 rounded-full animate-pulse opacity-50" />
                                                     <GoogleIcon size={32} />
                                                 </div>
-                                                <h3 className="font-black text-slate-800 text-lg mb-1">Conecta con Google</h3>
+                                                <h3 className="font-black text-slate-800 text-lg mb-1">{t('Conecta con Google')}</h3>
                                                 <p className="text-slate-500 text-xs mb-5 leading-snug">
-                                                    Sincroniza agenda y tareas para gestionar tu tiempo desde el CRM.
+                                                    {t('Sincroniza agenda y tareas para gestionar tu tiempo desde el CRM.')}
                                                 </p>
                                                 <button onClick={() => loginGoogle()}
                                                     className="w-full flex items-center justify-center gap-3 px-6 py-3 bg-white border-2 border-slate-200 text-slate-700 font-black rounded-xl hover:border-(--theme-400) hover:shadow-xl hover:shadow-(--theme-500)/10 active:scale-95 transition-all text-xs group">
                                                     <div className="group-hover:rotate-12 transition-transform">
                                                         <GoogleIcon size={18} />
                                                     </div>
-                                                    Vincular ahora
+                                                    {t('Vincular ahora')}
                                                 </button>
                                             </div>
                                         )}
@@ -577,10 +577,10 @@ export default function VendedorAjustes() {
                                             <div className="p-2 rounded-xl bg-(--theme-100) text-(--theme-600)">
                                                 <Palette size={15} />
                                             </div>
-                                            Colores del Sistema
+                                            {t('Colores del Sistema')}
                                         </h2>
                                         <p className="text-sm text-slate-500 mb-6 font-medium">
-                                            Personaliza el color de acento principal del CRM en tu dispositivo.
+                                            {t('Personaliza el color de acento principal del CRM en tu dispositivo.')}
                                         </p>
 
                                         <div className="flex flex-wrap gap-4">
@@ -609,7 +609,7 @@ export default function VendedorAjustes() {
                                                             </div>
                                                         )}
                                                         <span className={`text-sm font-semibold ${isActive ? 'text-slate-900' : 'text-slate-600'}`}>
-                                                            {theme.label}
+                                                            {t(theme.label)}
                                                         </span>
                                                     </button>
                                                 )
@@ -629,13 +629,13 @@ export default function VendedorAjustes() {
                                                         <Award size={15} />
                                                     </div>
                                                     <div>
-                                                        <span className="font-black">Fórmula de Ventas Máximas</span>
-                                                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tight mt-0.5">Estructura × Sistema × Operaciones</p>
+                                                        <span className="font-black">{t('Fórmula de Ventas Máximas')}</span>
+                                                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tight mt-0.5">{t('Estructura × Sistema × Operaciones')}</p>
                                                     </div>
                                                 </div>
                                                 <div className="bg-indigo-600 text-white rounded-xl px-4 py-1 text-center shadow-md">
                                                     <div className="text-sm font-black">{maxSalesCoef.toFixed(1)}%</div>
-                                                    <div className="text-[6px] font-bold uppercase tracking-widest leading-none">Efectividad</div>
+                                                    <div className="text-[6px] font-bold uppercase tracking-widest leading-none">{t('Efectividad')}</div>
                                                 </div>
                                             </h2>
 
@@ -644,7 +644,7 @@ export default function VendedorAjustes() {
                                                     {/* Factor 1: Estructura */}
                                                     <div className="space-y-1">
                                                         <div className="flex justify-between items-center text-xs">
-                                                            <span className="font-black text-gray-700 uppercase tracking-wider">1. Estructura (Gente/Vendedores): {estructuraScore}%</span>
+                                                            <span className="font-black text-gray-700 uppercase tracking-wider">{t('1. Estructura (Gente/Vendedores):')} {estructuraScore}%</span>
                                                         </div>
                                                         <input
                                                             type="range"
@@ -655,14 +655,14 @@ export default function VendedorAjustes() {
                                                             className="w-full accent-indigo-600 h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer"
                                                         />
                                                         <p className="text-[9.5px] text-gray-400 font-bold uppercase leading-tight">
-                                                            Capacitación del equipo, cobertura del territorio y dominio del guión S1.
+                                                            {t('Capacitación del equipo, cobertura del territorio y dominio del guión S1.')}
                                                         </p>
                                                     </div>
 
                                                     {/* Factor 2: Sistema */}
                                                     <div className="space-y-1">
                                                         <div className="flex justify-between items-center text-xs">
-                                                            <span className="font-black text-gray-700 uppercase tracking-wider">2. Sistema (Proceso/CRM): {sistemaScore}%</span>
+                                                            <span className="font-black text-gray-700 uppercase tracking-wider">{t('2. Sistema (Proceso/CRM):')} {sistemaScore}%</span>
                                                         </div>
                                                         <input
                                                             type="range"
@@ -673,14 +673,14 @@ export default function VendedorAjustes() {
                                                             className="w-full accent-indigo-600 h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer"
                                                         />
                                                         <p className="text-[9.5px] text-gray-400 font-bold uppercase leading-tight">
-                                                            Disciplina de llamadas de recuperación S1 y venta cruzada S2.
+                                                            {t('Disciplina de llamadas de recuperación S1 y venta cruzada S2.')}
                                                         </p>
                                                     </div>
 
                                                     {/* Factor 3: Operaciones */}
                                                     <div className="space-y-1">
                                                         <div className="flex justify-between items-center text-xs">
-                                                            <span className="font-black text-gray-700 uppercase tracking-wider">3. Operaciones (Cumplimiento/OTD): {operacionesScore}%</span>
+                                                            <span className="font-black text-gray-700 uppercase tracking-wider">{t('3. Operaciones (Cumplimiento/OTD):')} {operacionesScore}%</span>
                                                         </div>
                                                         <input
                                                             type="range"
@@ -691,24 +691,24 @@ export default function VendedorAjustes() {
                                                             className="w-full accent-indigo-600 h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer"
                                                         />
                                                         <p className="text-[9.5px] text-gray-400 font-bold uppercase leading-tight">
-                                                            Calidad de entrega, servicio al cliente y cumplimiento del OTD (On-Time Delivery).
+                                                            {t('Calidad de entrega, servicio al cliente y cumplimiento del OTD (On-Time Delivery).')}
                                                         </p>
                                                     </div>
                                                 </div>
 
                                                 <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100 flex flex-col justify-between">
                                                     <div>
-                                                        <h4 className="text-[9.5px] font-black uppercase tracking-widest text-indigo-700 mb-3 border-b border-indigo-100 pb-1">Evaluación de Ventas Coeficiente</h4>
+                                                        <h4 className="text-[9.5px] font-black uppercase tracking-widest text-indigo-700 mb-3 border-b border-indigo-100 pb-1">{t('Evaluación de Ventas Coeficiente')}</h4>
                                                         <p className="text-[11px] text-gray-600 font-semibold leading-relaxed">
-                                                            {minScoreFactor === 'estructura' && '⚠️ Alerta de Estructura: Tu equipo de ventas necesita capacitación inmediata en la metodología Moneycall. Asegúrate de que dominen el guión de apertura S1 y que la cobertura de clientes sea completa.'}
-                                                            {minScoreFactor === 'sistema' && '⚠️ Falta de Disciplina en Proceso: Tu mayor debilidad es la falta de uso riguroso del CRM. Asegúrate de registrar todas las llamadas de recuperación S1 y venta cruzada S2 en el CRM.'}
-                                                            {minScoreFactor === 'operaciones' && '⚠️ Peligro Operativo: De nada sirve un excelente equipo y un gran proceso de venta si la entrega o la calidad fallan. Los problemas operativos (OTD bajo) están ahogando tus ventas recurrentes.'}
-                                                            {minScoreFactor === 'perfect' && '🔥 ¡Felicidades! Tienes una base de ventas sólida. Mantén el ritmo de 30 llamadas diarias para maximizar tus ingresos.'}
+                                                            {minScoreFactor === 'estructura' && t('⚠️ Alerta de Estructura: Tu equipo de ventas necesita capacitación inmediata en la metodología Moneycall. Asegúrate de que dominen el guión de apertura S1 y que la cobertura de clientes sea completa.')}
+                                                            {minScoreFactor === 'sistema' && t('⚠️ Falta de Disciplina en Proceso: Tu mayor debilidad es la falta de uso riguroso del CRM. Asegúrate de registrar todas las llamadas de recuperación S1 y venta cruzada S2 en el CRM.')}
+                                                            {minScoreFactor === 'operaciones' && t('⚠️ Peligro Operativo: De nada sirve un excelente equipo y un gran proceso de venta si la entrega o la calidad fallan. Los problemas operativos (OTD bajo) están ahogando tus ventas recurrentes.')}
+                                                            {minScoreFactor === 'perfect' && t('🔥 ¡Felicidades! Tienes una base de ventas sólida. Mantén el ritmo de 30 llamadas diarias para maximizar tus ingresos.')}
                                                         </p>
                                                     </div>
 
                                                     <div className="mt-4 pt-3 border-t border-gray-200/60 flex items-center gap-1.5">
-                                                        <span className="text-[8.5px] font-black text-gray-400 uppercase tracking-widest block shrink-0">Fórmula:</span>
+                                                        <span className="text-[8.5px] font-black text-gray-400 uppercase tracking-widest block shrink-0">{t('Fórmula:')}</span>
                                                         <code className="text-[10px] font-bold text-indigo-600 bg-white border border-gray-100 rounded px-2 py-1 truncate">
                                                             {estructuraScore}% × {sistemaScore}% × {operacionesScore}% = {maxSalesCoef.toFixed(1)}%
                                                         </code>
@@ -733,10 +733,10 @@ export default function VendedorAjustes() {
                                             </div>
                                         </div>
 
-                                        <h2 className="text-2xl font-black text-slate-800 mb-2">Próximamente</h2>
+                                        <h2 className="text-2xl font-black text-slate-800 mb-2">{t('Próximamente')}</h2>
                                         <p className="text-slate-500 text-sm max-w-xs leading-relaxed font-medium">
-                                            Estamos trabajando en un sistema de notificaciones inteligente para que no te pierdas nada.
-                                            <span className="block mt-2 text-(--theme-600) font-bold">¡Disponible muy pronto!</span>
+                                            {t('Estamos trabajando en un sistema de notificaciones inteligente para que no te pierdas nada.')}
+                                            <span className="block mt-2 text-(--theme-600) font-bold">{t('¡Disponible muy pronto!')}</span>
                                         </p>
 
                                         <div className="mt-8 flex gap-2">
@@ -744,7 +744,7 @@ export default function VendedorAjustes() {
                                                 V2.1 Beta
                                             </div>
                                             <div className="px-3 py-1 rounded-full bg-(--theme-50) text-[10px] font-black text-(--theme-600) uppercase tracking-widest border border-(--theme-100)">
-                                                En Desarrollo
+                                                {t('En Desarrollo')}
                                             </div>
                                         </div>
                                     </div>
