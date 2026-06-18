@@ -1087,12 +1087,12 @@ export default function ClienteDetalle({
 
                         {/* ==================== ÁRBOL DE LLAMADA ==================== */}
                         <div className="space-y-3">
-                            <div id="detalle-cliente-acciones-seguimiento" className="grid grid-cols-3 gap-3">
+                            <div id="detalle-cliente-acciones-seguimiento" className="grid grid-cols-2 md:grid-cols-4 gap-3">
                                 {/* Botón principal intercambiable: Registrar Venta / Registrar Llamada */}
                                 <div className="relative group/main">
                                     <button
                                         onClick={modoBotonPrincipal === 'venta' ? manejarRegistrarVenta : () => setLlamadaFlow({ paso: 'tipo_llamada', tipoCall: '', contesto: null, fechaProxima: '', notas: '' })}
-                                        className={`flex flex-col items-center justify-center gap-2 border-2 rounded-xl p-4 transition-all shadow-sm font-bold text-sm text-center leading-tight w-full ${
+                                        className={`flex flex-col items-center justify-center gap-2 border-2 rounded-xl p-4 transition-all shadow-sm font-bold text-sm text-center leading-tight w-full h-full ${
                                             modoBotonPrincipal === 'venta'
                                                 ? 'bg-emerald-50 border-emerald-300 text-emerald-700 hover:border-emerald-500'
                                                 : 'bg-white border-slate-200 hover:border-(--theme-500) text-gray-700 hover:text-(--theme-600)'
@@ -1143,6 +1143,14 @@ export default function ClienteDetalle({
                                 >
                                     <Calendar className="w-6 h-6" />
                                     Agendar Reunión
+                                </button>
+                                {/* Historial de Ventas */}
+                                <button
+                                    onClick={() => setModalHistorialVentas(true)}
+                                    className="flex flex-col items-center justify-center gap-2 bg-white border-2 border-slate-200 hover:border-emerald-500 rounded-xl p-4 text-gray-700 hover:text-emerald-600 transition-all shadow-sm font-bold text-sm text-center leading-tight"
+                                >
+                                    <History className="w-6 h-6 text-emerald-500" />
+                                    Historial Ventas
                                 </button>
                             </div>
 

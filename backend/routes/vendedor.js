@@ -462,9 +462,22 @@ router.get('/dashboard-closer', [auth, esVendedor], async (req, res) => {
         inicioMes.setDate(1);
         inicioMes.setHours(0, 0, 0, 0);
 
-        const ventasMes = await db.prepare('SELECT * FROM ventas WHERE vendedor = ? AND fecha >= ?').all(closerId, inicioMes.toISOString());
-        const ventasHoy = await db.prepare('SELECT * FROM ventas WHERE vendedor = ? AND fecha >= ? AND fecha <= ?').all(closerId, hoyInicio.toISOString(), hoyFin.toISOString());
+        let sqlVentas = `
+            SELECT v.* FROM ventas v
+            JOIN clientes c ON v.cliente = c.id
+            WHERE (v.vendedor = ? ${equipoId ? 'OR c.equipo_id = ?' : ''})
+        `;
+        let paramsVentas = equipoId ? [closerId, equipoId] : [closerId];
+        const ventasTodas = await db.prepare(sqlVentas).all(...paramsVentas);
+
+        const ventasMes = ventasTodas.filter(v => new Date(v.fecha) >= inicioMes);
+        const ventasHoy = ventasTodas.filter(v => {
+            const f = new Date(v.fecha);
+            return f >= hoyInicio && f <= hoyFin;
+        });
+
         const montoTotalMes = ventasMes.reduce((sum, v) => sum + (v.monto || 0), 0);
+        const montoTotal = ventasTodas.reduce((sum, v) => sum + (v.monto || 0), 0);
 
         const tasasConversion = {
             asistencia: embudo.reunion_agendada > 0 ? ((embudo.reunion_realizada / embudo.reunion_agendada) * 100).toFixed(1) : '0.0',
@@ -477,7 +490,13 @@ router.get('/dashboard-closer', [auth, esVendedor], async (req, res) => {
             embudo,
             metricas: {
                 reuniones: { hoy: reunionesHoy.length, pendientes: clientes.filter(c => c.etapaEmbudo === 'reunion_agendada').length, realizadas: embudo.reunion_realizada, realizadasHoy: reunionesRealizadasHoy, propuestasHoy: propuestasHoy },
-                ventas: { mes: ventasMes.length, montoMes: montoTotalMes, totales: embudo.venta_ganada, ventasHoy: ventasHoy.length },
+                ventas: { 
+                    mes: ventasMes.length, 
+                    montoMes: montoTotalMes, 
+                    totales: ventasTodas.length, 
+                    montoTotal: montoTotal, 
+                    ventasHoy: ventasHoy.length 
+                },
                 negociaciones: { activas: embudo.en_negociacion }
             },
             tasasConversion,
@@ -873,7 +892,7 @@ router.post('/crear-prospecto', [auth, esVendedor], async (req, res) => {
 // POST /api/vendedor/registrar-actividad
 router.post('/registrar-actividad', [auth, esVendedor], async (req, res) => {
     try {
-        const { clienteId, tipo, resultado, descripcion, notas, fechaCita, etapaEmbudo, proximaLlamada, interes, customMetricLabel, customMetricValue, monto } = req.body;
+        const { clienteId, tipo, resultado, descripcion, notas, fechaCita, etapaEmbudo, proximaLlamada, interes, customMetricLabel, customMetricValue, monto, pdf_url } = req.body;
         const tiposValidos = ['llamada', 'mensaje', 'correo', 'whatsapp', 'cita', 'prospecto', 'venta', 'suscripcion'];
         const resultadosValidos = ['exitoso', 'pendiente', 'fallido'];
 
@@ -914,9 +933,9 @@ router.post('/registrar-actividad', [auth, esVendedor], async (req, res) => {
 
         if (tipo === 'venta' || tipo === 'suscripcion') {
             await db.prepare(`
-                INSERT INTO ventas (cliente, vendedor, monto, notas, estado)
-                VALUES (?, ?, ?, ?, 'completado')
-            `).run(cid, prospectorId, parseFloat(monto) || 0, notas || '');
+                INSERT INTO ventas (cliente, vendedor, monto, notas, estado, pdf_url, fecha)
+                VALUES (?, ?, ?, ?, 'completado', ?, ?)
+            `).run(cid, prospectorId, parseFloat(monto) || 0, notas || '', pdf_url || null, new Date().toISOString());
         }
 
         const now = new Date().toISOString();

@@ -377,7 +377,8 @@ const initDb = async () => {
     monto DOUBLE PRECISION NOT NULL,
     fecha TEXT DEFAULT CURRENT_TIMESTAMP,
     estado TEXT DEFAULT 'pendiente',
-    notas TEXT
+    notas TEXT,
+    pdf_url TEXT
   );
 
   CREATE TABLE IF NOT EXISTS equipos (
@@ -574,6 +575,7 @@ const initDb = async () => {
       ['clientes',    'fuente',              'TEXT'],
       ['clientes',    '"motivoPerdida"',     'TEXT'],
       ['actividades', '"equipo_id"',         'INTEGER'],
+      ['ventas',      '"pdf_url"',           'TEXT'],
     ];
     for (const [table, col, type] of colsMissingPg) {
       try {
@@ -696,6 +698,7 @@ const initDb = async () => {
       ['clientes', 'fuente TEXT'],
       ['clientes', 'motivoPerdida TEXT'],
       ['tareas', 'equipo_id INTEGER'],
+      ['ventas', 'pdf_url TEXT'],
     ];
     for (const [table, colDef] of colsMissingSqlite) {
       try {
