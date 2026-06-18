@@ -291,13 +291,66 @@ export const useMoneycallBotLogic = () => {
   };
 
   // --- DASHBOARD STEPS ---
+  // --- DASHBOARD STEPS ---
   const stepDashboardIntro = () => {
     setCurrentStep({
       id: 'dashboard_intro',
-      text: 'Aquí en el Dashboard puedes ver un resumen global de tu actividad: métricas de ventas, tareas pendientes y un gráfico de tu rendimiento. Es tu centro de mando diario. Puedes acceder a las demás secciones desde el menú lateral izquierdo.',
+      text: 'Este es tu Embudo de Ventas. Aquí puedes ver de forma gráfica y en tiempo real el flujo de tus leads desde la Entrada hasta el Cierre de ventas, junto con los porcentajes de conversión de cada etapa.',
+      targetSelector: '#dashboard-funnel-container',
       options: [
-        { label: 'Volver al inicio', action: () => startConversation() },
-        { label: 'Cerrar Asistente', action: () => { setAvatarState('resting'); closeBot(); } }
+        { label: 'Siguiente: Filtros de Período', action: () => stepDashboardPeriodos() },
+        { label: 'Cancelar', action: () => startConversation() }
+      ]
+    });
+  };
+
+  const stepDashboardPeriodos = () => {
+    setCurrentStep({
+      id: 'dashboard_periodos',
+      text: 'Con estos botones de Filtro, puedes segmentar las métricas de tu embudo y ver el desempeño por Hoy, esta Semana o el Mes en curso. ¡Así tienes el control absoluto de tus números en tiempo real!',
+      targetSelector: '#dashboard-period-selector',
+      options: [
+        { label: 'Siguiente: KPIs Operativos', action: () => stepDashboardKpis() },
+        { label: 'Atrás', action: () => stepDashboardIntro() },
+        { label: 'Cancelar', action: () => startConversation() }
+      ]
+    });
+  };
+
+  const stepDashboardKpis = () => {
+    setCurrentStep({
+      id: 'dashboard_kpis',
+      text: 'En esta sección de Salud Operativa vigilamos tu eficiencia comercial. Medimos tu Velocidad de Respuesta, Tasa de Asistencia a reuniones (show-up), Ciclo de Cierre en días y el Ticket Promedio.',
+      targetSelector: '#dashboard-kpi-cards',
+      options: [
+        { label: 'Siguiente: Agenda Prioritaria', action: () => stepDashboardAgenda() },
+        { label: 'Atrás', action: () => stepDashboardPeriodos() },
+        { label: 'Cancelar', action: () => startConversation() }
+      ]
+    });
+  };
+
+  const stepDashboardAgenda = () => {
+    setCurrentStep({
+      id: 'dashboard_agenda',
+      text: 'Aquí tienes la Agenda Prioritaria. Te muestra tus próximos compromisos de reuniones y citas de ventas del día para que nunca dejes de asistir a un cliente.',
+      targetSelector: '#dashboard-agenda-prioritaria',
+      options: [
+        { label: 'Siguiente: Tareas Críticas', action: () => stepDashboardTareas() },
+        { label: 'Atrás', action: () => stepDashboardKpis() },
+        { label: 'Cancelar', action: () => startConversation() }
+      ]
+    });
+  };
+
+  const stepDashboardTareas = () => {
+    setCurrentStep({
+      id: 'dashboard_tareas',
+      text: 'Por último, este es el panel de Tareas Críticas de tu equipo. Te ayuda a recordar y ejecutar los pendientes de alta prioridad en tu día a día comercial.',
+      targetSelector: '#dashboard-tareas-criticas',
+      options: [
+        { label: 'Finalizar Recorrido', action: () => startConversation() },
+        { label: 'Atrás', action: () => stepDashboardAgenda() }
       ]
     });
   };

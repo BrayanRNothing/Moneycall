@@ -752,7 +752,7 @@ const Dashboard = () => {
                         <span className="text-sm font-bold text-gray-700 uppercase tracking-widest">Resumen de Ventas</span>
                     </div>
 
-                    <div className="flex items-center gap-1 bg-white border border-gray-200 rounded-lg p-1 shadow-sm">
+                    <div id="dashboard-period-selector" className="flex items-center gap-1 bg-white border border-gray-200 rounded-lg p-1 shadow-sm">
                         {PERIODOS.map(p => (
                             <button
                                 key={p.key}
@@ -767,7 +767,7 @@ const Dashboard = () => {
                         ))}
                     </div>
                 </div>
-                <div className="bg-white border border-gray-200 rounded-xl p-3 shadow-sm w-full">
+                <div id="dashboard-funnel-container" className="bg-white border border-gray-200 rounded-xl p-3 shadow-sm w-full">
                     <FunnelVisual
                         stages={[
                             {
@@ -828,7 +828,7 @@ const Dashboard = () => {
 
                 <div className="flex-1 flex flex-col min-w-0">
                     <div className="shrink-0 relative z-20">
-                        <div className="flex items-end gap-2.5 overflow-x-auto pb-px -mb-px" style={{ scrollbarWidth: 'none' }}>
+                        <div id="dashboard-tabs-container" className="flex items-end gap-2.5 overflow-x-auto pb-px -mb-px" style={{ scrollbarWidth: 'none' }}>
                             {[
                                 { key: 'resumen', label: 'Resumen', Icon: TrendingUp },
                                 { key: 'kpis', label: 'Métricas', Icon: BarChart3 },
@@ -851,13 +851,13 @@ const Dashboard = () => {
                             ))}
                         </div>
                     </div>
-
+ 
                     <div className={`flex-1 min-h-0 relative z-10 bg-white border border-gray-200 rounded-xl p-3 shadow-sm flex flex-col ${healthTab === 'resumen' ? 'rounded-tl-none' : ''}`}>
                         <div className="flex-1 min-h-0 overflow-y-auto xl:pr-1 scrollbar-hide" style={{ scrollbarWidth: 'none' }}>
                             {healthTab === 'resumen' && (
                                 <div className="h-full flex flex-col gap-4 animate-in fade-in duration-500">
                                     {/* SECCIÓN 1: SALUD OPERATIVA (KPIs DE PROCESO) */}
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 shrink-0">
+                                    <div id="dashboard-kpi-cards" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 shrink-0">
                                         <MetricKPICard
                                             title="Velocidad de Respuesta"
                                             value={closerData?.eficiencia?.responseTimeHoras || 0}
@@ -897,7 +897,7 @@ const Dashboard = () => {
                                     {/* SECCIÓN 2: CENTRO DE ACCIÓN (ENFOQUE INMEDIATO) */}
                                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 flex-1 min-h-0 pb-1">
                                         {/* Agenda Prioritaria */}
-                                        <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm flex flex-col h-full">
+                                        <div id="dashboard-agenda-prioritaria" className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm flex flex-col h-full">
                                             <div className="flex items-center justify-between mb-6 shrink-0">
                                                 <div className="flex items-center gap-3">
                                                     <div className="w-10 h-10 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-500 shadow-xs">
@@ -942,7 +942,7 @@ const Dashboard = () => {
                                         </div>
 
                                         {/* Tareas Críticas del Equipo */}
-                                        <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm flex flex-col h-full">
+                                        <div id="dashboard-tareas-criticas" className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm flex flex-col h-full">
                                             <div className="flex items-center justify-between mb-6 shrink-0">
                                                 <div className="flex items-center gap-3">
                                                     <div className="w-10 h-10 bg-rose-50 rounded-2xl flex items-center justify-center text-rose-500 shadow-xs">

@@ -66,8 +66,29 @@ router.put('/:id/pdf', auth, async (req, res) => {
 router.delete('/:id', auth, async (req, res) => {
     try {
         const saleId = parseInt(req.params.id);
+        
+        // 1. Obtener la información de la venta para poder identificar la actividad
+        const venta = await db.prepare('SELECT * FROM ventas WHERE id = ?').get(saleId);
+        if (!venta) {
+            return res.status(404).json({ mensaje: 'Venta no encontrada' });
+        }
+
+        // 2. Eliminar la venta de la tabla 'ventas'
         await db.prepare('DELETE FROM ventas WHERE id = ?').run(saleId);
-        res.json({ mensaje: 'Venta eliminada' });
+
+        // 3. Eliminar la actividad correspondiente
+        // Buscamos una actividad que coincida en cliente, vendedor, tipo ('venta' o 'suscripcion')
+        // y que contenga el monto de la venta en la descripción o coincida en las notas.
+        const likeMonto = `%${venta.monto}%`;
+        await db.prepare(`
+            DELETE FROM actividades 
+            WHERE cliente = ? 
+              AND vendedor = ? 
+              AND tipo IN ('venta', 'suscripcion')
+              AND (notas = ? OR descripcion LIKE ?)
+        `).run(venta.cliente, venta.vendedor, venta.notas || '', likeMonto);
+
+        res.json({ mensaje: 'Venta y actividad asociada eliminadas' });
     } catch (error) {
         console.error('Error al eliminar venta:', error);
         res.status(500).json({ mensaje: 'Error del servidor' });

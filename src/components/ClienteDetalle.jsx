@@ -759,6 +759,7 @@ export default function ClienteDetalle({
             await axios.delete(`${API_URL}/api/ventas/${ventaId}`, { headers: getAuthHeaders() });
             toast.success('Venta eliminada con éxito');
             cargarVentasHistorial();
+            handleSeleccionarCliente();
             if (onActualizado) await onActualizado();
         } catch (err) {
             console.error('Error al eliminar venta:', err);
