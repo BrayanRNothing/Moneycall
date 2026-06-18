@@ -28,7 +28,7 @@ const inferRoleKey = (rol) => {
 };
 
 const initialForm = { usuario: '', contraseña: '', nombre: '', email: '', telefono: '', rol: 'vendedor' };
-const initialEditForm = { nombre: '', email: '', telefono: '' };
+const initialEditForm = { nombre: '', email: '', telefono: '', rol: 'vendedor' };
 
 export default function Equipo() {
   const userAuth = getUser();
@@ -176,6 +176,7 @@ export default function Equipo() {
       nombre: miembro.nombre || '',
       email: miembro.email || '',
       telefono: miembro.telefono || '',
+      rol: miembro.rol || 'vendedor',
     });
   };
 
@@ -672,6 +673,18 @@ export default function Equipo() {
                     onChange={e => setEditForm(p => ({ ...p, telefono: e.target.value }))}
                   />
                 </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Rol en el equipo *</label>
+                <select
+                  className="w-full px-5 py-4 bg-gray-50 border-2 border-transparent rounded-2xl text-sm font-semibold text-gray-800 outline-none focus:bg-white focus:border-amber-500 transition-all cursor-pointer"
+                  value={editForm.rol || 'vendedor'}
+                  onChange={e => setEditForm(p => ({ ...p, rol: e.target.value }))}
+                >
+                  <option value="vendedor">Vendedor (Gestiona clientes y ventas)</option>
+                  <option value="asignador">Asignador (Asigna prospectos a vendedores)</option>
+                </select>
               </div>
 
               <div className="pt-6 flex gap-4">

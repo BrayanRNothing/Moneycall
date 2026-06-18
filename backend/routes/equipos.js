@@ -180,7 +180,7 @@ router.post('/agregar-miembro', auth, esTeamOwner, async (req, res) => {
 router.put('/miembro/:id', auth, esTeamOwner, async (req, res) => {
     try {
         const miembroId = parseInt(req.params.id, 10);
-        const { nombre, email, telefono } = req.body;
+        const { nombre, email, telefono, rol } = req.body;
 
         const miembro = await db.prepare('SELECT id, "equipo_id" FROM usuarios WHERE id = ?').get(miembroId);
         if (!miembro) {
@@ -203,6 +203,10 @@ router.put('/miembro/:id', auth, esTeamOwner, async (req, res) => {
         if (typeof telefono === 'string') {
             updates.push('telefono = ?');
             params.push(telefono.trim());
+        }
+        if (typeof rol === 'string' && ROLES_PERMITIDOS.includes(rol.toLowerCase())) {
+            updates.push('rol = ?');
+            params.push(rol.toLowerCase());
         }
         if (updates.length === 0) {
             return res.status(400).json({ mensaje: 'No hay campos para actualizar' });
