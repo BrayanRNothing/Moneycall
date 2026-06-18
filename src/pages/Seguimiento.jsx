@@ -50,7 +50,6 @@ const CSV_LABELS = ['Nombres', 'Apellido Paterno', 'Apellido Materno', 'Telefono
 
 function prospectosToCsv(prospectos) {
     const escape = (val) => {
-    const { t } = useTranslation();
         if (val == null) return '';
         const s = String(val).replace(/"/g, '""');
         return s.includes(',') || s.includes('"') || s.includes('\n') ? `"${s}"` : s;
@@ -148,6 +147,7 @@ const buildReminderByClienteMap = (tareas = []) => {
 };
 
 const Seguimiento = () => {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const location = useLocation();
     const [searchParams, setSearchParams] = useSearchParams();

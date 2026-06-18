@@ -53,7 +53,6 @@ const GOAL_LABELS = {
 };
 
 const toNumber = (value) => {
-    const { t } = useTranslation();
     const parsed = Number(value);
     return Number.isFinite(parsed) ? parsed : 0;
 };
@@ -233,6 +232,7 @@ const ProactiveRatioDoughnut = ({ proactiveCount, reactiveCount }) => {
 };
 
 const Dashboard = () => {
+    const { t } = useTranslation();
     const { width } = useWindowSize();
     const [loading, setLoading] = useState(true);
 

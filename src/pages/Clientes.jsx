@@ -24,7 +24,6 @@ const normalizeClienteRecordatorio = (cliente) => ({
 });
 
 const buildReminderByClienteMap = (tareas = []) => {
-    const { t } = useTranslation();
     const map = new Map();
     for (const t of tareas) {
         if (t?.estado !== 'pendiente') continue;
@@ -51,6 +50,7 @@ const ETAPA_META = {
 const getEtapaMeta = (etapa) => ETAPA_META[etapa] || { label: 'Sin etapa', className: 'bg-slate-100 text-slate-600' };
 
 const Clientes = () => {
+    const { t } = useTranslation();
     const location = useLocation();
     const esMenuSeguimiento = location.pathname.endsWith('/clientes/seguimiento');
     const [clientes, setClientes] = useState([]);
