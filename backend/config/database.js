@@ -297,7 +297,7 @@ const initDb = async () => {
     id SERIAL PRIMARY KEY,
     usuario TEXT UNIQUE NOT NULL,
     contraseña TEXT NOT NULL,
-    rol TEXT NOT NULL CHECK(rol IN ('vendedor','admin')),
+    rol TEXT NOT NULL CHECK(rol IN ('vendedor','admin','asignador')),
     nombre TEXT NOT NULL,
     email TEXT,
     telefono TEXT,
@@ -305,7 +305,8 @@ const initDb = async () => {
     fechaCreacion TEXT DEFAULT CURRENT_TIMESTAMP,
     "googleRefreshToken" TEXT,
     "googleAccessToken" TEXT,
-    "googleTokenExpiry" DOUBLE PRECISION
+    "googleTokenExpiry" DOUBLE PRECISION,
+    last_seen TEXT
   );
 
   CREATE TABLE IF NOT EXISTS clientes (
@@ -395,6 +396,14 @@ const initDb = async () => {
     color TEXT,
     equipo_id INTEGER REFERENCES equipos(id),
     "fechaCreacion" TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+  );
+
+  CREATE TABLE IF NOT EXISTS notificaciones (
+    id SERIAL PRIMARY KEY,
+    usuario_id INTEGER REFERENCES usuarios(id),
+    mensaje TEXT NOT NULL,
+    leido INTEGER DEFAULT 0,
+    fecha TEXT DEFAULT CURRENT_TIMESTAMP
   );
 `;
 
@@ -576,6 +585,7 @@ const initDb = async () => {
       ['clientes',    '"motivoPerdida"',     'TEXT'],
       ['actividades', '"equipo_id"',         'INTEGER'],
       ['ventas',      '"pdf_url"',           'TEXT'],
+      ['usuarios',    'last_seen',           'TIMESTAMPTZ'],
     ];
     for (const [table, col, type] of colsMissingPg) {
       try {
@@ -699,6 +709,7 @@ const initDb = async () => {
       ['clientes', 'motivoPerdida TEXT'],
       ['tareas', 'equipo_id INTEGER'],
       ['ventas', 'pdf_url TEXT'],
+      ['usuarios', 'last_seen TEXT'],
     ];
     for (const [table, colDef] of colsMissingSqlite) {
       try {
@@ -731,7 +742,7 @@ const initDb = async () => {
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             usuario TEXT UNIQUE NOT NULL,
             contraseña TEXT NOT NULL,
-            rol TEXT NOT NULL CHECK(rol IN ('vendedor','admin')),
+            rol TEXT NOT NULL CHECK(rol IN ('vendedor','admin','asignador')),
             nombre TEXT NOT NULL,
             email TEXT,
             telefono TEXT,
@@ -789,7 +800,7 @@ const initDb = async () => {
         await internalDb.query(`
             ALTER TABLE usuarios DROP CONSTRAINT IF EXISTS usuarios_rol_check;
             UPDATE usuarios SET rol = 'vendedor' WHERE rol IN ('prospector', 'closer', 'superuser');
-            ALTER TABLE usuarios ADD CONSTRAINT usuarios_rol_check CHECK (rol IN ('vendedor', 'admin'));
+            ALTER TABLE usuarios ADD CONSTRAINT usuarios_rol_check CHECK (rol IN ('vendedor', 'admin', 'asignador'));
         `);
           console.log('✅ Migración: Constraint de rol actualizado en Postgres (admin/vendedor)');
     } catch(e) {

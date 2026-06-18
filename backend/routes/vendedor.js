@@ -1014,6 +1014,16 @@ router.post('/crear-prospecto', [auth, esVendedor], async (req, res) => {
         const cliente = toMongoFormat(row);
         if (cliente) cliente.prospectorAsignado = { nombre: req.usuario.nombre };
 
+        // Registrar actividad de creación
+        try {
+            await db.prepare(`
+                INSERT INTO actividades (tipo, vendedor, cliente, fecha, descripcion, resultado, notas)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            `).run('prospecto', prospectorId, result.lastInsertRowid, now, 'Nuevo prospecto agregado al sistema', 'exitoso', notas || '');
+        } catch (actError) {
+            console.error('Error al registrar actividad de creación de prospecto:', actError);
+        }
+
         // 🚀 Web Sockets: Emitir evento solo al equipo
         if (req.app.get('io') && equipoId) {
             req.app.get('io').to(`team_${equipoId}`).emit('prospectos_actualizados', {

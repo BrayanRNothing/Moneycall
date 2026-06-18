@@ -69,7 +69,7 @@ router.get('/mi-equipo', auth, async (req, res) => {
         }
 
         // Miembros del equipo
-        let miembrosSql = 'SELECT id, usuario, nombre, rol, email, telefono, activo, "equipo_id", googleRefreshToken FROM usuarios WHERE "equipo_id" = ?';
+        let miembrosSql = 'SELECT id, usuario, nombre, rol, email, telefono, activo, "equipo_id", googleRefreshToken, last_seen FROM usuarios WHERE "equipo_id" = ?';
         const params = [equipoId];
 
         if (estado !== null) {
@@ -105,7 +105,8 @@ router.get('/mi-equipo', auth, async (req, res) => {
                 email: m.email,
                 telefono: m.telefono,
                 activo: !!m.activo,
-                googleLinked: !!m.googleRefreshToken
+                googleLinked: !!m.googleRefreshToken,
+                last_seen: m.last_seen || null
             })),
             resumen: {
                 total: Number(resumen?.total || 0),
@@ -583,6 +584,50 @@ router.get('/monitoreo/actividades', auth, esTeamOwner, async (req, res) => {
         res.json({ actividades });
     } catch (error) {
         console.error('Error en GET /api/equipos/monitoreo/actividades:', error);
+        res.status(500).json({ mensaje: 'Error del servidor' });
+    }
+});
+
+// @route   GET /api/equipos/miembro/:id/prospectos
+// @desc    Obtener lista de clientes y prospectos de un miembro del equipo
+// @access  Private (Team Owner)
+router.get('/miembro/:id/prospectos', auth, esTeamOwner, async (req, res) => {
+    try {
+        const miembroId = parseInt(req.params.id, 10);
+        
+        // Verificar que el miembro pertenezca al equipo
+        const miembro = await db.prepare('SELECT "equipo_id" FROM usuarios WHERE id = ?').get(miembroId);
+        if (!miembro || String(miembro.equipo_id) !== String(req.equipoId)) {
+            return res.status(403).json({ mensaje: 'No tienes permiso para ver a este usuario o no existe' });
+        }
+
+        const sql = `
+            SELECT c.* 
+            FROM clientes c
+            WHERE (c."propietarioId" = ? OR c.prospectorAsignado = ? OR c.vendedorAsignado = ? OR c.closerAsignado = ?)
+            ORDER BY c.fechaUltimaEtapa DESC
+        `;
+        
+        const rows = await db.prepare(sql).all(miembroId, miembroId, miembroId, miembroId);
+        
+        const prospectos = rows.map(r => ({
+            id: r.id,
+            nombres: r.nombres,
+            apellidoPaterno: r.apellidoPaterno,
+            empresa: r.empresa,
+            telefono: r.telefono,
+            correo: r.correo,
+            etapaEmbudo: r.etapaEmbudo,
+            fechaRegistro: r.fechaRegistro,
+            fechaUltimaEtapa: r.fechaUltimaEtapa,
+            ultimaInteraccion: r.ultimaInteraccion,
+            customMetricLabel: r.customMetricLabel,
+            customMetricValue: r.customMetricValue
+        }));
+
+        res.json({ prospectos });
+    } catch (error) {
+        console.error('Error en GET /api/equipos/miembro/:id/prospectos:', error);
         res.status(500).json({ mensaje: 'Error del servidor' });
     }
 });

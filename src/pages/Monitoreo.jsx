@@ -1,5 +1,23 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Activity, RefreshCw, Calendar, Phone, MessageSquare, Video, FileText, CheckCircle2, Target, AlertTriangle, ChevronLeft, UserCircle2 } from 'lucide-react';
+import { Activity, RefreshCw, Calendar, Phone, MessageSquare, Video, FileText, CheckCircle2, Target, AlertTriangle, ChevronLeft, UserCircle2, Briefcase, Search, Users } from 'lucide-react';
+
+const getEtapaColor = (etapa) => {
+    switch (etapa) {
+        case 'prospecto_nuevo': return 'bg-blue-50 text-blue-700 border-blue-200';
+        case 'en_contacto': return 'bg-amber-50 text-amber-700 border-amber-200';
+        case 'reunion_agendada': return 'bg-purple-50 text-purple-700 border-purple-200';
+        case 'reunion_realizada': return 'bg-indigo-50 text-indigo-700 border-indigo-200';
+        case 'negociacion': return 'bg-orange-50 text-orange-700 border-orange-200';
+        case 'venta_ganada': case 'cliente_activo': return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+        case 'perdido': return 'bg-rose-50 text-rose-700 border-rose-200';
+        default: return 'bg-gray-50 text-gray-700 border-gray-200';
+    }
+};
+
+const formatEtapa = (etapa) => {
+    if (!etapa) return 'Sin Etapa';
+    return etapa.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+};
 import { getUser, getToken } from '../utils/authUtils';
 import API_URL from '../config/api';
 
@@ -37,9 +55,13 @@ export default function Monitoreo() {
     const token = getToken();
     const [miembros, setMiembros] = useState([]);
     const [actividades, setActividades] = useState([]);
+    const [prospectos, setProspectos] = useState([]);
     const [selectedMember, setSelectedMember] = useState(null);
+    const [filtroHistorial, setFiltroHistorial] = useState('hoy');
+    const [tabCartera, setTabCartera] = useState('prospectos');
     const [loading, setLoading] = useState(true);
     const [loadingActs, setLoadingActs] = useState(false);
+    const [loadingProps, setLoadingProps] = useState(false);
     const [error, setError] = useState('');
 
     const fetchMiembros = useCallback(async () => {
@@ -78,15 +100,35 @@ export default function Monitoreo() {
         }
     }, [token]);
 
+    const fetchProspectos = useCallback(async (miembroId) => {
+        setLoadingProps(true);
+        try {
+            const res = await fetch(`${API_URL}/api/equipos/miembro/${miembroId}/prospectos`, {
+                headers: { 'Content-Type': 'application/json', 'x-auth-token': token }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setProspectos(data.prospectos || []);
+            }
+        } catch (e) {
+            console.error('Error fetching prospectos:', e);
+        } finally {
+            setLoadingProps(false);
+        }
+    }, [token]);
+
     useEffect(() => {
         fetchMiembros();
     }, [fetchMiembros]);
 
     useEffect(() => {
         if (selectedMember) {
+            setFiltroHistorial('hoy');
+            setTabCartera('prospectos');
             fetchActividades(selectedMember.id);
+            fetchProspectos(selectedMember.id);
         }
-    }, [selectedMember, fetchActividades]);
+    }, [selectedMember, fetchActividades, fetchProspectos]);
 
     if (!userAuth?.esOwner && userAuth?.rol !== 'admin') {
         return (
@@ -99,11 +141,11 @@ export default function Monitoreo() {
     }
 
     return (
-        <div className="min-h-screen md:bg-slate-50 md:p-6 bg-white -m-4 md:m-0 p-4 pb-8 md:pb-6 animate-in fade-in duration-500">
-            <div className="max-w-5xl mx-auto space-y-6">
+        <div className="min-h-[100%] flex flex-col md:bg-slate-50 md:p-6 bg-white -m-4 md:m-0 p-4 pb-8 md:pb-6 h-full animate-in fade-in duration-500">
+            <div className="max-w-full mx-auto space-y-6 flex-1 flex flex-col w-full min-h-0">
                 
                 {/* Cabecera Principal */}
-                <div className="bg-white md:rounded-2xl p-5 border border-slate-200 shadow-sm transition-all">
+                <div className="bg-white md:rounded-2xl p-5 border border-slate-200 shadow-sm md:shadow-md transition-all shrink-0">
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                         <div className="flex items-center gap-4">
                             {selectedMember ? (
@@ -114,7 +156,7 @@ export default function Monitoreo() {
                                     <ChevronLeft size={24} className="group-hover:-translate-x-1 transition-transform" />
                                 </button>
                             ) : (
-                                <div className="w-14 h-14 rounded-2xl bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                                <div className="w-14 h-14 rounded-2xl bg-linear-to-br from-(--theme-500) to-(--theme-600) flex items-center justify-center shadow-lg shadow-(--theme-500)/20">
                                     <Activity size={28} className="text-white" />
                                 </div>
                             )}
@@ -128,24 +170,15 @@ export default function Monitoreo() {
                             </div>
                         </div>
 
-                        {!selectedMember && (
+                        <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 md:gap-3 w-full md:w-auto mt-2 md:mt-0">
                             <button
-                                className="p-2.5 bg-white border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 transition-all shadow-sm group"
-                                onClick={fetchMiembros}
-                                title="Actualizar"
+                                className="flex-1 sm:flex-none justify-center flex items-center gap-1.5 px-3 py-2 md:px-4 md:py-2.5 bg-white border border-gray-200 rounded-xl text-[11px] md:text-xs font-bold text-gray-600 hover:bg-gray-50 transition-all shadow-sm"
+                                onClick={selectedMember ? () => { fetchActividades(selectedMember.id); fetchProspectos(selectedMember.id); } : fetchMiembros}
                             >
-                                <RefreshCw size={18} className={`${loading ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-500'}`} />
+                                <RefreshCw size={14} className={(selectedMember ? (loadingActs || loadingProps) : loading) ? 'animate-spin' : ''} />
+                                ACTUALIZAR
                             </button>
-                        )}
-                        {selectedMember && (
-                            <button
-                                className="p-2.5 bg-white border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 transition-all shadow-sm group"
-                                onClick={() => fetchActividades(selectedMember.id)}
-                                title="Actualizar Timeline"
-                            >
-                                <RefreshCw size={18} className={`${loadingActs ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-500'}`} />
-                            </button>
-                        )}
+                        </div>
                     </div>
                 </div>
 
@@ -158,122 +191,250 @@ export default function Monitoreo() {
 
                 {/* Vista de Tarjetas (Grid de Usuarios) */}
                 {!selectedMember && (
-                    <div className="animate-in slide-in-from-bottom-4 fade-in duration-500">
-                        {loading ? (
-                            <div className="bg-white md:rounded-2xl border border-slate-200 shadow-sm p-6 flex flex-col items-center justify-center py-20">
-                                <RefreshCw size={48} className="animate-spin text-indigo-500 mb-4" />
-                                <p className="text-gray-500 font-semibold uppercase tracking-widest text-xs">Cargando equipo...</p>
+                    <div className="flex-1 flex flex-col min-h-0 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                        <div className="bg-white md:rounded-2xl p-5 border border-slate-200 shadow-sm flex-1 flex flex-col min-h-0">
+                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 shrink-0">
+                                <div>
+                                    <h2 className="text-lg md:text-xl font-bold text-gray-900 leading-tight">Miembros Disponibles</h2>
+                                    <p className="text-[10px] md:text-xs text-gray-400 font-semibold uppercase tracking-widest mt-1">Selecciona un miembro para monitorear</p>
+                                </div>
                             </div>
-                        ) : miembros.length === 0 ? (
-                            <div className="bg-white md:rounded-2xl border border-slate-200 shadow-sm p-6 text-center py-20 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200">
-                                <Users size={48} className="mx-auto text-gray-300 mb-4" />
-                                <p className="text-gray-500 font-semibold">Tu equipo no tiene otros miembros además de ti.</p>
-                            </div>
-                        ) : (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                                {miembros.map(miembro => (
-                                    <div 
-                                        key={miembro.id} 
-                                        onClick={() => setSelectedMember(miembro)}
-                                        className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 cursor-pointer hover:shadow-lg hover:border-indigo-200 hover:-translate-y-1 transition-all duration-300 group"
-                                    >
-                                        <div className="flex items-center gap-4 mb-4">
-                                            <div className="w-14 h-14 rounded-full bg-linear-to-br from-indigo-100 to-purple-100 text-indigo-700 flex items-center justify-center font-bold text-xl border-2 border-white shadow-sm group-hover:scale-110 transition-transform">
-                                                {getInitials(miembro.nombre)}
-                                            </div>
-                                            <div>
-                                                <h3 className="font-bold text-gray-900 group-hover:text-indigo-600 transition-colors">{miembro.nombre}</h3>
-                                                <p className="text-xs text-gray-500 font-medium">@{miembro.usuario}</p>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-center justify-between text-xs font-semibold text-gray-500 border-t border-gray-100 pt-4">
-                                            <span className="flex items-center gap-1.5">
-                                                <div className={`w-2 h-2 rounded-full ${miembro.activo ? 'bg-emerald-500' : 'bg-rose-500'}`}></div>
-                                                {miembro.activo ? 'Activo' : 'Inactivo'}
-                                            </span>
-                                            <span className="text-indigo-500 bg-indigo-50 px-3 py-1 rounded-full group-hover:bg-indigo-100 transition-colors">
-                                                Ver acciones
-                                            </span>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                )}
 
-                {/* Vista de Línea de Tiempo (Actividades del Usuario Seleccionado) */}
-                {selectedMember && (
-                    <div className="bg-white md:rounded-2xl border border-slate-200 shadow-sm p-6 overflow-hidden min-h-[400px]">
-                        {loadingActs ? (
-                            <div className="flex flex-col items-center justify-center py-20">
-                                <RefreshCw size={48} className="animate-spin text-indigo-500 mb-4" />
-                                <p className="text-gray-500 font-semibold uppercase tracking-widest text-xs">Cargando actividades...</p>
-                            </div>
-                        ) : actividades.length === 0 ? (
-                            <div className="text-center py-20 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200">
-                                <Activity size={48} className="mx-auto text-gray-300 mb-4" />
-                                <p className="text-gray-500 font-semibold">Este usuario no tiene actividades registradas.</p>
-                            </div>
-                        ) : (
-                            <div className="relative border-l-2 border-indigo-100 ml-4 space-y-8 pb-4">
-                                {actividades.map((act) => (
-                                    <div key={act.id} className="relative pl-8 animate-in slide-in-from-bottom-4 fade-in duration-500">
-                                        {/* Line marker */}
-                                        <div className={`absolute -left-[13px] top-1 w-6 h-6 rounded-full border-4 border-white flex items-center justify-center shadow-sm ${getTipoColor(act.tipo).split(' ')[0]}`}>
-                                            <div className="w-2 h-2 rounded-full bg-current"></div>
-                                        </div>
-                                        
-                                        <div className="bg-white border border-gray-100 p-5 rounded-2xl shadow-sm hover:shadow-md hover:border-indigo-100 transition-all">
-                                            <div className="flex flex-wrap items-center justify-between gap-4 mb-3">
+                            {loading ? (
+                                <div className="flex flex-col items-center justify-center py-20 flex-1">
+                                    <RefreshCw size={48} className="animate-spin text-(--theme-500) mb-4" />
+                                    <p className="text-gray-500 font-semibold uppercase tracking-widest text-xs">Cargando equipo...</p>
+                                </div>
+                            ) : miembros.length === 0 ? (
+                                <div className="text-center py-20 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200 flex-1 flex flex-col items-center justify-center min-h-0">
+                                    <Users size={48} className="mx-auto text-gray-300 mb-4" />
+                                    <p className="text-gray-500 font-semibold">Tu equipo no tiene otros miembros además de ti.</p>
+                                </div>
+                            ) : (
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 overflow-y-auto pr-2 pb-2 flex-1 content-start min-h-0">
+                                    {miembros.map(miembro => (
+                                        <div 
+                                            key={miembro.id} 
+                                            onClick={() => setSelectedMember(miembro)}
+                                            className={`group relative p-5 bg-white border border-gray-200 rounded-2xl transition-all hover:shadow-xl hover:shadow-gray-200/50 hover:-translate-y-1 cursor-pointer ${!miembro.activo ? 'grayscale opacity-70' : ''}`}
+                                        >
+                                            <div className="flex items-start justify-between mb-4">
                                                 <div className="flex items-center gap-3">
-                                                    <div className={`p-2 rounded-xl border ${getTipoColor(act.tipo)}`}>
-                                                        {getIcon(act.tipo)}
+                                                    <div className="w-12 h-12 rounded-xl bg-linear-to-br from-(--theme-50) to-(--theme-100) text-(--theme-600) flex items-center justify-center font-bold text-lg border border-(--theme-100)">
+                                                        {getInitials(miembro.nombre)}
                                                     </div>
                                                     <div>
-                                                        <h3 className="text-sm font-bold text-gray-900 capitalize">{act.tipo}</h3>
+                                                        <h3 className="font-bold text-gray-900 group-hover:text-(--theme-600) transition-colors truncate max-w-[120px]">{miembro.nombre}</h3>
+                                                        <p className="text-xs text-gray-400 font-semibold">@{miembro.usuario}</p>
                                                     </div>
                                                 </div>
-                                                <div className="text-right">
-                                                    <div className="flex items-center gap-1.5 text-[11px] font-bold text-gray-400 bg-gray-50 px-2.5 py-1 rounded-lg border border-gray-100">
-                                                        <Calendar size={12} />
-                                                        {new Date(act.fecha || act.createdAt).toLocaleString(undefined, {
-                                                            day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
-                                                        })}
-                                                    </div>
+                                                <div className={`px-2 py-1 rounded-lg text-[10px] font-bold uppercase tracking-tighter ${miembro.activo ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-rose-50 text-rose-600 border border-rose-100'}`}>
+                                                    {miembro.activo ? 'ACTIVO' : 'INACTIVO'}
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="space-y-2 mb-6 text-xs text-gray-500 font-semibold">
+                                                <div className="flex items-center gap-2">
+                                                    <div className={`w-2 h-2 rounded-full ${
+                                                        miembro.last_seen && (Date.now() - new Date(miembro.last_seen.endsWith('Z') || miembro.last_seen.includes('+') ? miembro.last_seen : miembro.last_seen.replace(' ', 'T') + 'Z').getTime() < 5 * 60 * 1000) 
+                                                        ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)] animate-pulse' 
+                                                        : 'bg-gray-300'
+                                                    }`}></div>
+                                                    <span className="uppercase tracking-widest">{miembro.last_seen && (Date.now() - new Date(miembro.last_seen.endsWith('Z') || miembro.last_seen.includes('+') ? miembro.last_seen : miembro.last_seen.replace(' ', 'T') + 'Z').getTime() < 5 * 60 * 1000) ? 'En línea' : 'Desconectado'}</span>
                                                 </div>
                                             </div>
 
-                                            <div className="pl-1">
-                                                {act.cliente && (
-                                                    <div className="mb-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
-                                                        <p className="text-xs text-gray-500 uppercase tracking-widest font-bold mb-1">Cliente Involucrado</p>
-                                                        <p className="text-sm font-semibold text-gray-800">
-                                                            {act.cliente.nombres} {act.cliente.apellidoPaterno} 
-                                                            {act.cliente.empresa && <span className="text-gray-500 font-normal ml-1">({act.cliente.empresa})</span>}
-                                                        </p>
-                                                    </div>
-                                                )}
-                                                {act.descripcion && (
-                                                    <p className="text-sm text-gray-600 mb-3">{act.descripcion}</p>
-                                                )}
-                                                {act.notas && (
-                                                    <p className="text-sm text-gray-500 italic mb-3 border-l-2 border-gray-200 pl-3">{act.notas}</p>
-                                                )}
-                                                {act.resultado && (
-                                                    <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-widest border ${act.resultado === 'exitoso' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-gray-50 border-gray-200 text-gray-600'}`}>
-                                                        <CheckCircle2 size={12} className={act.resultado === 'exitoso' ? 'text-emerald-500' : 'text-gray-400'} />
-                                                        {act.resultado}
-                                                    </div>
-                                                )}
+                                            <div className="pt-4 border-t border-gray-50 flex justify-center">
+                                                <span className="text-[10px] font-bold text-(--theme-600) bg-(--theme-50) px-4 py-1.5 rounded-xl border border-(--theme-100) group-hover:bg-(--theme-100) transition-colors uppercase tracking-widest">
+                                                    MONITOREAR
+                                                </span>
                                             </div>
                                         </div>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
+                                    ))}
+                                </div>
+                            )}
+                        </div>
                     </div>
                 )}
+
+                {/* Detalles del Usuario Seleccionado (Layout de dos columnas) */}
+                {selectedMember && (() => {
+                    const esHoy = (fecha) => {
+                        const today = new Date();
+                        const date = new Date(fecha);
+                        return date.getDate() === today.getDate() &&
+                            date.getMonth() === today.getMonth() &&
+                            date.getFullYear() === today.getFullYear();
+                    };
+
+                    const actividadesFiltradas = actividades.filter(act => {
+                        if (filtroHistorial === 'hoy') return esHoy(act.fecha || act.createdAt);
+                        return true;
+                    });
+
+                    const clientesLista = prospectos.filter(p => p.etapaEmbudo === 'cliente_activo' || p.etapaEmbudo === 'venta_ganada');
+                    const prospectosLista = prospectos.filter(p => p.etapaEmbudo !== 'cliente_activo' && p.etapaEmbudo !== 'venta_ganada');
+                    const carteraActiva = tabCartera === 'prospectos' ? prospectosLista : clientesLista;
+
+                    return (
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 flex-1 min-h-0 animate-in slide-in-from-bottom-4 fade-in duration-500">
+                            
+                            {/* Columna Historial de Interacción */}
+                            <div className="bg-white md:rounded-2xl border border-slate-200 shadow-sm flex flex-col min-h-0">
+                                <div className="p-4 sm:p-5 border-b border-gray-100 flex items-center justify-between shrink-0">
+                                    <div className="flex items-center gap-2">
+                                        <div className="p-2 bg-(--theme-50) rounded-lg">
+                                            <Activity size={18} className="text-(--theme-600)" />
+                                        </div>
+                                        <div>
+                                            <h2 className="text-base font-bold text-gray-900 leading-tight">Historial</h2>
+                                            <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-widest mt-0.5">Actividades del usuario</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-1 bg-gray-50 p-1 rounded-xl border border-gray-100">
+                                        <button 
+                                            onClick={() => setFiltroHistorial('hoy')}
+                                            className={`px-3 py-1.5 text-[10px] uppercase tracking-widest font-bold rounded-lg transition-all ${filtroHistorial === 'hoy' ? 'bg-white text-(--theme-600) shadow-sm border border-gray-200/50' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'}`}
+                                        >
+                                            Hoy
+                                        </button>
+                                        <button 
+                                            onClick={() => setFiltroHistorial('global')}
+                                            className={`px-3 py-1.5 text-[10px] uppercase tracking-widest font-bold rounded-lg transition-all ${filtroHistorial === 'global' ? 'bg-white text-(--theme-600) shadow-sm border border-gray-200/50' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'}`}
+                                        >
+                                            Global
+                                        </button>
+                                    </div>
+                                </div>
+                                <div className="p-4 sm:p-5 flex-1 overflow-y-auto content-start min-h-0 custom-scrollbar pr-2">
+                                    {loadingActs ? (
+                                        <div className="flex flex-col items-center justify-center py-20 flex-1">
+                                            <RefreshCw size={32} className="animate-spin text-(--theme-500) mb-4" />
+                                        </div>
+                                    ) : actividadesFiltradas.length === 0 ? (
+                                        <div className="text-center py-16 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center">
+                                            <Activity size={32} className="mx-auto text-gray-300 mb-3" />
+                                            <p className="text-gray-500 text-sm font-semibold">No hay interacciones {filtroHistorial === 'hoy' ? 'para hoy' : 'registradas'}.</p>
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-3">
+                                            {actividadesFiltradas.map((act) => (
+                                                <div key={act.id} className="bg-white border border-gray-100 p-4 rounded-xl shadow-sm hover:shadow-md hover:border-(--theme-100) transition-all flex flex-col gap-3 group">
+                                                    <div className="flex items-start gap-3">
+                                                        <div className={`p-2.5 rounded-xl border shrink-0 group-hover:scale-105 transition-transform ${getTipoColor(act.tipo)}`}>
+                                                            {getIcon(act.tipo)}
+                                                        </div>
+                                                        <div className="flex-1 min-w-0">
+                                                            <div className="flex items-center justify-between gap-2 mb-1">
+                                                                <div className="flex items-center gap-2 flex-wrap">
+                                                                    <h3 className="text-sm font-bold text-gray-900 capitalize">{act.tipo}</h3>
+                                                                    {act.resultado && (
+                                                                        <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider border ${act.resultado === 'exitoso' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-gray-50 border-gray-200 text-gray-600'}`}>
+                                                                            {act.resultado}
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                                <div className="text-[10px] font-semibold text-gray-400 whitespace-nowrap bg-gray-50 px-2 py-0.5 rounded-full border border-gray-100">
+                                                                    {new Date(act.fecha || act.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                                                                </div>
+                                                            </div>
+                                                            {act.cliente && (
+                                                                <p className="text-[11px] font-medium text-gray-600 truncate mt-1">
+                                                                    Con: <span className="font-bold text-gray-800">{act.cliente.nombres} {act.cliente.apellidoPaterno}</span>
+                                                                </p>
+                                                            )}
+                                                            {act.descripcion && (
+                                                                <p className="text-xs text-gray-600 mt-2 line-clamp-2 leading-relaxed bg-gray-50 p-2 rounded-lg border border-gray-100">{act.descripcion}</p>
+                                                            )}
+                                                            {act.notas && (
+                                                                <p className="text-xs text-gray-500 italic mt-2 border-l-2 border-(--theme-300) pl-2">
+                                                                    "{act.notas}"
+                                                                </p>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Columna Cartera */}
+                            <div className="bg-white md:rounded-2xl border border-slate-200 shadow-sm flex flex-col min-h-0">
+                                <div className="p-4 sm:p-5 border-b border-gray-100 shrink-0">
+                                    <div className="flex items-center gap-2 mb-4">
+                                        <div className="p-2 bg-(--theme-50) rounded-lg">
+                                            <Briefcase size={18} className="text-(--theme-600)" />
+                                        </div>
+                                        <div>
+                                            <h2 className="text-base font-bold text-gray-900 leading-tight">Cartera</h2>
+                                            <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-widest mt-0.5">Contactos asignados</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="flex items-center gap-1 bg-gray-50 p-1 rounded-xl border border-gray-100">
+                                        <button 
+                                            onClick={() => setTabCartera('prospectos')}
+                                            className={`flex-1 py-1.5 text-[10px] uppercase tracking-widest font-bold rounded-lg transition-all flex items-center justify-center gap-2 ${tabCartera === 'prospectos' ? 'bg-white text-(--theme-600) shadow-sm border border-gray-200/50' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'}`}
+                                        >
+                                            Prospectos <span className={`px-2 py-0.5 rounded-full text-[9px] ${tabCartera === 'prospectos' ? 'bg-(--theme-50) text-(--theme-600)' : 'bg-gray-200 text-gray-500'}`}>{prospectosLista.length}</span>
+                                        </button>
+                                        <button 
+                                            onClick={() => setTabCartera('clientes')}
+                                            className={`flex-1 py-1.5 text-[10px] uppercase tracking-widest font-bold rounded-lg transition-all flex items-center justify-center gap-2 ${tabCartera === 'clientes' ? 'bg-white text-(--theme-600) shadow-sm border border-gray-200/50' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'}`}
+                                        >
+                                            Clientes <span className={`px-2 py-0.5 rounded-full text-[9px] ${tabCartera === 'clientes' ? 'bg-(--theme-50) text-(--theme-600)' : 'bg-gray-200 text-gray-500'}`}>{clientesLista.length}</span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div className="p-4 sm:p-5 flex-1 overflow-y-auto content-start min-h-0 custom-scrollbar pr-2">
+                                    {loadingProps ? (
+                                        <div className="flex flex-col items-center justify-center py-20 flex-1">
+                                            <RefreshCw size={32} className="animate-spin text-(--theme-500) mb-4" />
+                                        </div>
+                                    ) : carteraActiva.length === 0 ? (
+                                        <div className="text-center py-16 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center">
+                                            <Briefcase size={32} className="mx-auto text-gray-300 mb-3" />
+                                            <p className="text-gray-500 text-sm font-semibold">No hay {tabCartera} asignados.</p>
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-3">
+                                            {carteraActiva.map((p) => (
+                                                <div key={p.id} className="bg-white border border-gray-100 p-4 rounded-xl shadow-sm hover:shadow-md hover:border-(--theme-100) transition-all group">
+                                                    <div className="flex justify-between items-start mb-2">
+                                                        <div>
+                                                            <div className="font-bold text-gray-900 text-sm group-hover:text-(--theme-600) transition-colors">{p.nombres} {p.apellidoPaterno}</div>
+                                                            <div className="text-[11px] font-medium text-gray-500 flex items-center gap-1 mt-1">
+                                                                <Briefcase size={10} className="text-gray-400" /> {p.empresa || 'Sin empresa'}
+                                                            </div>
+                                                        </div>
+                                                        <span className={`inline-flex items-center px-2 py-1 rounded-lg text-[9px] font-bold tracking-tighter uppercase border ${getEtapaColor(p.etapaEmbudo)}`}>
+                                                            {formatEtapa(p.etapaEmbudo)}
+                                                        </span>
+                                                    </div>
+                                                    
+                                                    <div className="flex flex-wrap gap-x-4 gap-y-2 mt-4 pt-3 border-t border-gray-50">
+                                                        {p.telefono && (
+                                                            <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-1.5 bg-gray-50 px-2 py-1 rounded-md">
+                                                                <Phone size={10} className="text-gray-400" /> {p.telefono}
+                                                            </div>
+                                                        )}
+                                                        <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-1.5 bg-gray-50 px-2 py-1 rounded-md">
+                                                            <Calendar size={10} className="text-gray-400" />
+                                                            {p.ultimaInteraccion ? new Date(p.ultimaInteraccion).toLocaleDateString() : 'Nunca'}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    );
+                })()}
             </div>
         </div>
     );

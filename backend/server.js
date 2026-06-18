@@ -64,6 +64,7 @@ app.use('/api/google', require('./routes/google'));
 app.use('/api/equipos', require('./routes/equipos'));
 app.use('/api/plantillas', require('./routes/plantillas'));
 app.use('/api/documentos', require('./routes/documentos'));
+app.use('/api/notificaciones', require('./routes/notificaciones'));
 console.log('🚀 Rutas registradas correctamente');
 
 

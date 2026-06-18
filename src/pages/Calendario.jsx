@@ -1332,7 +1332,7 @@ const Calendario = () => {
                                                     relative rounded-2xl transition-all border flex items-center justify-center p-1 md:p-2 min-h-[44px] md:min-h-[72px] aspect-square md:aspect-auto
                                                     ${!date ? "bg-transparent border-transparent cursor-default select-none" : ""}
                                                     ${date && !selectedCloser ? "opacity-40 cursor-not-allowed bg-slate-50 border-slate-100" : ""}
-                                                    ${isPastDay ? "opacity-30 cursor-not-allowed bg-slate-50 border-slate-100/70 text-slate-300 line-through select-none" : ""}
+                                                    ${isPastDay ? "opacity-60 cursor-not-allowed bg-slate-50/50 border-slate-200/50 text-slate-400 select-none" : ""}
                                                     ${date && selectedCloser && !isSelected && !isPastDay ? "bg-white border-slate-200 hover:border-(--theme-500)/50 hover:shadow-sm text-slate-700" : ""}
                                                     ${isSelected && !isPastDay ? "bg-(--theme-500) text-white shadow-lg shadow-(--theme-500)/30 scale-105 border-(--theme-500) z-20" : ""}
                                                     ${isTodayDate && !isSelected ? "bg-(--theme-50) border-(--theme-200) text-(--theme-700)" : ""}

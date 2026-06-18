@@ -1,6 +1,8 @@
 const jwt = require('jsonwebtoken');
 const { db } = require('../config/database');
 
+const lastSeenCache = new Map();
+
 /**
  * Middleware para verificar el token JWT
  */
@@ -28,6 +30,18 @@ const auth = async (req, res, next) => {
 
         // Añadir usuario al request (normalizando id a string por si acaso)
         req.usuario = { ...row, id: String(row.id), _id: String(row.id) };
+
+        // Actualizar last_seen
+        const now = Date.now();
+        const lastUpdated = lastSeenCache.get(row.id) || 0;
+        if (now - lastUpdated > 60000) { // Actualizar máximo 1 vez por minuto
+            lastSeenCache.set(row.id, now);
+            // Fire and forget (no hacemos await para no bloquear la petición)
+            db.prepare('UPDATE usuarios SET last_seen = CURRENT_TIMESTAMP WHERE id = ?')
+              .run(row.id)
+              .catch(err => console.error('Error updating last_seen:', err.message));
+        }
+
         next();
     } catch (error) {
         console.error('Auth error:', error.message);
@@ -46,7 +60,7 @@ const esSuperUser = (req, res, next) => {
         return res.status(401).json({ mensaje: 'Usuario no autenticado' });
     }
 
-    const rolesPermitidos = ['admin', 'vendedor'];
+    const rolesPermitidos = ['admin', 'vendedor', 'asignador'];
 
     if (rolesPermitidos.includes(req.usuario.rol)) {
         next();

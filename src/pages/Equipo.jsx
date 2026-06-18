@@ -264,9 +264,9 @@ export default function Equipo() {
   });
 
   return (
-    <div className="min-h-screen md:bg-slate-50 md:p-6 bg-white -m-4 md:m-0 p-4 pb-8 md:pb-6">
+    <div className="min-h-full flex flex-col md:bg-slate-50 md:p-6 bg-white -m-4 md:m-0 p-4 pb-8 md:pb-6 h-full">
       {/* Team Info Card - NOW AT THE TOP */}
-      <div className="max-w-full mx-auto space-y-6">
+      <div className="max-w-full mx-auto space-y-6 flex-1 flex flex-col w-full min-h-0">
         {!loading && !error && equipo && (
           <div className="bg-white md:rounded-2xl p-5 border border-slate-200 shadow-sm md:shadow-md transition-all">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -349,8 +349,8 @@ export default function Equipo() {
 
         {/* Member List Section */}
         {!loading && equipo && (
-          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <div className="bg-white md:rounded-2xl p-5 border border-slate-200 shadow-sm overflow-hidden">
+          <div className="flex-1 flex flex-col min-h-0 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <div className="bg-white md:rounded-2xl p-5 border border-slate-200 shadow-sm flex-1 flex flex-col min-h-0">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
                 <div>
                   <h2 className="text-lg md:text-xl font-bold text-gray-900 leading-tight">Miembros del Equipo</h2>
@@ -395,12 +395,12 @@ export default function Equipo() {
               </div>
 
               {miembrosFiltrados.length === 0 ? (
-                <div className="text-center py-20 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200">
+                <div className="text-center py-20 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200 flex-1 flex flex-col items-center justify-center min-h-0">
                   <Users size={48} className="mx-auto text-gray-300 mb-4" />
                   <p className="text-gray-500 font-semibold">No se encontraron miembros</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 overflow-y-auto pr-2 pb-2 flex-1 content-start min-h-0">
                   {miembrosFiltrados.map(m => (
                     <div
                       key={m.id}

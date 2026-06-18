@@ -8,6 +8,7 @@ import logocrmoneycall from '../assets/logocrmoneycall.png';
 import useWindowSize from '../hooks/useWindowSize';
 import MainLayoutMobile from './MainLayoutMobile';
 import MoneycallBot from '../components/BotAssistant/MoneycallBot';
+import NotificacionesBell from '../components/NotificacionesBell';
 
 const MainLayout = () => {
     const { width } = useWindowSize();
@@ -22,7 +23,7 @@ const MainLayout = () => {
             window.location.href = '/'; // Force redirect if no session
             return;
         }
-        if (userGuardado.rol && userGuardado.rol !== 'vendedor' && userGuardado.rol !== 'admin') {
+        if (userGuardado.rol && userGuardado.rol !== 'vendedor' && userGuardado.rol !== 'admin' && userGuardado.rol !== 'asignador') {
             window.location.href = '/';
             return;
         }
@@ -34,14 +35,14 @@ const MainLayout = () => {
             fetch(`${API_URL}/api/auth/me`, {
                 headers: { 'x-auth-token': token }
             })
-            .then(res => res.ok ? res.json() : Promise.reject('Failed to fetch'))
-            .then(freshUser => {
-                if (freshUser && freshUser.id) {
-                    setUsuario(freshUser);
-                    saveUser(freshUser, !!localStorage.getItem('user'));
-                }
-            })
-            .catch(err => console.error('Failed to refresh user data:', err));
+                .then(res => res.ok ? res.json() : Promise.reject('Failed to fetch'))
+                .then(freshUser => {
+                    if (freshUser && freshUser.id) {
+                        setUsuario(freshUser);
+                        saveUser(freshUser, !!localStorage.getItem('user'));
+                    }
+                })
+                .catch(err => console.error('Failed to refresh user data:', err));
         }
     }, []);
 
@@ -78,7 +79,19 @@ const MainLayout = () => {
             path: '/vendedor/monitoreo',
             icon: (
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M19.07 4.93A10 10 0 0 0 6.99 3.34"/><path d="M4 5.49A10 10 0 0 0 5.6 20.3"/><path d="M8.5 8.5A5 5 0 0 1 15.5 8.5"/><path d="M15.5 15.5A5 5 0 0 1 8.5 15.5"/><circle cx="12" cy="12" r="1"/>
+                    <path d="M19.07 4.93A10 10 0 0 0 6.99 3.34" /><path d="M4 5.49A10 10 0 0 0 5.6 20.3" /><path d="M8.5 8.5A5 5 0 0 1 15.5 8.5" /><path d="M15.5 15.5A5 5 0 0 1 8.5 15.5" /><circle cx="12" cy="12" r="1" />
+                </svg>
+            )
+        }] : []),
+        ...(usuario?.rol === 'admin' || usuario?.rol === 'asignador' ? [{
+            name: 'Asignar',
+            path: '/vendedor/asignar',
+            icon: (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                    <circle cx="9" cy="7" r="4" />
+                    <line x1="19" y1="8" x2="19" y2="14" />
+                    <line x1="22" y1="11" x2="16" y2="11" />
                 </svg>
             )
         }] : []),
@@ -179,7 +192,10 @@ const MainLayout = () => {
                 <main
                     className="flex-1 bg-white/80 backdrop-blur-md border border-white/40 rounded-3xl overflow-hidden transition-all duration-300 relative premium-reflejo"
                 >
-                    <div className={`h-full scrollbar-hide ${isAjustesRoute || isDashboard ? 'overflow-hidden' : 'overflow-y-auto'}`}>
+                    <div className="absolute top-4 right-6 z-50">
+                        <NotificacionesBell />
+                    </div>
+                    <div className={`h-full scrollbar-hide ${isAjustesRoute || isDashboard ? 'overflow-hidden' : 'overflow-y-auto pt-14'}`}>
                         <Outlet />
                     </div>
                 </main>

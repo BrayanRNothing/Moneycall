@@ -315,7 +315,7 @@ export default function VendedorAjustes() {
                             </div>
 
                             {/* Info Card desktop only */}
-                            <div className="hidden lg:flex mt-6 p-5 bg-linear-to-br from-(--theme-50) to-white rounded-3xl border border-(--theme-200) shadow-sm overflow-hidden relative group flex-col min-h-40">
+                            <div className="hidden lg:flex mt-6 p-5 bg-linear-to-br from-(--theme-50) to-white rounded-3xl border border-(--theme-200) shadow-sm overflow-hidden relative group flex-col">
                                 <div className={`absolute top-0 right-0 w-24 h-24 bg-linear-to-br ${roleBg} opacity-5 rounded-full -translate-y-8 translate-x-8 group-hover:scale-110 transition-transform duration-700`} />
                                 <h3 className="text-xs font-black text-(--theme-400) uppercase tracking-widest mb-2">Estado de Cuenta</h3>
                                 <div className="space-y-3">
@@ -633,7 +633,7 @@ export default function VendedorAjustes() {
                                                     <div className="text-[6px] font-bold uppercase tracking-widest leading-none">Efectividad</div>
                                                 </div>
                                             </h2>
-                                            
+
                                             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
                                                 <div className="lg:col-span-2 space-y-6 flex flex-col justify-around">
                                                     {/* Factor 1: Estructura */}
@@ -641,11 +641,11 @@ export default function VendedorAjustes() {
                                                         <div className="flex justify-between items-center text-xs">
                                                             <span className="font-black text-gray-700 uppercase tracking-wider">1. Estructura (Gente/Vendedores): {estructuraScore}%</span>
                                                         </div>
-                                                        <input 
-                                                            type="range" 
-                                                            min="10" 
-                                                            max="100" 
-                                                            value={estructuraScore} 
+                                                        <input
+                                                            type="range"
+                                                            min="10"
+                                                            max="100"
+                                                            value={estructuraScore}
                                                             onChange={(e) => setEstructuraScore(Number(e.target.value))}
                                                             className="w-full accent-indigo-600 h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer"
                                                         />
@@ -653,17 +653,17 @@ export default function VendedorAjustes() {
                                                             Capacitación del equipo, cobertura del territorio y dominio del guión S1.
                                                         </p>
                                                     </div>
-                                                    
+
                                                     {/* Factor 2: Sistema */}
                                                     <div className="space-y-1">
                                                         <div className="flex justify-between items-center text-xs">
                                                             <span className="font-black text-gray-700 uppercase tracking-wider">2. Sistema (Proceso/CRM): {sistemaScore}%</span>
                                                         </div>
-                                                        <input 
-                                                            type="range" 
-                                                            min="10" 
-                                                            max="100" 
-                                                            value={sistemaScore} 
+                                                        <input
+                                                            type="range"
+                                                            min="10"
+                                                            max="100"
+                                                            value={sistemaScore}
                                                             onChange={(e) => setSistemaScore(Number(e.target.value))}
                                                             className="w-full accent-indigo-600 h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer"
                                                         />
@@ -671,17 +671,17 @@ export default function VendedorAjustes() {
                                                             Disciplina de llamadas de recuperación S1 y venta cruzada S2.
                                                         </p>
                                                     </div>
-                                                    
+
                                                     {/* Factor 3: Operaciones */}
                                                     <div className="space-y-1">
                                                         <div className="flex justify-between items-center text-xs">
                                                             <span className="font-black text-gray-700 uppercase tracking-wider">3. Operaciones (Cumplimiento/OTD): {operacionesScore}%</span>
                                                         </div>
-                                                        <input 
-                                                            type="range" 
-                                                            min="10" 
-                                                            max="100" 
-                                                            value={operacionesScore} 
+                                                        <input
+                                                            type="range"
+                                                            min="10"
+                                                            max="100"
+                                                            value={operacionesScore}
                                                             onChange={(e) => setOperacionesScore(Number(e.target.value))}
                                                             className="w-full accent-indigo-600 h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer"
                                                         />
@@ -690,7 +690,7 @@ export default function VendedorAjustes() {
                                                         </p>
                                                     </div>
                                                 </div>
-                                                
+
                                                 <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100 flex flex-col justify-between">
                                                     <div>
                                                         <h4 className="text-[9.5px] font-black uppercase tracking-widest text-indigo-700 mb-3 border-b border-indigo-100 pb-1">Evaluación de Ventas Coeficiente</h4>
@@ -701,7 +701,7 @@ export default function VendedorAjustes() {
                                                             {minScoreFactor === 'perfect' && '🔥 ¡Felicidades! Tienes una base de ventas sólida. Mantén el ritmo de 30 llamadas diarias para maximizar tus ingresos.'}
                                                         </p>
                                                     </div>
-                                                    
+
                                                     <div className="mt-4 pt-3 border-t border-gray-200/60 flex items-center gap-1.5">
                                                         <span className="text-[8.5px] font-black text-gray-400 uppercase tracking-widest block shrink-0">Fórmula:</span>
                                                         <code className="text-[10px] font-bold text-indigo-600 bg-white border border-gray-100 rounded px-2 py-1 truncate">
@@ -727,13 +727,13 @@ export default function VendedorAjustes() {
                                                 <AlertCircle className="text-amber-600" size={16} />
                                             </div>
                                         </div>
-                                        
+
                                         <h2 className="text-2xl font-black text-slate-800 mb-2">Próximamente</h2>
                                         <p className="text-slate-500 text-sm max-w-xs leading-relaxed font-medium">
-                                            Estamos trabajando en un sistema de notificaciones inteligente para que no te pierdas nada. 
+                                            Estamos trabajando en un sistema de notificaciones inteligente para que no te pierdas nada.
                                             <span className="block mt-2 text-(--theme-600) font-bold">¡Disponible muy pronto!</span>
                                         </p>
-                                        
+
                                         <div className="mt-8 flex gap-2">
                                             <div className="px-3 py-1 rounded-full bg-slate-100 text-[10px] font-black text-slate-400 uppercase tracking-widest border border-slate-200">
                                                 V2.1 Beta

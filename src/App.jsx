@@ -50,6 +50,7 @@ const Clientes = lazyWithRetry(() => import('./pages/Clientes.jsx'));
 // Shared Components
 const Equipo = lazyWithRetry(() => import('./pages/Equipo.jsx'));
 const Monitoreo = lazyWithRetry(() => import('./pages/Monitoreo.jsx'));
+const AsignadorDashboard = lazyWithRetry(() => import('./pages/AsignadorDashboard.jsx'));
 const AdminPanel = lazyWithRetry(() => import('./pages/AdminPanel.jsx'));
 const ManualMetodologia = lazyWithRetry(() => import('./pages/ManualMetodologia.jsx'));
 
@@ -150,6 +151,7 @@ function App() {
             <Route path="clientes" element={<Clientes />} />
             <Route path="equipo" element={<Equipo />} />
             <Route path="monitoreo" element={<Monitoreo />} />
+            <Route path="asignar" element={<AsignadorDashboard />} />
             <Route path="admin" element={<AdminPanel />} />
             <Route path="manual" element={<ManualMetodologia />} />
             <Route path="usuarios" element={<Navigate to="/vendedor/equipo" replace />} />

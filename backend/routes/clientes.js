@@ -281,7 +281,8 @@ router.post('/', auth, esSuperUser, async (req, res) => {
         const rol = String(req.usuario.rol || '').toLowerCase();
         const usuarioId = parseInt(req.usuario.id);
         const equipoId = req.usuario.equipo_id || null;
-        const vendedorId = req.usuario.rol === 'admin' && vendedorAsignado ? parseInt(vendedorAsignado) : usuarioId;
+        const esAsignador = req.usuario.rol === 'asignador';
+        const vendedorId = (req.usuario.rol === 'admin' || esAsignador) && vendedorAsignado ? parseInt(vendedorAsignado) : usuarioId;
         const etapa = etapaEmbudo || 'venta_ganada';
         const estadoCliente = estado || (etapa === 'venta_ganada' ? 'ganado' : 'proceso');
         const now = new Date().toISOString();
@@ -314,6 +315,18 @@ router.post('/', auth, esSuperUser, async (req, res) => {
         );
 
         const row = await db.prepare('SELECT * FROM clientes ORDER BY id DESC LIMIT 1').get();
+
+        if (esAsignador && vendedorId && vendedorId !== usuarioId) {
+            try {
+                await db.prepare('INSERT INTO notificaciones (usuario_id, mensaje) VALUES (?, ?)').run(
+                    vendedorId,
+                    `Se te ha asignado un nuevo prospecto: ${nombres} ${apellidoPaterno || ''}`.trim()
+                );
+            } catch (err) {
+                console.error('Error al insertar notificación:', err);
+            }
+        }
+
         res.status(201).json({ mensaje: 'Cliente creado', cliente: toMongoFormat(row) || row });
     } catch (error) {
         res.status(500).json({ mensaje: 'Error del servidor' });
