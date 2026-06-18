@@ -166,8 +166,7 @@ const Login = () => {
     }
     const user = getUser();
     if (user) {
-      // Todos los usuarios van al dashboard de vendedor
-      navigate('/vendedor');
+      navigate(user.rol === 'asignador' ? '/vendedor/asignar' : '/vendedor');
     }
   }, [navigate]);
 
@@ -186,8 +185,8 @@ const Login = () => {
         const userData = data.usuario || data.user;
         saveUser(userData, rememberMe);
         if (data.token) saveToken(data.token, rememberMe);
-        // Todos los usuarios van al dashboard de vendedor
-        navigate('/vendedor');
+        // Redirigir según rol: asignador va a su panel, resto al dashboard
+        navigate(userData?.rol === 'asignador' ? '/vendedor/asignar' : '/vendedor');
       } else {
         setError(data.mensaje || data.message || 'Credenciales incorrectas');
       }
