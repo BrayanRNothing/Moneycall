@@ -73,6 +73,15 @@ const MainLayout = () => {
                 </svg>
             )
         },
+        ...(isAdminRoot || usuario?.esOwner ? [{
+            name: 'Monitoreo',
+            path: '/vendedor/monitoreo',
+            icon: (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M19.07 4.93A10 10 0 0 0 6.99 3.34"/><path d="M4 5.49A10 10 0 0 0 5.6 20.3"/><path d="M8.5 8.5A5 5 0 0 1 15.5 8.5"/><path d="M15.5 15.5A5 5 0 0 1 8.5 15.5"/><circle cx="12" cy="12" r="1"/>
+                </svg>
+            )
+        }] : []),
         {
             name: 'Calendario',
             path: '/vendedor/calendario',
@@ -114,16 +123,6 @@ const MainLayout = () => {
     const menuItems = [
         ...(isAdminRoot ? [panelAdminItem, { name: '__admin-separator__', isSpacer: true }] : []),
         ...vendedorMainItems,
-        ...(isAdminRoot || usuario?.esOwner ? [{
-            name: 'Monitoreo',
-            path: '/vendedor/monitoreo',
-            icon: (
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                </svg>
-            )
-        }] : []),
         {
             name: 'Equipo',
             path: '/vendedor/equipo',
