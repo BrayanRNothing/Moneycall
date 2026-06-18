@@ -9,6 +9,7 @@ import socket from '../config/socket';
 import StatCard from '../components/ui/StatCard';
 
 import MetricKPICard from '../components/ui/MetricKPICard';
+import NotificacionesBell from '../components/NotificacionesBell';
 
 const PERIODOS = [
     { key: 'dia', label: 'Hoy', suffix: 'hoy' },
@@ -752,19 +753,24 @@ const Dashboard = () => {
                         <span className="text-sm font-bold text-gray-700 uppercase tracking-widest">Resumen de Ventas</span>
                     </div>
 
-                    <div id="dashboard-period-selector" className="flex items-center gap-1 bg-white border border-gray-200 rounded-lg p-1 shadow-sm">
-                        {PERIODOS.map(p => (
-                            <button
-                                key={p.key}
-                                onClick={() => setPeriodo(p.key)}
-                                className={`px-3 py-1 rounded-md text-[10px] font-bold transition-all ${periodo === p.key
-                                    ? 'bg-(--theme-50) text-(--theme-600) shadow-sm border border-(--theme-100)'
-                                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
-                                    }`}
-                            >
-                                {p.label}
-                            </button>
-                        ))}
+                    <div className="flex items-center gap-3">
+                        <div className="bg-white border border-gray-200 rounded-lg p-0.5 shadow-sm h-full flex items-center justify-center relative z-50">
+                            <NotificacionesBell />
+                        </div>
+                        <div id="dashboard-period-selector" className="flex items-center gap-1 bg-white border border-gray-200 rounded-lg p-1 shadow-sm">
+                            {PERIODOS.map(p => (
+                                <button
+                                    key={p.key}
+                                    onClick={() => setPeriodo(p.key)}
+                                    className={`px-3 py-1 rounded-md text-[10px] font-bold transition-all ${periodo === p.key
+                                        ? 'bg-(--theme-50) text-(--theme-600) shadow-sm border border-(--theme-100)'
+                                        : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                                        }`}
+                                >
+                                    {p.label}
+                                </button>
+                            ))}
+                        </div>
                     </div>
                 </div>
                 <div id="dashboard-funnel-container" className="bg-white border border-gray-200 rounded-xl p-3 shadow-sm w-full">

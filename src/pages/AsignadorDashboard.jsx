@@ -48,14 +48,16 @@ export default function AsignadorDashboard() {
     const fetchVendedores = useCallback(async () => {
         setLoading(true);
         try {
-            // Reutilizamos el endpoint de usuarios, filtramos por vendedores
-            const res = await fetch(`${API_URL}/api/usuarios`, {
+            // Obtener el equipo actual y filtrar los vendedores de este equipo
+            const res = await fetch(`${API_URL}/api/equipos/mi-equipo`, {
                 headers: { 'Content-Type': 'application/json', 'x-auth-token': token }
             });
             if (res.ok) {
                 const data = await res.json();
-                const vends = data.filter(u => u.rol === 'vendedor' || u.rol === 'admin');
-                setVendedores(vends);
+                if (data.miembros) {
+                    const vends = data.miembros.filter(u => u.rol === 'vendedor');
+                    setVendedores(vends);
+                }
             }
         } catch (e) {
             console.error('Error fetching vendedores:', e);

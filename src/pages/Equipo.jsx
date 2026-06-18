@@ -27,7 +27,7 @@ const inferRoleKey = (rol) => {
   return 'prospector';
 };
 
-const initialForm = { usuario: '', contraseña: '', nombre: '', email: '', telefono: '' };
+const initialForm = { usuario: '', contraseña: '', nombre: '', email: '', telefono: '', rol: 'vendedor' };
 const initialEditForm = { nombre: '', email: '', telefono: '' };
 
 export default function Equipo() {
@@ -437,7 +437,7 @@ export default function Equipo() {
                       <div className="space-y-2 mb-6 text-xs text-gray-500 font-semibold">
                         <div className="flex items-center gap-2">
                           <Shield size={12} className="text-gray-400" />
-                          <span className="uppercase tracking-widest">{ROL_UNICO.label}</span>
+                          <span className="uppercase tracking-widest">{m.rol === 'asignador' ? 'Asignador' : 'Vendedor'}</span>
                         </div>
                         <div className="flex items-center gap-2 truncate">
                           <Search size={12} className="text-gray-400" />
@@ -539,6 +539,18 @@ export default function Equipo() {
                   required
                   placeholder="Ej: Ana María García"
                 />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Rol en el equipo *</label>
+                <select
+                  className="w-full px-5 py-4 bg-gray-50 border-2 border-transparent rounded-2xl text-sm font-semibold text-gray-800 outline-none focus:bg-white focus:border-indigo-500 transition-all cursor-pointer"
+                  value={form.rol || 'vendedor'}
+                  onChange={e => setForm(p => ({ ...p, rol: e.target.value }))}
+                >
+                  <option value="vendedor">Vendedor (Gestiona clientes y ventas)</option>
+                  <option value="asignador">Asignador (Asigna prospectos a vendedores)</option>
+                </select>
               </div>
 
               <div className="grid grid-cols-2 gap-4">

@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs');
 const { db } = require('../config/database');
 const { auth, esTeamOwner } = require('../middleware/auth');
 
-const ROLES_PERMITIDOS = ['vendedor'];
+const ROLES_PERMITIDOS = ['vendedor', 'asignador'];
 const TIPOS_META = ['ventas_monto', 'ventas_cantidad', 'clientes', 'actividades'];
 
 let goalsTableReady = false;
@@ -125,8 +125,8 @@ router.get('/mi-equipo', auth, async (req, res) => {
 // @access  Private (Team Owner)
 router.post('/agregar-miembro', auth, esTeamOwner, async (req, res) => {
     try {
-        const { usuario, contraseña, nombre, email, telefono } = req.body;
-        const rol = 'vendedor';
+        const { usuario, contraseña, nombre, email, telefono, rol: inputRol } = req.body;
+        const rol = (inputRol || 'vendedor').toLowerCase();
 
         if (!usuario || !contraseña || !nombre) {
             return res.status(400).json({ mensaje: 'Complete los campos requeridos: usuario, contraseña, nombre' });

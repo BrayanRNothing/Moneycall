@@ -8,7 +8,7 @@ import logocrmoneycall from '../assets/logocrmoneycall.png';
 import useWindowSize from '../hooks/useWindowSize';
 import MainLayoutMobile from './MainLayoutMobile';
 import MoneycallBot from '../components/BotAssistant/MoneycallBot';
-import NotificacionesBell from '../components/NotificacionesBell';
+
 
 const MainLayout = () => {
     const { width } = useWindowSize();
@@ -192,9 +192,7 @@ const MainLayout = () => {
                 <main
                     className="flex-1 bg-white/80 backdrop-blur-md border border-white/40 rounded-3xl overflow-hidden transition-all duration-300 relative premium-reflejo"
                 >
-                    <div className="absolute top-4 right-6 z-50">
-                        <NotificacionesBell />
-                    </div>
+
                     <div className={`h-full scrollbar-hide ${isAjustesRoute || isDashboard ? 'overflow-hidden' : 'overflow-y-auto pt-14'}`}>
                         <Outlet />
                     </div>
