@@ -110,6 +110,30 @@ export const useMoneycallBotLogic = () => {
           ]
         });
       }
+    } else if (path.includes('/admin')) {
+      setCurrentStep({
+        id: 'greeting_admin',
+        text: '¡Hola! Bienvenido al Panel de Administración. Aquí puedes gestionar los propietarios de equipo, revisar los usuarios de cada equipo y realizar configuraciones del sistema.',
+        options: [
+          { label: 'Cerrar Asistente', action: () => { setAvatarState('resting'); closeBot(); } }
+        ]
+      });
+    } else if (path.includes('/monitoreo')) {
+      setCurrentStep({
+        id: 'greeting_monitoreo',
+        text: '¡Hola! Bienvenido al panel de Monitoreo de Equipo. Aquí puedes ver el rendimiento de tu equipo, actividades recientes y métricas clave en tiempo real.',
+        options: [
+          { label: 'Cerrar Asistente', action: () => { setAvatarState('resting'); closeBot(); } }
+        ]
+      });
+    } else if (path.includes('/asignar')) {
+      setCurrentStep({
+        id: 'greeting_asignar',
+        text: '¡Hola! Bienvenido al panel de Asignación. Aquí puedes registrar prospectos y asignarlos directamente a los vendedores del sistema.',
+        options: [
+          { label: 'Cerrar Asistente', action: () => { setAvatarState('resting'); closeBot(); } }
+        ]
+      });
     } else {
       // Dashboard o fallback
       setCurrentStep({

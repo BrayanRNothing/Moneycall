@@ -142,15 +142,17 @@ const AnimatedGridBackground = ({
         initParticles();
         animate();
 
-        // Event listeners
-        window.addEventListener('resize', () => {
+        const handleResize = () => {
             resizeCanvas();
             initParticles();
-        });
+        };
+
+        // Event listeners
+        window.addEventListener('resize', handleResize);
 
         // Cleanup
         return () => {
-            window.removeEventListener('resize', resizeCanvas);
+            window.removeEventListener('resize', handleResize);
             cancelAnimationFrame(animationFrameId);
         };
     }, [particleCount, mode, bgColor, lineColor, particleColor]);

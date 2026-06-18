@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Briefcase, RefreshCw, Plus, Users, Phone, Calendar, Mail, Building, ChevronLeft } from 'lucide-react';
+import { Briefcase, RefreshCw, Plus, Users, Phone, Calendar, Mail, Building, ChevronLeft, Globe, MapPin, X } from 'lucide-react';
 import { getUser, getToken } from '../utils/authUtils';
 import API_URL from '../config/api';
 
@@ -39,9 +39,12 @@ export default function AsignadorDashboard() {
     const [formData, setFormData] = useState({
         nombres: '',
         apellidoPaterno: '',
-        telefono: '',
-        correo: '',
+        apellidoMaterno: '',
+        telefonos: [''],
+        correos: [''],
         empresa: '',
+        sitioWeb: '',
+        ubicacion: '',
         fuente: 'Asignador'
     });
 
@@ -96,23 +99,52 @@ export default function AsignadorDashboard() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
+            const telefonosLimpios = formData.telefonos.filter(t => t.trim());
+            const correosLimpios = formData.correos.filter(c => c.trim());
+
+            if (!formData.nombres.trim()) {
+                alert('El nombre es obligatorio');
+                return;
+            }
+
+            const payload = {
+                nombres: formData.nombres,
+                apellidoPaterno: formData.apellidoPaterno,
+                apellidoMaterno: formData.apellidoMaterno,
+                telefono: telefonosLimpios[0] || '',
+                telefono2: telefonosLimpios.slice(1).join(', ') || '',
+                correo: correosLimpios.join(', ') || '',
+                empresa: formData.empresa,
+                sitioWeb: formData.sitioWeb,
+                ubicacion: formData.ubicacion,
+                fuente: formData.fuente || 'Asignador',
+                vendedorAsignado: selectedMember.id,
+                etapaEmbudo: 'prospecto_nuevo'
+            };
+
             const res = await fetch(`${API_URL}/api/clientes`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'x-auth-token': token
                 },
-                body: JSON.stringify({
-                    ...formData,
-                    vendedorAsignado: selectedMember.id,
-                    etapaEmbudo: 'prospecto_nuevo'
-                })
+                body: JSON.stringify(payload)
             });
             
             if (res.ok) {
                 alert('Prospecto asignado con éxito');
                 setShowForm(false);
-                setFormData({ nombres: '', apellidoPaterno: '', telefono: '', correo: '', empresa: '', fuente: 'Asignador' });
+                setFormData({
+                    nombres: '',
+                    apellidoPaterno: '',
+                    apellidoMaterno: '',
+                    telefonos: [''],
+                    correos: [''],
+                    empresa: '',
+                    sitioWeb: '',
+                    ubicacion: '',
+                    fuente: 'Asignador'
+                });
                 fetchProspectos(selectedMember.id);
             } else {
                 const errorData = await res.json();
@@ -245,29 +277,191 @@ export default function AsignadorDashboard() {
                                     </div>
                                 </div>
                                 <div className="p-4 sm:p-5 flex-1 overflow-y-auto content-start min-h-0 custom-scrollbar pr-2">
-                                    <form onSubmit={handleSubmit} className="space-y-4">
-                                        <div>
-                                            <label className="block text-xs font-semibold text-gray-600 mb-1">Nombre</label>
-                                            <input type="text" required value={formData.nombres} onChange={e => setFormData({...formData, nombres: e.target.value})} className="w-full px-3 py-2 border rounded-lg text-sm" placeholder="Nombre del prospecto" />
+                                    <form onSubmit={handleSubmit} className="space-y-6">
+                                        
+                                        {/* Sección: Identidad */}
+                                        <div className="space-y-4">
+                                            <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
+                                                <div className="w-1 h-3 bg-(--theme-500) rounded-full"></div>
+                                                Identidad
+                                            </h3>
+                                            <div className="space-y-3">
+                                                <div>
+                                                    <label className="block text-[10px] font-black text-slate-500 mb-1.5 uppercase tracking-wider">Nombres *</label>
+                                                    <input 
+                                                        type="text" 
+                                                        required 
+                                                        value={formData.nombres} 
+                                                        onChange={e => setFormData({...formData, nombres: e.target.value})} 
+                                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-(--theme-500) focus:bg-white transition-all outline-none font-medium" 
+                                                        placeholder="Juan" 
+                                                    />
+                                                </div>
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <div>
+                                                        <label className="block text-[10px] font-black text-slate-500 mb-1.5 uppercase tracking-wider">Apellido Paterno</label>
+                                                        <input 
+                                                            type="text" 
+                                                            value={formData.apellidoPaterno} 
+                                                            onChange={e => setFormData({...formData, apellidoPaterno: e.target.value})} 
+                                                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-(--theme-500) focus:bg-white transition-all outline-none font-medium" 
+                                                            placeholder="García" 
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-[10px] font-black text-slate-500 mb-1.5 uppercase tracking-wider">Apellido Materno</label>
+                                                        <input 
+                                                            type="text" 
+                                                            value={formData.apellidoMaterno} 
+                                                            onChange={e => setFormData({...formData, apellidoMaterno: e.target.value})} 
+                                                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-(--theme-500) focus:bg-white transition-all outline-none font-medium" 
+                                                            placeholder="López" 
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <label className="block text-xs font-semibold text-gray-600 mb-1">Apellido</label>
-                                            <input type="text" value={formData.apellidoPaterno} onChange={e => setFormData({...formData, apellidoPaterno: e.target.value})} className="w-full px-3 py-2 border rounded-lg text-sm" placeholder="Apellido" />
+
+                                        {/* Sección: Contacto */}
+                                        <div className="space-y-4">
+                                            <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
+                                                <div className="w-1 h-3 bg-indigo-500 rounded-full"></div>
+                                                Contacto
+                                            </h3>
+                                            <div className="space-y-3">
+                                                <div>
+                                                    <div className="flex items-center justify-between mb-1.5">
+                                                        <label className="block text-[10px] font-black text-slate-500 uppercase tracking-wider">Teléfonos *</label>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setFormData(f => ({ ...f, telefonos: [...f.telefonos, ''] }))}
+                                                            className="text-[10px] text-(--theme-600) hover:text-(--theme-700) font-black uppercase tracking-tighter"
+                                                        >
+                                                            + Añadir otro
+                                                        </button>
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        {formData.telefonos.map((tel, idx) => (
+                                                            <div key={idx} className="relative group">
+                                                                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 group-focus-within:text-(--theme-500) transition-colors" />
+                                                                <input
+                                                                    type="tel"
+                                                                    required={idx === 0}
+                                                                    value={tel}
+                                                                    onChange={e => setFormData(f => {
+                                                                        const t = [...f.telefonos];
+                                                                        t[idx] = e.target.value;
+                                                                        return { ...f, telefonos: t };
+                                                                    })}
+                                                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-10 py-3 text-sm focus:ring-2 focus:ring-(--theme-500) focus:bg-white transition-all outline-none font-medium"
+                                                                    placeholder="55 1234 5678"
+                                                                />
+                                                                {formData.telefonos.length > 1 && (
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => setFormData(f => ({ ...f, telefonos: f.telefonos.filter((_, i) => i !== idx) }))}
+                                                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-red-300 hover:text-red-500 transition-colors"
+                                                                    >
+                                                                        <X className="w-4 h-4" />
+                                                                    </button>
+                                                                )}
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+
+                                                <div>
+                                                    <div className="flex items-center justify-between mb-1.5">
+                                                        <label className="block text-[10px] font-black text-slate-500 uppercase tracking-wider">Correos Electrónicos</label>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setFormData(f => ({ ...f, correos: [...f.correos, ''] }))}
+                                                            className="text-[10px] text-(--theme-600) hover:text-(--theme-700) font-black uppercase tracking-tighter"
+                                                        >
+                                                            + Añadir otro
+                                                        </button>
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        {formData.correos.map((cor, idx) => (
+                                                            <div key={idx} className="relative group">
+                                                                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 group-focus-within:text-(--theme-500) transition-colors" />
+                                                                <input
+                                                                    type="email"
+                                                                    value={cor}
+                                                                    onChange={e => setFormData(f => {
+                                                                        const c = [...f.correos];
+                                                                        c[idx] = e.target.value;
+                                                                        return { ...f, correos: c };
+                                                                    })}
+                                                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-10 py-3 text-sm focus:ring-2 focus:ring-(--theme-500) focus:bg-white transition-all outline-none font-medium"
+                                                                    placeholder="ejemplo@correo.com"
+                                                                />
+                                                                {formData.correos.length > 1 && (
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => setFormData(f => ({ ...f, correos: f.correos.filter((_, i) => i !== idx) }))}
+                                                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-red-300 hover:text-red-500 transition-colors"
+                                                                    >
+                                                                        <X className="w-4 h-4" />
+                                                                    </button>
+                                                                )}
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <label className="block text-xs font-semibold text-gray-600 mb-1">Teléfono</label>
-                                            <input type="tel" required value={formData.telefono} onChange={e => setFormData({...formData, telefono: e.target.value})} className="w-full px-3 py-2 border rounded-lg text-sm" placeholder="Número de teléfono" />
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-semibold text-gray-600 mb-1">Correo</label>
-                                            <input type="email" required value={formData.correo} onChange={e => setFormData({...formData, correo: e.target.value})} className="w-full px-3 py-2 border rounded-lg text-sm" placeholder="Correo electrónico" />
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-semibold text-gray-600 mb-1">Empresa</label>
-                                            <input type="text" value={formData.empresa} onChange={e => setFormData({...formData, empresa: e.target.value})} className="w-full px-3 py-2 border rounded-lg text-sm" placeholder="Nombre de la empresa" />
+
+                                        {/* Sección: Empresa y Sitio */}
+                                        <div className="space-y-4">
+                                            <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
+                                                <div className="w-1 h-3 bg-emerald-500 rounded-full"></div>
+                                                Empresa & Sitio
+                                            </h3>
+                                            <div className="space-y-3">
+                                                <div>
+                                                    <label className="block text-[10px] font-black text-slate-500 mb-1.5 uppercase tracking-wider">Nombre de Empresa</label>
+                                                    <div className="relative group">
+                                                        <Building className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 group-focus-within:text-(--theme-500) transition-colors" />
+                                                        <input 
+                                                            type="text" 
+                                                            value={formData.empresa} 
+                                                            onChange={e => setFormData({...formData, empresa: e.target.value})} 
+                                                            className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 py-3 text-sm focus:ring-2 focus:ring-(--theme-500) focus:bg-white transition-all outline-none font-medium" 
+                                                            placeholder="Empresa S.A." 
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <label className="block text-[10px] font-black text-slate-500 mb-1.5 uppercase tracking-wider">Sitio Web</label>
+                                                    <div className="relative group">
+                                                        <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 group-focus-within:text-(--theme-500) transition-colors" />
+                                                        <input 
+                                                            type="url" 
+                                                            value={formData.sitioWeb} 
+                                                            onChange={e => setFormData({...formData, sitioWeb: e.target.value})} 
+                                                            className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 py-3 text-sm focus:ring-2 focus:ring-(--theme-500) focus:bg-white transition-all outline-none font-medium" 
+                                                            placeholder="https://google.com" 
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <label className="block text-[10px] font-black text-slate-500 mb-1.5 uppercase tracking-wider">Ubicación</label>
+                                                    <div className="relative group">
+                                                        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 group-focus-within:text-(--theme-500) transition-colors" />
+                                                        <input 
+                                                            type="text" 
+                                                            value={formData.ubicacion} 
+                                                            onChange={e => setFormData({...formData, ubicacion: e.target.value})} 
+                                                            className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 py-3 text-sm focus:ring-2 focus:ring-(--theme-500) focus:bg-white transition-all outline-none font-medium" 
+                                                            placeholder="CDMX, México" 
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                         
-                                        <button type="submit" className="w-full py-2.5 bg-(--theme-600) text-white font-bold rounded-lg text-sm hover:bg-(--theme-700) transition-colors mt-6">
+                                        <button type="submit" className="w-full py-3 bg-(--theme-600) text-white font-bold rounded-xl text-xs uppercase tracking-widest hover:bg-(--theme-700) hover:brightness-110 transition-all shadow-md mt-6">
                                             Asignar Prospecto a {selectedMember.nombre}
                                         </button>
                                     </form>
