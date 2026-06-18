@@ -126,6 +126,14 @@ export default function ClienteDetalle({
     const [modalVenta, setModalVenta] = useState(false);
     const [ventaForm, setVentaForm] = useState({ descripcion: '', monto: '', tipo: 'venta', notas: '' });
     const [guardandoVenta, setGuardandoVenta] = useState(false);
+    
+    // Estados para Historial de Ventas y PDFs
+    const [modalHistorialVentas, setModalHistorialVentas] = useState(false);
+    const [ventasHistorial, setVentasHistorial] = useState([]);
+    const [cargandoVentas, setCargandoVentas] = useState(false);
+    const [pdfArchivo, setPdfArchivo] = useState(null);
+    const [subiendoPdf, setSubiendoPdf] = useState(false);
+    const [subiendoPdfVentaId, setSubiendoPdfVentaId] = useState(null);
 
     // ESTADOS PARA DIAGNÓSTICO MONEYCALL
     const [modalDiagnosticoAbierto, setModalDiagnosticoAbierto] = useState(false);
@@ -234,6 +242,12 @@ export default function ClienteDetalle({
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [initialCliente?.id, initialCliente?._id]);
+
+    useEffect(() => {
+        if (modalHistorialVentas && pid) {
+            cargarVentasHistorial();
+        }
+    }, [modalHistorialVentas, pid]);
 
     const cargarRecordatorios = async (ClienteId) => {
         try {
@@ -684,20 +698,116 @@ export default function ClienteDetalle({
         setModalVenta(true);
     };
 
+    const cargarVentasHistorial = async () => {
+        if (!pid) return;
+        setCargandoVentas(true);
+        try {
+            const res = await axios.get(`${API_URL}/api/ventas/cliente/${pid}`, { headers: getAuthHeaders() });
+            setVentasHistorial(res.data || []);
+        } catch (err) {
+            console.error('Error al cargar historial de ventas:', err);
+            toast.error('No se pudo cargar el historial de ventas');
+        } finally {
+            setCargandoVentas(false);
+        }
+    };
+
+    const handleSubirPdfVentaExistente = async (e, ventaId) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        if (file.type !== 'application/pdf') {
+            toast.error('Solo se permiten archivos PDF');
+            return;
+        }
+
+        if (file.size > 15 * 1024 * 1024) {
+            toast.error('El archivo excede el límite de 15MB');
+            return;
+        }
+
+        setSubiendoPdfVentaId(ventaId);
+        const formData = new FormData();
+        formData.append('archivo', file);
+
+        try {
+            const uploadRes = await axios.post(`${API_URL}/api/documentos/upload`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    'x-auth-token': getToken()
+                }
+            });
+            const pdf_url = uploadRes.data.url;
+
+            await axios.put(`${API_URL}/api/ventas/${ventaId}/pdf`, { pdf_url }, { headers: getAuthHeaders() });
+            toast.success('Comprobante PDF adjuntado con éxito');
+            cargarVentasHistorial();
+        } catch (err) {
+            console.error('Error al subir PDF a venta:', err);
+            toast.error('No se pudo adjuntar el PDF');
+        } finally {
+            setSubiendoPdfVentaId(null);
+        }
+    };
+
+    const handleEliminarVenta = async (ventaId) => {
+        if (!window.confirm('¿Estás seguro de que deseas eliminar esta venta del historial? Esto también afectará el cálculo del ticket promedio.')) {
+            return;
+        }
+
+        try {
+            await axios.delete(`${API_URL}/api/ventas/${ventaId}`, { headers: getAuthHeaders() });
+            toast.success('Venta eliminada con éxito');
+            cargarVentasHistorial();
+            if (onActualizado) await onActualizado();
+        } catch (err) {
+            console.error('Error al eliminar venta:', err);
+            toast.error('No se pudo eliminar la venta');
+        }
+    };
+
     const handleGuardarVenta = async () => {
         if (!ventaForm.descripcion.trim()) return toast.error('Escribe una descripción para la venta');
         setGuardandoVenta(true);
         try {
+            let uploadedPdfUrl = null;
+            if (pdfArchivo) {
+                setSubiendoPdf(true);
+                const formData = new FormData();
+                formData.append('archivo', pdfArchivo);
+                try {
+                    const uploadRes = await axios.post(`${API_URL}/api/documentos/upload`, formData, {
+                        headers: {
+                            'Content-Type': 'multipart/form-data',
+                            'x-auth-token': getToken()
+                        }
+                    });
+                    uploadedPdfUrl = uploadRes.data.url;
+                } catch (uploadErr) {
+                    console.error('Error al subir PDF:', uploadErr);
+                    toast.error('No se pudo subir el archivo PDF. Registrando venta sin PDF.');
+                } finally {
+                    setSubiendoPdf(false);
+                }
+            }
+
             const desc = `${ventaForm.tipo === 'venta' ? '🛒 Venta' : '🔁 Suscripción'}: ${ventaForm.descripcion}${ventaForm.monto ? ` — $${ventaForm.monto}` : ''}${ventaForm.notas ? ` · ${ventaForm.notas}` : ''}`;
             await registrarActividad({
                 tipo: ventaForm.tipo === 'suscripcion' ? 'suscripcion' : 'venta',
                 resultado: 'exitoso',
                 descripcion: desc,
                 notas: ventaForm.notas,
-                monto: ventaForm.monto
+                monto: ventaForm.monto,
+                pdf_url: uploadedPdfUrl
             });
             setModalVenta(false);
+            setPdfArchivo(null);
             toast.success('Venta registrada en el historial');
+            
+            if (modalHistorialVentas) {
+                cargarVentasHistorial();
+            }
+            if (onActualizado) await onActualizado();
         } catch {
             toast.error('Error al registrar la venta');
         } finally {
@@ -2238,6 +2348,47 @@ export default function ClienteDetalle({
                                     />
                                 </div>
                             </div>
+                            {/* Comprobante PDF */}
+                            <div>
+                                <label className="text-xs font-bold text-slate-600 uppercase tracking-wider mb-1 block">Comprobante (PDF)</label>
+                                <div className="border-2 border-dashed border-slate-200 hover:border-emerald-400 rounded-xl p-4 transition-all bg-slate-50/50 flex flex-col items-center justify-center gap-1.5 cursor-pointer relative group">
+                                    <input
+                                        type="file"
+                                        accept=".pdf,application/pdf"
+                                        onChange={(e) => {
+                                            const file = e.target.files[0];
+                                            if (file && file.type !== 'application/pdf') {
+                                                toast.error('Solo se permiten archivos PDF');
+                                                e.target.value = '';
+                                                return;
+                                            }
+                                            if (file && file.size > 15 * 1024 * 1024) {
+                                                toast.error('El archivo excede el límite de 15MB');
+                                                e.target.value = '';
+                                                return;
+                                            }
+                                            setPdfArchivo(file);
+                                        }}
+                                        className="absolute inset-0 opacity-0 cursor-pointer"
+                                    />
+                                    <Upload className={`w-6 h-6 ${pdfArchivo ? 'text-emerald-500' : 'text-slate-400 group-hover:text-emerald-500'} transition-colors`} />
+                                    <span className="text-xs font-bold text-slate-600 text-center truncate max-w-full">
+                                        {pdfArchivo ? pdfArchivo.name : 'Seleccionar o arrastrar PDF'}
+                                    </span>
+                                    <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Límite 15MB</span>
+                                </div>
+                                {pdfArchivo && (
+                                    <div className="flex justify-end mt-1">
+                                        <button
+                                            type="button"
+                                            onClick={() => setPdfArchivo(null)}
+                                            className="text-[10px] font-black text-rose-600 hover:underline px-1 py-0.5"
+                                        >
+                                            Quitar archivo
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
                             {/* Notas */}
                             <div>
                                 <label className="text-xs font-bold text-slate-600 uppercase tracking-wider mb-1 block">Notas adicionales</label>
@@ -2251,10 +2402,132 @@ export default function ClienteDetalle({
                             </div>
                             <button
                                 onClick={handleGuardarVenta}
-                                disabled={guardandoVenta || !ventaForm.descripcion.trim()}
+                                disabled={guardandoVenta || subiendoPdf || !ventaForm.descripcion.trim()}
                                 className="w-full py-2.5 bg-emerald-600 text-white rounded-lg font-bold text-sm hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 {guardandoVenta ? '⏳ Guardando...' : '✓ Registrar en historial'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* MODAL HISTORIAL DE VENTAS */}
+            {modalHistorialVentas && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full flex flex-col max-h-[85vh] overflow-hidden animate-in fade-in zoom-in duration-200">
+                        {/* Header */}
+                        <div className="px-6 py-4 border-b border-slate-100 bg-gradient-to-r from-emerald-50 to-white flex justify-between items-center shrink-0">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center text-emerald-700">
+                                    <TrendingUp className="w-5 h-5" />
+                                </div>
+                                <div>
+                                    <h2 className="text-base font-bold text-gray-900 leading-tight">Historial de Ventas</h2>
+                                    <p className="text-[10px] text-slate-400 font-medium">Ventas reales y comprobantes registrados</p>
+                                </div>
+                            </div>
+                            <button onClick={() => setModalHistorialVentas(false)} className="p-1.5 hover:bg-slate-100 rounded-full transition-colors text-slate-400">
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+
+                        {/* Contenido */}
+                        <div className="p-6 overflow-y-auto space-y-4 flex-1 hide-scrollbar">
+                            {cargandoVentas ? (
+                                <div className="flex justify-center items-center py-12">
+                                    <RefreshCw className="w-8 h-8 text-emerald-600 animate-spin" />
+                                </div>
+                            ) : ventasHistorial.length === 0 ? (
+                                <div className="text-center py-12 text-slate-400">
+                                    <TrendingUp className="w-12 h-12 mx-auto mb-3 opacity-30 text-emerald-600" />
+                                    <p className="text-sm font-bold">No hay ventas registradas en base de datos.</p>
+                                    <p className="text-xs text-slate-400 mt-1">Usa el botón "Registrar Venta" para agregar una.</p>
+                                </div>
+                            ) : (
+                                <div className="space-y-3">
+                                    {ventasHistorial.map((venta) => (
+                                        <div key={venta.id || venta._id} className="p-4 bg-slate-50 border border-slate-100 hover:border-slate-200 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all">
+                                            <div className="space-y-1 min-w-0">
+                                                <div className="flex items-center gap-2 flex-wrap">
+                                                    <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-sm ${venta.estado === 'completado' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
+                                                        {venta.estado || 'completado'}
+                                                    </span>
+                                                    <span className="text-xs text-slate-400 font-medium">
+                                                        {new Date(venta.fecha).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                                    </span>
+                                                    {venta.vendedorNombre && (
+                                                        <span className="text-[10px] bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded font-semibold">
+                                                            👤 {venta.vendedorNombre}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <p className="text-sm font-extrabold text-slate-800 uppercase tracking-tight">{venta.notas || 'Venta registrada'}</p>
+                                                {venta.pdf_url && (
+                                                    <a
+                                                        href={`${API_URL}${venta.pdf_url}`}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="inline-flex items-center gap-1 text-[11px] text-rose-600 hover:text-rose-800 font-bold hover:underline"
+                                                    >
+                                                        <FileText className="w-3.5 h-3.5" /> Ver Comprobante PDF
+                                                    </a>
+                                                )}
+                                            </div>
+
+                                            <div className="flex items-center gap-3 shrink-0 self-end sm:self-center">
+                                                <div className="text-right">
+                                                    <span className="text-base font-black text-emerald-600 block">
+                                                        ${parseFloat(venta.monto).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                    </span>
+                                                </div>
+
+                                                <div className="flex items-center gap-1.5 border-l border-slate-200 pl-3">
+                                                    {!venta.pdf_url && (
+                                                        <div className="relative">
+                                                            <input
+                                                                type="file"
+                                                                id={`upload-pdf-existente-${venta.id || venta._id}`}
+                                                                accept=".pdf,application/pdf"
+                                                                onChange={(e) => handleSubirPdfVentaExistente(e, venta.id || venta._id)}
+                                                                className="hidden"
+                                                            />
+                                                            <label
+                                                                htmlFor={`upload-pdf-existente-${venta.id || venta._id}`}
+                                                                className={`p-2 bg-white hover:bg-rose-50 border border-slate-200 hover:border-rose-300 rounded-lg text-slate-500 hover:text-rose-600 transition-all cursor-pointer flex items-center justify-center ${subiendoPdfVentaId === (venta.id || venta._id) ? 'pointer-events-none opacity-50' : ''}`}
+                                                                title="Subir Comprobante PDF"
+                                                            >
+                                                                {subiendoPdfVentaId === (venta.id || venta._id) ? (
+                                                                    <RefreshCw className="w-4 h-4 animate-spin text-rose-500" />
+                                                                ) : (
+                                                                    <Upload className="w-4 h-4 text-rose-500" />
+                                                                )}
+                                                            </label>
+                                                        </div>
+                                                    )}
+                                                    
+                                                    <button
+                                                        onClick={() => handleEliminarVenta(venta.id || venta._id)}
+                                                        className="p-2 bg-white hover:bg-rose-50 border border-slate-200 hover:border-rose-300 rounded-lg text-slate-400 hover:text-rose-600 transition-all"
+                                                        title="Eliminar del historial"
+                                                    >
+                                                        <Trash2 className="w-4 h-4 text-rose-500" />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Footer */}
+                        <div className="px-6 py-4 border-t border-slate-100 bg-slate-50 flex justify-end shrink-0">
+                            <button
+                                onClick={() => setModalHistorialVentas(false)}
+                                className="px-6 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl text-xs font-bold hover:bg-slate-50 shadow-xs"
+                            >
+                                Cerrar
                             </button>
                         </div>
                     </div>
