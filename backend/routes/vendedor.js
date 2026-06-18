@@ -479,11 +479,46 @@ router.get('/dashboard-closer', [auth, esVendedor], async (req, res) => {
         const montoTotalMes = ventasMes.reduce((sum, v) => sum + (v.monto || 0), 0);
         const montoTotal = ventasTodas.reduce((sum, v) => sum + (v.monto || 0), 0);
 
+        // Consulta para calcular Tasa de Asistencia histórica basada en actividades de tipo 'cita'
+        let sqlTodasCitas = `
+            SELECT a.* FROM actividades a
+            JOIN clientes c ON a.cliente = c.id
+            WHERE a.tipo = 'cita'
+        `;
+        let paramsTodasCitas = [];
+        if (equipoId) {
+            sqlTodasCitas += ' AND c.equipo_id = ?';
+            paramsTodasCitas.push(equipoId);
+        } else {
+            sqlTodasCitas += ' AND (c.closerAsignado = ? OR a.vendedor = ?)';
+            paramsTodasCitas.push(closerId, closerId);
+        }
+        const todasCitas = await db.prepare(sqlTodasCitas).all(...paramsTodasCitas);
+
+        const citasConcluidas = todasCitas.filter(a => a.resultado !== 'pendiente');
+        const countAsistieron = citasConcluidas.filter(a => 
+            (a.descripcion && a.descripcion.startsWith('Reunión realizada')) || 
+            (a.notas && (a.notas.includes('(venta)') || a.notas.includes('(cotizacion)') || a.notas.includes('(otra_reunion)') || a.notas.includes('(no_venta)')))
+        ).length;
+
+        const countNoAsistieron = citasConcluidas.filter(a => 
+            (a.descripcion && a.descripcion.includes('no asistió')) || 
+            (a.notas && a.notas.includes('(no_asistio)'))
+        ).length;
+        
+        const totalConcluidas = countAsistieron + countNoAsistieron;
+        const tasaAsistenciaVal = totalConcluidas > 0
+            ? ((countAsistieron / totalConcluidas) * 100).toFixed(1)
+            : '0.0';
+
         const tasasConversion = {
-            asistencia: embudo.reunion_agendada > 0 ? ((embudo.reunion_realizada / embudo.reunion_agendada) * 100).toFixed(1) : '0.0',
-            interes: embudo.reunion_realizada > 0 ? ((embudo.propuesta_enviada / embudo.reunion_realizada) * 100).toFixed(1) : '0.0',
+            asistencia: parseFloat(tasaAsistenciaVal),
+            asistenciaDetalle: `${countAsistieron} asistidas, ${countNoAsistieron} inasistencias`,
+            asistidas: countAsistieron,
+            noAsistidas: countNoAsistieron,
+            interes: countAsistieron > 0 ? ((embudo.propuesta_enviada / countAsistieron) * 100).toFixed(1) : '0.0',
             cierre: embudo.propuesta_enviada > 0 ? ((embudo.venta_ganada / embudo.propuesta_enviada) * 100).toFixed(1) : '0.0',
-            global: embudo.reunion_agendada > 0 ? ((embudo.venta_ganada / embudo.reunion_agendada) * 100).toFixed(1) : '0.0'
+            global: totalConcluidas > 0 ? ((embudo.venta_ganada / totalConcluidas) * 100).toFixed(1) : '0.0'
         };
 
         res.json({

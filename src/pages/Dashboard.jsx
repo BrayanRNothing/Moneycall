@@ -296,6 +296,7 @@ const Dashboard = () => {
             },
             tasasConversion: {
                 asistencia: getNumero(rawData?.tasasConversion?.asistencia),
+                asistenciaDetalle: rawData?.tasasConversion?.asistenciaDetalle || '',
                 interes: getNumero(rawData?.tasasConversion?.interes),
                 cierre: getNumero(rawData?.tasasConversion?.cierre)
             },
@@ -838,7 +839,7 @@ const Dashboard = () => {
                                             value={closerData?.tasasConversion?.asistencia || 0}
                                             format="percent"
                                             icon={<Users />}
-                                            detail="Show-up en citas agendadas"
+                                            detail={closerData?.tasasConversion?.asistenciaDetalle || "Show-up en citas agendadas"}
                                             thresholds={{ good: 75, okay: 50 }}
                                         />
                                         <MetricKPICard
@@ -959,12 +960,10 @@ const Dashboard = () => {
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 shrink-0">
                                         <MetricKPICard
                                             title="Tasa de Show-up"
-                                            value={closerData.embudo.reunion_agendada > 0
-                                                ? (closerData.embudo.reunion_realizada / closerData.embudo.reunion_agendada) * 100
-                                                : 0}
+                                            value={closerData?.tasasConversion?.asistencia || 0}
                                             format="percent"
                                             icon={<Video className="w-5 h-5" />}
-                                            detail={`${closerData.embudo.reunion_realizada} citas realizadas de ${closerData.embudo.reunion_agendada}`}
+                                            detail={closerData?.tasasConversion?.asistenciaDetalle || "Show-up en citas agendadas"}
                                             thresholds={{ good: 70, okay: 45 }}
                                         />
                                         <MetricKPICard
