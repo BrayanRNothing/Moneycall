@@ -595,13 +595,23 @@ router.get('/monitoreo/actividades', auth, esTeamOwner, async (req, res) => {
 // @route   GET /api/equipos/miembro/:id/prospectos
 // @desc    Obtener lista de clientes y prospectos de un miembro del equipo
 // @access  Private (Team Owner)
-router.get('/miembro/:id/prospectos', auth, esTeamOwner, async (req, res) => {
+router.get('/miembro/:id/prospectos', auth, async (req, res) => {
     try {
         const miembroId = parseInt(req.params.id, 10);
         
+        // Verificar permisos
+        const esOwner = await db.prepare('SELECT id FROM equipos WHERE owner_id = ?').get(req.usuario.id);
+        const esAsignador = req.usuario.rol === 'asignador';
+        
+        if (!esOwner && !esAsignador) {
+            return res.status(403).json({ mensaje: 'No tienes permiso. Solo owner o asignador.' });
+        }
+
+        const miEquipoId = esOwner ? esOwner.id : req.usuario.equipo_id;
+        
         // Verificar que el miembro pertenezca al equipo
         const miembro = await db.prepare('SELECT "equipo_id" FROM usuarios WHERE id = ?').get(miembroId);
-        if (!miembro || String(miembro.equipo_id) !== String(req.equipoId)) {
+        if (!miembro || String(miembro.equipo_id) !== String(miEquipoId)) {
             return res.status(403).json({ mensaje: 'No tienes permiso para ver a este usuario o no existe' });
         }
 
