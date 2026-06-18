@@ -90,41 +90,70 @@ const CLIENT_STAGES = ['venta_ganada', 'cotizacion_realizada', 'contrato_firmado
 const NON_PROSPECT_STAGES = [...CLIENT_STAGES, 'perdido'];
 
 // Helper: calcula métricas para un período dado por filtro SQL en campo fecha (actividades) y fechaRegistro (clientes)
-async function calcularPeriodoActividades(db, prospectorId, filtroFecha) {
+async function calcularPeriodoActividades(db, prospectorId, equipoId, filtroFecha) {
     const where = filtroFecha ? `AND ${filtroFecha}` : '';
 
-    const row = await db.prepare(
-        `SELECT COUNT(*) as c FROM actividades WHERE vendedor = ? AND tipo = 'llamada' ${where}`
-    ).get(prospectorId);
+    let row, row2;
+    if (equipoId) {
+        row = await db.prepare(
+            `SELECT COUNT(a.id) as c FROM actividades a 
+             JOIN usuarios u ON a.vendedor = u.id 
+             WHERE u.equipo_id = ? AND a.tipo = 'llamada' ${where}`
+        ).get(equipoId);
+        row2 = await db.prepare(
+            `SELECT COUNT(a.id) as c FROM actividades a 
+             JOIN usuarios u ON a.vendedor = u.id 
+             WHERE u.equipo_id = ? AND a.tipo IN ('whatsapp','correo','mensaje') ${where}`
+        ).get(equipoId);
+    } else {
+        row = await db.prepare(
+            `SELECT COUNT(*) as c FROM actividades WHERE vendedor = ? AND tipo = 'llamada' ${where}`
+        ).get(prospectorId);
+        row2 = await db.prepare(
+            `SELECT COUNT(*) as c FROM actividades WHERE vendedor = ? AND tipo IN ('whatsapp','correo','mensaje') ${where}`
+        ).get(prospectorId);
+    }
     const llamadas = row?.c || 0;
-
-    const row2 = await db.prepare(
-        `SELECT COUNT(*) as c FROM actividades WHERE vendedor = ? AND tipo IN ('whatsapp','correo','mensaje') ${where}`
-    ).get(prospectorId);
     const mensajes = row2?.c || 0;
 
     return { llamadas, mensajes };
 }
 
-async function calcularPeriodoClientes(db, prospectorId, filtroFechaRegistro) {
+async function calcularPeriodoClientes(db, prospectorId, equipoId, filtroFechaRegistro) {
     const where = filtroFechaRegistro ? `AND ${filtroFechaRegistro}` : '';
-    // UNIFICADO: Contar prospectos donde el usuario ha tenido actividad o está asignado
-    const row = await db.prepare(
-        `SELECT COUNT(DISTINCT id) as c FROM clientes 
-         WHERE (prospectorAsignado = ? OR id IN (SELECT cliente FROM actividades WHERE vendedor = ?))
-         AND etapaEmbudo NOT IN ('perdido', 'venta_ganada', 'cotizacion_realizada', 'contrato_firmado', 'esperando_pago', 'cliente_activo') ${where}`
-    ).get(prospectorId, prospectorId);
+    let row;
+    if (equipoId) {
+        row = await db.prepare(
+            `SELECT COUNT(DISTINCT id) as c FROM clientes 
+             WHERE equipo_id = ? 
+             AND etapaEmbudo NOT IN ('perdido', 'venta_ganada', 'cotizacion_realizada', 'contrato_firmado', 'esperando_pago', 'cliente_activo') ${where}`
+        ).get(equipoId);
+    } else {
+        row = await db.prepare(
+            `SELECT COUNT(DISTINCT id) as c FROM clientes 
+             WHERE (prospectorAsignado = ? OR id IN (SELECT cliente FROM actividades WHERE vendedor = ?))
+             AND etapaEmbudo NOT IN ('perdido', 'venta_ganada', 'cotizacion_realizada', 'contrato_firmado', 'esperando_pago', 'cliente_activo') ${where}`
+        ).get(prospectorId, prospectorId);
+    }
     return row?.c || 0;
 }
 
 // Reuniones: filtrar por fechaUltimaEtapa (momento en que se agendó/cambió a esa etapa)
-async function calcularPeriodoReuniones(db, prospectorId, filtroFechaEtapa) {
+async function calcularPeriodoReuniones(db, prospectorId, equipoId, filtroFechaEtapa) {
     const where = filtroFechaEtapa ? `AND ${filtroFechaEtapa}` : '';
-    // UNIFICADO: Contar reuniones agendadas por el usuario (actividades tipo cita)
-    const row = await db.prepare(
-        `SELECT COUNT(DISTINCT cliente) as c FROM actividades 
-         WHERE vendedor = ? AND tipo = 'cita' ${where}`
-    ).get(prospectorId);
+    let row;
+    if (equipoId) {
+        row = await db.prepare(
+            `SELECT COUNT(DISTINCT a.cliente) as c FROM actividades a
+             JOIN usuarios u ON a.vendedor = u.id
+             WHERE u.equipo_id = ? AND a.tipo = 'cita' ${where}`
+        ).get(equipoId);
+    } else {
+        row = await db.prepare(
+            `SELECT COUNT(DISTINCT cliente) as c FROM actividades 
+             WHERE vendedor = ? AND tipo = 'cita' ${where}`
+        ).get(prospectorId);
+    }
     return row?.c || 0;
 }
 
@@ -132,12 +161,21 @@ async function calcularPeriodoReuniones(db, prospectorId, filtroFechaEtapa) {
 router.get('/dashboard', [auth, esVendedor], async (req, res) => {
     try {
         const prospectorId = parseInt(req.usuario.id);
-        // UNIFICADO: Ver todos los clientes donde el usuario está asignado o ha tenido actividad
-        const clientes = await db.prepare(`
-            SELECT DISTINCT c.* FROM clientes c
-            LEFT JOIN actividades a ON c.id = a.cliente
-            WHERE c.prospectorAsignado = ? OR a.vendedor = ?
-        `).all(prospectorId, prospectorId);
+        const equipoId = req.usuario.equipo_id;
+
+        // UNIFICADO: Ver todos los clientes según el ámbito (equipo o individual)
+        let clientes;
+        if (equipoId) {
+            clientes = await db.prepare(`
+                SELECT * FROM clientes WHERE equipo_id = ?
+            `).all(equipoId);
+        } else {
+            clientes = await db.prepare(`
+                SELECT DISTINCT c.* FROM clientes c
+                LEFT JOIN actividades a ON c.id = a.cliente
+                WHERE c.prospectorAsignado = ? OR a.vendedor = ?
+            `).all(prospectorId, prospectorId);
+        }
 
         // Filtrar solo prospectos activos (excluir perdidos y ventas ganadas)
         const clientesActivos = clientes.filter(c => !NON_PROSPECT_STAGES.includes(c.etapaEmbudo));
@@ -206,31 +244,31 @@ router.get('/dashboard', [auth, esVendedor], async (req, res) => {
 
         // Actividades: campo 'fecha'
         const FILTROS_ACT = {
-            dia: `fecha >= '${startOfDayISO}' AND fecha <= '${endOfDay}'`,
-            semana: `fecha >= '${startOfWeek}'`,
-            mes: `fecha >= '${startOfMonth}'`,
+            dia: `fecha::timestamp >= '${startOfDayISO}'::timestamp AND fecha::timestamp <= '${endOfDay}'::timestamp`,
+            semana: `fecha::timestamp >= '${startOfWeek}'::timestamp`,
+            mes: `fecha::timestamp >= '${startOfMonth}'::timestamp`,
             total: null
         };
         // Prospectos nuevos: campo 'fechaRegistro'
         const FILTROS_CLI = {
-            dia: `(fechaRegistro >= '${startOfDayISO}' AND fechaRegistro <= '${endOfDay}' OR (fechaRegistro IS NULL AND fechaUltimaEtapa >= '${startOfDayISO}' AND fechaUltimaEtapa <= '${endOfDay}'))`,
-            semana: `(fechaRegistro >= '${startOfWeek}' OR (fechaRegistro IS NULL AND fechaUltimaEtapa >= '${startOfWeek}'))`,
-            mes: `(fechaRegistro >= '${startOfMonth}' OR (fechaRegistro IS NULL AND fechaUltimaEtapa >= '${startOfMonth}'))`,
+            dia: `(fechaRegistro::timestamp >= '${startOfDayISO}'::timestamp AND fechaRegistro::timestamp <= '${endOfDay}'::timestamp OR (fechaRegistro IS NULL AND fechaUltimaEtapa::timestamp >= '${startOfDayISO}'::timestamp AND fechaUltimaEtapa::timestamp <= '${endOfDay}'::timestamp))`,
+            semana: `(fechaRegistro::timestamp >= '${startOfWeek}'::timestamp OR (fechaRegistro IS NULL AND fechaUltimaEtapa::timestamp >= '${startOfWeek}'::timestamp))`,
+            mes: `(fechaRegistro::timestamp >= '${startOfMonth}'::timestamp OR (fechaRegistro IS NULL AND fechaUltimaEtapa::timestamp >= '${startOfMonth}'::timestamp))`,
             total: null
         };
         // Reuniones agendadas: campo 'fecha' (en tabla actividades)
         const FILTROS_REUNION = {
-            dia: `fecha >= '${startOfDayISO}' AND fecha <= '${endOfDay}'`,
-            semana: `fecha >= '${startOfWeek}'`,
-            mes: `fecha >= '${startOfMonth}'`,
+            dia: `fecha::timestamp >= '${startOfDayISO}'::timestamp AND fecha::timestamp <= '${endOfDay}'::timestamp`,
+            semana: `fecha::timestamp >= '${startOfWeek}'::timestamp`,
+            mes: `fecha::timestamp >= '${startOfMonth}'::timestamp`,
             total: null
         };
 
         const periodos = {};
         for (const key of ['dia', 'semana', 'mes', 'total']) {
-            const { llamadas, mensajes } = await calcularPeriodoActividades(db, prospectorId, FILTROS_ACT[key]);
-            const prospectos = await calcularPeriodoClientes(db, prospectorId, FILTROS_CLI[key]);
-            const reuniones = await calcularPeriodoReuniones(db, prospectorId, FILTROS_REUNION[key]);
+            const { llamadas, mensajes } = await calcularPeriodoActividades(db, prospectorId, equipoId, FILTROS_ACT[key]);
+            const prospectos = await calcularPeriodoClientes(db, prospectorId, equipoId, FILTROS_CLI[key]);
+            const reuniones = await calcularPeriodoReuniones(db, prospectorId, equipoId, FILTROS_REUNION[key]);
             periodos[key] = { llamadas, mensajes, prospectos, reuniones };
         }
 
@@ -413,7 +451,7 @@ router.get('/dashboard-closer', [auth, esVendedor], async (req, res) => {
             FROM clientes c
             JOIN actividades a ON a.cliente = c.id
             WHERE (c.closerAsignado = ? ${equipoId ? 'OR c.equipo_id = ?' : ''})
-            AND a.tipo IN ('llamada', 'mensaje', 'cita')
+            AND a.tipo IN ('llamada', 'whatsapp', 'correo', 'mensaje', 'cita')
             GROUP BY c.id
         `).all(...(equipoId ? [closerId, equipoId] : [closerId]));
 

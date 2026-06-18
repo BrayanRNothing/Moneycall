@@ -346,7 +346,7 @@ router.get('/mi-equipo/metricas', auth, async (req, res) => {
         const ventasRows = await db.prepare(
             `SELECT u.id AS miembro_id, COUNT(v.id) AS cantidad, COALESCE(SUM(v.monto), 0) AS monto
              FROM usuarios u
-             LEFT JOIN ventas v ON v.vendedor = u.id AND TO_CHAR(v.fecha::timestamp, 'YYYY-MM') = ?
+             LEFT JOIN ventas v ON v.vendedor = u.id AND SUBSTRING(v.fecha, 1, 7) = ?
              WHERE u."equipo_id" = ?
              GROUP BY u.id`
         ).all(periodo, equipoId);
@@ -354,7 +354,7 @@ router.get('/mi-equipo/metricas', auth, async (req, res) => {
         const actividadesRows = await db.prepare(
             `SELECT u.id AS miembro_id, COUNT(a.id) AS total
              FROM usuarios u
-             LEFT JOIN actividades a ON a.vendedor = u.id AND TO_CHAR(a.fecha::timestamp, 'YYYY-MM') = ?
+             LEFT JOIN actividades a ON a.vendedor = u.id AND SUBSTRING(a.fecha, 1, 7) = ?
              WHERE u."equipo_id" = ?
              GROUP BY u.id`
         ).all(periodo, equipoId);

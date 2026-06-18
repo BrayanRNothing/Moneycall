@@ -29,10 +29,13 @@ const DashboardMobile = ({
 
     // Cálculos rápidos (reutilizados del dashboard original pero simplificados)
     const mP = vendedorData.periodos?.[periodo] || {};
-    const totalEntrada = vendedorData.embudo.total || 0;
-    const enContacto = vendedorData.embudo.en_contacto || 0;
-    const negociacion = (vendedorData.embudo.reunion_agendada || 0) + (closerData.embudo.reunion_realizada || 0);
-    const ganadas = closerData.embudo.venta_ganada || 0;
+    const cP = closerData.periodos?.[periodo] || { ventasCount: 0, ventasMonto: 0, reunionesRealizadas: 0 };
+    const isTotal = periodo === 'total';
+    const totalEntrada = isTotal ? (vendedorData.embudo.total || 0) : (mP.prospectos || 0);
+    const enContacto = isTotal ? (vendedorData.embudo.en_contacto || 0) : (mP.llamadas || 0);
+    const negociacion = isTotal ? ((vendedorData.embudo.reunion_agendada || 0) + (closerData.embudo.reunion_realizada || 0)) : (mP.reuniones || 0);
+    const ganadas = isTotal ? (closerData.embudo.venta_ganada || 0) : (cP.ventasCount || 0);
+    const ventasMonto = isTotal ? (closerData.metricas.ventas.montoTotal || 0) : (cP.ventasMonto || 0);
     
     const formatMoney = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', maximumFractionDigits: 0 });
 
@@ -70,7 +73,7 @@ const DashboardMobile = ({
                 <StatCard title="Entrada" value={totalEntrada} icon="📥" color="blue" />
                 <StatCard title="Ganadas" value={ganadas} icon="🏆" color="yellow" />
                 <StatCard title="Llamadas" value={mP.llamadas || 0} icon="📞" color="green" />
-                <StatCard title="Cierres $" value={formatMoney.format(closerData.metricas.ventas.montoMes || 0)} icon="💰" color="purple" />
+                <StatCard title="Cierres $" value={formatMoney.format(ventasMonto)} icon="💰" color="purple" />
             </div>
 
             {/* ── Simplified Pipeline (Vertical) ── */}

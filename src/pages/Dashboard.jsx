@@ -677,15 +677,28 @@ const Dashboard = () => {
     const formatMoney = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', maximumFractionDigits: 0 });
     const formatNumber = new Intl.NumberFormat('es-MX');
 
-    const totalEntrada = vendedorData.embudo.total || 0;
-    const enContacto = vendedorData.embudo.en_contacto || 0;
-    const sinContactar = Math.max(0, totalEntrada - enContacto);
-    const negociacion = (vendedorData.embudo.reunion_agendada || 0) + (closerData.embudo.reunion_realizada || 0) + (closerData.embudo.propuesta_enviada || 0);
-    const ganadas = closerData.embudo.venta_ganada || 0;
-    const totalLeadsHistoricos = totalEntrada + ganadas + (closerData.embudo.perdido || 0);
-    const tasaGlobal = totalLeadsHistoricos > 0 ? clampPercent((ganadas / totalLeadsHistoricos) * 100) : 0;
-    const tasaContacto = clampPercent(vendedorData.tasasConversion.contacto || 0);
-    const tasaAgendamiento = enContacto > 0 ? clampPercent((negociacion / enContacto) * 100) : 0;
+    const isTotal = periodo === 'total';
+    const totalEntrada = isTotal ? (vendedorData.embudo.total || 0) : (mP.prospectos || 0);
+    const enContacto = isTotal ? (vendedorData.embudo.en_contacto || 0) : (mP.llamadas || 0);
+    const sinContactar = isTotal ? Math.max(0, (vendedorData.embudo.total || 0) - (vendedorData.embudo.en_contacto || 0)) : Math.max(0, totalEntrada - enContacto);
+    const negociacion = isTotal ? ((vendedorData.embudo.reunion_agendada || 0) + (closerData.embudo.reunion_realizada || 0) + (closerData.embudo.propuesta_enviada || 0)) : (mP.reuniones || 0);
+    const ganadas = isTotal ? (closerData.embudo.venta_ganada || 0) : (cP.ventasCount || 0);
+    const totalLeadsHistoricos = isTotal
+        ? (vendedorData.embudo.total || 0) + (closerData.embudo.venta_ganada || 0) + (closerData.embudo.perdido || 0)
+        : totalEntrada;
+    
+    const tasaGlobal = isTotal
+        ? (totalLeadsHistoricos > 0 ? clampPercent((ganadas / totalLeadsHistoricos) * 100) : 0)
+        : (totalEntrada > 0 ? clampPercent((ganadas / totalEntrada) * 100) : 0);
+
+    const tasaContacto = isTotal
+        ? clampPercent(vendedorData.tasasConversion.contacto || 0)
+        : (totalEntrada > 0 ? clampPercent((enContacto / totalEntrada) * 100) : 0);
+
+    const tasaAgendamiento = isTotal
+        ? ((vendedorData.embudo.en_contacto || 0) > 0 ? clampPercent((negociacion / (vendedorData.embudo.en_contacto || 1)) * 100) : 0)
+        : (enContacto > 0 ? clampPercent((negociacion / enContacto) * 100) : 0);
+
     const tasaCierre = negociacion > 0 ? clampPercent((ganadas / negociacion) * 100) : 0;
     const etapasDebiles = [
         { etapa: 'Contacto Inicial → Llamadas', tasa: tasaContacto },
@@ -873,10 +886,10 @@ const Dashboard = () => {
                                         />
                                         <MetricKPICard
                                             title="Ticket Promedio"
-                                            value={closerData.metricas.ventas.montoMes / (closerData.metricas.ventas.mes || 1)}
+                                            value={cP.ventasCount > 0 ? cP.ventasMonto / cP.ventasCount : 0}
                                             format="money"
                                             icon={<DollarSign />}
-                                            detail="Valor promedio de cierre"
+                                            detail={`Promedio en el período (${cP.ventasCount} ventas)`}
                                             color="emerald"
                                         />
                                     </div>
@@ -988,12 +1001,10 @@ const Dashboard = () => {
                                         />
                                         <MetricKPICard
                                             title="Ticket Promedio"
-                                            value={closerData.metricas.ventas.totales > 0
-                                                ? closerData.metricas.ventas.montoTotal / closerData.metricas.ventas.totales
-                                                : 0}
+                                            value={cP.ventasCount > 0 ? cP.ventasMonto / cP.ventasCount : 0}
                                             format="money"
                                             icon={<DollarSign className="w-5 h-5" />}
-                                            detail={`Basado en ${closerData.metricas.ventas.totales} ventas totales`}
+                                            detail={`Promedio en el período (${cP.ventasCount} ventas)`}
                                             color="emerald"
                                         />
                                         <MetricKPICard
