@@ -108,7 +108,7 @@ export default function Monitoreo() {
                     });
                     if (actsRes.ok) {
                         const actsData = await actsRes.json();
-                        memberActs = actsData.actividades || [];
+                        memberActs = (actsData.actividades || []).filter(act => act.tipo !== 'login' && act.tipo !== 'logout');
                     }
                 } catch (e) {
                     console.error('Error fetching activities for member', m.id, e);
@@ -138,7 +138,7 @@ export default function Monitoreo() {
             });
             if (!res.ok) throw new Error((await res.json()).mensaje || 'Error al cargar actividades');
             const data = await res.json();
-            setActividades(data.actividades || []);
+            setActividades((data.actividades || []).filter(act => act.tipo !== 'login' && act.tipo !== 'logout'));
         } catch (e) {
             setError(e.message);
         } finally {

@@ -3,8 +3,10 @@ import {
     User, Lock, Shield, Monitor, LogOut,
     Link2, Link2Off, CheckCircle2, Mail, Phone,
     AlertCircle, Bell, Save, KeyRound, Palette, Camera,
-    Award
+    Award, Globe
 } from 'lucide-react';
+import { useTranslation } from '../utils/translations';
+import { useLanguageStore } from '../store/useLanguageStore';
 import Avatar from '../components/ui/Avatar';
 import toast from 'react-hot-toast';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -33,6 +35,8 @@ const Toggle = ({ value, onChange }) => (
 );
 
 export default function VendedorAjustes() {
+    const { t, language } = useTranslation();
+    const setLanguage = useLanguageStore((state) => state.setLanguage);
     const navigate = useNavigate();
     const location = useLocation();
     const [user, setUser] = useState({ nombre: 'Usuario', usuario: 'usuario', email: '', telefono: '', rol: 'vendedor', id: null });
@@ -229,12 +233,13 @@ export default function VendedorAjustes() {
     const inp = "w-full px-4 py-3 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 focus:ring-2 focus:ring-(--theme-500)/30 focus:border-(--theme-500) outline-none transition-all text-sm shadow-sm";
 
     const tabs = [
-        { id: 'perfil', label: 'Perfil', icon: User },
-        { id: 'seguridad', label: 'Seguridad', icon: KeyRound },
-        { id: 'integraciones', label: 'Google', icon: Link2 },
-        { id: 'colores', label: 'Colores del Sistema', icon: Palette },
-        { id: 'formula', label: 'Fórmula de Ventas', icon: Award },
-        { id: 'notificaciones', label: 'Notificaciones', icon: Bell },
+        { id: 'perfil', label: t('Perfil'), icon: User },
+        { id: 'seguridad', label: t('Seguridad'), icon: KeyRound },
+        { id: 'integraciones', label: t('Google'), icon: Link2 },
+        { id: 'colores', label: t('Colores del Sistema'), icon: Palette },
+        { id: 'formula', label: t('Fórmula de Ventas'), icon: Award },
+        { id: 'notificaciones', label: t('Notificaciones'), icon: Bell },
+        { id: 'idioma', label: t('Idioma / Language'), icon: Globe },
     ];
 
     return (
@@ -740,6 +745,69 @@ export default function VendedorAjustes() {
                                             </div>
                                             <div className="px-3 py-1 rounded-full bg-(--theme-50) text-[10px] font-black text-(--theme-600) uppercase tracking-widest border border-(--theme-100)">
                                                 En Desarrollo
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
+                            )}
+
+                            {activeTab === 'idioma' && (
+                                <section className="bg-white md:rounded-3xl md:shadow-xl border-b md:border border-slate-200 overflow-x-hidden overflow-y-auto max-h-[72vh] lg:max-h-none lg:overflow-visible lg:min-h-[460px]">
+                                    <div className="p-6 sm:p-8 h-full flex flex-col justify-between">
+                                        <div>
+                                            <h2 className="text-base font-bold text-slate-800 mb-5 flex items-center gap-2 border-b border-gray-100 pb-3">
+                                                <div className={`p-2 rounded-xl bg-linear-to-br ${roleBg} text-white shadow-sm`}>
+                                                    <Globe size={15} />
+                                                </div>
+                                                <span className="font-black">{t('Idioma del Sistema')}</span>
+                                            </h2>
+                                            
+                                            <p className="text-sm text-slate-500 mb-6 font-medium">
+                                                {t('Selecciona el idioma principal de la aplicación')}:
+                                            </p>
+
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                <button
+                                                    onClick={() => setLanguage('es')}
+                                                    className={`p-5 rounded-2xl border text-left transition-all flex items-center justify-between group ${
+                                                        language === 'es'
+                                                            ? 'border-indigo-600 bg-indigo-50/50 shadow-md ring-2 ring-indigo-500/20'
+                                                            : 'border-slate-200 hover:border-indigo-300 hover:bg-slate-50'
+                                                    }`}
+                                                >
+                                                    <div>
+                                                        <h3 className="font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
+                                                            {t('Español')}
+                                                        </h3>
+                                                        <p className="text-xs text-gray-400 font-semibold mt-0.5">Spanish</p>
+                                                    </div>
+                                                    {language === 'es' && (
+                                                        <div className="w-6 h-6 rounded-full bg-indigo-600 flex items-center justify-center text-white shadow-sm animate-in zoom-in-50">
+                                                            <CheckCircle2 size={14} />
+                                                        </div>
+                                                    )}
+                                                </button>
+
+                                                <button
+                                                    onClick={() => setLanguage('en')}
+                                                    className={`p-5 rounded-2xl border text-left transition-all flex items-center justify-between group ${
+                                                        language === 'en'
+                                                            ? 'border-indigo-600 bg-indigo-50/50 shadow-md ring-2 ring-indigo-500/20'
+                                                            : 'border-slate-200 hover:border-indigo-300 hover:bg-slate-50'
+                                                    }`}
+                                                >
+                                                    <div>
+                                                        <h3 className="font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
+                                                            {t('Inglés')}
+                                                        </h3>
+                                                        <p className="text-xs text-gray-400 font-semibold mt-0.5">English</p>
+                                                    </div>
+                                                    {language === 'en' && (
+                                                        <div className="w-6 h-6 rounded-full bg-indigo-600 flex items-center justify-center text-white shadow-sm animate-in zoom-in-50">
+                                                            <CheckCircle2 size={14} />
+                                                        </div>
+                                                    )}
+                                                </button>
                                             </div>
                                         </div>
                                     </div>
