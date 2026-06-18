@@ -34,7 +34,13 @@ const INITIAL_CLOSER_DATA = {
     analisisPerdidas: { no_asistio: 0, no_interesado: 0 },
     analisisPerdidasPremium: {},
     analisisFuentes: {},
-    eficiencia: { cicloVentaDias: 0, responseTimeHoras: 0, leadsEstancados: 0 }
+    eficiencia: { cicloVentaDias: 0, responseTimeHoras: 0, leadsEstancados: 0 },
+    periodos: {
+        dia: { ventasCount: 0, ventasMonto: 0, reunionesRealizadas: 0 },
+        semana: { ventasCount: 0, ventasMonto: 0, reunionesRealizadas: 0 },
+        mes: { ventasCount: 0, ventasMonto: 0, reunionesRealizadas: 0 },
+        total: { ventasCount: 0, ventasMonto: 0, reunionesRealizadas: 0 }
+    }
 };
 
 const GOAL_LABELS = {
@@ -195,6 +201,12 @@ const Dashboard = () => {
                 asistenciaDetalle: rawData?.tasasConversion?.asistenciaDetalle || '',
                 interes: getNumero(rawData?.tasasConversion?.interes),
                 cierre: getNumero(rawData?.tasasConversion?.cierre)
+            },
+            periodos: rawData?.periodos || {
+                dia: { ventasCount: 0, ventasMonto: 0, reunionesRealizadas: 0 },
+                semana: { ventasCount: 0, ventasMonto: 0, reunionesRealizadas: 0 },
+                mes: { ventasCount: 0, ventasMonto: 0, reunionesRealizadas: 0 },
+                total: { ventasCount: 0, ventasMonto: 0, reunionesRealizadas: 0 }
             },
             analisisPerdidas: {
                 no_asistio: getNumero(rawData?.analisisPerdidas?.no_asistio),
@@ -498,6 +510,7 @@ const Dashboard = () => {
 
 
     const mP = vendedorData.periodos?.[periodo] || EMPTY_PERIODO;
+    const cP = closerData.periodos?.[periodo] || { ventasCount: 0, ventasMonto: 0, reunionesRealizadas: 0 };
     const periodoSuffix = PERIODOS.find(p => p.key === periodo)?.suffix || 'hoy';
     const formatMoney = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', maximumFractionDigits: 0 });
     const formatNumber = new Intl.NumberFormat('es-MX');
@@ -521,15 +534,21 @@ const Dashboard = () => {
     const cardsResumen = [
         { title: 'Prospectos activos', value: formatNumber.format(totalEntrada), icon: '👥', color: 'blue', subtext: `${mP.prospectos || 0} recibidos ${periodoSuffix}` },
         { title: 'En contacto', value: formatNumber.format(enContacto), icon: '📞', color: 'green', subtext: `${sinContactar} todavía sin tocar` },
-        { title: 'En negociación', value: formatNumber.format(negociacion), icon: '🤝', color: 'purple', subtext: `${closerData.metricas.reuniones.realizadasHoy || 0} citas realizadas hoy` },
-        { title: 'Ventas ganadas', value: formatNumber.format(ganadas), icon: '🏆', color: 'yellow', subtext: `${formatPercent(tasaGlobal)} de conversión global` }
+        { title: 'En negociación', value: formatNumber.format(negociacion), icon: '🤝', color: 'purple', subtext: `${cP.reunionesRealizadas || 0} citas realizadas ${periodoSuffix}` },
+        { title: 'Ventas ganadas', value: formatNumber.format(ganadas), icon: '🏆', color: 'yellow', subtext: `${formatPercent(tasaGlobal)} conv. global (${cP.ventasCount || 0} en periodo)` }
     ];
 
+    const labelPeriodo = periodo === 'dia' ? 'hoy' : periodo === 'semana' ? 'semana' : periodo === 'mes' ? 'mes' : 'total';
+    const labelMensajes = periodo === 'dia' ? 'Mensajes hoy' : periodo === 'semana' ? 'Mensajes esta semana' : periodo === 'mes' ? 'Mensajes este mes' : 'Mensajes totales';
+    const labelLlamadas = periodo === 'dia' ? 'Llamadas hoy' : periodo === 'semana' ? 'Llamadas esta semana' : periodo === 'mes' ? 'Llamadas este mes' : 'Llamadas totales';
+    const labelReuniones = periodo === 'dia' ? 'Reuniones hoy' : periodo === 'semana' ? 'Reuniones esta semana' : periodo === 'mes' ? 'Reuniones este mes' : 'Reuniones totales';
+    const labelVentas = periodo === 'dia' ? 'Ventas hoy' : periodo === 'semana' ? 'Ventas esta semana' : periodo === 'mes' ? 'Ventas este mes' : 'Ventas totales';
+
     const panelesActividad = [
-        { label: 'Llamadas hoy', value: mP.llamadas || 0, detail: `+${mP.llamadas || 0} esfuerzos en ${periodoSuffix}` },
-        { label: 'Mensajes hoy', value: mP.mensajes || 0, detail: 'Seguimientos, WhatsApp o correos enviados' },
-        { label: 'Reuniones hoy', value: (mP.reuniones || 0) + (closerData.metricas.reuniones.realizadasHoy || 0), detail: `Pendientes: ${closerData.metricas.reuniones.pendientes || 0}` },
-        { label: 'Ventas del mes', value: formatMoney.format(closerData.metricas.ventas.montoMes || 0), detail: `${closerData.metricas.ventas.mes || 0} cierres este mes` }
+        { label: labelLlamadas, value: mP.llamadas || 0, detail: `+${mP.llamadas || 0} esfuerzos ${periodoSuffix}` },
+        { label: labelMensajes, value: mP.mensajes || 0, detail: 'Seguimientos, WhatsApp o correos enviados' },
+        { label: labelReuniones, value: cP.reunionesRealizadas || 0, detail: `Citas agendadas en periodo: ${mP.reuniones || 0}` },
+        { label: labelVentas, value: formatMoney.format(cP.ventasMonto || 0), detail: `${cP.ventasCount || 0} cierres ${periodoSuffix}` }
     ];
 
     return (
@@ -590,8 +609,8 @@ const Dashboard = () => {
                                 etapa: 'Negociación',
                                 cantidad: negociacion,
                                 color: 'bg-slate-600',
-                                contadorHoy: (vendedorData.periodos?.[periodo]?.reuniones ?? 0) + (closerData.metricas.reuniones.realizadasHoy || 0),
-                                labelContador: `citas ${periodoSuffix}`,
+                                contadorHoy: cP.reunionesRealizadas || 0,
+                                labelContador: `realizadas ${periodoSuffix}`,
                                 cantidadExito: ganadas,
                                 cantidadPerdida: Math.max(0, negociacion - ganadas),
                                 porcentajeExito: formatPercent(tasaCierre),
@@ -602,7 +621,7 @@ const Dashboard = () => {
                                 etapa: 'Cierre',
                                 cantidad: ganadas,
                                 color: 'bg-green-500',
-                                contadorHoy: closerData.metricas.ventas.ventasHoy || 0,
+                                contadorHoy: cP.ventasCount || 0,
                                 labelContador: `ganadas ${periodoSuffix}`,
                                 cantidadExito: ganadas,
                                 porcentajeExito: 100,

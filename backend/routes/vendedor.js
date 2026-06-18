@@ -547,6 +547,53 @@ router.get('/dashboard-closer', [auth, esVendedor], async (req, res) => {
             global: totalConcluidas > 0 ? ((embudo.venta_ganada / totalConcluidas) * 100).toFixed(1) : '0.0'
         };
 
+        // --- CLOSER PERIOD METRICS ---
+        const nowLocal = new Date();
+        const startOfDay = new Date(nowLocal.getFullYear(), nowLocal.getMonth(), nowLocal.getDate());
+        const startOfDayTime = startOfDay.getTime();
+        const endOfDayTime = startOfDayTime + 24 * 60 * 60 * 1000 - 1;
+
+        const sixDaysAgo = new Date(nowLocal);
+        sixDaysAgo.setDate(nowLocal.getDate() - 6);
+        sixDaysAgo.setHours(0, 0, 0, 0);
+        const startOfWeekTime = sixDaysAgo.getTime();
+
+        const startOfMonth = new Date(nowLocal.getFullYear(), nowLocal.getMonth(), 1);
+        startOfMonth.setHours(0, 0, 0, 0);
+        const startOfMonthTime = startOfMonth.getTime();
+
+        const calcularStatsCloserPeriodo = (filtroFn) => {
+            const vFiltered = ventasTodas.filter(filtroFn);
+            const cFiltered = citasConcluidas.filter(filtroFn);
+
+            const countAsistieronPeriodo = cFiltered.filter(a => 
+                (a.descripcion && a.descripcion.startsWith('Reunión realizada')) || 
+                (a.notas && (a.notas.includes('(venta)') || a.notas.includes('(cotizacion)') || a.notas.includes('(otra_reunion)') || a.notas.includes('(no_venta)')))
+            ).length;
+
+            return {
+                ventasCount: vFiltered.length,
+                ventasMonto: vFiltered.reduce((sum, v) => sum + (v.monto || 0), 0),
+                reunionesRealizadas: countAsistieronPeriodo
+            };
+        };
+
+        const periodosCloser = {
+            dia: calcularStatsCloserPeriodo(x => {
+                const t = new Date(x.fecha || x.createdAt).getTime();
+                return t >= startOfDayTime && t <= endOfDayTime;
+            }),
+            semana: calcularStatsCloserPeriodo(x => {
+                const t = new Date(x.fecha || x.createdAt).getTime();
+                return t >= startOfWeekTime;
+            }),
+            mes: calcularStatsCloserPeriodo(x => {
+                const t = new Date(x.fecha || x.createdAt).getTime();
+                return t >= startOfMonthTime;
+            }),
+            total: calcularStatsCloserPeriodo(() => true)
+        };
+
         res.json({
             embudo,
             metricas: {
@@ -561,6 +608,7 @@ router.get('/dashboard-closer', [auth, esVendedor], async (req, res) => {
                 negociaciones: { activas: embudo.en_negociacion }
             },
             tasasConversion,
+            periodos: periodosCloser,
             analisisPerdidas,
             analisisPerdidasPremium,
             analisisFuentes: analisisFuentesPremium,
