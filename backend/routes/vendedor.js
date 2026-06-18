@@ -873,8 +873,8 @@ router.post('/crear-prospecto', [auth, esVendedor], async (req, res) => {
 // POST /api/vendedor/registrar-actividad
 router.post('/registrar-actividad', [auth, esVendedor], async (req, res) => {
     try {
-        const { clienteId, tipo, resultado, descripcion, notas, fechaCita, etapaEmbudo, proximaLlamada, interes, customMetricLabel, customMetricValue } = req.body;
-        const tiposValidos = ['llamada', 'mensaje', 'correo', 'whatsapp', 'cita', 'prospecto'];
+        const { clienteId, tipo, resultado, descripcion, notas, fechaCita, etapaEmbudo, proximaLlamada, interes, customMetricLabel, customMetricValue, monto } = req.body;
+        const tiposValidos = ['llamada', 'mensaje', 'correo', 'whatsapp', 'cita', 'prospecto', 'venta', 'suscripcion'];
         const resultadosValidos = ['exitoso', 'pendiente', 'fallido'];
 
         if (!clienteId || !tipo) {
@@ -911,6 +911,13 @@ router.post('/registrar-actividad', [auth, esVendedor], async (req, res) => {
             INSERT INTO actividades (tipo, vendedor, cliente, fecha, descripcion, resultado, notas)
             VALUES (?, ?, ?, ?, ?, ?, ?)
         `).run(tipo, prospectorId, cid, fechaActividad, descripcion || `${tipo} registrada`, resultadoFinal, notas || '');
+
+        if (tipo === 'venta' || tipo === 'suscripcion') {
+            await db.prepare(`
+                INSERT INTO ventas (cliente, vendedor, monto, notas, estado)
+                VALUES (?, ?, ?, ?, 'completado')
+            `).run(cid, prospectorId, parseFloat(monto) || 0, notas || '');
+        }
 
         const now = new Date().toISOString();
         const updates = ['ultimaInteraccion = ?'];

@@ -693,7 +693,8 @@ export default function ClienteDetalle({
                 tipo: ventaForm.tipo === 'suscripcion' ? 'suscripcion' : 'venta',
                 resultado: 'exitoso',
                 descripcion: desc,
-                notas: ventaForm.notas
+                notas: ventaForm.notas,
+                monto: ventaForm.monto
             });
             setModalVenta(false);
             toast.success('Venta registrada en el historial');
