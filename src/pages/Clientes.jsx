@@ -25,15 +25,15 @@ const normalizeClienteRecordatorio = (cliente) => ({
 
 const buildReminderByClienteMap = (tareas = []) => {
     const map = new Map();
-    for (const t of tareas) {
-        if (t?.estado !== 'pendiente') continue;
-        if (t?.titulo !== 'Recordatorio de llamada') continue;
-        if (!t?.cliente || !t?.fechaLimite) continue;
+    for (const tarea of tareas) {
+        if (tarea?.estado !== 'pendiente') continue;
+        if (tarea?.titulo !== 'Recordatorio de llamada') continue;
+        if (!tarea?.cliente || !tarea?.fechaLimite) continue;
 
-        const clienteId = String(t.cliente);
+        const clienteId = String(tarea.cliente);
         const actual = map.get(clienteId);
-        if (!actual || new Date(t.fechaLimite) < new Date(actual)) {
-            map.set(clienteId, t.fechaLimite);
+        if (!actual || new Date(tarea.fechaLimite) < new Date(actual)) {
+            map.set(clienteId, tarea.fechaLimite);
         }
     }
     return map;
@@ -273,7 +273,7 @@ const Clientes = () => {
         try {
             const rolePath = 'vendedor'; // O corregir según rol real
             const id = clienteAEditar.id;
-            const telefonosLimpios = (clienteAEditar.telefonos || []).filter(t => t.trim());
+            const telefonosLimpios = (clienteAEditar.telefonos || []).filter(tel => tel.trim());
             const correosLimpios = (clienteAEditar.correos || []).filter(e => e.trim());
             const payload = { 
                 ...clienteAEditar, 
@@ -391,7 +391,7 @@ const Clientes = () => {
                                                     <input
                                                         type="tel"
                                                         value={tel}
-                                                        onChange={(e) => setClienteAEditar((f) => { const t = [...(f.telefonos || [''])]; t[idx] = e.target.value; return { ...f, telefonos: t }; })}
+                                                        onChange={(e) => setClienteAEditar((f) => { const tels = [...(f.telefonos || [''])]; tels[idx] = e.target.value; return { ...f, telefonos: tels }; })}
                                                         className="flex-1 bg-transparent border-0 focus:ring-0 text-sm py-1 outline-none font-medium"
                                                         placeholder="Ej: +56 9 1234 5678"
                                                     />

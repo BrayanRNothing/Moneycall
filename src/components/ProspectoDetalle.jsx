@@ -35,7 +35,6 @@ const getAuthHeaders = () => ({
 });
 
 const getCalendarRolePath = () => {
-    const { t } = useTranslation();
     const user = getUser();
     const role = String(user?.rol || '').toLowerCase();
     if (role === 'admin') return 'vendedor';
@@ -71,6 +70,7 @@ export default function ProspectoDetalle({
     setModalPasarClienteAbierto,
     setModalDescartarAbierto
 }) {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const calendarRolePath = getCalendarRolePath();
     const { currentStep, botActions } = useBotStore();
