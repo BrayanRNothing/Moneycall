@@ -1,3 +1,4 @@
+import { useTranslation } from '../utils/translations';
 import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Search, RefreshCw, ChevronRight, ArrowLeft, User, History, Trash2, Download, Upload, Plus, X, Phone, MessageCircle, Calendar, Filter, Star, Mail, MessageSquare, Clock, Share2, Edit2, Bell } from 'lucide-react';
@@ -23,6 +24,7 @@ const normalizeClienteRecordatorio = (cliente) => ({
 });
 
 const buildReminderByClienteMap = (tareas = []) => {
+    const { t } = useTranslation();
     const map = new Map();
     for (const t of tareas) {
         if (t?.estado !== 'pendiente') continue;
@@ -330,12 +332,11 @@ const Clientes = () => {
                             {/* Sección: Datos Personales */}
                             <div className="space-y-4">
                                 <h3 className="text-xs font-extrabold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                                    <div className="w-1 h-4 bg-(--theme-500) rounded-full"></div>
-                                    Información Personal
+                                    <div className="w-1 h-4 bg-(--theme-500) rounded-full"></div>{t("Información Personal")}
                                 </h3>
                                 <div className="space-y-3">
                                     <div>
-                                        <label className="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wider">Nombres *</label>
+                                        <label className="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wider">{t("Nombres *")}</label>
                                         <input
                                             type="text"
                                             value={clienteAEditar.nombres}
@@ -345,7 +346,7 @@ const Clientes = () => {
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
-                                            <label className="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wider">Apellido Paterno</label>
+                                            <label className="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wider">{t("Apellido Paterno")}</label>
                                             <input
                                                 type="text"
                                                 value={clienteAEditar.apellidoPaterno}
@@ -354,7 +355,7 @@ const Clientes = () => {
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wider">Apellido Materno</label>
+                                            <label className="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wider">{t("Apellido Materno")}</label>
                                             <input
                                                 type="text"
                                                 value={clienteAEditar.apellidoMaterno}
@@ -369,13 +370,12 @@ const Clientes = () => {
                             {/* Sección: Contacto */}
                             <div className="space-y-4">
                                 <h3 className="text-xs font-extrabold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                                    <div className="w-1 h-4 bg-(--theme-500) rounded-full"></div>
-                                    Contacto
+                                    <div className="w-1 h-4 bg-(--theme-500) rounded-full"></div>{t("Contacto")}
                                 </h3>
                                 <div className="space-y-3">
                                     <div>
                                         <div className="flex items-center justify-between mb-2">
-                                            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider">Teléfonos *</label>
+                                            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider">{t("Teléfonos *")}</label>
                                             <button
                                                 type="button"
                                                 onClick={() => setClienteAEditar((f) => ({ ...f, telefonos: [...(f.telefonos || ['']), ''] }))}
@@ -410,7 +410,7 @@ const Clientes = () => {
                                     </div>
                                     <div>
                                         <div className="flex items-center justify-between mb-2">
-                                            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider">Correos Electrónicos</label>
+                                            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider">{t("Correos Electrónicos")}</label>
                                             <button
                                                 type="button"
                                                 onClick={() => setClienteAEditar((f) => ({ ...f, correos: [...(f.correos || ['']), ''] }))}
@@ -454,7 +454,7 @@ const Clientes = () => {
                                 </h3>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wider">Empresa</label>
+                                        <label className="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wider">{t("Empresa")}</label>
                                         <input
                                             type="text"
                                             value={clienteAEditar.empresa}
@@ -464,7 +464,7 @@ const Clientes = () => {
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wider">Sitio Web</label>
+                                        <label className="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wider">{t("Sitio Web")}</label>
                                         <input
                                             type="url"
                                             value={clienteAEditar.sitioWeb || ''}
@@ -475,7 +475,7 @@ const Clientes = () => {
                                     </div>
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wider">Ubicación</label>
+                                    <label className="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wider">{t("Ubicación")}</label>
                                     <input
                                         type="text"
                                         value={clienteAEditar.ubicacion || ''}
@@ -543,7 +543,7 @@ const Clientes = () => {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">Empresa</label>
+                                <label className="block text-sm font-semibold text-gray-700 mb-2">{t("Empresa")}</label>
                                 <input
                                     type="text"
                                     value={formCliente.empresa}
@@ -559,8 +559,7 @@ const Clientes = () => {
                                         type="button"
                                         onClick={() => setFormCliente((f) => ({ ...f, correos: [...f.correos, ''] }))}
                                         className="text-xs text-(--theme-600) hover:text-(--theme-700) font-bold"
-                                    >
-                                        + Añadir otro
+                                    >{t("+ Añadir otro")}
                                     </button>
                                 </div>
                                 <div className="space-y-2">
@@ -1149,12 +1148,12 @@ const Clientes = () => {
                                 <thead className="bg-slate-100/70 text-slate-500 uppercase">
                                     <tr>
                                         <th className="px-2 md:px-4 py-2 md:py-3 text-left font-semibold text-[10px] md:text-xs">Cliente</th>
-                                        <th className="px-2 md:px-4 py-2 md:py-3 text-left font-semibold text-[10px] md:text-xs">Empresa</th>
-                                        <th className="px-2 md:px-4 py-2 md:py-3 text-left font-semibold text-[10px] md:text-xs">Contacto</th>
-                                        <th className="px-2 md:px-4 py-2 md:py-3 text-center font-semibold text-[9px] md:text-xs uppercase tracking-wider">Etapa</th>
+                                        <th className="px-2 md:px-4 py-2 md:py-3 text-left font-semibold text-[10px] md:text-xs">{t("Empresa")}</th>
+                                        <th className="px-2 md:px-4 py-2 md:py-3 text-left font-semibold text-[10px] md:text-xs">{t("Contacto")}</th>
+                                        <th className="px-2 md:px-4 py-2 md:py-3 text-center font-semibold text-[9px] md:text-xs uppercase tracking-wider">{t("Etapa")}</th>
                                         <th className="px-2 md:px-4 py-2 md:py-3 text-left font-semibold text-[10px] md:text-xs whitespace-nowrap">Última interacción</th>
                                         <th className="px-2 md:px-4 py-2 md:py-3 text-left font-semibold text-[10px] md:text-xs">Recordatorio</th>
-                                        <th className="px-2 md:px-4 py-2 md:py-3 text-center font-semibold text-[10px] md:text-xs">Acciones</th>
+                                        <th className="px-2 md:px-4 py-2 md:py-3 text-center font-semibold text-[10px] md:text-xs">{t("Acciones")}</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100">
@@ -1196,7 +1195,7 @@ const Clientes = () => {
                                                         );
                                                     })() : null}
                                                     {!cliente.telefono && !cliente.correo && (
-                                                        <span className="text-xs text-slate-400 italic">Sin contacto</span>
+                                                        <span className="text-xs text-slate-400 italic">{t("Sin contacto")}</span>
                                                     )}
                                                 </div>
                                             </td>

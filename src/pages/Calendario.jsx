@@ -1,3 +1,4 @@
+import { useTranslation } from '../utils/translations';
 import React, { useState, useMemo, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
@@ -45,6 +46,7 @@ const MONTHS = [
 ];
 
 const Calendario = () => {
+    const { t } = useTranslation();
   const location = useLocation();
   console.log(
     "VENDEDOR CALENDAR MOUNT/RENDER. Location state:",
@@ -1184,8 +1186,7 @@ const Calendario = () => {
               </div>
             </div>
             <div>
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1.5">
-                Notas
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1.5">{t("Notas")}
               </label>
               <textarea
                 value={editMeetingData.notas}
@@ -1865,7 +1866,7 @@ const Calendario = () => {
                                           title="Editar Reunión"
                                         >
                                           <Edit2 className="w-3.5 h-3.5" />
-                                          <span className="hidden sm:inline">Editar</span>
+                                          <span className="hidden sm:inline">{t("Editar")}</span>
                                         </button>
                                         <button
                                           onClick={() =>

@@ -1,3 +1,4 @@
+import { useTranslation } from '../utils/translations';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { UserPlus, Users, Loader2, Pencil, Trash2, X } from 'lucide-react';
@@ -15,6 +16,7 @@ const initialForm = {
 };
 
 export default function AdminPanel() {
+    const { t } = useTranslation();
   const currentUser = useMemo(() => getUser(), []);
   const token = getToken();
 
@@ -234,7 +236,7 @@ export default function AdminPanel() {
 
             {loading ? (
               <div className="h-40 flex items-center justify-center text-slate-500">
-                <Loader2 className="w-5 h-5 animate-spin mr-2" /> <span>Cargando...</span>
+                <Loader2 className="w-5 h-5 animate-spin mr-2" /> <span>{t("Cargando...")}</span>
               </div>
             ) : owners.length === 0 ? (
               <div className="h-40 flex items-center justify-center text-slate-500 text-sm">
@@ -245,12 +247,12 @@ export default function AdminPanel() {
                 <table className="w-full min-w-[620px] text-sm border-collapse">
                   <thead>
                     <tr className="text-left text-slate-500 border-b border-slate-100">
-                      <th className="py-2">Nombre</th>
+                      <th className="py-2">{t("Nombre")}</th>
                       <th className="py-2">Usuario</th>
-                      <th className="py-2">Equipo</th>
-                      <th className="py-2">Email</th>
-                      <th className="py-2">Teléfono</th>
-                      <th className="py-2 text-right">Acciones</th>
+                      <th className="py-2">{t("Equipo")}</th>
+                      <th className="py-2">{t("Email")}</th>
+                      <th className="py-2">{t("Teléfono")}</th>
+                      <th className="py-2 text-right">{t("Acciones")}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -292,7 +294,7 @@ export default function AdminPanel() {
                                   onClick={() => handleStartEdit(owner)}
                                   className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors"
                                 >
-                                  <Pencil className="w-3.5 h-3.5" /> <span>Editar</span>
+                                  <Pencil className="w-3.5 h-3.5" /> <span>{t("Editar")}</span>
                                 </button>
                                 <button
                                   type="button"
@@ -308,7 +310,7 @@ export default function AdminPanel() {
                                   ) : (
                                     <>
                                       <Trash2 className="w-3.5 h-3.5" />
-                                      <span>Eliminar</span>
+                                      <span>{t("Eliminar")}</span>
                                     </>
                                   )}
                                 </button>
@@ -439,14 +441,14 @@ export default function AdminPanel() {
                 type="email"
                 value={form.email}
                 onChange={handleInput}
-                placeholder="Email"
+                placeholder={t("Email")}
                 className="w-full border border-slate-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-slate-300"
               />
               <input
                 name="telefono"
                 value={form.telefono}
                 onChange={handleInput}
-                placeholder="Teléfono"
+                placeholder={t("Teléfono")}
                 className="w-full border border-slate-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-slate-300"
               />
 

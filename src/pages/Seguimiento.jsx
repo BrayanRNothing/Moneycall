@@ -1,3 +1,4 @@
+import { useTranslation } from '../utils/translations';
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import {
@@ -49,6 +50,7 @@ const CSV_LABELS = ['Nombres', 'Apellido Paterno', 'Apellido Materno', 'Telefono
 
 function prospectosToCsv(prospectos) {
     const escape = (val) => {
+    const { t } = useTranslation();
         if (val == null) return '';
         const s = String(val).replace(/"/g, '""');
         return s.includes(',') || s.includes('"') || s.includes('\n') ? `"${s}"` : s;
@@ -753,12 +755,11 @@ const Seguimiento = () => {
                                 {/* Columna 1: Identidad */}
                                 <div className="space-y-5">
                                     <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
-                                        <div className="w-1 h-3 bg-(--theme-500) rounded-full"></div>
-                                        Identidad
+                                        <div className="w-1 h-3 bg-(--theme-500) rounded-full"></div>{t("Identidad")}
                                     </h3>
                                     <div className="space-y-4">
                                         <div>
-                                            <label className="block text-[10px] font-black text-slate-500 mb-1.5 uppercase tracking-wider">Nombres *</label>
+                                            <label className="block text-[10px] font-black text-slate-500 mb-1.5 uppercase tracking-wider">{t("Nombres *")}</label>
                                             <input
                                                 id="crear-prospecto-nombres"
                                                 type="text"
@@ -771,7 +772,7 @@ const Seguimiento = () => {
                                         </div>
                                         <div className="grid grid-cols-1 gap-4">
                                             <div>
-                                                <label className="block text-[10px] font-black text-slate-500 mb-1.5 uppercase tracking-wider">Apellido Paterno</label>
+                                                <label className="block text-[10px] font-black text-slate-500 mb-1.5 uppercase tracking-wider">{t("Apellido Paterno")}</label>
                                                 <input
                                                     id="crear-prospecto-apellido-paterno"
                                                     type="text"
@@ -783,7 +784,7 @@ const Seguimiento = () => {
                                                 />
                                             </div>
                                             <div>
-                                                <label className="block text-[10px] font-black text-slate-500 mb-1.5 uppercase tracking-wider">Apellido Materno</label>
+                                                <label className="block text-[10px] font-black text-slate-500 mb-1.5 uppercase tracking-wider">{t("Apellido Materno")}</label>
                                                 <input
                                                     id="crear-prospecto-apellido-materno"
                                                     type="text"
@@ -801,19 +802,17 @@ const Seguimiento = () => {
                                 {/* Columna 2: Contacto */}
                                 <div className="space-y-5">
                                     <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
-                                        <div className="w-1 h-3 bg-indigo-500 rounded-full"></div>
-                                        Contacto
+                                        <div className="w-1 h-3 bg-indigo-500 rounded-full"></div>{t("Contacto")}
                                     </h3>
                                     <div className="space-y-4">
                                         <div>
                                             <div className="flex items-center justify-between mb-1.5">
-                                                <label className="block text-[10px] font-black text-slate-500 uppercase tracking-wider">Teléfonos *</label>
+                                                <label className="block text-[10px] font-black text-slate-500 uppercase tracking-wider">{t("Teléfonos *")}</label>
                                                 <button
                                                     type="button"
                                                     onClick={() => setFormCrear((f) => ({ ...f, telefonos: [...f.telefonos, ''] }))}
                                                     className="text-[10px] text-(--theme-600) hover:text-(--theme-700) font-black uppercase tracking-tighter"
-                                                >
-                                                    + Añadir otro
+                                                >{t("+ Añadir otro")}
                                                 </button>
                                             </div>
                                             <div className="space-y-2">
@@ -844,13 +843,12 @@ const Seguimiento = () => {
                                         </div>
                                         <div>
                                             <div className="flex items-center justify-between mb-1.5">
-                                                <label className="block text-[10px] font-black text-slate-500 uppercase tracking-wider">Correos Electrónicos</label>
+                                                <label className="block text-[10px] font-black text-slate-500 uppercase tracking-wider">{t("Correos Electrónicos")}</label>
                                                 <button
                                                     type="button"
                                                     onClick={() => setFormCrear((f) => ({ ...f, correos: [...f.correos, ''] }))}
                                                     className="text-[10px] text-(--theme-600) hover:text-(--theme-700) font-black uppercase tracking-tighter"
-                                                >
-                                                    + Añadir otro
+                                                >{t("+ Añadir otro")}
                                                 </button>
                                             </div>
                                             <div className="space-y-2">
@@ -885,12 +883,11 @@ const Seguimiento = () => {
                                 {/* Columna 3: Empresa y Lugar */}
                                 <div className="space-y-5">
                                     <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
-                                        <div className="w-1 h-3 bg-emerald-500 rounded-full"></div>
-                                        Empresa & Sitio
+                                        <div className="w-1 h-3 bg-emerald-500 rounded-full"></div>{t("Empresa & Sitio")}
                                     </h3>
                                     <div className="space-y-4">
                                         <div>
-                                            <label className="block text-[10px] font-black text-slate-500 mb-1.5 uppercase tracking-wider">Nombre de Empresa</label>
+                                            <label className="block text-[10px] font-black text-slate-500 mb-1.5 uppercase tracking-wider">{t("Nombre de Empresa")}</label>
                                             <div className="relative group">
                                                 <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 group-focus-within:text-(--theme-500) transition-colors" />
                                                 <input
@@ -905,7 +902,7 @@ const Seguimiento = () => {
                                             </div>
                                         </div>
                                         <div>
-                                            <label className="block text-[10px] font-black text-slate-500 mb-1.5 uppercase tracking-wider">Sitio Web</label>
+                                            <label className="block text-[10px] font-black text-slate-500 mb-1.5 uppercase tracking-wider">{t("Sitio Web")}</label>
                                             <div className="relative group">
                                                 <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 group-focus-within:text-(--theme-500) transition-colors" />
                                                 <input
@@ -920,7 +917,7 @@ const Seguimiento = () => {
                                             </div>
                                         </div>
                                         <div>
-                                            <label className="block text-[10px] font-black text-slate-500 mb-1.5 uppercase tracking-wider">Ubicación</label>
+                                            <label className="block text-[10px] font-black text-slate-500 mb-1.5 uppercase tracking-wider">{t("Ubicación")}</label>
                                             <div className="relative group">
                                                 <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 group-focus-within:text-(--theme-500) transition-colors" />
                                                 <input
@@ -1019,12 +1016,11 @@ const Seguimiento = () => {
                             {/* Sección: Datos Personales */}
                             <div className="space-y-4">
                                 <h3 className="text-xs font-extrabold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                                    <div className="w-1 h-4 bg-(--theme-500) rounded-full"></div>
-                                    Información Personal
+                                    <div className="w-1 h-4 bg-(--theme-500) rounded-full"></div>{t("Información Personal")}
                                 </h3>
                                 <div className="space-y-3">
                                     <div>
-                                        <label className="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wider">Nombres *</label>
+                                        <label className="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wider">{t("Nombres *")}</label>
                                         <input
                                             type="text"
                                             value={prospectoAEditar.nombres}
@@ -1034,7 +1030,7 @@ const Seguimiento = () => {
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
-                                            <label className="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wider">Apellido Paterno</label>
+                                            <label className="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wider">{t("Apellido Paterno")}</label>
                                             <input
                                                 type="text"
                                                 value={prospectoAEditar.apellidoPaterno}
@@ -1043,7 +1039,7 @@ const Seguimiento = () => {
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wider">Apellido Materno</label>
+                                            <label className="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wider">{t("Apellido Materno")}</label>
                                             <input
                                                 type="text"
                                                 value={prospectoAEditar.apellidoMaterno}
@@ -1058,13 +1054,12 @@ const Seguimiento = () => {
                             {/* Sección: Contacto */}
                             <div className="space-y-4">
                                 <h3 className="text-xs font-extrabold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                                    <div className="w-1 h-4 bg-(--theme-500) rounded-full"></div>
-                                    Contacto
+                                    <div className="w-1 h-4 bg-(--theme-500) rounded-full"></div>{t("Contacto")}
                                 </h3>
                                 <div className="space-y-3">
                                     <div>
                                         <div className="flex items-center justify-between mb-2">
-                                            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider">Teléfonos *</label>
+                                            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider">{t("Teléfonos *")}</label>
                                             <button
                                                 type="button"
                                                 onClick={() => setProspectoAEditar((f) => ({ ...f, telefonos: [...(f.telefonos || ['']), ''] }))}
@@ -1099,7 +1094,7 @@ const Seguimiento = () => {
                                     </div>
                                     <div>
                                         <div className="flex items-center justify-between mb-2">
-                                            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider">Correos Electrónicos</label>
+                                            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider">{t("Correos Electrónicos")}</label>
                                             <button
                                                 type="button"
                                                 onClick={() => setProspectoAEditar((f) => ({ ...f, correos: [...(f.correos || ['']), ''] }))}
@@ -1143,7 +1138,7 @@ const Seguimiento = () => {
                                 </h3>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wider">Empresa</label>
+                                        <label className="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wider">{t("Empresa")}</label>
                                         <input
                                             type="text"
                                             value={prospectoAEditar.empresa}
@@ -1153,7 +1148,7 @@ const Seguimiento = () => {
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wider">Sitio Web</label>
+                                        <label className="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wider">{t("Sitio Web")}</label>
                                         <input
                                             type="url"
                                             value={prospectoAEditar.sitioWeb || ''}
@@ -1164,7 +1159,7 @@ const Seguimiento = () => {
                                     </div>
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wider">Ubicación</label>
+                                    <label className="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wider">{t("Ubicación")}</label>
                                     <input
                                         type="text"
                                         value={prospectoAEditar.ubicacion || ''}
@@ -1483,8 +1478,7 @@ const Seguimiento = () => {
                             onClick={() => setModalCrearAbierto(true)}
                             className="w-full sm:w-auto justify-center flex items-center gap-2 px-3 py-2 md:px-4 md:py-2 bg-(--theme-600) text-white rounded-lg hover:bg-(--theme-700) transition-colors text-xs md:text-sm font-medium"
                         >
-                            <UserPlus className="w-4 h-4 md:w-5 md:h-5" />
-                            Crear prospecto
+                            <UserPlus className="w-4 h-4 md:w-5 md:h-5" />{t("Crear prospecto")}
                         </button>
                     </div>
                 </div>
@@ -1642,12 +1636,12 @@ const Seguimiento = () => {
                                 <thead className="bg-slate-100/70 text-slate-500 uppercase">
                                     <tr>
                                         <th className="px-2 md:px-4 py-2 md:py-3 text-left font-semibold text-[10px] md:text-xs">Cliente</th>
-                                        <th className="px-2 md:px-4 py-2 md:py-3 text-left font-semibold text-[10px] md:text-xs">Empresa</th>
-                                        <th className="px-2 md:px-4 py-2 md:py-3 text-left font-semibold text-[10px] md:text-xs">Contacto</th>
-                                        <th className="px-2 md:px-4 py-2 md:py-3 text-center font-semibold text-[9px] md:text-xs uppercase tracking-wider">Etapa</th>
+                                        <th className="px-2 md:px-4 py-2 md:py-3 text-left font-semibold text-[10px] md:text-xs">{t("Empresa")}</th>
+                                        <th className="px-2 md:px-4 py-2 md:py-3 text-left font-semibold text-[10px] md:text-xs">{t("Contacto")}</th>
+                                        <th className="px-2 md:px-4 py-2 md:py-3 text-center font-semibold text-[9px] md:text-xs uppercase tracking-wider">{t("Etapa")}</th>
                                         <th className="px-2 md:px-4 py-2 md:py-3 text-left font-semibold text-[10px] md:text-xs whitespace-nowrap">Última interacción</th>
                                         <th className="px-2 md:px-4 py-2 md:py-3 text-left font-semibold text-[10px] md:text-xs">Recordatorio</th>
-                                        <th className="px-2 md:px-4 py-2 md:py-3 text-center font-semibold text-[10px] md:text-xs">Acciones</th>
+                                        <th className="px-2 md:px-4 py-2 md:py-3 text-center font-semibold text-[10px] md:text-xs">{t("Acciones")}</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100">
@@ -1687,14 +1681,13 @@ const Seguimiento = () => {
                                                             </p>
                                                         );
                                                     })() : (
-                                                        <span className="text-xs text-slate-400 italic">Sin contacto</span>
+                                                        <span className="text-xs text-slate-400 italic">{t("Sin contacto")}</span>
                                                     )}
                                                 </div>
                                             </td>
                                             <td className="px-2 md:px-4 py-2 md:py-3 text-center whitespace-nowrap">
                                                 {p.etapaEmbudo === 'prospecto_nuevo' && !p.ultimaActTipo ? (
-                                                    <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-500">
-                                                        No contactado
+                                                    <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-500">{t("No contactado")}
                                                     </span>
                                                 ) : (
                                                     <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${getEtapaColor(p.etapaEmbudo)}`}>

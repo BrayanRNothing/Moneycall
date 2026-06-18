@@ -1,3 +1,4 @@
+import { useTranslation } from '../utils/translations';
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -40,6 +41,7 @@ const getAuthHeaders = () => ({
 });
 
 const getCalendarRolePath = () => {
+    const { t } = useTranslation();
     const user = getUser();
     const role = String(user?.rol || '').toLowerCase();
     if (role === 'admin') return 'vendedor';
@@ -991,7 +993,7 @@ export default function ClienteDetalle({
                     onClick={onVolver}
                     className="flex items-center gap-2 text-gray-500 hover:text-gray-900 transition-colors font-medium mb-2 shrink-0"
                 >
-                    <ArrowLeft className="w-5 h-5" /> Regresar a la lista
+                    <ArrowLeft className="w-5 h-5" />{t("Regresar a la lista")}
                 </button>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6 flex-1 min-h-0 overflow-hidden">
@@ -1077,7 +1079,7 @@ export default function ClienteDetalle({
                                                         <Phone className="w-3.5 h-3.5" />
                                                     </div>
                                                     <div className="flex flex-col overflow-hidden">
-                                                        <span className="text-[9px] uppercase tracking-wider font-extrabold text-slate-400 leading-none mb-0.5">Teléfono</span>
+                                                        <span className="text-[9px] uppercase tracking-wider font-extrabold text-slate-400 leading-none mb-0.5">{t("Teléfono")}</span>
                                                         <div className="flex flex-wrap text-xs font-bold text-slate-700 truncate">
                                                             {[ClienteSeleccionado.telefono, ClienteSeleccionado.telefono2].filter(Boolean).flatMap(t => t.split(',').map(s => s.trim())).filter(Boolean).slice(0, 1).map((tel, idx) => (
                                                                 <span key={idx}>{tel}</span>
@@ -1097,7 +1099,7 @@ export default function ClienteDetalle({
                                                         <Mail className="w-3.5 h-3.5" />
                                                     </div>
                                                     <div className="flex flex-col overflow-hidden">
-                                                        <span className="text-[9px] uppercase tracking-wider font-extrabold text-slate-400 leading-none mb-0.5">Correo</span>
+                                                        <span className="text-[9px] uppercase tracking-wider font-extrabold text-slate-400 leading-none mb-0.5">{t("Correo")}</span>
                                                         <div className="flex flex-wrap text-xs font-bold text-slate-700 truncate" title={correosContacto.join(', ')}>
                                                             {correosContacto.slice(0, 1).map((e, idx) => (
                                                                 <span key={idx}>{e}</span>
@@ -1117,7 +1119,7 @@ export default function ClienteDetalle({
                                                         <MapPin className="w-3.5 h-3.5" />
                                                     </div>
                                                     <div className="flex flex-col overflow-hidden">
-                                                        <span className="text-[9px] uppercase tracking-wider font-extrabold text-slate-400 leading-none mb-0.5">Ubicación</span>
+                                                        <span className="text-[9px] uppercase tracking-wider font-extrabold text-slate-400 leading-none mb-0.5">{t("Ubicación")}</span>
                                                         <span className="text-xs font-bold text-slate-700 truncate">
                                                             {ClienteSeleccionado.ubicacion}
                                                         </span>
@@ -1312,7 +1314,7 @@ export default function ClienteDetalle({
                                                                         <button
                                                                             onClick={() => setModalCita({ abierto: true, cita, editando: false })}
                                                                             className="flex items-center justify-center bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 rounded px-2 py-1.5 transition-colors shadow-sm"
-                                                                            title="Ver"
+                                                                            title={t("Ver")}
                                                                         >
                                                                             <Eye className="w-3.5 h-3.5" />
                                                                         </button>
@@ -1322,7 +1324,7 @@ export default function ClienteDetalle({
                                                                                 setModalCita({ abierto: true, cita, editando: true });
                                                                             }}
                                                                             className="flex items-center justify-center bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 rounded px-2 py-1.5 transition-colors shadow-sm"
-                                                                            title="Editar"
+                                                                            title={t("Editar")}
                                                                         >
                                                                             <Edit2 className="w-3.5 h-3.5" />
                                                                         </button>
@@ -1354,13 +1356,13 @@ export default function ClienteDetalle({
                                                                         onClick={() => handleEditarRecordatorio(rec)}
                                                                         className="flex-1 flex items-center justify-center gap-1 bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 rounded py-1.5 text-[10px] font-bold transition-colors"
                                                                     >
-                                                                        <Edit2 className="w-3 h-3" /> Editar
+                                                                        <Edit2 className="w-3 h-3" />{t("Editar")}
                                                                     </button>
                                                                     <button
                                                                         onClick={() => descartarRecordatorio(rec.id)}
                                                                         className="flex-1 flex items-center justify-center gap-1 bg-white border border-rose-200 hover:bg-rose-50 text-rose-600 rounded py-1.5 text-[10px] font-bold transition-colors"
                                                                     >
-                                                                        <Trash2 className="w-3 h-3" /> Quitar
+                                                                        <Trash2 className="w-3 h-3" />{t("Quitar")}
                                                                     </button>
                                                                 </div>
                                                             </div>
@@ -1368,7 +1370,7 @@ export default function ClienteDetalle({
                                                     })}
 
                                                     {citasPendientes.length === 0 && recordatoriosLlamada.length === 0 && (
-                                                        <p className="text-[11px] text-slate-500 px-1 italic">Sin alertas por ahora.</p>
+                                                        <p className="text-[11px] text-slate-500 px-1 italic">{t("Sin alertas por ahora.")}</p>
                                                     )}
                                                 </div>
 
@@ -1482,8 +1484,7 @@ export default function ClienteDetalle({
                                                     className="flex-1 py-2 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-700 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-xs"
                                                     title="Abrir Historial Completo"
                                                 >
-                                                    <List className="w-3.5 h-3.5" />
-                                                    Historial
+                                                    <List className="w-3.5 h-3.5" />{t("Historial")}
                                                 </button>
                                             </div>
                                         </div>
@@ -1589,7 +1590,7 @@ export default function ClienteDetalle({
                                                                 </div>
                                                                 <button
                                                                     onClick={() => handleDeleteActividadContext(act.id)}
-                                                                    title="Eliminar"
+                                                                    title={t("Eliminar")}
                                                                     className="shrink-0 p-1 rounded text-slate-200 hover:text-red-500 hover:bg-red-50 transition-all mt-0.5"
                                                                 >
                                                                     <Trash2 className="w-3 h-3" />
@@ -2120,7 +2121,7 @@ export default function ClienteDetalle({
                                             </span>
                                         </div>
                                         <div className="space-y-1">
-                                            <span className="text-xs font-bold text-slate-400 uppercase">Notas</span>
+                                            <span className="text-xs font-bold text-slate-400 uppercase">{t("Notas")}</span>
                                             <p className="text-sm text-slate-600 leading-relaxed italic">
                                                 {modalCita.cita.notas || 'Sin notas registradas.'}
                                             </p>

@@ -1,3 +1,4 @@
+import { useTranslation } from '../utils/translations';
 import React, { useState, useEffect } from 'react';
 import { Phone, UserPlus, Calendar, TrendingUp, RefreshCw, Clock, CheckCircle2, Target, MessageSquare, ExternalLink, Users, Award, DollarSign, AlertTriangle, TrendingDown, Zap, Bell, ArrowRightLeft, PercentCircle, BarChart3, Search, FileText, Video, Globe, XCircle, Plus, Pencil, Trash2, Activity, ChevronRight, LogIn, LogOut, History, MousePointer2 } from 'lucide-react';
 import axios from 'axios';
@@ -52,6 +53,7 @@ const GOAL_LABELS = {
 };
 
 const toNumber = (value) => {
+    const { t } = useTranslation();
     const parsed = Number(value);
     return Number.isFinite(parsed) ? parsed : 0;
 };
@@ -750,7 +752,7 @@ const Dashboard = () => {
                 <div className="flex items-center justify-between mb-1.5 px-1">
                     <div className="flex items-center gap-1.5">
                         <TrendingUp className="w-4 h-4 text-(--theme-600)" />
-                        <span className="text-sm font-bold text-gray-700 uppercase tracking-widest">Resumen de Ventas</span>
+                        <span className="text-sm font-bold text-gray-700 uppercase tracking-widest">{t("Resumen de Ventas")}</span>
                     </div>
 
                     <div className="flex items-center gap-3">
@@ -865,7 +867,7 @@ const Dashboard = () => {
                                     {/* SECCIÓN 1: SALUD OPERATIVA (KPIs DE PROCESO) */}
                                     <div id="dashboard-kpi-cards" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 shrink-0">
                                         <MetricKPICard
-                                            title="Velocidad de Respuesta"
+                                            title={t("Velocidad de Respuesta")}
                                             value={closerData?.eficiencia?.responseTimeHoras || 0}
                                             format="number"
                                             icon={<Zap />}
@@ -874,7 +876,7 @@ const Dashboard = () => {
                                             reverse={true}
                                         />
                                         <MetricKPICard
-                                            title="Tasa de Asistencia"
+                                            title={t("Tasa de Asistencia")}
                                             value={closerData?.tasasConversion?.asistencia || 0}
                                             format="percent"
                                             icon={<Users />}
@@ -882,7 +884,7 @@ const Dashboard = () => {
                                             thresholds={{ good: 75, okay: 50 }}
                                         />
                                         <MetricKPICard
-                                            title="Ciclo de Cierre"
+                                            title={t("Ciclo de Cierre")}
                                             value={closerData?.eficiencia?.cicloVentaDias || 0}
                                             format="number"
                                             icon={<RefreshCw />}
@@ -891,7 +893,7 @@ const Dashboard = () => {
                                             reverse={true}
                                         />
                                         <MetricKPICard
-                                            title="Ticket Promedio"
+                                            title={t("Ticket Promedio")}
                                             value={cP.ventasCount > 0 ? cP.ventasMonto / cP.ventasCount : 0}
                                             format="money"
                                             icon={<DollarSign />}
@@ -910,18 +912,18 @@ const Dashboard = () => {
                                                         <Calendar className="w-5 h-5" />
                                                     </div>
                                                     <div>
-                                                        <h3 className="text-sm font-black uppercase tracking-widest text-gray-800">Agenda Prioritaria</h3>
-                                                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tight">Próximos compromisos</p>
+                                                        <h3 className="text-sm font-black uppercase tracking-widest text-gray-800">{t("Agenda Prioritaria")}</h3>
+                                                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tight">{t("Próximos compromisos")}</p>
                                                     </div>
                                                 </div>
-                                                <button onClick={() => navigate('/vendedor/calendario')} className="text-(--theme-600) text-[10px] font-black uppercase tracking-widest hover:underline px-2 py-1">Ver Calendario</button>
+                                                <button onClick={() => navigate('/vendedor/calendario')} className="text-(--theme-600) text-[10px] font-black uppercase tracking-widest hover:underline px-2 py-1">{t("Ver Calendario")}</button>
                                             </div>
 
                                             <div className="flex-1 overflow-y-auto space-y-3 pr-1 scrollbar-hide">
                                                 {reuniones.length === 0 ? (
                                                     <div className="h-full flex flex-col items-center justify-center text-center opacity-40 py-8">
                                                         <Calendar className="w-8 h-8 mb-2" />
-                                                        <p className="text-[10px] font-black uppercase tracking-widest leading-tight">Sin citas próximas</p>
+                                                        <p className="text-[10px] font-black uppercase tracking-widest leading-tight">{t("Sin citas próximas")}</p>
                                                     </div>
                                                 ) : (
                                                     reuniones.map((reunion, i) => (
@@ -955,18 +957,18 @@ const Dashboard = () => {
                                                         <Bell className="w-5 h-5" />
                                                     </div>
                                                     <div>
-                                                        <h3 className="text-sm font-black uppercase tracking-widest text-gray-800">Tareas Críticas</h3>
-                                                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tight">Acciones prioritarias</p>
+                                                        <h3 className="text-sm font-black uppercase tracking-widest text-gray-800">{t("Tareas Críticas")}</h3>
+                                                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tight">{t("Acciones prioritarias")}</p>
                                                     </div>
                                                 </div>
-                                                <button onClick={() => setHealthTab('tareas')} className="text-rose-500 text-[10px] font-black uppercase tracking-widest hover:underline px-2 py-1">Ver Todas</button>
+                                                <button onClick={() => setHealthTab('tareas')} className="text-rose-500 text-[10px] font-black uppercase tracking-widest hover:underline px-2 py-1">{t("Ver Todas")}</button>
                                             </div>
 
                                             <div className="flex-1 overflow-y-auto space-y-3 pr-1 scrollbar-hide">
                                                 {teamTasks.filter(t => t.prioridad === 'alta' && t.estado !== 'completada').length === 0 ? (
                                                     <div className="h-full flex flex-col items-center justify-center text-center opacity-40 py-8">
                                                         <CheckCircle2 className="w-8 h-8 mb-2 text-emerald-500" />
-                                                        <p className="text-[10px] font-black uppercase tracking-widest leading-tight">Sin tareas críticas</p>
+                                                        <p className="text-[10px] font-black uppercase tracking-widest leading-tight">{t("Sin tareas críticas")}</p>
                                                     </div>
                                                 ) : (
                                                     teamTasks
@@ -980,7 +982,7 @@ const Dashboard = () => {
                                                                         <p className="text-[9px] text-gray-400 font-bold uppercase mt-0.5 truncate">{tarea.descripcion || 'Sin descripción'}</p>
                                                                     </div>
                                                                     <div className="flex items-center gap-2 ml-3">
-                                                                        <span className="text-[8px] font-black text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded border border-rose-100 uppercase">Hoy</span>
+                                                                        <span className="text-[8px] font-black text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded border border-rose-100 uppercase">{t("Hoy")}</span>
                                                                         <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-rose-500 group-hover:translate-x-1 transition-all" />
                                                                     </div>
                                                                 </div>
@@ -1006,7 +1008,7 @@ const Dashboard = () => {
                                             thresholds={{ good: 70, okay: 45 }}
                                         />
                                         <MetricKPICard
-                                            title="Ticket Promedio"
+                                            title={t("Ticket Promedio")}
                                             value={cP.ventasCount > 0 ? cP.ventasMonto / cP.ventasCount : 0}
                                             format="money"
                                             icon={<DollarSign className="w-5 h-5" />}
@@ -1035,7 +1037,7 @@ const Dashboard = () => {
                                             reverse={true}
                                         />
                                         <MetricKPICard
-                                            title="Ciclo de Cierre"
+                                            title={t("Ciclo de Cierre")}
                                             value={closerData?.eficiencia?.cicloVentaDias || 0}
                                             format="number"
                                             icon={<ArrowRightLeft className="w-5 h-5" />}
@@ -1590,7 +1592,7 @@ const Dashboard = () => {
                                                         {r.cliente?.nombres} {r.cliente?.apellidoPaterno}
                                                     </div>
                                                     {esHoy && (
-                                                        <span className="text-[7px] font-black bg-white/30 text-white px-1.5 py-0.5 rounded-full backdrop-blur-sm uppercase tracking-tighter border border-white/10 whitespace-nowrap animate-pulse">Hoy</span>
+                                                        <span className="text-[7px] font-black bg-white/30 text-white px-1.5 py-0.5 rounded-full backdrop-blur-sm uppercase tracking-tighter border border-white/10 whitespace-nowrap animate-pulse">{t("Hoy")}</span>
                                                     )}
                                                 </div>
 
@@ -1673,9 +1675,9 @@ const Dashboard = () => {
                                             onChange={(e) => setNewTask({ ...newTask, prioridad: e.target.value })}
                                             className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-(--theme-500)/20 focus:border-(--theme-500) transition-all outline-hidden appearance-none"
                                         >
-                                            <option value="baja">Baja</option>
-                                            <option value="media">Media</option>
-                                            <option value="alta">Alta</option>
+                                            <option value="baja">{t("Baja")}</option>
+                                            <option value="media">{t("Media")}</option>
+                                            <option value="alta">{t("Alta")}</option>
                                         </select>
                                     </div>
                                     <div>

@@ -1,3 +1,4 @@
+import { useTranslation } from '../utils/translations';
 import React, { useState } from 'react';
 import {
     BookOpen,
@@ -13,6 +14,7 @@ import {
 } from 'lucide-react';
 
 const ManualMetodologia = () => {
+    const { t } = useTranslation();
     const [currentPage, setCurrentPage] = useState(0);
 
     const pages = [
@@ -21,8 +23,7 @@ const ManualMetodologia = () => {
             <div className="w-20 h-20 rounded-2xl bg-slate-900 flex items-center justify-center mb-8 shadow-sm">
                 <BookOpen className="w-10 h-10 text-white" strokeWidth={1} />
             </div>
-            <h1 className="text-4xl sm:text-5xl font-light text-slate-900 tracking-tight mb-4">
-                Manual<span className="font-semibold">Operativo</span>
+            <h1 className="text-4xl sm:text-5xl font-light text-slate-900 tracking-tight mb-4">{t("Manual")}<span className="font-semibold">Operativo</span>
             </h1>
             <div className="h-px w-24 bg-slate-200 mb-8"></div>
             <h2 className="text-sm font-medium text-slate-500 tracking-widest uppercase">

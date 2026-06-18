@@ -1,3 +1,4 @@
+import { useTranslation } from '../utils/translations';
 import { useState, useEffect, useCallback } from 'react';
 import { Users, UserPlus, Edit2, Power, Crown, Shield, X, Check, Loader2, RefreshCw, Trash2, Search, Download, AlertTriangle } from 'lucide-react';
 import { getUser, getToken } from '../utils/authUtils';
@@ -31,6 +32,7 @@ const initialForm = { usuario: '', contraseña: '', nombre: '', email: '', telef
 const initialEditForm = { nombre: '', email: '', telefono: '', rol: 'vendedor' };
 
 export default function Equipo() {
+    const { t } = useTranslation();
   const userAuth = getUser();
   const token = getToken();
 
@@ -317,8 +319,7 @@ export default function Equipo() {
                   className="flex-1 sm:flex-none justify-center flex items-center gap-1.5 px-3 py-2 md:px-4 md:py-2.5 bg-white border border-gray-200 rounded-xl text-[11px] md:text-xs font-bold text-gray-600 hover:bg-gray-50 transition-all shadow-sm"
                   onClick={fetchEquipo}
                 >
-                  <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
-                  ACTUALIZAR
+                  <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />{t("ACTUALIZAR")}
                 </button>
                 {esOwner && (
                   <button
@@ -354,8 +355,8 @@ export default function Equipo() {
             <div className="bg-white md:rounded-2xl p-5 border border-slate-200 shadow-sm flex-1 flex flex-col min-h-0">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
                 <div>
-                  <h2 className="text-lg md:text-xl font-bold text-gray-900 leading-tight">Miembros del Equipo</h2>
-                  <p className="text-[10px] md:text-xs text-gray-400 font-semibold uppercase tracking-widest mt-1">Gestión de acceso y roles</p>
+                  <h2 className="text-lg md:text-xl font-bold text-gray-900 leading-tight">{t("Miembros del Equipo")}</h2>
+                  <p className="text-[10px] md:text-xs text-gray-400 font-semibold uppercase tracking-widest mt-1">{t("Gestión de acceso y roles")}</p>
                 </div>
 
                 <div className="flex flex-wrap gap-2">
@@ -365,7 +366,7 @@ export default function Equipo() {
                       className="pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium w-full md:w-64 outline-none focus:bg-white focus:border-(--theme-500) focus:ring-4 focus:ring-(--theme-500)/10 transition-all"
                       value={draftFilters.busqueda}
                       onChange={e => setDraftFilters(prev => ({ ...prev, busqueda: e.target.value }))}
-                      placeholder="Buscar por nombre, usuario..."
+                      placeholder={t("Buscar por nombre, usuario...")}
                     />
                   </div>
                   <select
@@ -373,21 +374,20 @@ export default function Equipo() {
                     value={draftFilters.estado}
                     onChange={e => setDraftFilters(prev => ({ ...prev, estado: e.target.value }))}
                   >
-                    <option value="todos">Todos los estados</option>
-                    <option value="activo">Activos</option>
-                    <option value="inactivo">Inactivos</option>
+                    <option value="todos">{t("Todos los estados")}</option>
+                    <option value="activo">{t("Activos")}</option>
+                    <option value="inactivo">{t("Inactivos")}</option>
                   </select>
                   <button
                     className="flex-1 sm:flex-none px-4 py-2 md:px-6 md:py-2.5 bg-gray-900 text-white rounded-xl text-[11px] md:text-xs font-bold shadow-sm hover:bg-black transition-all whitespace-nowrap"
                     onClick={applyFilters}
-                  >
-                    FILTRAR
+                  >{t("FILTRAR")}
                   </button>
                   {esOwner && (
                     <button
                       className="p-2.5 bg-gray-100 text-gray-600 rounded-xl hover:bg-gray-200 transition-all"
                       onClick={handleExportCSV}
-                      title="Exportar a CSV"
+                      title={t("Exportar a CSV")}
                     >
                       <Download size={18} />
                     </button>
@@ -474,7 +474,7 @@ export default function Equipo() {
                           <button
                             className="p-2 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all opacity-0 group-hover:opacity-100"
                             onClick={() => handleDeleteMember(m)}
-                            title="Eliminar"
+                            title={t("Eliminar")}
                           >
                             <Trash2 size={14} />
                           </button>
@@ -483,7 +483,7 @@ export default function Equipo() {
 
                       {String(m.id) === String(userAuth?.id) && (
                         <div className="pt-4 border-t border-gray-50 text-center">
-                          <span className="text-[10px] font-bold text-(--theme-600) bg-(--theme-50) px-3 py-1 rounded-full border border-(--theme-100)">ESTE ERES TÚ</span>
+                          <span className="text-[10px] font-bold text-(--theme-600) bg-(--theme-50) px-3 py-1 rounded-full border border-(--theme-100)">{t("ESTE ERES TÚ")}</span>
                         </div>
                       )}
                     </div>
@@ -507,8 +507,8 @@ export default function Equipo() {
                   <UserPlus size={24} />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-gray-900 leading-none">Nuevo Miembro</h3>
-                  <p className="text-xs text-gray-400 font-semibold uppercase tracking-widest mt-1">Integrar al equipo</p>
+                  <h3 className="text-xl font-bold text-gray-900 leading-none">{t("Nuevo Miembro")}</h3>
+                  <p className="text-xs text-gray-400 font-semibold uppercase tracking-widest mt-1">{t("Integrar al equipo")}</p>
                 </div>
               </div>
               <button
@@ -532,7 +532,7 @@ export default function Equipo() {
 
             <form onSubmit={handleAddMember} className="space-y-6">
               <div className="space-y-2">
-                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Nombre Completo *</label>
+                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">{t("Nombre Completo *")}</label>
                 <input
                   className="w-full px-5 py-4 bg-gray-50 border-2 border-transparent rounded-2xl text-sm font-semibold text-gray-800 outline-none focus:bg-white focus:border-indigo-500 focus:shadow-lg focus:shadow-indigo-500/10 transition-all"
                   value={form.nombre}
@@ -543,20 +543,20 @@ export default function Equipo() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Rol en el equipo *</label>
+                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">{t("Rol en el equipo *")}</label>
                 <select
                   className="w-full px-5 py-4 bg-gray-50 border-2 border-transparent rounded-2xl text-sm font-semibold text-gray-800 outline-none focus:bg-white focus:border-indigo-500 transition-all cursor-pointer"
                   value={form.rol || 'vendedor'}
                   onChange={e => setForm(p => ({ ...p, rol: e.target.value }))}
                 >
-                  <option value="vendedor">Vendedor (Gestiona clientes y ventas)</option>
-                  <option value="asignador">Asignador (Asigna prospectos a vendedores)</option>
+                  <option value="vendedor">{t("Vendedor (Gestiona clientes y ventas)")}</option>
+                  <option value="asignador">{t("Asignador (Asigna prospectos a vendedores)")}</option>
                 </select>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Usuario *</label>
+                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">{t("Usuario *")}</label>
                   <input
                     className="w-full px-5 py-4 bg-gray-50 border-2 border-transparent rounded-2xl text-sm font-semibold text-gray-800 outline-none focus:bg-white focus:border-indigo-500 transition-all font-mono"
                     value={form.usuario}
@@ -566,7 +566,7 @@ export default function Equipo() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Contraseña *</label>
+                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">{t("Contraseña *")}</label>
                   <input
                     className="w-full px-5 py-4 bg-gray-50 border-2 border-transparent rounded-2xl text-sm font-semibold text-gray-800 outline-none focus:bg-white focus:border-indigo-500 transition-all"
                     type="password"
@@ -590,7 +590,7 @@ export default function Equipo() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Teléfono</label>
+                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">{t("Teléfono")}</label>
                   <input
                     className="w-full px-5 py-4 bg-gray-50 border-2 border-transparent rounded-2xl text-sm font-semibold text-gray-800 outline-none focus:bg-white focus:border-indigo-500 transition-all"
                     value={form.telefono}
@@ -613,8 +613,7 @@ export default function Equipo() {
                   type="button"
                   className="px-8 py-4 bg-gray-100 text-gray-500 rounded-[20px] text-xs font-bold uppercase tracking-widest hover:bg-gray-200 transition-all"
                   onClick={() => { setShowAddModal(false); setFormError(''); setForm(initialForm); }}
-                >
-                  CANCELAR
+                >{t("CANCELAR")}
                 </button>
               </div>
             </form>
@@ -632,7 +631,7 @@ export default function Equipo() {
                   <Edit2 size={24} />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-gray-900 leading-none">Editar Perfil</h3>
+                  <h3 className="text-xl font-bold text-gray-900 leading-none">{t("Editar Perfil")}</h3>
                   <p className="text-xs text-gray-400 font-semibold uppercase tracking-widest mt-1">{editMember.nombre}</p>
                 </div>
               </div>
@@ -646,7 +645,7 @@ export default function Equipo() {
 
             <form onSubmit={handleEditMember} className="space-y-6">
               <div className="space-y-2">
-                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Nombre Completo *</label>
+                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">{t("Nombre Completo *")}</label>
                 <input
                   className="w-full px-5 py-4 bg-gray-50 border-2 border-transparent rounded-2xl text-sm font-semibold text-gray-800 outline-none focus:bg-white focus:border-amber-500 transition-all"
                   value={editForm.nombre}
@@ -666,7 +665,7 @@ export default function Equipo() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Teléfono</label>
+                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">{t("Teléfono")}</label>
                   <input
                     className="w-full px-5 py-4 bg-gray-50 border-2 border-transparent rounded-2xl text-sm font-semibold text-gray-800 outline-none focus:bg-white focus:border-amber-500 transition-all"
                     value={editForm.telefono}
@@ -676,14 +675,14 @@ export default function Equipo() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Rol en el equipo *</label>
+                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">{t("Rol en el equipo *")}</label>
                 <select
                   className="w-full px-5 py-4 bg-gray-50 border-2 border-transparent rounded-2xl text-sm font-semibold text-gray-800 outline-none focus:bg-white focus:border-amber-500 transition-all cursor-pointer"
                   value={editForm.rol || 'vendedor'}
                   onChange={e => setEditForm(p => ({ ...p, rol: e.target.value }))}
                 >
-                  <option value="vendedor">Vendedor (Gestiona clientes y ventas)</option>
-                  <option value="asignador">Asignador (Asigna prospectos a vendedores)</option>
+                  <option value="vendedor">{t("Vendedor (Gestiona clientes y ventas)")}</option>
+                  <option value="asignador">{t("Asignador (Asigna prospectos a vendedores)")}</option>
                 </select>
               </div>
 
@@ -699,8 +698,7 @@ export default function Equipo() {
                   type="button"
                   className="px-8 py-4 bg-gray-100 text-gray-500 rounded-[20px] text-xs font-bold uppercase tracking-widest hover:bg-gray-200 transition-all"
                   onClick={() => setEditMember(null)}
-                >
-                  CANCELAR
+                >{t("CANCELAR")}
                 </button>
               </div>
             </form>

@@ -1,5 +1,12 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Activity, RefreshCw, Calendar, Phone, MessageSquare, Video, FileText, CheckCircle2, Target, AlertTriangle, ChevronLeft, UserCircle2, Briefcase, Search, Users } from 'lucide-react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { 
+    Activity, RefreshCw, Calendar, Phone, MessageSquare, Video, FileText, 
+    CheckCircle2, Target, AlertTriangle, ChevronLeft, UserCircle2, 
+    Briefcase, Search, Users, DollarSign, Award, Percent, TrendingUp 
+} from 'lucide-react';
+import { getUser, getToken } from '../utils/authUtils';
+import API_URL from '../config/api';
+import { useTranslation } from '../utils/translations';
 
 const getEtapaColor = (etapa) => {
     switch (etapa) {
@@ -13,13 +20,6 @@ const getEtapaColor = (etapa) => {
         default: return 'bg-gray-50 text-gray-700 border-gray-200';
     }
 };
-
-const formatEtapa = (etapa) => {
-    if (!etapa) return 'Sin Etapa';
-    return etapa.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-};
-import { getUser, getToken } from '../utils/authUtils';
-import API_URL from '../config/api';
 
 const getIcon = (tipo) => {
     switch (tipo) {
@@ -50,21 +50,32 @@ const getInitials = (name) => {
     return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
 };
 
+const esHoy = (fecha) => {
+    const today = new Date();
+    const date = new Date(fecha);
+    return date.getDate() === today.getDate() &&
+        date.getMonth() === today.getMonth() &&
+        date.getFullYear() === today.getFullYear();
+};
+
 export default function Monitoreo() {
+    const { t } = useTranslation();
     const userAuth = getUser();
     const token = getToken();
+    
     const [miembros, setMiembros] = useState([]);
     const [actividades, setActividades] = useState([]);
     const [prospectos, setProspectos] = useState([]);
     const [selectedMember, setSelectedMember] = useState(null);
     const [filtroHistorial, setFiltroHistorial] = useState('hoy');
+    const [selectedActivityType, setSelectedActivityType] = useState('all');
     const [tabCartera, setTabCartera] = useState('prospectos');
     const [loading, setLoading] = useState(true);
     const [loadingActs, setLoadingActs] = useState(false);
     const [loadingProps, setLoadingProps] = useState(false);
     const [error, setError] = useState('');
 
-    const fetchMiembros = useCallback(async () => {
+    const fetchMiembrosConDatos = useCallback(async () => {
         setLoading(true);
         setError('');
         try {
@@ -73,9 +84,44 @@ export default function Monitoreo() {
             });
             if (!res.ok) throw new Error((await res.json()).mensaje || 'Error al cargar miembros');
             const data = await res.json();
-            // Filtrar al propio owner para que no se vea a sí mismo
             const filteredMembers = (data.miembros || []).filter(m => String(m.id) !== String(userAuth?.id));
-            setMiembros(filteredMembers);
+            
+            // Cargar prospectos y actividades de cada miembro en paralelo para calcular métricas
+            const membersWithData = await Promise.all(filteredMembers.map(async (m) => {
+                let memberProps = [];
+                let memberActs = [];
+                try {
+                    const propsRes = await fetch(`${API_URL}/api/equipos/miembro/${m.id}/prospectos`, {
+                        headers: { 'Content-Type': 'application/json', 'x-auth-token': token }
+                    });
+                    if (propsRes.ok) {
+                        const propsData = await propsRes.json();
+                        memberProps = propsData.prospectos || [];
+                    }
+                } catch (e) {
+                    console.error('Error fetching prospects for member', m.id, e);
+                }
+
+                try {
+                    const actsRes = await fetch(`${API_URL}/api/equipos/monitoreo/actividades?limit=200&miembro_id=${m.id}`, {
+                        headers: { 'Content-Type': 'application/json', 'x-auth-token': token }
+                    });
+                    if (actsRes.ok) {
+                        const actsData = await actsRes.json();
+                        memberActs = actsData.actividades || [];
+                    }
+                } catch (e) {
+                    console.error('Error fetching activities for member', m.id, e);
+                }
+
+                return {
+                    ...m,
+                    prospectos: memberProps,
+                    actividades: memberActs
+                };
+            }));
+
+            setMiembros(membersWithData);
         } catch (e) {
             setError(e.message);
         } finally {
@@ -118,27 +164,98 @@ export default function Monitoreo() {
     }, [token]);
 
     useEffect(() => {
-        fetchMiembros();
-    }, [fetchMiembros]);
+        fetchMiembrosConDatos();
+    }, [fetchMiembrosConDatos]);
 
     useEffect(() => {
         if (selectedMember) {
             setFiltroHistorial('hoy');
+            setSelectedActivityType('all');
             setTabCartera('prospectos');
             fetchActividades(selectedMember.id);
             fetchProspectos(selectedMember.id);
         }
     }, [selectedMember, fetchActividades, fetchProspectos]);
 
+    // Calcular KPIs agregados del equipo
+    const teamKpis = useMemo(() => {
+        let totalLeads = 0;
+        let totalPipelineValue = 0;
+        let totalTodayActs = 0;
+        let totalReuniones = 0;
+        let reunionesRealizadas = 0;
+
+        miembros.forEach(m => {
+            const props = m.prospectos || [];
+            const acts = m.actividades || [];
+
+            totalLeads += props.length;
+
+            const activeProps = props.filter(p => p.etapaEmbudo !== 'venta_ganada' && p.etapaEmbudo !== 'perdido' && p.etapaEmbudo !== 'cliente_activo');
+            totalPipelineValue += activeProps.reduce((sum, p) => sum + (parseFloat(p.monto || p.valor) || 0), 0);
+
+            totalTodayActs += acts.filter(act => esHoy(act.fecha || act.createdAt)).length;
+
+            const memberReuniones = acts.filter(act => act.tipo === 'reunion' || act.tipo === 'cita');
+            totalReuniones += memberReuniones.length;
+            reunionesRealizadas += memberReuniones.filter(act => act.resultado === 'exitoso').length;
+        });
+
+        const showUpRate = totalReuniones > 0 ? (reunionesRealizadas / totalReuniones) * 100 : 0;
+
+        return {
+            totalLeads,
+            totalPipelineValue,
+            totalTodayActs,
+            showUpRate
+        };
+    }, [miembros]);
+
+    // Calcular estadísticas individuales de miembros para el Leaderboard
+    const miembrosStats = useMemo(() => {
+        return miembros.map(m => {
+            const props = m.prospectos || [];
+            const acts = m.actividades || [];
+
+            const activeProps = props.filter(p => p.etapaEmbudo !== 'venta_ganada' && p.etapaEmbudo !== 'perdido' && p.etapaEmbudo !== 'cliente_activo');
+            const activeClients = props.filter(p => p.etapaEmbudo === 'venta_ganada' || p.etapaEmbudo === 'cliente_activo');
+            const pipelineValue = activeProps.reduce((sum, p) => sum + (parseFloat(p.monto || p.valor) || 0), 0);
+
+            const todayActs = acts.filter(act => esHoy(act.fecha || act.createdAt)).length;
+
+            const memberReuniones = acts.filter(act => act.tipo === 'reunion' || act.tipo === 'cita');
+            const realizadas = memberReuniones.filter(act => act.resultado === 'exitoso').length;
+            const showUpRate = memberReuniones.length > 0 ? (realizadas / memberReuniones.length) * 100 : 0;
+
+            const isOnline = m.last_seen && (Date.now() - new Date(m.last_seen.endsWith('Z') || m.last_seen.includes('+') ? m.last_seen : m.last_seen.replace(' ', 'T') + 'Z').getTime() < 5 * 60 * 1000);
+
+            return {
+                id: m.id,
+                nombre: m.nombre,
+                usuario: m.usuario,
+                activo: m.activo,
+                isOnline,
+                activePropsCount: activeProps.length,
+                activeClientsCount: activeClients.length,
+                pipelineValue,
+                todayActsCount: todayActs,
+                showUpRate,
+                rawMiembro: m
+            };
+        });
+    }, [miembros]);
+
     if (!userAuth?.esOwner && userAuth?.rol !== 'admin') {
         return (
             <div className="flex flex-col items-center justify-center py-20 min-h-screen">
                 <AlertTriangle size={64} className="text-rose-500 mb-4" />
-                <h2 className="text-2xl font-bold text-gray-900">Acceso Denegado</h2>
-                <p className="text-gray-500">Solo el propietario del equipo puede acceder a esta sección.</p>
+                <h2 className="text-2xl font-bold text-gray-900">{t('Acceso Denegado')}</h2>
+                <p className="text-gray-500">{t('Solo el propietario del equipo puede acceder a esta sección.')}</p>
             </div>
         );
     }
+
+    const formatMoney = (val) => new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', maximumFractionDigits: 0 }).format(val);
 
     return (
         <div className="min-h-[100%] flex flex-col md:bg-slate-50 md:p-6 bg-white -m-4 md:m-0 p-4 pb-8 md:pb-6 h-full animate-in fade-in duration-500">
@@ -162,10 +279,10 @@ export default function Monitoreo() {
                             )}
                             <div>
                                 <h1 className="text-xl md:text-2xl font-bold tracking-tight text-gray-900 leading-tight">
-                                    {selectedMember ? `Monitoreo: ${selectedMember.nombre}` : 'Monitoreo del Equipo'}
+                                    {selectedMember ? `${t('Monitoreo: ')}${selectedMember.nombre}` : t('Monitoreo del Equipo')}
                                 </h1>
                                 <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mt-1">
-                                    {selectedMember ? 'Línea de tiempo de acciones' : 'Supervisa en tiempo real a los miembros de tu equipo'}
+                                    {selectedMember ? t('Línea de tiempo de acciones') : t('Supervisa en tiempo real a los miembros de tu equipo')}
                                 </p>
                             </div>
                         </div>
@@ -173,10 +290,10 @@ export default function Monitoreo() {
                         <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 md:gap-3 w-full md:w-auto mt-2 md:mt-0">
                             <button
                                 className="flex-1 sm:flex-none justify-center flex items-center gap-1.5 px-3 py-2 md:px-4 md:py-2.5 bg-white border border-gray-200 rounded-xl text-[11px] md:text-xs font-bold text-gray-600 hover:bg-gray-50 transition-all shadow-sm"
-                                onClick={selectedMember ? () => { fetchActividades(selectedMember.id); fetchProspectos(selectedMember.id); } : fetchMiembros}
+                                onClick={selectedMember ? () => { fetchActividades(selectedMember.id); fetchProspectos(selectedMember.id); } : fetchMiembrosConDatos}
                             >
                                 <RefreshCw size={14} className={(selectedMember ? (loadingActs || loadingProps) : loading) ? 'animate-spin' : ''} />
-                                ACTUALIZAR
+                                {t('ACTUALIZAR')}
                             </button>
                         </div>
                     </div>
@@ -189,123 +306,206 @@ export default function Monitoreo() {
                     </div>
                 )}
 
-                {/* Vista de Tarjetas (Grid de Usuarios) */}
+                {/* Vista Principal de Monitoreo (Leaderboard + KPIs) */}
                 {!selectedMember && (
-                    <div className="flex-1 flex flex-col min-h-0 animate-in fade-in slide-in-from-bottom-4 duration-700">
-                        <div className="bg-white md:rounded-2xl p-5 border border-slate-200 shadow-sm flex-1 flex flex-col min-h-0">
-                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 shrink-0">
+                    <div className="flex-1 flex flex-col gap-6 min-h-0 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                        {/* KPIs Agregados del Equipo */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 shrink-0">
+                            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4 hover:shadow-md transition-all">
+                                <div className="p-3.5 bg-blue-50 text-blue-600 rounded-xl">
+                                    <Users size={24} />
+                                </div>
                                 <div>
-                                    <h2 className="text-lg md:text-xl font-bold text-gray-900 leading-tight">Miembros Disponibles</h2>
-                                    <p className="text-[10px] md:text-xs text-gray-400 font-semibold uppercase tracking-widest mt-1">Selecciona un miembro para monitorear</p>
+                                    <p className="text-xs font-extrabold text-gray-400 uppercase tracking-wider">{t('Miembros Disponibles')}</p>
+                                    <h3 className="text-2xl font-black text-gray-900 mt-1">{miembros.length}</h3>
+                                </div>
+                            </div>
+                            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4 hover:shadow-md transition-all">
+                                <div className="p-3.5 bg-emerald-50 text-emerald-600 rounded-xl">
+                                    <Briefcase size={24} />
+                                </div>
+                                <div>
+                                    <p className="text-xs font-extrabold text-gray-400 uppercase tracking-wider">{t('Contactos asignados')}</p>
+                                    <h3 className="text-2xl font-black text-gray-900 mt-1">{teamKpis.totalLeads}</h3>
+                                </div>
+                            </div>
+                            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4 hover:shadow-md transition-all">
+                                <div className="p-3.5 bg-purple-50 text-purple-600 rounded-xl">
+                                    <DollarSign size={24} />
+                                </div>
+                                <div>
+                                    <p className="text-xs font-extrabold text-gray-400 uppercase tracking-wider">{t('Pipeline Activo')}</p>
+                                    <h3 className="text-2xl font-black text-gray-900 mt-1">{formatMoney(teamKpis.totalPipelineValue)}</h3>
+                                </div>
+                            </div>
+                            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4 hover:shadow-md transition-all">
+                                <div className="p-3.5 bg-amber-50 text-amber-600 rounded-xl">
+                                    <Activity size={24} />
+                                </div>
+                                <div>
+                                    <p className="text-xs font-extrabold text-gray-400 uppercase tracking-wider">{t('Interacciones Hoy')}</p>
+                                    <h3 className="text-2xl font-black text-gray-900 mt-1">{teamKpis.totalTodayActs}</h3>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Leaderboard / Tabla de Rendimiento */}
+                        <div className="bg-white md:rounded-2xl p-5 border border-slate-200 shadow-sm flex-1 flex flex-col min-h-0">
+                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 shrink-0">
+                                <div>
+                                    <h2 className="text-lg md:text-xl font-bold text-gray-900 leading-tight">{t('Miembros Disponibles')}</h2>
+                                    <p className="text-[10px] md:text-xs text-gray-400 font-semibold uppercase tracking-widest mt-1">{t('Selecciona un miembro para monitorear')}</p>
                                 </div>
                             </div>
 
                             {loading ? (
                                 <div className="flex flex-col items-center justify-center py-20 flex-1">
                                     <RefreshCw size={48} className="animate-spin text-(--theme-500) mb-4" />
-                                    <p className="text-gray-500 font-semibold uppercase tracking-widest text-xs">Cargando equipo...</p>
+                                    <p className="text-gray-500 font-semibold uppercase tracking-widest text-xs">{t('Cargando equipo...')}</p>
                                 </div>
                             ) : miembros.length === 0 ? (
                                 <div className="text-center py-20 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200 flex-1 flex flex-col items-center justify-center min-h-0">
                                     <Users size={48} className="mx-auto text-gray-300 mb-4" />
-                                    <p className="text-gray-500 font-semibold">Tu equipo no tiene otros miembros además de ti.</p>
+                                    <p className="text-gray-500 font-semibold">{t('Tu equipo no tiene otros miembros además de ti.')}</p>
                                 </div>
                             ) : (
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 overflow-y-auto pr-2 pb-2 flex-1 content-start min-h-0">
-                                    {miembros.map(miembro => (
-                                        <div 
-                                            key={miembro.id} 
-                                            onClick={() => setSelectedMember(miembro)}
-                                            className={`group relative p-5 bg-white border border-gray-200 rounded-2xl transition-all hover:shadow-xl hover:shadow-gray-200/50 hover:-translate-y-1 cursor-pointer ${!miembro.activo ? 'grayscale opacity-70' : ''}`}
-                                        >
-                                            <div className="flex items-start justify-between mb-4">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-12 h-12 rounded-xl bg-linear-to-br from-(--theme-50) to-(--theme-100) text-(--theme-600) flex items-center justify-center font-bold text-lg border border-(--theme-100)">
-                                                        {getInitials(miembro.nombre)}
-                                                    </div>
-                                                    <div>
-                                                        <h3 className="font-bold text-gray-900 group-hover:text-(--theme-600) transition-colors truncate max-w-[120px]">{miembro.nombre}</h3>
-                                                        <p className="text-xs text-gray-400 font-semibold">@{miembro.usuario}</p>
-                                                    </div>
-                                                </div>
-                                                <div className={`px-2 py-1 rounded-lg text-[10px] font-bold uppercase tracking-tighter ${miembro.activo ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-rose-50 text-rose-600 border border-rose-100'}`}>
-                                                    {miembro.activo ? 'ACTIVO' : 'INACTIVO'}
-                                                </div>
-                                            </div>
-                                            
-                                            <div className="space-y-2 mb-6 text-xs text-gray-500 font-semibold">
-                                                <div className="flex items-center gap-2">
-                                                    <div className={`w-2 h-2 rounded-full ${
-                                                        miembro.last_seen && (Date.now() - new Date(miembro.last_seen.endsWith('Z') || miembro.last_seen.includes('+') ? miembro.last_seen : miembro.last_seen.replace(' ', 'T') + 'Z').getTime() < 5 * 60 * 1000) 
-                                                        ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)] animate-pulse' 
-                                                        : 'bg-gray-300'
-                                                    }`}></div>
-                                                    <span className="uppercase tracking-widest">{miembro.last_seen && (Date.now() - new Date(miembro.last_seen.endsWith('Z') || miembro.last_seen.includes('+') ? miembro.last_seen : miembro.last_seen.replace(' ', 'T') + 'Z').getTime() < 5 * 60 * 1000) ? 'En línea' : 'Desconectado'}</span>
-                                                </div>
-                                            </div>
-
-                                            <div className="pt-4 border-t border-gray-50 flex justify-center">
-                                                <span className="text-[10px] font-bold text-(--theme-600) bg-(--theme-50) px-4 py-1.5 rounded-xl border border-(--theme-100) group-hover:bg-(--theme-100) transition-colors uppercase tracking-widest">
-                                                    MONITOREAR
-                                                </span>
-                                            </div>
-                                        </div>
-                                    ))}
+                                <div className="flex-1 overflow-x-auto min-h-0">
+                                    <table className="w-full text-left border-collapse">
+                                        <thead>
+                                            <tr className="border-b border-gray-100 text-[10px] font-black text-gray-400 uppercase tracking-wider">
+                                                <th className="pb-3 pl-4">{t('Nombre')}</th>
+                                                <th className="pb-3 text-center">{t('Estado de Cuenta')}</th>
+                                                <th className="pb-3 text-center">{t('Prospectos ')}</th>
+                                                <th className="pb-3 text-center">{t('Clientes ')}</th>
+                                                <th className="pb-3 text-center">{t('Interacciones Hoy')}</th>
+                                                <th className="pb-3 text-center">{t('Pipeline Activo')}</th>
+                                                <th className="pb-3 text-center">{t('Tasa de Asistencia de Citas')}</th>
+                                                <th className="pb-3 pr-4 text-right">{t('Acciones')}</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-gray-50 text-sm">
+                                            {miembrosStats.map(m => (
+                                                <tr key={m.id} className="hover:bg-slate-50/60 transition-colors group">
+                                                    <td className="py-4 pl-4 font-semibold text-gray-900">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="relative">
+                                                                <div className="w-10 h-10 rounded-xl bg-linear-to-br from-(--theme-50) to-(--theme-100) text-(--theme-600) flex items-center justify-center font-bold text-sm border border-(--theme-100)">
+                                                                    {getInitials(m.nombre)}
+                                                                </div>
+                                                                <div className={`absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full border-2 border-white ${m.isOnline ? 'bg-green-500' : 'bg-gray-300'}`} />
+                                                            </div>
+                                                            <div>
+                                                                <p className="font-bold text-gray-900">{m.nombre}</p>
+                                                                <p className="text-xs text-gray-400">@{m.usuario}</p>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td className="py-4 text-center">
+                                                        <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-bold ${m.activo ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-rose-50 text-rose-600 border border-rose-100'}`}>
+                                                            {m.activo ? t('En línea').toUpperCase() : t('Desconectado').toUpperCase()}
+                                                        </span>
+                                                    </td>
+                                                    <td className="py-4 text-center font-bold text-slate-700">{m.activePropsCount}</td>
+                                                    <td className="py-4 text-center font-bold text-slate-700">{m.activeClientsCount}</td>
+                                                    <td className="py-4 text-center">
+                                                        <div className="flex flex-col items-center gap-1">
+                                                            <span className="font-black text-indigo-600">{m.todayActsCount}</span>
+                                                            <div className="w-16 bg-gray-100 h-1.5 rounded-full overflow-hidden">
+                                                                <div className="bg-indigo-500 h-full rounded-full transition-all" style={{ width: `${Math.min(100, (m.todayActsCount / 10) * 100)}%` }} />
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td className="py-4 text-center font-black text-gray-900">{formatMoney(m.pipelineValue)}</td>
+                                                    <td className="py-4 text-center">
+                                                        <span className={`font-black ${m.showUpRate >= 75 ? 'text-emerald-600' : m.showUpRate >= 50 ? 'text-amber-500' : 'text-rose-500'}`}>
+                                                            {m.showUpRate.toFixed(0)}%
+                                                        </span>
+                                                    </td>
+                                                    <td className="py-4 pr-4 text-right">
+                                                        <button 
+                                                            onClick={() => setSelectedMember(m.rawMiembro)}
+                                                            className="px-3.5 py-1.5 bg-(--theme-50) text-(--theme-600) font-bold text-xs rounded-xl border border-(--theme-100) hover:bg-(--theme-600) hover:text-white transition-all duration-300 uppercase tracking-wider"
+                                                        >
+                                                            {t('MONITOREAR')}
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
                                 </div>
                             )}
                         </div>
                     </div>
                 )}
 
-                {/* Detalles del Usuario Seleccionado (Layout de dos columnas) */}
+                {/* Detalles del Miembro Seleccionado */}
                 {selectedMember && (() => {
-                    const esHoy = (fecha) => {
-                        const today = new Date();
-                        const date = new Date(fecha);
-                        return date.getDate() === today.getDate() &&
-                            date.getMonth() === today.getMonth() &&
-                            date.getFullYear() === today.getFullYear();
-                    };
-
-                    const actividadesFiltradas = actividades.filter(act => {
-                        if (filtroHistorial === 'hoy') return esHoy(act.fecha || act.createdAt);
-                        return true;
-                    });
-
                     const clientesLista = prospectos.filter(p => p.etapaEmbudo === 'cliente_activo' || p.etapaEmbudo === 'venta_ganada');
                     const prospectosLista = prospectos.filter(p => p.etapaEmbudo !== 'cliente_activo' && p.etapaEmbudo !== 'venta_ganada');
                     const carteraActiva = tabCartera === 'prospectos' ? prospectosLista : clientesLista;
+
+                    // Filtrado avanzado de historial
+                    const actividadesFiltradas = actividades.filter(act => {
+                        const matchesTime = filtroHistorial === 'hoy' ? esHoy(act.fecha || act.createdAt) : true;
+                        if (!matchesTime) return false;
+                        if (selectedActivityType === 'all') return true;
+                        return act.tipo === selectedActivityType;
+                    });
 
                     return (
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 flex-1 min-h-0 animate-in slide-in-from-bottom-4 fade-in duration-500">
                             
                             {/* Columna Historial de Interacción */}
                             <div className="bg-white md:rounded-2xl border border-slate-200 shadow-sm flex flex-col min-h-0">
-                                <div className="p-4 sm:p-5 border-b border-gray-100 flex items-center justify-between shrink-0">
-                                    <div className="flex items-center gap-2">
-                                        <div className="p-2 bg-(--theme-50) rounded-lg">
-                                            <Activity size={18} className="text-(--theme-600)" />
+                                <div className="p-4 sm:p-5 border-b border-gray-100 flex flex-col gap-4 shrink-0">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <div className="p-2 bg-(--theme-50) rounded-lg">
+                                                <Activity size={18} className="text-(--theme-600)" />
+                                            </div>
+                                            <div>
+                                                <h2 className="text-base font-bold text-gray-900 leading-tight">{t('Historial')}</h2>
+                                                <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-widest mt-0.5">{t('Actividades del usuario')}</p>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <h2 className="text-base font-bold text-gray-900 leading-tight">Historial</h2>
-                                            <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-widest mt-0.5">Actividades del usuario</p>
+                                        <div className="flex items-center gap-1 bg-gray-50 p-1 rounded-xl border border-gray-100">
+                                            <button 
+                                                onClick={() => setFiltroHistorial('hoy')}
+                                                className={`px-3 py-1.5 text-[10px] uppercase tracking-widest font-bold rounded-lg transition-all ${filtroHistorial === 'hoy' ? 'bg-white text-(--theme-600) shadow-sm border border-gray-200/50' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'}`}
+                                            >
+                                                {t('Hoy')}
+                                            </button>
+                                            <button 
+                                                onClick={() => setFiltroHistorial('global')}
+                                                className={`px-3 py-1.5 text-[10px] uppercase tracking-widest font-bold rounded-lg transition-all ${filtroHistorial === 'global' ? 'bg-white text-(--theme-600) shadow-sm border border-gray-200/50' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'}`}
+                                            >
+                                                {t('Global')}
+                                            </button>
                                         </div>
                                     </div>
-                                    <div className="flex items-center gap-1 bg-gray-50 p-1 rounded-xl border border-gray-100">
-                                        <button 
-                                            onClick={() => setFiltroHistorial('hoy')}
-                                            className={`px-3 py-1.5 text-[10px] uppercase tracking-widest font-bold rounded-lg transition-all ${filtroHistorial === 'hoy' ? 'bg-white text-(--theme-600) shadow-sm border border-gray-200/50' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'}`}
-                                        >
-                                            Hoy
-                                        </button>
-                                        <button 
-                                            onClick={() => setFiltroHistorial('global')}
-                                            className={`px-3 py-1.5 text-[10px] uppercase tracking-widest font-bold rounded-lg transition-all ${filtroHistorial === 'global' ? 'bg-white text-(--theme-600) shadow-sm border border-gray-200/50' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'}`}
-                                        >
-                                            Global
-                                        </button>
+
+                                    {/* Filtros avanzados de tipo de actividad */}
+                                    <div className="flex flex-wrap gap-1.5">
+                                        {[
+                                            { key: 'all', label: 'Todos' },
+                                            { key: 'llamada', label: 'Llamadas' },
+                                            { key: 'whatsapp', label: 'WhatsApp' },
+                                            { key: 'reunion', label: 'Citas' },
+                                            { key: 'correo', label: 'Correos' },
+                                            { key: 'cambio_etapa', label: 'Etapa' }
+                                        ].map(opt => (
+                                            <button
+                                                key={opt.key}
+                                                onClick={() => setSelectedActivityType(opt.key)}
+                                                className={`px-2.5 py-1 text-[9px] uppercase tracking-wider font-extrabold rounded-lg border transition-all ${selectedActivityType === opt.key ? 'bg-indigo-600 border-indigo-600 text-white shadow-xs' : 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50'}`}
+                                            >
+                                                {t(opt.label)}
+                                            </button>
+                                        ))}
                                     </div>
                                 </div>
+
                                 <div className="p-4 sm:p-5 flex-1 overflow-y-auto content-start min-h-0 custom-scrollbar pr-2">
                                     {loadingActs ? (
                                         <div className="flex flex-col items-center justify-center py-20 flex-1">
@@ -314,7 +514,7 @@ export default function Monitoreo() {
                                     ) : actividadesFiltradas.length === 0 ? (
                                         <div className="text-center py-16 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center">
                                             <Activity size={32} className="mx-auto text-gray-300 mb-3" />
-                                            <p className="text-gray-500 text-sm font-semibold">No hay interacciones {filtroHistorial === 'hoy' ? 'para hoy' : 'registradas'}.</p>
+                                            <p className="text-gray-500 text-sm font-semibold">{t('No hay interacciones')} {filtroHistorial === 'hoy' ? t('para hoy') : t('registradas')}.</p>
                                         </div>
                                     ) : (
                                         <div className="space-y-3">
@@ -327,10 +527,10 @@ export default function Monitoreo() {
                                                         <div className="flex-1 min-w-0">
                                                             <div className="flex items-center justify-between gap-2 mb-1">
                                                                 <div className="flex items-center gap-2 flex-wrap">
-                                                                    <h3 className="text-sm font-bold text-gray-900 capitalize">{act.tipo}</h3>
+                                                                    <h3 className="text-sm font-bold text-gray-900 capitalize">{t(act.tipo)}</h3>
                                                                     {act.resultado && (
                                                                         <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider border ${act.resultado === 'exitoso' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-gray-50 border-gray-200 text-gray-600'}`}>
-                                                                            {act.resultado}
+                                                                            {t(act.resultado)}
                                                                         </span>
                                                                     )}
                                                                 </div>
@@ -368,8 +568,8 @@ export default function Monitoreo() {
                                             <Briefcase size={18} className="text-(--theme-600)" />
                                         </div>
                                         <div>
-                                            <h2 className="text-base font-bold text-gray-900 leading-tight">Cartera</h2>
-                                            <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-widest mt-0.5">Contactos asignados</p>
+                                            <h2 className="text-base font-bold text-gray-900 leading-tight">{t('Cartera')}</h2>
+                                            <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-widest mt-0.5">{t('Contactos asignados')}</p>
                                         </div>
                                     </div>
                                     
@@ -378,13 +578,13 @@ export default function Monitoreo() {
                                             onClick={() => setTabCartera('prospectos')}
                                             className={`flex-1 py-1.5 text-[10px] uppercase tracking-widest font-bold rounded-lg transition-all flex items-center justify-center gap-2 ${tabCartera === 'prospectos' ? 'bg-white text-(--theme-600) shadow-sm border border-gray-200/50' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'}`}
                                         >
-                                            Prospectos <span className={`px-2 py-0.5 rounded-full text-[9px] ${tabCartera === 'prospectos' ? 'bg-(--theme-50) text-(--theme-600)' : 'bg-gray-200 text-gray-500'}`}>{prospectosLista.length}</span>
+                                            {t('Prospectos ')} <span className={`px-2 py-0.5 rounded-full text-[9px] ${tabCartera === 'prospectos' ? 'bg-(--theme-50) text-(--theme-600)' : 'bg-gray-200 text-gray-500'}`}>{prospectosLista.length}</span>
                                         </button>
                                         <button 
                                             onClick={() => setTabCartera('clientes')}
                                             className={`flex-1 py-1.5 text-[10px] uppercase tracking-widest font-bold rounded-lg transition-all flex items-center justify-center gap-2 ${tabCartera === 'clientes' ? 'bg-white text-(--theme-600) shadow-sm border border-gray-200/50' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'}`}
                                         >
-                                            Clientes <span className={`px-2 py-0.5 rounded-full text-[9px] ${tabCartera === 'clientes' ? 'bg-(--theme-50) text-(--theme-600)' : 'bg-gray-200 text-gray-500'}`}>{clientesLista.length}</span>
+                                            {t('Clientes ')} <span className={`px-2 py-0.5 rounded-full text-[9px] ${tabCartera === 'clientes' ? 'bg-(--theme-50) text-(--theme-600)' : 'bg-gray-200 text-gray-500'}`}>{clientesLista.length}</span>
                                         </button>
                                     </div>
                                 </div>
@@ -397,7 +597,7 @@ export default function Monitoreo() {
                                     ) : carteraActiva.length === 0 ? (
                                         <div className="text-center py-16 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center">
                                             <Briefcase size={32} className="mx-auto text-gray-300 mb-3" />
-                                            <p className="text-gray-500 text-sm font-semibold">No hay {tabCartera} asignados.</p>
+                                            <p className="text-gray-500 text-sm font-semibold">{t('No hay ')}{t(tabCartera)} {t('asignados.')}</p>
                                         </div>
                                     ) : (
                                         <div className="space-y-3">
@@ -407,11 +607,11 @@ export default function Monitoreo() {
                                                         <div>
                                                             <div className="font-bold text-gray-900 text-sm group-hover:text-(--theme-600) transition-colors">{p.nombres} {p.apellidoPaterno}</div>
                                                             <div className="text-[11px] font-medium text-gray-500 flex items-center gap-1 mt-1">
-                                                                <Briefcase size={10} className="text-gray-400" /> {p.empresa || 'Sin empresa'}
+                                                                <Briefcase size={10} className="text-gray-400" /> {p.empresa || t('Sin empresa')}
                                                             </div>
                                                         </div>
                                                         <span className={`inline-flex items-center px-2 py-1 rounded-lg text-[9px] font-bold tracking-tighter uppercase border ${getEtapaColor(p.etapaEmbudo)}`}>
-                                                            {formatEtapa(p.etapaEmbudo)}
+                                                            {t(p.etapaEmbudo)}
                                                         </span>
                                                     </div>
                                                     
@@ -423,7 +623,7 @@ export default function Monitoreo() {
                                                         )}
                                                         <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-1.5 bg-gray-50 px-2 py-1 rounded-md">
                                                             <Calendar size={10} className="text-gray-400" />
-                                                            {p.ultimaInteraccion ? new Date(p.ultimaInteraccion).toLocaleDateString() : 'Nunca'}
+                                                            {p.ultimaInteraccion ? new Date(p.ultimaInteraccion).toLocaleDateString() : t('Nunca')}
                                                         </div>
                                                     </div>
                                                 </div>

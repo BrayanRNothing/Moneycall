@@ -1,3 +1,4 @@
+import { useTranslation } from '../utils/translations';
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -34,6 +35,7 @@ const getAuthHeaders = () => ({
 });
 
 const getCalendarRolePath = () => {
+    const { t } = useTranslation();
     const user = getUser();
     const role = String(user?.rol || '').toLowerCase();
     if (role === 'admin') return 'vendedor';
@@ -732,7 +734,7 @@ export default function ProspectoDetalle({
                     onClick={onVolver}
                     className="flex items-center gap-2 text-gray-500 hover:text-gray-900 transition-colors font-medium mb-2 shrink-0"
                 >
-                    <ArrowLeft className="w-5 h-5" /> Regresar a la lista
+                    <ArrowLeft className="w-5 h-5" />{t("Regresar a la lista")}
                 </button>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6 flex-1 min-h-0 overflow-hidden">
@@ -841,7 +843,7 @@ export default function ProspectoDetalle({
                                                     <Phone className="w-3.5 h-3.5" />
                                                 </div>
                                                 <div className="flex flex-col overflow-hidden">
-                                                    <span className="text-[9px] uppercase tracking-wider font-extrabold text-slate-400 leading-none mb-0.5">Teléfono</span>
+                                                    <span className="text-[9px] uppercase tracking-wider font-extrabold text-slate-400 leading-none mb-0.5">{t("Teléfono")}</span>
                                                     <div className="flex flex-wrap text-xs font-bold text-slate-700 truncate">
                                                         {telefonosContacto.slice(0, 1).map((tel, idx) => (
                                                             <span key={idx}>{tel}</span>
@@ -861,7 +863,7 @@ export default function ProspectoDetalle({
                                                     <Mail className="w-3.5 h-3.5" />
                                                 </div>
                                                 <div className="flex flex-col overflow-hidden">
-                                                    <span className="text-[9px] uppercase tracking-wider font-extrabold text-slate-400 leading-none mb-0.5">Correo</span>
+                                                    <span className="text-[9px] uppercase tracking-wider font-extrabold text-slate-400 leading-none mb-0.5">{t("Correo")}</span>
                                                     <div className="flex flex-wrap text-xs font-bold text-slate-700 truncate" title={correosContacto.join(', ')}>
                                                         {correosContacto.slice(0, 1).map((e, idx) => (
                                                             <span key={idx}>{e}</span>
@@ -881,7 +883,7 @@ export default function ProspectoDetalle({
                                                     <MapPin className="w-3.5 h-3.5" />
                                                 </div>
                                                 <div className="flex flex-col overflow-hidden">
-                                                    <span className="text-[9px] uppercase tracking-wider font-extrabold text-slate-400 leading-none mb-0.5">Ubicación</span>
+                                                    <span className="text-[9px] uppercase tracking-wider font-extrabold text-slate-400 leading-none mb-0.5">{t("Ubicación")}</span>
                                                     <span className="text-xs font-bold text-slate-700 truncate">
                                                         {prospectoSeleccionado.ubicacion}
                                                     </span>
@@ -916,7 +918,7 @@ export default function ProspectoDetalle({
                                                     <Target className="w-3.5 h-3.5" />
                                                 </div>
                                                 <div className="flex flex-col overflow-hidden">
-                                                    <span className="text-[9px] uppercase tracking-wider font-extrabold text-slate-400 leading-none mb-0.5">Origen</span>
+                                                    <span className="text-[9px] uppercase tracking-wider font-extrabold text-slate-400 leading-none mb-0.5">{t("Origen")}</span>
                                                     <span className="text-xs font-bold text-slate-700 truncate">
                                                         {prospectoSeleccionado.fuente || prospectoSeleccionado.origen}
                                                     </span>
@@ -1087,7 +1089,7 @@ export default function ProspectoDetalle({
                                 <div id="detalle-prospecto-recordatorios-lista" className="bg-white border border-slate-200 rounded-xl p-3 flex flex-col gap-2 shadow-sm relative max-h-[280px]">
                                     <div className="flex items-center gap-2 shrink-0">
                                         <Bell className="w-3.5 h-3.5 text-(--theme-500)" />
-                                        <p className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">Recordatorios</p>
+                                        <p className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">{t("Recordatorios")}</p>
                                     </div>
 
                                     {/* Contenido con altura fija y scroll */}
@@ -1122,7 +1124,7 @@ export default function ProspectoDetalle({
                                                             <button
                                                                 onClick={() => setModalCita({ abierto: true, cita, editando: false })}
                                                                 className="flex items-center justify-center bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 rounded px-2 py-1.5 transition-colors shadow-sm"
-                                                                title="Ver"
+                                                                title={t("Ver")}
                                                             >
                                                                 <Eye className="w-3.5 h-3.5" />
                                                             </button>
@@ -1132,7 +1134,7 @@ export default function ProspectoDetalle({
                                                                     setModalCita({ abierto: true, cita, editando: true });
                                                                 }}
                                                                 className="flex items-center justify-center bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 rounded px-2 py-1.5 transition-colors shadow-sm"
-                                                                title="Editar"
+                                                                title={t("Editar")}
                                                             >
                                                                 <Edit2 className="w-3.5 h-3.5" />
                                                             </button>
@@ -1168,13 +1170,13 @@ export default function ProspectoDetalle({
                                                             onClick={() => handleEditarRecordatorio(rec)}
                                                             className="flex-1 flex items-center justify-center gap-1 bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 rounded py-1.5 text-[10px] font-bold transition-colors"
                                                         >
-                                                            <Edit2 className="w-3 h-3" /> Editar
+                                                            <Edit2 className="w-3 h-3" />{t("Editar")}
                                                         </button>
                                                         <button
                                                             onClick={() => descartarRecordatorio(rec.id)}
                                                             className="flex-1 flex items-center justify-center gap-1 bg-white border border-rose-200 hover:bg-rose-50 text-rose-600 rounded py-1.5 text-[10px] font-bold transition-colors"
                                                         >
-                                                            <Trash2 className="w-3 h-3" /> Quitar
+                                                            <Trash2 className="w-3 h-3" />{t("Quitar")}
                                                         </button>
                                                     </div>
                                                 </div>
@@ -1182,7 +1184,7 @@ export default function ProspectoDetalle({
                                         })}
 
                                         {totalAlertas === 0 && (
-                                            <p className="text-[11px] text-slate-500 px-1 italic">Sin alertas por ahora.</p>
+                                            <p className="text-[11px] text-slate-500 px-1 italic">{t("Sin alertas por ahora.")}</p>
                                         )}
                                     </div>
 
@@ -1415,7 +1417,7 @@ export default function ProspectoDetalle({
                                                                 </div>
                                                                 <button
                                                                     onClick={() => handleDeleteActividadContext(act.id)}
-                                                                    title="Eliminar"
+                                                                    title={t("Eliminar")}
                                                                     className="shrink-0 p-1 rounded text-slate-200 hover:text-red-500 hover:bg-red-50 transition-all mt-0.5"
                                                                 >
                                                                     <Trash2 className="w-3 h-3" />
@@ -1982,7 +1984,7 @@ export default function ProspectoDetalle({
                                             </span>
                                         </div>
                                         <div className="space-y-1">
-                                            <span className="text-xs font-bold text-slate-400 uppercase">Notas</span>
+                                            <span className="text-xs font-bold text-slate-400 uppercase">{t("Notas")}</span>
                                             <p className="text-sm text-slate-600 leading-relaxed italic">
                                                 {modalCita.cita.notas || 'Sin notas registradas.'}
                                             </p>
@@ -2139,7 +2141,7 @@ export default function ProspectoDetalle({
                                 <div className="p-2 bg-slate-50 group-hover:bg-white rounded-lg text-slate-500 group-hover:text-(--theme-600) transition-colors">
                                     <FileText className="w-6 h-6" />
                                 </div>
-                                <span className="text-sm font-semibold text-gray-700">Notas</span>
+                                <span className="text-sm font-semibold text-gray-700">{t("Notas")}</span>
                             </button>
                             <button
                                 onClick={() => addSeccion('list')}
