@@ -276,6 +276,15 @@ const Dashboard = () => {
     const [newTask, setNewTask] = useState({ titulo: '', descripcion: '', prioridad: 'media' });
     const navigate = useNavigate();
 
+    const handleReunionClick = (reunion) => {
+        const isClient = reunion.cliente?.esCliente || ['venta_ganada', 'cliente_activo', 'cotizacion_realizada', 'contrato_firmado', 'esperando_pago'].includes(reunion.cliente?.etapaEmbudo);
+        const targetPath = isClient ? '/vendedor/clientes' : '/vendedor/prospectos';
+        const clientVal = reunion.clienteId || reunion.cliente?.id || reunion.cliente?._id;
+        if (clientVal) {
+            navigate(targetPath, { state: { selectedId: clientVal } });
+        }
+    };
+
     const sanitizeCloserData = (rawData) => {
         if (!rawData) return INITIAL_CLOSER_DATA;
         const getNumero = (val) => { const num = parseFloat(val); return isNaN(num) || num === null ? 0 : num; };
@@ -927,7 +936,11 @@ const Dashboard = () => {
                                                     </div>
                                                 ) : (
                                                     reuniones.map((reunion, i) => (
-                                                        <div key={i} className="group p-3 bg-gray-50/50 rounded-xl border border-gray-100 hover:border-indigo-200 hover:bg-white transition-all">
+                                                        <div 
+                                                            key={i} 
+                                                            onClick={() => handleReunionClick(reunion)}
+                                                            className="group p-3 bg-gray-50/50 rounded-xl border border-gray-100 hover:border-indigo-200 hover:bg-white transition-all cursor-pointer hover:shadow-xs"
+                                                        >
                                                             <div className="flex items-center justify-between">
                                                                 <div className="flex items-center gap-3">
                                                                     <div className="w-8 h-8 bg-white border border-gray-100 rounded-lg flex items-center justify-center text-xs font-black text-indigo-600">
@@ -939,7 +952,18 @@ const Dashboard = () => {
                                                                     </div>
                                                                 </div>
                                                                 <div className="flex items-center gap-2">
-                                                                    {reunion.googleMeetLink && <Video className="w-4 h-4 text-indigo-400" />}
+                                                                    {reunion.googleMeetLink && (
+                                                                        <a 
+                                                                            href={reunion.googleMeetLink} 
+                                                                            target="_blank" 
+                                                                            rel="noopener noreferrer" 
+                                                                            onClick={(e) => e.stopPropagation()} 
+                                                                            className="p-1.5 hover:bg-indigo-50 rounded-lg text-indigo-500 hover:text-indigo-600 transition-colors shrink-0"
+                                                                            title={t("Unirse a la videollamada")}
+                                                                        >
+                                                                            <Video className="w-4 h-4" />
+                                                                        </a>
+                                                                    )}
                                                                     <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-indigo-400 group-hover:translate-x-1 transition-all" />
                                                                 </div>
                                                             </div>

@@ -1,7 +1,9 @@
+import { useTranslation } from '../utils/translations';
 import React, { useState, useEffect, useCallback } from 'react';
-import { Briefcase, RefreshCw, Plus, Users, Phone, Calendar, Mail, Building, ChevronLeft, Globe, MapPin, X } from 'lucide-react';
+import { Briefcase, RefreshCw, Plus, Users, Phone, Calendar, Mail, Building, ChevronLeft, Globe, MapPin, X, CheckCircle2, UserPlus } from 'lucide-react';
 import { getUser, getToken } from '../utils/authUtils';
 import API_URL from '../config/api';
+import { toast } from 'react-hot-toast';
 
 const getEtapaColor = (etapa) => {
     switch (etapa) {
@@ -27,6 +29,7 @@ const getInitials = (name) => {
 };
 
 export default function AsignadorDashboard() {
+    const { t } = useTranslation();
     const userAuth = getUser();
     const token = getToken();
     const [vendedores, setVendedores] = useState([]);
@@ -35,6 +38,8 @@ export default function AsignadorDashboard() {
     const [loading, setLoading] = useState(true);
     const [loadingProps, setLoadingProps] = useState(false);
     const [showForm, setShowForm] = useState(false);
+    const [successModal, setSuccessModal] = useState({ isOpen: false, name: '' });
+    const [confirmModal, setConfirmModal] = useState({ isOpen: false });
     
     const [formData, setFormData] = useState({
         nombres: '',
@@ -96,16 +101,20 @@ export default function AsignadorDashboard() {
         }
     }, [selectedMember, fetchProspectos]);
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = (e) => {
         e.preventDefault();
+        if (!formData.nombres.trim()) {
+            toast.error(t('El nombre es obligatorio'));
+            return;
+        }
+        setConfirmModal({ isOpen: true });
+    };
+
+    const handleConfirmAssignment = async () => {
+        setConfirmModal({ isOpen: false });
         try {
             const telefonosLimpios = formData.telefonos.filter(t => t.trim());
             const correosLimpios = formData.correos.filter(c => c.trim());
-
-            if (!formData.nombres.trim()) {
-                alert('El nombre es obligatorio');
-                return;
-            }
 
             const payload = {
                 nombres: formData.nombres,
@@ -132,7 +141,7 @@ export default function AsignadorDashboard() {
             });
             
             if (res.ok) {
-                alert('Prospecto asignado con éxito');
+                setSuccessModal({ isOpen: true, name: formData.nombres });
                 setShowForm(false);
                 setFormData({
                     nombres: '',
@@ -148,11 +157,11 @@ export default function AsignadorDashboard() {
                 fetchProspectos(selectedMember.id);
             } else {
                 const errorData = await res.json();
-                alert(errorData.mensaje || 'Error al asignar');
+                toast.error(errorData.mensaje || t('Error al asignar'));
             }
         } catch (error) {
             console.error(error);
-            alert('Error de conexión');
+            toast.error(t('Error de conexión'));
         }
     };
 
@@ -190,16 +199,14 @@ export default function AsignadorDashboard() {
                                 className="flex-1 sm:flex-none justify-center flex items-center gap-1.5 px-3 py-2 md:px-4 md:py-2.5 bg-white border border-gray-200 rounded-xl text-[11px] md:text-xs font-bold text-gray-600 hover:bg-gray-50 transition-all shadow-sm"
                                 onClick={selectedMember ? () => fetchProspectos(selectedMember.id) : fetchVendedores}
                             >
-                                <RefreshCw size={14} className={(selectedMember ? loadingProps : loading) ? 'animate-spin' : ''} />
-                                ACTUALIZAR
+                                <RefreshCw size={14} className={(selectedMember ? loadingProps : loading) ? 'animate-spin' : ''} />{t("ACTUALIZAR")}
                             </button>
                             {selectedMember && (
                                 <button
                                     onClick={() => setShowForm(!showForm)}
                                     className="flex-1 sm:flex-none justify-center flex items-center gap-1.5 px-3 py-2 md:px-4 md:py-2.5 bg-(--theme-600) text-white rounded-xl text-[11px] md:text-xs font-bold hover:bg-(--theme-700) transition-all shadow-sm"
                                 >
-                                    <Plus size={14} />
-                                    AGREGAR PROSPECTO
+                                    <Plus size={14} />{t("AGREGAR PROSPECTO")}
                                 </button>
                             )}
                         </div>
@@ -212,20 +219,20 @@ export default function AsignadorDashboard() {
                         <div className="bg-white md:rounded-2xl p-5 border border-slate-200 shadow-sm flex-1 flex flex-col min-h-0">
                             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 shrink-0">
                                 <div>
-                                    <h2 className="text-lg md:text-xl font-bold text-gray-900 leading-tight">Vendedores</h2>
-                                    <p className="text-[10px] md:text-xs text-gray-400 font-semibold uppercase tracking-widest mt-1">Selecciona a quién asignar</p>
+                                    <h2 className="text-lg md:text-xl font-bold text-gray-900 leading-tight">{t("Vendedores")}</h2>
+                                    <p className="text-[10px] md:text-xs text-gray-400 font-semibold uppercase tracking-widest mt-1">{t("Selecciona a quién asignar")}</p>
                                 </div>
                             </div>
 
                             {loading ? (
                                 <div className="flex flex-col items-center justify-center py-20 flex-1">
                                     <RefreshCw size={48} className="animate-spin text-(--theme-500) mb-4" />
-                                    <p className="text-gray-500 font-semibold uppercase tracking-widest text-xs">Cargando vendedores...</p>
+                                    <p className="text-gray-500 font-semibold uppercase tracking-widest text-xs">{t("Cargando vendedores...")}</p>
                                 </div>
                             ) : vendedores.length === 0 ? (
                                 <div className="text-center py-20 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200 flex-1 flex flex-col items-center justify-center min-h-0">
                                     <Users size={48} className="mx-auto text-gray-300 mb-4" />
-                                    <p className="text-gray-500 font-semibold">No hay vendedores disponibles.</p>
+                                    <p className="text-gray-500 font-semibold">{t("No hay vendedores disponibles.")}</p>
                                 </div>
                             ) : (
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 overflow-y-auto pr-2 pb-2 flex-1 content-start min-h-0">
@@ -248,8 +255,7 @@ export default function AsignadorDashboard() {
                                             </div>
                                             
                                             <div className="pt-4 border-t border-gray-50 flex justify-center">
-                                                <span className="text-[10px] font-bold text-(--theme-600) bg-(--theme-50) px-4 py-1.5 rounded-xl border border-(--theme-100) group-hover:bg-(--theme-100) transition-colors uppercase tracking-widest">
-                                                    SELECCIONAR
+                                                <span className="text-[10px] font-bold text-(--theme-600) bg-(--theme-50) px-4 py-1.5 rounded-xl border border-(--theme-100) group-hover:bg-(--theme-100) transition-colors uppercase tracking-widest">{t("SELECCIONAR")}
                                                 </span>
                                             </div>
                                         </div>
@@ -272,8 +278,8 @@ export default function AsignadorDashboard() {
                                         <Plus size={18} className="text-(--theme-600)" />
                                     </div>
                                     <div>
-                                        <h2 className="text-base font-bold text-gray-900 leading-tight">Asignar Nuevo Prospecto</h2>
-                                        <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-widest mt-0.5">Llenar datos del cliente</p>
+                                        <h2 className="text-base font-bold text-gray-900 leading-tight">{t("Asignar Nuevo Prospecto")}</h2>
+                                        <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-widest mt-0.5">{t("Llenar datos del cliente")}</p>
                                     </div>
                                 </div>
                                 <div className="p-4 sm:p-5 flex-1 overflow-y-auto content-start min-h-0 custom-scrollbar pr-2">
@@ -282,12 +288,11 @@ export default function AsignadorDashboard() {
                                         {/* Sección: Identidad */}
                                         <div className="space-y-4">
                                             <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
-                                                <div className="w-1 h-3 bg-(--theme-500) rounded-full"></div>
-                                                Identidad
+                                                <div className="w-1 h-3 bg-(--theme-500) rounded-full"></div>{t("Identidad")}
                                             </h3>
                                             <div className="space-y-3">
                                                 <div>
-                                                    <label className="block text-[10px] font-black text-slate-500 mb-1.5 uppercase tracking-wider">Nombres *</label>
+                                                    <label className="block text-[10px] font-black text-slate-500 mb-1.5 uppercase tracking-wider">{t("Nombres *")}</label>
                                                     <input 
                                                         type="text" 
                                                         required 
@@ -299,7 +304,7 @@ export default function AsignadorDashboard() {
                                                 </div>
                                                 <div className="grid grid-cols-2 gap-4">
                                                     <div>
-                                                        <label className="block text-[10px] font-black text-slate-500 mb-1.5 uppercase tracking-wider">Apellido Paterno</label>
+                                                        <label className="block text-[10px] font-black text-slate-500 mb-1.5 uppercase tracking-wider">{t("Apellido Paterno")}</label>
                                                         <input 
                                                             type="text" 
                                                             value={formData.apellidoPaterno} 
@@ -309,7 +314,7 @@ export default function AsignadorDashboard() {
                                                         />
                                                     </div>
                                                     <div>
-                                                        <label className="block text-[10px] font-black text-slate-500 mb-1.5 uppercase tracking-wider">Apellido Materno</label>
+                                                        <label className="block text-[10px] font-black text-slate-500 mb-1.5 uppercase tracking-wider">{t("Apellido Materno")}</label>
                                                         <input 
                                                             type="text" 
                                                             value={formData.apellidoMaterno} 
@@ -325,19 +330,17 @@ export default function AsignadorDashboard() {
                                         {/* Sección: Contacto */}
                                         <div className="space-y-4">
                                             <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
-                                                <div className="w-1 h-3 bg-indigo-500 rounded-full"></div>
-                                                Contacto
+                                                <div className="w-1 h-3 bg-indigo-500 rounded-full"></div>{t("Contacto")}
                                             </h3>
                                             <div className="space-y-3">
                                                 <div>
                                                     <div className="flex items-center justify-between mb-1.5">
-                                                        <label className="block text-[10px] font-black text-slate-500 uppercase tracking-wider">Teléfonos *</label>
+                                                        <label className="block text-[10px] font-black text-slate-500 uppercase tracking-wider">{t("Teléfonos *")}</label>
                                                         <button
                                                             type="button"
                                                             onClick={() => setFormData(f => ({ ...f, telefonos: [...f.telefonos, ''] }))}
                                                             className="text-[10px] text-(--theme-600) hover:text-(--theme-700) font-black uppercase tracking-tighter"
-                                                        >
-                                                            + Añadir otro
+                                                        >{t("+ Añadir otro")}
                                                         </button>
                                                     </div>
                                                     <div className="space-y-2">
@@ -372,13 +375,12 @@ export default function AsignadorDashboard() {
 
                                                 <div>
                                                     <div className="flex items-center justify-between mb-1.5">
-                                                        <label className="block text-[10px] font-black text-slate-500 uppercase tracking-wider">Correos Electrónicos</label>
+                                                        <label className="block text-[10px] font-black text-slate-500 uppercase tracking-wider">{t("Correos Electrónicos")}</label>
                                                         <button
                                                             type="button"
                                                             onClick={() => setFormData(f => ({ ...f, correos: [...f.correos, ''] }))}
                                                             className="text-[10px] text-(--theme-600) hover:text-(--theme-700) font-black uppercase tracking-tighter"
-                                                        >
-                                                            + Añadir otro
+                                                        >{t("+ Añadir otro")}
                                                         </button>
                                                     </div>
                                                     <div className="space-y-2">
@@ -415,12 +417,11 @@ export default function AsignadorDashboard() {
                                         {/* Sección: Empresa y Sitio */}
                                         <div className="space-y-4">
                                             <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
-                                                <div className="w-1 h-3 bg-emerald-500 rounded-full"></div>
-                                                Empresa & Sitio
+                                                <div className="w-1 h-3 bg-emerald-500 rounded-full"></div>{t("Empresa & Sitio")}
                                             </h3>
                                             <div className="space-y-3">
                                                 <div>
-                                                    <label className="block text-[10px] font-black text-slate-500 mb-1.5 uppercase tracking-wider">Nombre de Empresa</label>
+                                                    <label className="block text-[10px] font-black text-slate-500 mb-1.5 uppercase tracking-wider">{t("Nombre de Empresa")}</label>
                                                     <div className="relative group">
                                                         <Building className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 group-focus-within:text-(--theme-500) transition-colors" />
                                                         <input 
@@ -433,7 +434,7 @@ export default function AsignadorDashboard() {
                                                     </div>
                                                 </div>
                                                 <div>
-                                                    <label className="block text-[10px] font-black text-slate-500 mb-1.5 uppercase tracking-wider">Sitio Web</label>
+                                                    <label className="block text-[10px] font-black text-slate-500 mb-1.5 uppercase tracking-wider">{t("Sitio Web")}</label>
                                                     <div className="relative group">
                                                         <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 group-focus-within:text-(--theme-500) transition-colors" />
                                                         <input 
@@ -446,7 +447,7 @@ export default function AsignadorDashboard() {
                                                     </div>
                                                 </div>
                                                 <div>
-                                                    <label className="block text-[10px] font-black text-slate-500 mb-1.5 uppercase tracking-wider">Ubicación</label>
+                                                    <label className="block text-[10px] font-black text-slate-500 mb-1.5 uppercase tracking-wider">{t("Ubicación")}</label>
                                                     <div className="relative group">
                                                         <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 group-focus-within:text-(--theme-500) transition-colors" />
                                                         <input 
@@ -478,7 +479,7 @@ export default function AsignadorDashboard() {
                                     </div>
                                     <div>
                                         <h2 className="text-base font-bold text-gray-900 leading-tight">Cartera de {selectedMember.nombre}</h2>
-                                        <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-widest mt-0.5">Contactos asignados</p>
+                                        <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-widest mt-0.5">{t("Contactos asignados")}</p>
                                     </div>
                                 </div>
                             </div>
@@ -530,6 +531,58 @@ export default function AsignadorDashboard() {
                     </div>
                 )}
             </div>
+
+            {confirmModal.isOpen && (
+                <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-300">
+                    <div className="bg-white rounded-[32px] p-8 w-full max-w-sm text-center shadow-2xl animate-in zoom-in-95 duration-200">
+                        <div className="w-16 h-16 bg-indigo-50 text-indigo-500 rounded-full flex items-center justify-center mx-auto mb-4 border border-indigo-100 animate-pulse">
+                            <UserPlus size={32} />
+                        </div>
+                        <h3 className="text-xl font-bold text-gray-900 leading-tight mb-2">
+                            {t('¿Confirmar Asignación?')}
+                        </h3>
+                        <p className="text-sm text-gray-500 mb-6 leading-relaxed">
+                            {t('¿Estás seguro de que deseas asignar el prospecto')} <span className="font-extrabold text-gray-850">{formData.nombres} {formData.apellidoPaterno || ''}</span> {t('a')} <span className="font-extrabold text-gray-850">{selectedMember?.nombre}</span>?
+                        </p>
+                        <div className="flex flex-col gap-2">
+                            <button
+                                onClick={handleConfirmAssignment}
+                                className="w-full py-3.5 bg-(--theme-600) hover:bg-(--theme-700) text-white font-bold rounded-2xl text-xs uppercase tracking-widest transition-all shadow-md active:scale-95 animate-in fade-in"
+                            >
+                                {t('Sí, asignar')}
+                            </button>
+                            <button
+                                onClick={() => setConfirmModal({ isOpen: false })}
+                                className="w-full py-3.5 bg-slate-50 border border-slate-200 hover:bg-slate-100 text-slate-650 font-bold rounded-2xl text-xs uppercase tracking-widest transition-all active:scale-95"
+                            >
+                                {t('Cancelar')}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {successModal.isOpen && (
+                <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-300">
+                    <div className="bg-white rounded-[32px] p-8 w-full max-w-sm text-center shadow-2xl animate-in zoom-in-95 duration-200">
+                        <div className="w-16 h-16 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4 border border-emerald-100 animate-bounce">
+                            <CheckCircle2 size={32} />
+                        </div>
+                        <h3 className="text-xl font-bold text-gray-900 leading-tight mb-2">
+                            {t('¡Asignación Exitosa!')}
+                        </h3>
+                        <p className="text-sm text-gray-500 mb-6">
+                            {t('El prospecto')} <span className="font-extrabold text-gray-800">{successModal.name}</span> {t('ha sido asignado correctamente a')} <span className="font-extrabold text-gray-800">{selectedMember?.nombre}</span>.
+                        </p>
+                        <button
+                            onClick={() => setSuccessModal({ isOpen: false, name: '' })}
+                            className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-2xl text-xs uppercase tracking-widest transition-all shadow-md active:scale-95"
+                        >
+                            {t('Entendido')}
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

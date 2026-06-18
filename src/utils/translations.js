@@ -174,6 +174,12 @@ const translations = {
     'Prospecto nuevo': 'New prospect',
     'cliente_activo': 'active_client',
     'Cliente activo': 'Active client',
+    '¿Confirmar Asignación?': 'Confirm Assignment?',
+    '¿Estás seguro de que deseas asignar el prospecto': 'Are you sure you want to assign the prospect',
+    'a': 'to',
+    'Sí, asignar': 'Yes, assign',
+    'Cancelar': 'Cancel',
+    'Unirse a la videollamada': 'Join video call',
   }
 };
 
