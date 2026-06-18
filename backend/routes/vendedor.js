@@ -391,11 +391,21 @@ router.get('/dashboard-closer', [auth, esVendedor], async (req, res) => {
         `).all(...(equipoId ? [closerId, equipoId] : [closerId]));
 
         let totalDays = 0;
+        let validCiclos = 0;
         cicloData.forEach(d => {
-            const diff = new Date(d.fechaVenta) - new Date(d.fechaRegistro);
-            totalDays += diff / (1000 * 60 * 60 * 24);
+            if (d.fechaVenta && d.fechaRegistro) {
+                const tVenta = new Date(d.fechaVenta).getTime();
+                const tRegistro = new Date(d.fechaRegistro).getTime();
+                if (!isNaN(tVenta) && !isNaN(tRegistro)) {
+                    const diff = tVenta - tRegistro;
+                    if (diff >= 0) {
+                        totalDays += diff / (1000 * 60 * 60 * 24);
+                        validCiclos++;
+                    }
+                }
+            }
         });
-        const avgCycle = cicloData.length > 0 ? totalDays / cicloData.length : 0;
+        const avgCycle = validCiclos > 0 ? totalDays / validCiclos : 0;
 
         // 2. Lead Response Time (Promedio de horas hasta el primer contacto)
         const responseData = await db.prepare(`
@@ -408,20 +418,36 @@ router.get('/dashboard-closer', [auth, esVendedor], async (req, res) => {
         `).all(...(equipoId ? [closerId, equipoId] : [closerId]));
 
         let totalHours = 0;
+        let validResponses = 0;
         responseData.forEach(d => {
-            const diff = new Date(d.firstContact) - new Date(d.fechaRegistro);
-            totalHours += diff / (1000 * 60 * 60);
+            if (d.firstContact && d.fechaRegistro) {
+                const tContact = new Date(d.firstContact).getTime();
+                const tRegistro = new Date(d.fechaRegistro).getTime();
+                if (!isNaN(tContact) && !isNaN(tRegistro)) {
+                    const diff = tContact - tRegistro;
+                    if (diff >= 0) {
+                        totalHours += diff / (1000 * 60 * 60);
+                        validResponses++;
+                    }
+                }
+            }
         });
-        const avgResponse = responseData.length > 0 ? totalHours / responseData.length : 0;
+        const avgResponse = validResponses > 0 ? totalHours / validResponses : 0;
 
         // 3. Leads Estancados (> 7 días sin cambio de etapa)
         const sieteDiasAtras = new Date();
         sieteDiasAtras.setDate(sieteDiasAtras.getDate() - 7);
 
-        const estancadosCount = clientes.filter(c =>
-            !['venta_ganada', 'perdido'].includes(c.etapaEmbudo) &&
-            new Date(c.fechaUltimaEtapa || c.fechaRegistro) < sieteDiasAtras
-        ).length;
+        const estancadosCount = clientes.filter(c => {
+            const etapa = c.etapaEmbudo || 'prospecto_nuevo';
+            if (NON_PROSPECT_STAGES.includes(etapa)) return false;
+
+            const dateVal = c.fechaUltimaEtapa || c.fechaRegistro;
+            if (!dateVal) return false;
+
+            const date = new Date(dateVal);
+            return !isNaN(date.getTime()) && date < sieteDiasAtras;
+        }).length;
 
         const eficiencia = {
             cicloVentaDias: Math.round(avgCycle * 10) / 10,

@@ -669,7 +669,8 @@ const Dashboard = () => {
     const sinContactar = Math.max(0, totalEntrada - enContacto);
     const negociacion = (vendedorData.embudo.reunion_agendada || 0) + (closerData.embudo.reunion_realizada || 0) + (closerData.embudo.propuesta_enviada || 0);
     const ganadas = closerData.embudo.venta_ganada || 0;
-    const tasaGlobal = totalEntrada > 0 ? clampPercent((ganadas / totalEntrada) * 100) : 0;
+    const totalLeadsHistoricos = totalEntrada + ganadas + (closerData.embudo.perdido || 0);
+    const tasaGlobal = totalLeadsHistoricos > 0 ? clampPercent((ganadas / totalLeadsHistoricos) * 100) : 0;
     const tasaContacto = clampPercent(vendedorData.tasasConversion.contacto || 0);
     const tasaAgendamiento = enContacto > 0 ? clampPercent((negociacion / enContacto) * 100) : 0;
     const tasaCierre = negociacion > 0 ? clampPercent((ganadas / negociacion) * 100) : 0;
