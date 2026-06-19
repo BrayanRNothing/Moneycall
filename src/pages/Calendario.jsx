@@ -108,7 +108,6 @@ const Calendario = () => {
   const navigate = useNavigate();
 
   const cargarMisReuniones = async () => {
-    if (!isVendedor) return;
     setLoadingMisReuniones(true);
     try {
       const token = getToken();
@@ -154,7 +153,7 @@ const Calendario = () => {
   };
 
   const cargarMisEventosGoogle = async () => {
-    if (!isVendedor || !googleLinked) return;
+    if (!googleLinked) return;
     setLoadingGoogleEvents(true);
     try {
       const year = currentDate.getFullYear();
@@ -434,7 +433,6 @@ const Calendario = () => {
 
   // Verificar conexión Google del usuario actual (Vendedor)
   const checkMyConnection = async (isQuiet = false) => {
-    if (!isVendedor) return;
     try {
       const res = await fetch(`${API_URL}/api/google/account-info`, {
         headers: { "x-auth-token": getToken() },
@@ -486,7 +484,7 @@ const Calendario = () => {
     const handleFocus = () => checkMyConnection(true);
     window.addEventListener("focus", handleFocus);
     return () => window.removeEventListener("focus", handleFocus);
-  }, [isVendedor]);
+  }, []);
 
   // Verificar conexión Google del Closer seleccionado
   React.useEffect(() => {
@@ -622,7 +620,7 @@ const Calendario = () => {
   useEffect(() => {
     cargarMisReuniones();
     cargarMisEventosGoogle();
-  }, [isVendedor, currentDate, googleLinked]);
+  }, [currentDate, googleLinked]);
 
   const generateSlotsForDay = (date) => {
     if (!date) return [];
