@@ -589,8 +589,8 @@ const Dashboard = () => {
                                 cantidadPerdida: sinContactar,
                                 porcentajeExito: formatPercent(tasaContacto),
                                 porcentajePerdida: formatPercent(100 - tasaContacto),
-                                labelExito: 'a contacto',
-                                labelPerdida: 'sin tocar'
+                                labelExito: 'A Contacto',
+                                labelPerdida: 'Sin Tocar'
                             },
                             {
                                 etapa: 'Contacto',
@@ -602,8 +602,8 @@ const Dashboard = () => {
                                 cantidadPerdida: Math.max(0, enContacto - negociacion),
                                 porcentajeExito: formatPercent(tasaAgendamiento),
                                 porcentajePerdida: formatPercent(100 - tasaAgendamiento),
-                                labelExito: 'a cita',
-                                labelPerdida: 'estancados'
+                                labelExito: 'A Cita',
+                                labelPerdida: 'Estancados'
                             },
                             {
                                 etapa: 'Negociación',
@@ -614,8 +614,8 @@ const Dashboard = () => {
                                 cantidadExito: ganadas,
                                 cantidadPerdida: Math.max(0, negociacion - ganadas),
                                 porcentajeExito: formatPercent(tasaCierre),
-                                labelExito: 'a venta',
-                                labelPerdida: 'pausados'
+                                labelExito: 'A Venta',
+                                labelPerdida: 'Pausados'
                             },
                             {
                                 etapa: 'Cierre',
@@ -625,7 +625,7 @@ const Dashboard = () => {
                                 labelContador: `ganadas ${periodoSuffix}`,
                                 cantidadExito: ganadas,
                                 porcentajeExito: 100,
-                                labelExito: 'éxito'
+                                labelExito: 'Éxito'
                             }
                         ]}
                         type="vendedor"
