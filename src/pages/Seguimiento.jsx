@@ -449,7 +449,7 @@ const Seguimiento = () => {
                 handleSeleccionarProspecto(found);
             }
         }
-    }, [location.state?.selectedId, prospectos]);
+    }, [location.key, prospectos]);
 
     // Orden de prioridad de etapas (más avanzadas primero, perdido al fondo)
     const ORDEN_ETAPA = {

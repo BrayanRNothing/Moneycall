@@ -169,6 +169,15 @@ const Dashboard = () => {
     const [newTask, setNewTask] = useState({ titulo: '', descripcion: '', prioridad: 'media' });
     const navigate = useNavigate();
 
+    const handleReunionClick = (reunion) => {
+        const isClient = reunion.cliente?.esCliente || ['venta_ganada', 'cliente_activo', 'cotizacion_realizada', 'contrato_firmado', 'esperando_pago'].includes(reunion.cliente?.etapaEmbudo);
+        const targetPath = isClient ? '/vendedor/clientes' : '/vendedor/prospectos';
+        const clientVal = reunion.clienteId || reunion.cliente?.id || reunion.cliente?._id;
+        if (clientVal) {
+            navigate(targetPath, { state: { selectedId: clientVal }, replace: true });
+        }
+    };
+
     const sanitizeCloserData = (rawData) => {
         if (!rawData) return INITIAL_CLOSER_DATA;
         const getNumero = (val) => { const num = parseFloat(val); return isNaN(num) || num === null ? 0 : num; };
@@ -1241,14 +1250,7 @@ const Dashboard = () => {
                                                     <div
                                                         key={r.id || r._id}
                                                         className={`relative overflow-hidden group ${esHoy ? 'bg-linear-to-br from-emerald-500 to-emerald-600' : 'bg-linear-to-br from-indigo-600 to-indigo-700'} rounded-lg p-2.5 shadow-sm hover:shadow-md transition-all cursor-pointer`}
-                                                        onClick={() => {
-                                                            // Navegar al perfil del cliente/prospecto
-                                                            if (r.esCliente) {
-                                                                navigate('/vendedor/clientes', { state: { selectedId: r.cliente?.id || r.clienteId } });
-                                                            } else {
-                                                                navigate('/vendedor/prospectos', { state: { selectedId: r.cliente?.id || r.clienteId } });
-                                                            }
-                                                        }}
+                                                        onClick={() => handleReunionClick(r)}
                                                     >
                                                         {/* Fondo decorativo */}
                                                         <div className="absolute right-0 top-0 h-full w-1/4 bg-white/10 skew-x-12 transform origin-top-right transition-transform duration-500 group-hover:w-1/3"></div>

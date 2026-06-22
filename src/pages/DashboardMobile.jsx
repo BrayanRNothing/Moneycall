@@ -27,6 +27,15 @@ const DashboardMobile = ({
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('resumen');
 
+    const handleReunionClick = (reunion) => {
+        const isClient = reunion.cliente?.esCliente || reunion.esCliente || ['venta_ganada', 'cliente_activo', 'cotizacion_realizada', 'contrato_firmado', 'esperando_pago'].includes(reunion.cliente?.etapaEmbudo);
+        const targetPath = isClient ? '/vendedor/clientes' : '/vendedor/prospectos';
+        const clientVal = reunion.clienteId || reunion.cliente?.id || reunion.cliente?._id;
+        if (clientVal) {
+            navigate(targetPath, { state: { selectedId: clientVal }, replace: true });
+        }
+    };
+
     // Cálculos rápidos (reutilizados del dashboard original pero simplificados)
     const mP = vendedorData.periodos?.[periodo] || {};
     const cP = closerData.periodos?.[periodo] || { ventasCount: 0, ventasMonto: 0, reunionesRealizadas: 0 };
@@ -146,13 +155,7 @@ const DashboardMobile = ({
                                 {reuniones.slice(0, 3).map((r, i) => (
                                     <div 
                                         key={i} 
-                                        onClick={() => {
-                                            if (r.esCliente) {
-                                                navigate('/vendedor/clientes', { state: { selectedId: r.cliente?.id || r.clienteId } });
-                                            } else {
-                                                navigate('/vendedor/prospectos', { state: { selectedId: r.cliente?.id || r.clienteId } });
-                                            }
-                                        }}
+                                        onClick={() => handleReunionClick(r)}
                                         className="flex items-center justify-between p-3 bg-white rounded-2xl border border-slate-100 shadow-sm cursor-pointer hover:shadow-md transition-all"
                                     >
                                         <div className="flex items-center gap-3">
@@ -184,10 +187,11 @@ const DashboardMobile = ({
                                     <div 
                                         key={i} 
                                         onClick={() => {
-                                            if (rec.esCliente) {
-                                                navigate('/vendedor/clientes', { state: { selectedId: rec.id || rec._id } });
-                                            } else {
-                                                navigate('/vendedor/prospectos', { state: { selectedId: rec.id || rec._id } });
+                                            const isClient = rec.esCliente;
+                                            const targetPath = isClient ? '/vendedor/clientes' : '/vendedor/prospectos';
+                                            const clientVal = rec.id || rec._id;
+                                            if (clientVal) {
+                                                navigate(targetPath, { state: { selectedId: clientVal }, replace: true });
                                             }
                                         }}
                                         className={`flex items-center justify-between p-3 rounded-2xl border shadow-sm cursor-pointer hover:shadow-md transition-all ${
