@@ -240,27 +240,32 @@ router.get('/dashboard', [auth, esVendedor], async (req, res) => {
         sixDaysAgo.setDate(nowLocal.getDate() - 6);
         const startOfWeek = new Date(sixDaysAgo.getFullYear(), sixDaysAgo.getMonth(), sixDaysAgo.getDate()).toISOString().slice(0, 10) + 'T00:00:00.000Z';
 
-        const startOfMonth = new Date(nowLocal.getFullYear(), nowLocal.getMonth(), 1).toISOString().slice(0, 10) + 'T00:00:00.000Z';
+        // Mes y año personalizados desde la query
+        const queryMes = req.query.mes ? parseInt(req.query.mes, 10) : (nowLocal.getMonth() + 1);
+        const queryAnio = req.query.anio ? parseInt(req.query.anio, 10) : nowLocal.getFullYear();
+
+        const customStartOfMonth = new Date(queryAnio, queryMes - 1, 1).toISOString().slice(0, 10) + 'T00:00:00.000Z';
+        const customEndOfMonth = new Date(queryAnio, queryMes, 0).toISOString().slice(0, 10) + 'T23:59:59.999Z';
 
         // Actividades: campo 'fecha'
         const FILTROS_ACT = {
             dia: `fecha::timestamp >= '${startOfDayISO}'::timestamp AND fecha::timestamp <= '${endOfDay}'::timestamp`,
             semana: `fecha::timestamp >= '${startOfWeek}'::timestamp`,
-            mes: `fecha::timestamp >= '${startOfMonth}'::timestamp`,
+            mes: `fecha::timestamp >= '${customStartOfMonth}'::timestamp AND fecha::timestamp <= '${customEndOfMonth}'::timestamp`,
             total: null
         };
         // Prospectos nuevos: campo 'fechaRegistro'
         const FILTROS_CLI = {
             dia: `(fechaRegistro::timestamp >= '${startOfDayISO}'::timestamp AND fechaRegistro::timestamp <= '${endOfDay}'::timestamp OR (fechaRegistro IS NULL AND fechaUltimaEtapa::timestamp >= '${startOfDayISO}'::timestamp AND fechaUltimaEtapa::timestamp <= '${endOfDay}'::timestamp))`,
             semana: `(fechaRegistro::timestamp >= '${startOfWeek}'::timestamp OR (fechaRegistro IS NULL AND fechaUltimaEtapa::timestamp >= '${startOfWeek}'::timestamp))`,
-            mes: `(fechaRegistro::timestamp >= '${startOfMonth}'::timestamp OR (fechaRegistro IS NULL AND fechaUltimaEtapa::timestamp >= '${startOfMonth}'::timestamp))`,
+            mes: `((fechaRegistro::timestamp >= '${customStartOfMonth}'::timestamp AND fechaRegistro::timestamp <= '${customEndOfMonth}'::timestamp) OR (fechaRegistro IS NULL AND fechaUltimaEtapa::timestamp >= '${customStartOfMonth}'::timestamp AND fechaUltimaEtapa::timestamp <= '${customEndOfMonth}'::timestamp))`,
             total: null
         };
         // Reuniones agendadas: campo 'fecha' (en tabla actividades)
         const FILTROS_REUNION = {
             dia: `fecha::timestamp >= '${startOfDayISO}'::timestamp AND fecha::timestamp <= '${endOfDay}'::timestamp`,
             semana: `fecha::timestamp >= '${startOfWeek}'::timestamp`,
-            mes: `fecha::timestamp >= '${startOfMonth}'::timestamp`,
+            mes: `fecha::timestamp >= '${customStartOfMonth}'::timestamp AND fecha::timestamp <= '${customEndOfMonth}'::timestamp`,
             total: null
         };
 
@@ -522,9 +527,14 @@ router.get('/dashboard-closer', [auth, esVendedor], async (req, res) => {
         const reunionesRealizadasHoy = actividadesHoy.filter(a => a.tipo === 'cita' && a.resultado !== 'pendiente').length;
         const propuestasHoy = actividadesHoy.filter(a => a.descripcion && a.descripcion.toLowerCase().includes('cotización')).length;
 
-        const inicioMes = new Date();
-        inicioMes.setDate(1);
+        const nowLocal = new Date();
+        const queryMes = req.query.mes ? parseInt(req.query.mes, 10) : (nowLocal.getMonth() + 1);
+        const queryAnio = req.query.anio ? parseInt(req.query.anio, 10) : nowLocal.getFullYear();
+
+        const inicioMes = new Date(queryAnio, queryMes - 1, 1);
         inicioMes.setHours(0, 0, 0, 0);
+        const finMes = new Date(queryAnio, queryMes, 0);
+        finMes.setHours(23, 59, 59, 999);
 
         let sqlVentas = `
             SELECT v.* FROM ventas v
@@ -534,7 +544,10 @@ router.get('/dashboard-closer', [auth, esVendedor], async (req, res) => {
         let paramsVentas = equipoId ? [closerId, equipoId] : [closerId];
         const ventasTodas = await db.prepare(sqlVentas).all(...paramsVentas);
 
-        const ventasMes = ventasTodas.filter(v => new Date(v.fecha) >= inicioMes);
+        const ventasMes = ventasTodas.filter(v => {
+            const f = new Date(v.fecha);
+            return f >= inicioMes && f <= finMes;
+        });
         const ventasHoy = ventasTodas.filter(v => {
             const f = new Date(v.fecha);
             return f >= hoyInicio && f <= hoyFin;
@@ -586,7 +599,6 @@ router.get('/dashboard-closer', [auth, esVendedor], async (req, res) => {
         };
 
         // --- CLOSER PERIOD METRICS ---
-        const nowLocal = new Date();
         const startOfDay = new Date(nowLocal.getFullYear(), nowLocal.getMonth(), nowLocal.getDate());
         const startOfDayTime = startOfDay.getTime();
         const endOfDayTime = startOfDayTime + 24 * 60 * 60 * 1000 - 1;
@@ -596,9 +608,13 @@ router.get('/dashboard-closer', [auth, esVendedor], async (req, res) => {
         sixDaysAgo.setHours(0, 0, 0, 0);
         const startOfWeekTime = sixDaysAgo.getTime();
 
-        const startOfMonth = new Date(nowLocal.getFullYear(), nowLocal.getMonth(), 1);
+        const startOfMonth = new Date(queryAnio, queryMes - 1, 1);
         startOfMonth.setHours(0, 0, 0, 0);
         const startOfMonthTime = startOfMonth.getTime();
+
+        const endOfMonth = new Date(queryAnio, queryMes, 0);
+        endOfMonth.setHours(23, 59, 59, 999);
+        const endOfMonthTime = endOfMonth.getTime();
 
         const calcularStatsCloserPeriodo = (filtroFn) => {
             const vFiltered = ventasTodas.filter(filtroFn);
@@ -627,7 +643,7 @@ router.get('/dashboard-closer', [auth, esVendedor], async (req, res) => {
             }),
             mes: calcularStatsCloserPeriodo(x => {
                 const t = new Date(x.fecha || x.createdAt).getTime();
-                return t >= startOfMonthTime;
+                return t >= startOfMonthTime && t <= endOfMonthTime;
             }),
             total: calcularStatsCloserPeriodo(() => true)
         };

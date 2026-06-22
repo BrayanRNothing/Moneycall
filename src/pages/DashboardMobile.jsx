@@ -22,7 +22,11 @@ const DashboardMobile = ({
     reuniones, 
     teamTasks,
     periodo, 
-    setPeriodo 
+    setPeriodo,
+    selectedMonth,
+    setSelectedMonth,
+    selectedYear,
+    setSelectedYear
 }) => {
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('resumen');
@@ -58,23 +62,56 @@ const DashboardMobile = ({
         <div className="flex flex-col gap-6 pb-12">
             
             {/* ── Period Selector (Pills) ── */}
-            <div className="flex items-center justify-between">
-                <h2 className="text-xl font-black text-slate-800 tracking-tight">Mi Actividad</h2>
-                <div className="flex bg-white/50 backdrop-blur-md p-1 rounded-xl border border-white/40 shadow-sm">
-                    {PERIODOS.map((p) => (
-                        <button
-                            key={p.key}
-                            onClick={() => setPeriodo(p.key)}
-                            className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
-                                periodo === p.key 
-                                ? 'bg-(--theme-500) text-white shadow-md' 
-                                : 'text-slate-400 hover:text-slate-600'
-                            }`}
-                        >
-                            {p.label}
-                        </button>
-                    ))}
+            <div className="flex flex-col gap-2">
+                <div className="flex items-center justify-between">
+                    <h2 className="text-xl font-black text-slate-800 tracking-tight">Mi Actividad</h2>
+                    <div className="flex bg-white/50 backdrop-blur-md p-1 rounded-xl border border-white/40 shadow-sm">
+                        {PERIODOS.map((p) => (
+                            <button
+                                key={p.key}
+                                onClick={() => setPeriodo(p.key)}
+                                className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
+                                    periodo === p.key 
+                                    ? 'bg-(--theme-500) text-white shadow-md' 
+                                    : 'text-slate-400 hover:text-slate-600'
+                                }`}
+                            >
+                                {p.label}
+                            </button>
+                        ))}
+                    </div>
                 </div>
+                {periodo === 'mes' && (
+                    <div className="flex justify-end items-center gap-1.5 animate-fadeIn">
+                        <select
+                            value={selectedMonth}
+                            onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
+                            className="bg-white border border-slate-200 rounded-lg px-2 py-1 text-[10px] font-bold text-slate-700 shadow-sm focus:outline-none"
+                        >
+                            <option value={1}>Enero</option>
+                            <option value={2}>Febrero</option>
+                            <option value={3}>Marzo</option>
+                            <option value={4}>Abril</option>
+                            <option value={5}>Mayo</option>
+                            <option value={6}>Junio</option>
+                            <option value={7}>Julio</option>
+                            <option value={8}>Agosto</option>
+                            <option value={9}>Septiembre</option>
+                            <option value={10}>Octubre</option>
+                            <option value={11}>Noviembre</option>
+                            <option value={12}>Diciembre</option>
+                        </select>
+                        <select
+                            value={selectedYear}
+                            onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+                            className="bg-white border border-slate-200 rounded-lg px-2 py-1 text-[10px] font-bold text-slate-700 shadow-sm focus:outline-none"
+                        >
+                            {Array.from({ length: 4 }, (_, i) => 2024 + i).map(y => (
+                                <option key={y} value={y}>{y}</option>
+                            ))}
+                        </select>
+                    </div>
+                )}
             </div>
 
             {/* ── Top Metrics Grid ── */}

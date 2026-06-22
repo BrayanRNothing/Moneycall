@@ -136,6 +136,15 @@ const Dashboard = () => {
     const [reuniones, setReuniones] = useState([]);
     const [loadingReuniones, setLoadingReuniones] = useState(true);
     const [periodo, setPeriodo] = useState('dia');
+    const now = new Date();
+    const [selectedMonth, setSelectedMonth] = useState(now.getMonth() + 1); // 1-12
+    const [selectedYear, setSelectedYear] = useState(now.getFullYear());
+
+    const currentYear = new Date().getFullYear();
+    const yearsList = [];
+    for (let y = 2024; y <= currentYear + 1; y++) {
+        yearsList.push(y);
+    }
     const [healthTab, setHealthTab] = useState('resumen');
     const [actividades, setActividades] = useState([]);
     const [loadingActividades, setLoadingActividades] = useState(false);
@@ -267,7 +276,10 @@ const Dashboard = () => {
         if (!silent) setLoading(true);
         try {
             try {
-                const resP = await axios.get(`${API_URL}/api/vendedor/dashboard`, { headers: getAuthHeaders() });
+                const resP = await axios.get(`${API_URL}/api/vendedor/dashboard`, {
+                    headers: getAuthHeaders(),
+                    params: { mes: selectedMonth, anio: selectedYear }
+                });
                 setVendedorData(sanitizeVendedorData(resP.data));
             } catch (e) {
                 console.error('Error prospector data:', e);
@@ -275,7 +287,10 @@ const Dashboard = () => {
             }
 
             try {
-                const resC = await axios.get(`${API_URL}/api/vendedor/dashboard-closer`, { headers: getAuthHeaders() });
+                const resC = await axios.get(`${API_URL}/api/vendedor/dashboard-closer`, {
+                    headers: getAuthHeaders(),
+                    params: { mes: selectedMonth, anio: selectedYear }
+                });
                 setCloserData(sanitizeCloserData(resC.data));
             } catch (e) {
                 console.error('Error closer data:', e);
@@ -490,7 +505,7 @@ const Dashboard = () => {
             clearInterval(interval);
             socket.off('prospectos_actualizados', handleSocketUpdate);
         };
-    }, []);
+    }, [selectedMonth, selectedYear]);
 
     if (loading || !vendedorData || !closerData) {
         return (
@@ -513,6 +528,10 @@ const Dashboard = () => {
                 teamTasks={teamTasks}
                 periodo={periodo}
                 setPeriodo={setPeriodo}
+                selectedMonth={selectedMonth}
+                setSelectedMonth={setSelectedMonth}
+                selectedYear={selectedYear}
+                setSelectedYear={setSelectedYear}
             />
         );
     }
@@ -570,19 +589,54 @@ const Dashboard = () => {
                         <span className="text-sm font-bold text-gray-700 uppercase tracking-widest">Resumen de Ventas</span>
                     </div>
 
-                    <div className="flex items-center gap-1 bg-white border border-gray-200 rounded-lg p-1 shadow-sm">
-                        {PERIODOS.map(p => (
-                            <button
-                                key={p.key}
-                                onClick={() => setPeriodo(p.key)}
-                                className={`px-3 py-1 rounded-md text-[10px] font-bold transition-all ${periodo === p.key
-                                    ? 'bg-(--theme-50) text-(--theme-600) shadow-sm border border-(--theme-100)'
-                                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
-                                    }`}
-                            >
-                                {p.label}
-                            </button>
-                        ))}
+                    <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-1 bg-white border border-gray-200 rounded-lg p-1 shadow-sm">
+                            {PERIODOS.map(p => (
+                                <button
+                                    key={p.key}
+                                    onClick={() => setPeriodo(p.key)}
+                                    className={`px-3 py-1 rounded-md text-[10px] font-bold transition-all ${periodo === p.key
+                                        ? 'bg-(--theme-50) text-(--theme-600) shadow-sm border border-(--theme-100)'
+                                        : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                                        }`}
+                                >
+                                    {p.label}
+                                </button>
+                            ))}
+                        </div>
+
+                        {periodo === 'mes' && (
+                            <div className="flex items-center gap-1 bg-white border border-gray-200 rounded-lg p-1 shadow-sm animate-fadeIn">
+                                <select
+                                    value={selectedMonth}
+                                    onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
+                                    className="bg-transparent border-0 px-2 py-0.5 text-[10px] font-bold text-gray-700 focus:outline-none cursor-pointer"
+                                >
+                                    <option value={1}>Enero</option>
+                                    <option value={2}>Febrero</option>
+                                    <option value={3}>Marzo</option>
+                                    <option value={4}>Abril</option>
+                                    <option value={5}>Mayo</option>
+                                    <option value={6}>Junio</option>
+                                    <option value={7}>Julio</option>
+                                    <option value={8}>Agosto</option>
+                                    <option value={9}>Septiembre</option>
+                                    <option value={10}>Octubre</option>
+                                    <option value={11}>Noviembre</option>
+                                    <option value={12}>Diciembre</option>
+                                </select>
+                                <div className="w-px h-3 bg-gray-200"></div>
+                                <select
+                                    value={selectedYear}
+                                    onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+                                    className="bg-transparent border-0 px-2 py-0.5 text-[10px] font-bold text-gray-700 focus:outline-none cursor-pointer"
+                                >
+                                    {yearsList.map(y => (
+                                        <option key={y} value={y}>{y}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        )}
                     </div>
                 </div>
                 <div className="bg-white border border-gray-200 rounded-xl p-3 shadow-sm w-full">
