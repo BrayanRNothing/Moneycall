@@ -886,7 +886,7 @@ router.get('/prospectos', [auth, esVendedor], async (req, res) => {
         const total = countRow ? parseInt(countRow.total, 10) : 0;
 
         // Fetch paginated data
-        let sql = `${selectFields} ${baseSql} ORDER BY c."fechaUltimaEtapa" DESC LIMIT ? OFFSET ?`;
+        let sql = `${selectFields} ${baseSql} ORDER BY COALESCE(c."ultimaInteraccion", c."fechaUltimaEtapa", c."createdAt") DESC LIMIT ? OFFSET ?`;
         const paginatedParams = [...params, limitNum, offset];
 
         const rows = await db.prepare(sql).all(...paginatedParams);
@@ -996,7 +996,7 @@ router.get('/clientes-ganados', [auth, esVendedor], async (req, res) => {
             const like = '%' + busqueda + '%';
             params.push(like, like, like, like);
         }
-        sql += ' ORDER BY c.fechaUltimaEtapa DESC';
+        sql += ' ORDER BY COALESCE(c."ultimaInteraccion", c."fechaUltimaEtapa", c."createdAt") DESC';
 
         const rows = await db.prepare(sql).all(...params);
         const clientes = rows.map(r => {

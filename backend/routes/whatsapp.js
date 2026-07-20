@@ -166,7 +166,7 @@ router.get('/chats', auth, async (req, res) => {
                     "lastResult"
                 FROM sub
                 WHERE telefono IS NOT NULL AND telefono != '' AND "lastMessageTime" IS NOT NULL
-                ORDER BY COALESCE(CAST("lastMessageTime" AS TEXT), "ultimaInteraccion") DESC
+                ORDER BY COALESCE(CAST("lastMessageTime" AS TEXT), CAST("ultimaInteraccion" AS TEXT)) DESC
             `;
         } else {
             // Incluir clientes donde el usuario es vendedor, closer o propietario
@@ -188,7 +188,7 @@ router.get('/chats', auth, async (req, res) => {
                     OR "closerAsignado" = ?
                     OR (compartido = true AND "equipo_id" = (SELECT equipo_id FROM usuarios WHERE id = ?))
                   )
-                ORDER BY COALESCE(CAST("lastMessageTime" AS TEXT), "ultimaInteraccion") DESC
+                ORDER BY COALESCE(CAST("lastMessageTime" AS TEXT), CAST("ultimaInteraccion" AS TEXT)) DESC
             `;
             params = [vendedorId, vendedorId, vendedorId];
         }

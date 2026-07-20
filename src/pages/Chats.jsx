@@ -380,6 +380,10 @@ export default function Chats() {
         if (chatFilter === 'clientes') return isCl;
         if (chatFilter === 'conMensajes') return !!c.lastMessageTime;
         return true;
+    }).sort((a, b) => {
+        const timeA = new Date(a.lastMessageTime || a.lastmessagetime || a.ultimaInteraccion || a.ultimainteraccion || a.createdAt || a.createdat || 0).getTime();
+        const timeB = new Date(b.lastMessageTime || b.lastmessagetime || b.ultimaInteraccion || b.ultimainteraccion || b.createdAt || 0).getTime();
+        return timeB - timeA;
     });
 
     if (loadingStatus) {

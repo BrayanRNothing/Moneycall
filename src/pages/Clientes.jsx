@@ -558,6 +558,10 @@ const Clientes = () => {
             }
 
             return matchBusqueda && matchVisibilidad && matchFiltro && matchEtapa;
+        }).sort((a, b) => {
+            const timeA = new Date(a.ultimaInteraccion || a.ultimainteraccion || a.lastMessageTime || a.lastmessagetime || a.fechaUltimaEtapa || a.fechaultimaetapa || a.createdAt || a.createdat || 0).getTime();
+            const timeB = new Date(b.ultimaInteraccion || b.ultimainteraccion || b.lastMessageTime || b.lastmessagetime || b.fechaUltimaEtapa || b.fechaultimaetapa || b.createdAt || b.createdat || 0).getTime();
+            return timeB - timeA;
         });
     }, [clientes, busqueda, filtroVisibilidad, filtro, filtroEtapa]);
 

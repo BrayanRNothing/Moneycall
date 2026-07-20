@@ -62,7 +62,7 @@ router.get('/', auth, esSuperUser, async (req, res) => {
             const like = '%' + busqueda + '%';
             params.push(like, like, like);
         }
-        sql += ' ORDER BY c.ultimaInteraccion DESC';
+        sql += ' ORDER BY COALESCE(c."ultimaInteraccion", c."fechaUltimaEtapa", c."createdAt") DESC';
 
         const rows = await db.prepare(sql).all(...params);
         const clientes = rows.map(r => {

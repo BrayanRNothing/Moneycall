@@ -571,27 +571,17 @@ const Seguimiento = () => {
         const esPerdidoB = b.etapaEmbudo === 'perdido';
         if (esPerdidoA !== esPerdidoB) return esPerdidoA ? 1 : -1;
 
-        // Con próxima llamada urgente primero (vencidas aún antes que futuras)
+        // Chat / Interacción más reciente primero
+        const timeA = new Date(a.ultimaInteraccion || a.ultimainteraccion || a.lastMessageTime || a.lastmessagetime || a.fechaUltimaEtapa || a.fechaultimaetapa || a.createdAt || a.createdat || 0).getTime();
+        const timeB = new Date(b.ultimaInteraccion || b.ultimainteraccion || b.lastMessageTime || b.lastmessagetime || b.fechaUltimaEtapa || b.fechaultimaetapa || b.createdAt || b.createdat || 0).getTime();
+        if (timeB !== timeA) return timeB - timeA;
+
+        // Con próxima llamada urgente primero
         const tieneRecordA = !!a.proximaLlamada;
         const tieneRecordB = !!b.proximaLlamada;
         if (tieneRecordA !== tieneRecordB) return tieneRecordA ? -1 : 1;
-        if (tieneRecordA && tieneRecordB) {
-            const ahora = Date.now();
-            const vencidaA = new Date(a.proximaLlamada).getTime() < ahora;
-            const vencidaB = new Date(b.proximaLlamada).getTime() < ahora;
-            if (vencidaA !== vencidaB) return vencidaA ? -1 : 1; // vencidas primero
-            return new Date(a.proximaLlamada) - new Date(b.proximaLlamada);
-        }
 
-        // Mayor interés primero
-        const interesA = a.interes || 0;
-        const interesB = b.interes || 0;
-        if (interesB !== interesA) return interesB - interesA;
-
-        // Etapa más avanzada primero
-        const orA = ORDEN_ETAPA[a.etapaEmbudo] ?? 10;
-        const orB = ORDEN_ETAPA[b.etapaEmbudo] ?? 10;
-        return orA - orB;
+        return 0;
     });
 
     const handleExportCsv = () => {
