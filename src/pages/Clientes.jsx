@@ -812,7 +812,7 @@ const Clientes = () => {
                                     <select
                                         value={formCliente.lada || '+52'}
                                         onChange={(e) => setFormCliente({ ...formCliente, lada: e.target.value })}
-                                        className="w-1/3 px-2 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-(--theme-500) text-xs font-bold"
+                                        className="w-auto min-w-[110px] shrink-0 px-2 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-(--theme-500) text-xs font-bold"
                                     >
                                         <option value="+52">MX (+52)</option>
                                         <option value="+1">US (+1)</option>
