@@ -1546,8 +1546,8 @@ const Seguimiento = () => {
                             >
                                 <option value="todos">Todos los prospectos</option>
                                 <option value="en_contacto">En contacto</option>
-                                <option value="sin_respuesta">Sin contacto</option>
-                                <option value="no_contactado">No contactado</option>
+                                <option value="sin_respuesta">Sin respuesta (Contactado)</option>
+                                <option value="no_contactado">Sin contacto (Nuevos)</option>
                                 <option value="con_cita">Con cita</option>
                             </select>
 
