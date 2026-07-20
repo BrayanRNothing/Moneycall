@@ -930,6 +930,16 @@ const initDb = async () => {
     console.log(`🧹 Migración: Limpieza de conversaciones de WhatsApp mayores a 6 meses completada.`);
   } catch (e) { /* ignorar */ }
 
+  // Normalizar etiquetas genéricas de nombres de WhatsApp
+  try {
+    await db.prepare(`
+      UPDATE clientes 
+      SET nombres = 'Contacto', "apellidoPaterno" = 'WhatsApp' 
+      WHERE fuente = 'WhatsApp' 
+        AND ("apellidoPaterno" LIKE '%WhatsApp (+%' OR "apellidoPaterno" LIKE '%WhatsApp (+52%')
+    `).run();
+  } catch (e) { /* ignorar */ }
+
   // MIGRACIÓN POSTGRESQL PARA EL NUEVO ROL (vendedor)
   if (isPostgres) {
     try {

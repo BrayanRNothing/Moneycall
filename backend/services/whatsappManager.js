@@ -97,6 +97,55 @@ function isOlderThan6Months(msg) {
     return timestampInSeconds < cutoffTimestamp;
 }
 
+// Actualizar automáticamente el nombre de un cliente si actualmente tiene un nombre genérico ("Prospecto", "WhatsApp (+521...)")
+async function updateClientNameIfGeneric(vendedorId, phone, name, io) {
+    if (!phone || !name) return;
+    const cleanPhone = phone.replace(/\D/g, '').slice(-10);
+    if (cleanPhone.length < 10) return;
+
+    const trimmedName = String(name).trim();
+    if (!trimmedName || trimmedName.toLowerCase().startsWith('prospecto whatsapp') || trimmedName.toLowerCase() === 'prospecto') return;
+
+    const { db } = require('../config/database');
+    try {
+        const allClients = await db.prepare('SELECT id, nombres, "apellidoPaterno", telefono, telefono2, "equipo_id" FROM clientes').all();
+        const matchingClients = allClients.filter(c => {
+            const clean1 = String(c.telefono || '').replace(/\D/g, '').slice(-10);
+            const clean2 = String(c.telefono2 || '').replace(/\D/g, '').slice(-10);
+            return clean1 === cleanPhone || clean2 === cleanPhone;
+        });
+
+        for (const client of matchingClients) {
+            const isGenericName = 
+                !client.nombres || 
+                client.nombres === 'Prospecto' || 
+                client.nombres.toLowerCase().includes('prospecto') ||
+                client.nombres.toLowerCase().includes('sin nombre') ||
+                client.apellidoPaterno.toLowerCase().includes('whatsapp');
+
+            if (isGenericName) {
+                const parts = trimmedName.split(/\s+/);
+                const newNombres = parts[0] || 'Prospecto';
+                const newApellido = parts.slice(1).join(' ') || '';
+
+                await db.prepare('UPDATE clientes SET nombres = ?, "apellidoPaterno" = ? WHERE id = ?')
+                    .run(newNombres, newApellido, client.id);
+
+                console.log(`[WhatsApp user_${vendedorId}] ✏️ Nombre actualizado para cliente #${client.id}: ${newNombres} ${newApellido}`);
+                
+                if (io) {
+                    io.to(`user_${vendedorId}`).emit('prospectos_actualizados');
+                    if (client.equipo_id) {
+                        io.to(`team_${client.equipo_id}`).emit('prospectos_actualizados');
+                    }
+                }
+            }
+        }
+    } catch (err) {
+        console.error(`[WhatsApp user_${vendedorId}] Error al actualizar nombre genérico:`, err.message);
+    }
+}
+
 // ==========================================
 // DB SYNC HELPERS (PostgreSQL/SQLite safe)
 // ==========================================
@@ -305,6 +354,11 @@ async function handleIncomingMessage(vendedorId, phone, text, io, pushName = '',
         }
 
         if (matchingClients.length > 0) {
+            const contactJid = phone.split('@')[0];
+            const discoveredName = contactNames[contactJid] || contactNames[cleanIncoming] || pushName || '';
+            if (discoveredName) {
+                await updateClientNameIfGeneric(vendedorId, cleanIncoming, discoveredName, io);
+            }
             for (const client of matchingClients) {
                 // Registrar actividad en la base de datos
                 await db.prepare('INSERT INTO actividades (tipo, vendedor, cliente, descripcion, resultado) VALUES (?, ?, ?, ?, ?)')
@@ -504,7 +558,7 @@ async function connectClient(vendedorId, io) {
     sock.ev.on('messaging-history.set', async ({ chats, contacts, messages, isLatest }) => {
         console.log(`[WhatsApp user_${vendedorId}] Historial inicial recibido: ${chats?.length || 0} chats, ${contacts?.length || 0} contactos, ${messages?.length || 0} mensajes.`);
         
-        // Cargar nombres a memoria
+        // Cargar nombres a memoria y actualizar clientes genéricos
         if (contacts) {
             for (const contact of contacts) {
                 if (contact.id) {
@@ -512,6 +566,7 @@ async function connectClient(vendedorId, io) {
                     const name = contact.name || contact.verifiedName || contact.notify;
                     if (phone && name) {
                         contactNames[phone] = name;
+                        await updateClientNameIfGeneric(vendedorId, phone, name, io);
                     }
                 }
             }
@@ -525,37 +580,43 @@ async function connectClient(vendedorId, io) {
         }
     });
 
-    sock.ev.on('contacts.set', ({ contacts }) => {
+    sock.ev.on('contacts.set', async ({ contacts }) => {
+        if (!contacts) return;
         for (const contact of contacts) {
             if (contact.id) {
                 const phone = contact.id.split('@')[0];
                 const name = contact.name || contact.verifiedName || contact.notify;
                 if (phone && name) {
                     contactNames[phone] = name;
+                    await updateClientNameIfGeneric(vendedorId, phone, name, io);
                 }
             }
         }
     });
 
-    sock.ev.on('contacts.upsert', (contacts) => {
+    sock.ev.on('contacts.upsert', async (contacts) => {
+        if (!contacts) return;
         for (const contact of contacts) {
             if (contact.id) {
                 const phone = contact.id.split('@')[0];
                 const name = contact.name || contact.verifiedName || contact.notify;
                 if (phone && name) {
                     contactNames[phone] = name;
+                    await updateClientNameIfGeneric(vendedorId, phone, name, io);
                 }
             }
         }
     });
 
-    sock.ev.on('contacts.update', (updates) => {
+    sock.ev.on('contacts.update', async (updates) => {
+        if (!updates) return;
         for (const update of updates) {
             if (update.id) {
                 const phone = update.id.split('@')[0];
                 const name = update.name || update.verifiedName || update.notify;
                 if (phone && name) {
                     contactNames[phone] = name;
+                    await updateClientNameIfGeneric(vendedorId, phone, name, io);
                 }
             }
         }
