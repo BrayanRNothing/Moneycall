@@ -208,11 +208,29 @@ io.on('connection', (socket) => {
         }
     });
 
-    // Unirse a la sala del equipo (el frontend debe emitir este evento tras el login)
-    socket.on('join_team', (equipoId) => {
-        if (equipoId) {
+    // Unirse a la sala del equipo (con verificación de token de seguridad)
+    socket.on('join_team', async (data) => {
+        const equipoId = typeof data === 'object' ? data.equipoId : data;
+        const token = typeof data === 'object' ? data.token : null;
+        if (!equipoId) return;
+
+        if (token) {
+            try {
+                const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret');
+                const { db } = require('./config/database');
+                const user = await db.prepare('SELECT id, "equipo_id", activo FROM usuarios WHERE id = ?').get(decoded.id);
+                if (!user || (user.activo === 0 || user.activo === false)) return;
+                if (String(user.equipo_id) === String(equipoId)) {
+                    socket.join(`team_${equipoId}`);
+                    console.log(`👥 Socket ${socket.id} unió al equipo autenticado: team_${equipoId}`);
+                } else {
+                    socket.emit('auth_error', { mensaje: 'No pertenece a este equipo' });
+                }
+            } catch (_) {
+                socket.emit('auth_error', { mensaje: 'Token inválido para equipo' });
+            }
+        } else {
             socket.join(`team_${equipoId}`);
-            console.log(`👥 Socket ${socket.id} unió al equipo: team_${equipoId}`);
         }
     });
 

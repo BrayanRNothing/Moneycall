@@ -34,6 +34,11 @@ backend/database.db*
 backend/uploads/*
 !backend/uploads/.gitkeep
 
+# Sesiones de WhatsApp (Credenciales privadas)
+backend/sessions/*
+!backend/sessions/.gitkeep
+backend/sessions/
+
 # Variables de entorno
 .env
 .env.local
