@@ -906,6 +906,30 @@ const initDb = async () => {
     }
   } catch (e) { /* ignorar */ }
 
+  // Limpiar actividades de WhatsApp y prospectos automáticos con más de 6 meses de antigüedad (180 días)
+  try {
+    const cutoffDate = new Date(Date.now() - 180 * 24 * 60 * 60 * 1000).toISOString();
+    
+    await db.prepare(`
+      DELETE FROM actividades 
+      WHERE tipo = 'whatsapp' 
+        AND "createdAt" < ?
+    `).run(cutoffDate);
+
+    await db.prepare(`
+      DELETE FROM clientes 
+      WHERE fuente = 'WhatsApp' 
+        AND "createdAt" < ?
+        AND id NOT IN (
+          SELECT DISTINCT cliente 
+          FROM actividades 
+          WHERE cliente IS NOT NULL AND "createdAt" >= ?
+        )
+    `).run(cutoffDate, cutoffDate);
+
+    console.log(`🧹 Migración: Limpieza de conversaciones de WhatsApp mayores a 6 meses completada.`);
+  } catch (e) { /* ignorar */ }
+
   // MIGRACIÓN POSTGRESQL PARA EL NUEVO ROL (vendedor)
   if (isPostgres) {
     try {

@@ -83,6 +83,20 @@ function isGroupOrNonPersonJid(jidOrPhone) {
     return false;
 }
 
+// Verificar si un mensaje de WhatsApp es más antiguo a 6 meses (180 días)
+function isOlderThan6Months(msg) {
+    if (!msg) return false;
+    const rawTimestamp = msg.messageTimestamp?.low || msg.messageTimestamp || 0;
+    if (!rawTimestamp) return false;
+
+    const timestampInSeconds = rawTimestamp > 1000000000000 ? Math.floor(rawTimestamp / 1000) : Number(rawTimestamp);
+    const nowInSeconds = Math.floor(Date.now() / 1000);
+    const sixMonthsInSeconds = 180 * 24 * 60 * 60;
+    const cutoffTimestamp = nowInSeconds - sixMonthsInSeconds;
+
+    return timestampInSeconds < cutoffTimestamp;
+}
+
 // ==========================================
 // DB SYNC HELPERS (PostgreSQL/SQLite safe)
 // ==========================================
@@ -555,8 +569,9 @@ async function connectClient(vendedorId, io) {
                 const remoteJid = msg.key?.remoteJid || '';
                 const remoteJidAlt = msg.key?.remoteJidAlt || '';
 
-                // Rechazar de inmediato cualquier mensaje de grupo o participante de grupo
+                // Rechazar de inmediato cualquier mensaje de grupo o mayor a 6 meses
                 if (
+                    isOlderThan6Months(msg) ||
                     remoteJid.includes('@g.us') ||
                     remoteJidAlt.includes('@g.us') ||
                     msg.key?.participant ||
@@ -757,6 +772,9 @@ async function processHistoricalMessages(vendedorId, messages, io) {
         const validMessages = messages.filter(msg => {
             if (!msg.message) return false;
 
+            // RECHAZAR mensajes mayores a 6 meses (180 días)
+            if (isOlderThan6Months(msg)) return false;
+
             const remoteJid = msg.key?.remoteJid || '';
             const remoteJidAlt = msg.key?.remoteJidAlt || '';
 
@@ -910,6 +928,7 @@ async function processHistoricalMessages(vendedorId, messages, io) {
 
             // Recopilar mensajes para insertar en lote
             for (const msg of sorted) {
+                if (isOlderThan6Months(msg)) continue;
                 // Obtener texto (soportar texto simple y extended text)
                 const text = msg.message?.conversation || 
                              msg.message?.extendedTextMessage?.text || 
