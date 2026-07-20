@@ -886,7 +886,7 @@ router.get('/prospectos', [auth, esVendedor], async (req, res) => {
         const total = countRow ? parseInt(countRow.total, 10) : 0;
 
         // Fetch paginated data
-        let sql = `${selectFields} ${baseSql} ORDER BY COALESCE(c."ultimaInteraccion", c."fechaUltimaEtapa", c."createdAt") DESC LIMIT ? OFFSET ?`;
+        let sql = `${selectFields} ${baseSql} ORDER BY COALESCE(c."ultimaInteraccion", c."fechaUltimaEtapa", c."fechaRegistro") DESC LIMIT ? OFFSET ?`;
         const paginatedParams = [...params, limitNum, offset];
 
         const rows = await db.prepare(sql).all(...paginatedParams);
@@ -899,8 +899,8 @@ router.get('/prospectos', [auth, esVendedor], async (req, res) => {
                 `SELECT a.cliente, a.tipo, COALESCE(NULLIF(a.notas, ''), a.descripcion) as texto
                  FROM actividades a
                  INNER JOIN (
-                   SELECT cliente, MAX(createdAt) as maxCreatedAt FROM actividades WHERE cliente IN (${ids.map(() => '?').join(',')}) GROUP BY cliente
-                 ) ult ON a.cliente = ult.cliente AND a.createdAt = ult.maxCreatedAt`
+                   SELECT cliente, MAX(fecha) as maxFecha FROM actividades WHERE cliente IN (${ids.map(() => '?').join(',')}) GROUP BY cliente
+                 ) ult ON a.cliente = ult.cliente AND a.fecha = ult.maxFecha`
             ).all(...ids)
             : [];
 
@@ -996,7 +996,7 @@ router.get('/clientes-ganados', [auth, esVendedor], async (req, res) => {
             const like = '%' + busqueda + '%';
             params.push(like, like, like, like);
         }
-        sql += ' ORDER BY COALESCE(c."ultimaInteraccion", c."fechaUltimaEtapa", c."createdAt") DESC';
+        sql += ' ORDER BY COALESCE(c."ultimaInteraccion", c."fechaUltimaEtapa", c."fechaRegistro") DESC';
 
         const rows = await db.prepare(sql).all(...params);
         const clientes = rows.map(r => {
@@ -1246,7 +1246,7 @@ router.get(['/prospecto/:id/historial-completo', '/Cliente/:id/historial-complet
             FROM actividades a
             LEFT JOIN usuarios u ON a.vendedor = u.id
             WHERE a.cliente = ?
-            ORDER BY a."createdAt" ASC
+            ORDER BY a."fecha" ASC
         `).all(prospectoId);
 
         // Obtener historial del embudo

@@ -138,7 +138,7 @@ router.get('/chats', auth, async (req, res) => {
                     ORDER BY a.id DESC LIMIT 1
                 ) AS "lastMessage",
                 (
-                    SELECT a."createdAt" 
+                    SELECT a."fecha" 
                     FROM actividades a 
                     WHERE a.cliente = c.id AND a.tipo = 'whatsapp' 
                     ORDER BY a.id DESC LIMIT 1
@@ -166,7 +166,7 @@ router.get('/chats', auth, async (req, res) => {
                     "lastResult"
                 FROM sub
                 WHERE telefono IS NOT NULL AND telefono != ''
-                ORDER BY COALESCE(CAST("lastMessageTime" AS TEXT), CAST("ultimaInteraccion" AS TEXT), CAST("createdAt" AS TEXT)) DESC
+                ORDER BY COALESCE(CAST("lastMessageTime" AS TEXT), CAST("ultimaInteraccion" AS TEXT), CAST("fechaRegistro" AS TEXT)) DESC
             `;
         } else {
             // Incluir clientes donde el usuario es vendedor, closer o propietario
@@ -188,7 +188,7 @@ router.get('/chats', auth, async (req, res) => {
                     OR "closerAsignado" = ?
                     OR (compartido = true AND "equipo_id" = (SELECT equipo_id FROM usuarios WHERE id = ?))
                   )
-                ORDER BY COALESCE(CAST("lastMessageTime" AS TEXT), CAST("ultimaInteraccion" AS TEXT), CAST("createdAt" AS TEXT)) DESC
+                ORDER BY COALESCE(CAST("lastMessageTime" AS TEXT), CAST("ultimaInteraccion" AS TEXT), CAST("fechaRegistro" AS TEXT)) DESC
             `;
             params = [vendedorId, vendedorId, vendedorId];
         }
@@ -238,7 +238,7 @@ router.get('/chats/:clienteId', auth, async (req, res) => {
         }
 
         const activities = await db.prepare(
-            'SELECT id, descripcion, resultado, "createdAt" FROM actividades WHERE cliente = ? AND tipo = ? ORDER BY id ASC'
+            'SELECT id, descripcion, resultado, "fecha" FROM actividades WHERE cliente = ? AND tipo = ? ORDER BY id ASC'
         ).all(clienteId, 'whatsapp');
         
         res.json(activities);

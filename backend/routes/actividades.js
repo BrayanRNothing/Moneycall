@@ -32,7 +32,7 @@ router.get('/cliente/:clienteId/historial-completo', auth, async (req, res) => {
             FROM actividades a
             LEFT JOIN usuarios u ON a.vendedor = u.id
             WHERE a.cliente = ?
-            ORDER BY a."createdAt" ASC
+            ORDER BY a."fecha" ASC
         `).all(clienteId);
 
         // Obtener historial del embudo
