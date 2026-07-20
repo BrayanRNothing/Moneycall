@@ -884,6 +884,28 @@ const initDb = async () => {
     } catch (e) { /* ignorar */ }
   }
 
+  // Limpiar prospectos creados de grupos de WhatsApp
+  try {
+    const deletedGroups = await db.prepare(`
+      DELETE FROM clientes 
+      WHERE fuente = 'WhatsApp' 
+        AND (
+          telefono LIKE '%g.us%' OR 
+          telefono LIKE '%broadcast%' OR 
+          telefono LIKE '%newsletter%' OR
+          "apellidoPaterno" LIKE '%120363%' OR
+          "apellidoPaterno" LIKE '%@g.us%' OR
+          "apellidoPaterno" LIKE '%broadcast%' OR
+          nombres LIKE '%Grupo%' OR
+          empresa = 'Grupo WhatsApp' OR
+          LENGTH(REPLACE(telefono, '+', '')) > 15
+        )
+    `).run();
+    if (deletedGroups && (deletedGroups.rowCount > 0 || deletedGroups.changes > 0)) {
+      console.log(`🧹 Migración: Limpiados registros automáticos de grupos de WhatsApp.`);
+    }
+  } catch (e) { /* ignorar */ }
+
   // MIGRACIÓN POSTGRESQL PARA EL NUEVO ROL (vendedor)
   if (isPostgres) {
     try {

@@ -56,6 +56,33 @@ function resolveLidToPhone(jid, sessionDir) {
     return jid;
 }
 
+// Validar si un JID o teléfono corresponde a un grupo de WhatsApp, transmisión o ID no individual
+function isGroupOrNonPersonJid(jidOrPhone) {
+    if (!jidOrPhone) return true;
+    const str = String(jidOrPhone).toLowerCase().trim();
+    
+    if (
+        str.includes('@g.us') || 
+        str.includes('@broadcast') || 
+        str.includes('@newsletter') || 
+        str.includes('@call')
+    ) {
+        return true;
+    }
+
+    const digitsOnly = str.replace(/\D/g, '');
+    
+    if (digitsOnly.length > 15 || digitsOnly.startsWith('120363')) {
+        return true;
+    }
+
+    if (digitsOnly.length < 10) {
+        return true;
+    }
+
+    return false;
+}
+
 // ==========================================
 // DB SYNC HELPERS (PostgreSQL/SQLite safe)
 // ==========================================
@@ -180,15 +207,15 @@ function stopHeartbeat(vendedorId) {
 // INCOMING MESSAGE HANDLER
 // ==========================================
 
-async function handleIncomingMessage(vendedorId, phone, text, io, pushName = '') {
+async function handleIncomingMessage(vendedorId, phone, text, io, pushName = '', msgKey = {}) {
     const { db } = require('../config/database');
     try {
-        // Ignorar JIDs de grupos o broadcast
-        if (phone.includes('@g.us') || phone.includes('@broadcast')) return;
+        // Ignorar JIDs de grupos, broadcast, newsletters o participantes de grupos
+        if (!phone || isGroupOrNonPersonJid(phone) || msgKey.remoteJid?.includes('@g.us') || msgKey.participant) return;
 
         // Normalizar número entrante: obtener últimos 10 dígitos numéricos
         const cleanIncoming = phone.replace(/\D/g, '').slice(-10);
-        if (cleanIncoming.length < 10) return;
+        if (cleanIncoming.length < 10 || isGroupOrNonPersonJid(cleanIncoming)) return;
 
         // Obtener todos los clientes para poder compararlos limpiamente
         const allClients = await db.prepare('SELECT id, nombres, "apellidoPaterno", telefono, telefono2, "equipo_id" FROM clientes').all();
@@ -201,6 +228,7 @@ async function handleIncomingMessage(vendedorId, phone, text, io, pushName = '')
 
         // Si el cliente no existe, lo creamos automáticamente como un prospecto nuevo
         if (matchingClients.length === 0) {
+            if (isGroupOrNonPersonJid(phone)) return;
             console.log(`[WhatsApp user_${vendedorId}] Teléfono ${phone} no registrado. Creando prospecto automático...`);
             
             let equipoId = null;
@@ -293,14 +321,14 @@ async function handleIncomingMessage(vendedorId, phone, text, io, pushName = '')
         console.error(`[WhatsApp user_${vendedorId}] Error handling incoming message:`, err.message);
     }
 }
-async function handleOutgoingMessageFromOtherDevice(vendedorId, phone, text, io) {
+async function handleOutgoingMessageFromOtherDevice(vendedorId, phone, text, io, msgKey = {}) {
     const { db } = require('../config/database');
     try {
-        // Ignorar JIDs de grupos o broadcast
-        if (phone.includes('@g.us') || phone.includes('@broadcast')) return;
+        // Ignorar JIDs de grupos, broadcast, newsletters o participantes de grupos
+        if (!phone || isGroupOrNonPersonJid(phone) || msgKey.remoteJid?.includes('@g.us') || msgKey.participant) return;
 
         const cleanIncoming = phone.replace(/\D/g, '').slice(-10);
-        if (cleanIncoming.length < 10) return;
+        if (cleanIncoming.length < 10 || isGroupOrNonPersonJid(cleanIncoming)) return;
 
         const allClients = await db.prepare('SELECT id, nombres, "apellidoPaterno", telefono, telefono2, "equipo_id", "etapaEmbudo", "historialEmbudo" FROM clientes').all();
         const matchingClients = allClients.filter(c => {
@@ -522,87 +550,100 @@ async function connectClient(vendedorId, io) {
     sock.ev.on('messages.upsert', async (m) => {
         if (m.type === 'notify' || m.type === 'append') {
             for (const msg of m.messages) {
-                console.log(`[Baileys upsert] key: ${JSON.stringify(msg.key)}, hasMessage: ${!!msg.message}`);
-                if (msg.message) {
-                    const rawJid = msg.key.remoteJidAlt || msg.key.remoteJid || '';
-                    const sessionDir = path.join(SESSION_DIR_BASE, `user_${vendedorId}`);
-                    const jid = resolveLidToPhone(rawJid, sessionDir);
+                if (!msg.message) continue;
 
-                    // Solo procesar chats individuales estándar (@s.whatsapp.net)
-                    // Esto evita procesar grupos, listas de difusión y LIDs (identificadores internos de WhatsApp que parecen números aleatorios)
-                    if (!jid.endsWith('@s.whatsapp.net')) {
-                        continue;
+                const remoteJid = msg.key?.remoteJid || '';
+                const remoteJidAlt = msg.key?.remoteJidAlt || '';
+
+                // Rechazar de inmediato cualquier mensaje de grupo o participante de grupo
+                if (
+                    remoteJid.includes('@g.us') ||
+                    remoteJidAlt.includes('@g.us') ||
+                    msg.key?.participant ||
+                    isGroupOrNonPersonJid(remoteJid) ||
+                    isGroupOrNonPersonJid(remoteJidAlt)
+                ) {
+                    continue;
+                }
+
+                const rawJid = remoteJidAlt || remoteJid;
+                const sessionDir = path.join(SESSION_DIR_BASE, `user_${vendedorId}`);
+                const jid = resolveLidToPhone(rawJid, sessionDir);
+
+                if (!jid || !jid.endsWith('@s.whatsapp.net') || isGroupOrNonPersonJid(jid)) {
+                    continue;
+                }
+
+                const phone = jid.split('@')[0];
+                if (isGroupOrNonPersonJid(phone)) continue;
+
+                const isFromMe = msg.key.fromMe;
+                
+                // Identificar si contiene archivos multimedia
+                const mediaKeys = ['imageMessage', 'videoMessage', 'documentMessage', 'audioMessage', 'stickerMessage'];
+                let isMedia = false;
+                let mediaType = '';
+                let mediaObj = null;
+
+                for (const key of mediaKeys) {
+                    if (msg.message[key]) {
+                        isMedia = true;
+                        mediaType = key.replace('Message', ''); // 'image', 'video', 'document', 'audio', 'sticker'
+                        mediaObj = msg.message[key];
+                        break;
                     }
+                }
 
-                    const phone = jid.split('@')[0];
-                    const isFromMe = msg.key.fromMe;
-                    
-                    // Identificar si contiene archivos multimedia
-                    const mediaKeys = ['imageMessage', 'videoMessage', 'documentMessage', 'audioMessage', 'stickerMessage'];
-                    let isMedia = false;
-                    let mediaType = '';
-                    let mediaObj = null;
-
-                    for (const key of mediaKeys) {
-                        if (msg.message[key]) {
-                            isMedia = true;
-                            mediaType = key.replace('Message', ''); // 'image', 'video', 'document', 'audio', 'sticker'
-                            mediaObj = msg.message[key];
-                            break;
+                if (isMedia && mediaObj) {
+                    try {
+                        const stream = await downloadContentFromMessage(mediaObj, mediaType);
+                        let buffer = Buffer.from([]);
+                        for await (const chunk of stream) {
+                            buffer = Buffer.concat([buffer, chunk]);
                         }
+
+                        let ext = '';
+                        if (mediaType === 'image') ext = '.jpg';
+                        else if (mediaType === 'video') ext = '.mp4';
+                        else if (mediaType === 'audio') ext = '.ogg';
+                        else if (mediaType === 'sticker') ext = '.webp';
+                        else if (mediaType === 'document') {
+                            const originalName = mediaObj.fileName || 'documento';
+                            ext = path.extname(originalName) || '.pdf';
+                        }
+
+                        const whatsappUploadsDir = path.join(__dirname, '../uploads/whatsapp');
+                        if (!fs.existsSync(whatsappUploadsDir)) {
+                            fs.mkdirSync(whatsappUploadsDir, { recursive: true });
+                        }
+
+                        const fileName = `${mediaType}_${Date.now()}_${Math.floor(Math.random() * 10000)}${ext}`;
+                        const filePath = path.join(whatsappUploadsDir, fileName);
+                        fs.writeFileSync(filePath, buffer);
+
+                        const publicUrl = `/archivos/whatsapp/${fileName}`;
+                        let captionText = mediaObj.caption || '';
+                        let desc = `[${mediaType.toUpperCase()}](${publicUrl})`;
+                        if (captionText) {
+                            desc += ` - ${captionText}`;
+                        }
+
+                        if (isFromMe) {
+                            await handleOutgoingMessageFromOtherDevice(vendedorId, phone, desc, io, msg.key);
+                        } else {
+                            await handleIncomingMessage(vendedorId, phone, desc, io, msg.pushName, msg.key);
+                        }
+                    } catch (err) {
+                        console.error(`[WhatsApp user_${vendedorId}] Error downloading media:`, err.message);
                     }
-
-                    if (isMedia && mediaObj) {
-                        try {
-                            const stream = await downloadContentFromMessage(mediaObj, mediaType);
-                            let buffer = Buffer.from([]);
-                            for await (const chunk of stream) {
-                                buffer = Buffer.concat([buffer, chunk]);
-                            }
-
-                            let ext = '';
-                            if (mediaType === 'image') ext = '.jpg';
-                            else if (mediaType === 'video') ext = '.mp4';
-                            else if (mediaType === 'audio') ext = '.ogg';
-                            else if (mediaType === 'sticker') ext = '.webp';
-                            else if (mediaType === 'document') {
-                                const originalName = mediaObj.fileName || 'documento';
-                                ext = path.extname(originalName) || '.pdf';
-                            }
-
-                            const whatsappUploadsDir = path.join(__dirname, '../uploads/whatsapp');
-                            if (!fs.existsSync(whatsappUploadsDir)) {
-                                fs.mkdirSync(whatsappUploadsDir, { recursive: true });
-                            }
-
-                            const fileName = `${mediaType}_${Date.now()}_${Math.floor(Math.random() * 10000)}${ext}`;
-                            const filePath = path.join(whatsappUploadsDir, fileName);
-                            fs.writeFileSync(filePath, buffer);
-
-                            const publicUrl = `/archivos/whatsapp/${fileName}`;
-                            let captionText = mediaObj.caption || '';
-                            let desc = `[${mediaType.toUpperCase()}](${publicUrl})`;
-                            if (captionText) {
-                                desc += ` - ${captionText}`;
-                            }
-
-                            if (isFromMe) {
-                                await handleOutgoingMessageFromOtherDevice(vendedorId, phone, desc, io);
-                            } else {
-                                await handleIncomingMessage(vendedorId, phone, desc, io, msg.pushName);
-                            }
-                        } catch (err) {
-                            console.error(`[WhatsApp user_${vendedorId}] Error downloading media:`, err.message);
-                        }
-                    } else {
-                        // Procesar mensaje de texto estándar
-                        const text = msg.message.conversation || msg.message.extendedTextMessage?.text || '';
-                        if (text) {
-                            if (isFromMe) {
-                                await handleOutgoingMessageFromOtherDevice(vendedorId, phone, text, io);
-                            } else {
-                                await handleIncomingMessage(vendedorId, phone, text, io, msg.pushName);
-                            }
+                } else {
+                    // Procesar mensaje de texto estándar
+                    const text = msg.message.conversation || msg.message.extendedTextMessage?.text || '';
+                    if (text) {
+                        if (isFromMe) {
+                            await handleOutgoingMessageFromOtherDevice(vendedorId, phone, text, io, msg.key);
+                        } else {
+                            await handleIncomingMessage(vendedorId, phone, text, io, msg.pushName, msg.key);
                         }
                     }
                 }
@@ -712,11 +753,26 @@ async function processHistoricalMessages(vendedorId, messages, io) {
     try {
         const sessionDir = path.join(SESSION_DIR_BASE, `user_${vendedorId}`);
         // Filtrar mensajes: solo procesar chats individuales estándar (@s.whatsapp.net)
-        // Esto evita procesar grupos, listas de difusión y LIDs (identificadores internos de WhatsApp que parecen números aleatorios)
+        // Esto evita procesar grupos, listas de difusión, newsletters y participantes de grupo
         const validMessages = messages.filter(msg => {
-            const rawJid = msg.key?.remoteJidAlt || msg.key?.remoteJid || '';
+            if (!msg.message) return false;
+
+            const remoteJid = msg.key?.remoteJid || '';
+            const remoteJidAlt = msg.key?.remoteJidAlt || '';
+
+            if (
+                remoteJid.includes('@g.us') ||
+                remoteJidAlt.includes('@g.us') ||
+                msg.key?.participant ||
+                isGroupOrNonPersonJid(remoteJid) ||
+                isGroupOrNonPersonJid(remoteJidAlt)
+            ) {
+                return false;
+            }
+
+            const rawJid = remoteJidAlt || remoteJid;
             const jid = resolveLidToPhone(rawJid, sessionDir);
-            return jid && jid.endsWith('@s.whatsapp.net');
+            return jid && jid.endsWith('@s.whatsapp.net') && !isGroupOrNonPersonJid(jid);
         });
 
         if (validMessages.length === 0) return;
@@ -760,7 +816,9 @@ async function processHistoricalMessages(vendedorId, messages, io) {
         const newActivitiesToInsert = [];
         
         for (const [phone, msgs] of Object.entries(messagesByPhone)) {
+            if (isGroupOrNonPersonJid(phone)) continue;
             const cleanPhone = phone.replace(/\D/g, '').slice(-10);
+            if (cleanPhone.length < 10 || isGroupOrNonPersonJid(cleanPhone)) continue;
             
             // Buscar si el cliente ya existe
             let client = allClients.find(c => {
