@@ -826,7 +826,7 @@ const Clientes = () => {
                                         type="tel"
                                         value={formCliente.telefono}
                                         onChange={(e) => setFormCliente({ ...formCliente, telefono: e.target.value })}
-                                        className="flex-1 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-(--theme-500) text-sm font-medium transition-all"
+                                        className="flex-1 min-w-0 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-(--theme-500) text-sm font-medium transition-all"
                                         placeholder="8136458366"
                                     />
                                 </div>
@@ -859,7 +859,7 @@ const Clientes = () => {
                                                 type="email"
                                                 value={cor}
                                                 onChange={(e) => setFormCliente((f) => { const c = [...f.correos]; c[idx] = e.target.value; return { ...f, correos: c }; })}
-                                                className="flex-1 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-(--theme-500) text-sm font-medium transition-all"
+                                                className="flex-1 min-w-0 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-(--theme-500) text-sm font-medium transition-all"
                                                 placeholder="juan@empresa.com"
                                             />
                                             {formCliente.correos.length > 1 && (
