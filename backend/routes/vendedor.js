@@ -1056,7 +1056,8 @@ router.post('/crear-prospecto', [auth, esVendedor], async (req, res) => {
             false
         );
 
-        const row = await db.prepare('SELECT * FROM clientes WHERE id = ?').get(result.lastInsertRowid);
+        const insertedId = result.lastInsertRowid || result.id || (await db.prepare('SELECT id FROM clientes WHERE "propietarioId" = ? ORDER BY id DESC LIMIT 1').get(prospectorId))?.id;
+        const row = await db.prepare('SELECT * FROM clientes WHERE id = ?').get(insertedId);
         const cliente = toMongoFormat(row);
         if (cliente) cliente.prospectorAsignado = { nombre: req.usuario.nombre };
 
@@ -1065,7 +1066,7 @@ router.post('/crear-prospecto', [auth, esVendedor], async (req, res) => {
             await db.prepare(`
                 INSERT INTO actividades (tipo, vendedor, cliente, fecha, descripcion, resultado, notas)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
-            `).run('prospecto', prospectorId, result.lastInsertRowid, now, 'Nuevo prospecto agregado al sistema', 'exitoso', notas || '');
+            `).run('prospecto', prospectorId, insertedId, now, 'Nuevo prospecto agregado al sistema', 'exitoso', notas || '');
         } catch (actError) {
             console.error('Error al registrar actividad de creación de prospecto:', actError);
         }

@@ -272,11 +272,11 @@ router.get('/:id', auth, esSuperUser, async (req, res) => {
     }
 });
 
-router.post('/', auth, esSuperUser, async (req, res) => {
+router.post('/', auth, async (req, res) => {
     try {
         const { nombres, apellidoPaterno, apellidoMaterno, telefono, correo, empresa, estado, vendedorAsignado, etapaEmbudo, fuente } = req.body;
-        if (!nombres || !telefono || !correo) {
-            return res.status(400).json({ mensaje: 'Complete los campos requeridos' });
+        if (!nombres || !telefono) {
+            return res.status(400).json({ mensaje: 'Complete los campos requeridos (Nombre y Teléfono)' });
         }
         const rol = String(req.usuario.rol || '').toLowerCase();
         const usuarioId = parseInt(req.usuario.id);
@@ -328,8 +328,15 @@ router.post('/', auth, esSuperUser, async (req, res) => {
             }
         }
 
+        const io = req.app.get('io');
+        if (io) {
+            io.to(`user_${vendedorId}`).emit('prospectos_actualizados');
+            if (equipoId) io.to(`team_${equipoId}`).emit('prospectos_actualizados');
+        }
+
         res.status(201).json({ mensaje: 'Cliente creado', cliente: toMongoFormat(row) || row });
     } catch (error) {
+        console.error('Error al crear cliente:', error);
         res.status(500).json({ mensaje: 'Error del servidor' });
     }
 });
