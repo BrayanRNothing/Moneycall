@@ -814,13 +814,13 @@ const Clientes = () => {
                                         onChange={(e) => setFormCliente({ ...formCliente, lada: e.target.value })}
                                         className="w-1/3 px-2 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-(--theme-500) text-xs font-bold"
                                     >
-                                        <option value="+52">🇲🇽 +52</option>
-                                        <option value="+1">🇺🇸 +1</option>
-                                        <option value="+34">🇪🇸 +34</option>
-                                        <option value="+57">🇨🇴 +57</option>
-                                        <option value="+54">🇦🇷 +54</option>
-                                        <option value="+56">🇨🇱 +56</option>
-                                        <option value="+51">🇵🇪 +51</option>
+                                        <option value="+52">MX (+52)</option>
+                                        <option value="+1">US (+1)</option>
+                                        <option value="+34">ES (+34)</option>
+                                        <option value="+57">CO (+57)</option>
+                                        <option value="+54">AR (+54)</option>
+                                        <option value="+56">CL (+56)</option>
+                                        <option value="+51">PE (+51)</option>
                                     </select>
                                     <input
                                         type="tel"
