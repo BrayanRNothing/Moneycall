@@ -146,6 +146,76 @@ async function updateClientNameIfGeneric(vendedorId, phone, name, io) {
     }
 }
 
+// Asegurar que exista un prospecto para un teléfono/JID individual de WhatsApp recibido de chats o contactos
+async function ensureProspectExists(vendedorId, phone, name = '', io) {
+    if (!phone || isGroupOrNonPersonJid(phone)) return;
+    const cleanPhone = phone.replace(/\D/g, '').slice(-10);
+    if (cleanPhone.length < 10 || isGroupOrNonPersonJid(cleanPhone)) return;
+
+    const { db } = require('../config/database');
+    try {
+        const allClients = await db.prepare('SELECT id, nombres, "apellidoPaterno", telefono, telefono2, "equipo_id" FROM clientes').all();
+        const exists = allClients.some(c => {
+            const clean1 = String(c.telefono || '').replace(/\D/g, '').slice(-10);
+            const clean2 = String(c.telefono2 || '').replace(/\D/g, '').slice(-10);
+            return clean1 === cleanPhone || clean2 === cleanPhone;
+        });
+
+        if (!exists) {
+            let equipoId = null;
+            const vendedor = await db.prepare('SELECT equipo_id FROM usuarios WHERE id = ?').get(vendedorId);
+            if (vendedor) equipoId = vendedor.equipo_id || null;
+
+            const now = new Date().toISOString();
+            const hist = JSON.stringify([{ etapa: 'prospecto_nuevo', fecha: now, vendedor: vendedorId }]);
+            const rawFormattedPhone = phone.startsWith('+') ? phone : `+${phone}`;
+
+            let nombres = 'Contacto';
+            let apellidoPaterno = 'WhatsApp';
+
+            const trimmedName = String(name || '').trim();
+            if (trimmedName && !trimmedName.toLowerCase().startsWith('prospecto whatsapp')) {
+                const parts = trimmedName.split(/\s+/);
+                nombres = parts[0] || 'Contacto';
+                apellidoPaterno = parts.slice(1).join(' ') || '';
+            }
+
+            await db.prepare(`
+                INSERT INTO clientes (nombres, "apellidoPaterno", "apellidoMaterno", telefono, correo, empresa, estado, "etapaEmbudo", "historialEmbudo", "vendedorAsignado", "prospectorAsignado", "closerAsignado", "fechaUltimaEtapa", "equipo_id", "propietarioId", compartido, fuente)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `).run(
+                nombres,
+                apellidoPaterno,
+                '',
+                rawFormattedPhone,
+                '',
+                'Contacto WhatsApp',
+                'proceso',
+                'prospecto_nuevo',
+                hist,
+                vendedorId,
+                vendedorId,
+                vendedorId,
+                now,
+                equipoId,
+                vendedorId,
+                0,
+                'WhatsApp'
+            );
+
+            console.log(`[WhatsApp user_${vendedorId}] ➕ Prospecto asegurado/registrado: ${nombres} ${apellidoPaterno} (${rawFormattedPhone})`);
+            if (io) {
+                io.to(`user_${vendedorId}`).emit('prospectos_actualizados');
+                if (equipoId) io.to(`team_${equipoId}`).emit('prospectos_actualizados');
+            }
+        } else if (name) {
+            await updateClientNameIfGeneric(vendedorId, cleanPhone, name, io);
+        }
+    } catch (err) {
+        console.error(`[WhatsApp user_${vendedorId}] Error al asegurar prospecto:`, err.message);
+    }
+}
+
 // ==========================================
 // DB SYNC HELPERS (PostgreSQL/SQLite safe)
 // ==========================================
@@ -405,7 +475,9 @@ async function handleOutgoingMessageFromOtherDevice(vendedorId, phone, text, io,
             return clean1 === cleanIncoming || clean2 === cleanIncoming;
         });
 
-        if (matchingClients.length > 0) {
+        if (matchingClients.length === 0) {
+            await ensureProspectExists(vendedorId, phone, '', io);
+        } else {
             for (const client of matchingClients) {
                 const desc = `Vendedor: ${text}`;
                 
@@ -558,16 +630,26 @@ async function connectClient(vendedorId, io) {
     sock.ev.on('messaging-history.set', async ({ chats, contacts, messages, isLatest }) => {
         console.log(`[WhatsApp user_${vendedorId}] Historial inicial recibido: ${chats?.length || 0} chats, ${contacts?.length || 0} contactos, ${messages?.length || 0} mensajes.`);
         
-        // Cargar nombres a memoria y actualizar clientes genéricos
+        // Cargar contactos y asegurar prospectos en la base de datos
         if (contacts) {
             for (const contact of contacts) {
                 if (contact.id) {
                     const phone = contact.id.split('@')[0];
-                    const name = contact.name || contact.verifiedName || contact.notify;
+                    const name = contact.name || contact.verifiedName || contact.notify || '';
                     if (phone && name) {
                         contactNames[phone] = name;
-                        await updateClientNameIfGeneric(vendedorId, phone, name, io);
                     }
+                    await ensureProspectExists(vendedorId, phone, name, io);
+                }
+            }
+        }
+
+        if (chats) {
+            for (const chat of chats) {
+                if (chat.id) {
+                    const phone = chat.id.split('@')[0];
+                    const name = contactNames[phone] || chat.name || '';
+                    await ensureProspectExists(vendedorId, phone, name, io);
                 }
             }
         }
@@ -585,11 +667,11 @@ async function connectClient(vendedorId, io) {
         for (const contact of contacts) {
             if (contact.id) {
                 const phone = contact.id.split('@')[0];
-                const name = contact.name || contact.verifiedName || contact.notify;
+                const name = contact.name || contact.verifiedName || contact.notify || '';
                 if (phone && name) {
                     contactNames[phone] = name;
-                    await updateClientNameIfGeneric(vendedorId, phone, name, io);
                 }
+                await ensureProspectExists(vendedorId, phone, name, io);
             }
         }
     });
@@ -599,11 +681,11 @@ async function connectClient(vendedorId, io) {
         for (const contact of contacts) {
             if (contact.id) {
                 const phone = contact.id.split('@')[0];
-                const name = contact.name || contact.verifiedName || contact.notify;
+                const name = contact.name || contact.verifiedName || contact.notify || '';
                 if (phone && name) {
                     contactNames[phone] = name;
-                    await updateClientNameIfGeneric(vendedorId, phone, name, io);
                 }
+                await ensureProspectExists(vendedorId, phone, name, io);
             }
         }
     });
@@ -613,11 +695,11 @@ async function connectClient(vendedorId, io) {
         for (const update of updates) {
             if (update.id) {
                 const phone = update.id.split('@')[0];
-                const name = update.name || update.verifiedName || update.notify;
+                const name = update.name || update.verifiedName || update.notify || '';
                 if (phone && name) {
                     contactNames[phone] = name;
-                    await updateClientNameIfGeneric(vendedorId, phone, name, io);
                 }
+                await ensureProspectExists(vendedorId, phone, name, io);
             }
         }
     });
@@ -642,7 +724,7 @@ async function connectClient(vendedorId, io) {
                     continue;
                 }
 
-                const rawJid = remoteJidAlt || remoteJid;
+                const rawJid = remoteJid.endsWith('@s.whatsapp.net') ? remoteJid : (remoteJidAlt.endsWith('@s.whatsapp.net') ? remoteJidAlt : (remoteJid || remoteJidAlt));
                 const sessionDir = path.join(SESSION_DIR_BASE, `user_${vendedorId}`);
                 const jid = resolveLidToPhone(rawJid, sessionDir);
 
@@ -849,7 +931,7 @@ async function processHistoricalMessages(vendedorId, messages, io) {
                 return false;
             }
 
-            const rawJid = remoteJidAlt || remoteJid;
+            const rawJid = remoteJid.endsWith('@s.whatsapp.net') ? remoteJid : (remoteJidAlt.endsWith('@s.whatsapp.net') ? remoteJidAlt : (remoteJid || remoteJidAlt));
             const jid = resolveLidToPhone(rawJid, sessionDir);
             return jid && jid.endsWith('@s.whatsapp.net') && !isGroupOrNonPersonJid(jid);
         });
