@@ -566,9 +566,9 @@ router.get('/monitoreo/actividades', auth, esTeamOwner, async (req, res) => {
         const actividades = rows.map(r => ({
             id: r.id,
             tipo: r.tipo,
-            descripcion: r.descripcion,
+            descripcion: `Actividad registrada: ${r.tipo}`,
             resultado: r.resultado,
-            notas: r.notas,
+            notas: 'Contenido oculto por privacidad',
             fecha: r.fecha,
             createdAt: r.createdAt,
             vendedor: {

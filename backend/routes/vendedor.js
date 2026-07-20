@@ -988,7 +988,8 @@ router.get('/clientes-ganados', [auth, esVendedor], async (req, res) => {
 
         sql += ` ${visibilityWhere.join(' AND ')}`;
 
-        sql += ' AND c.etapaEmbudo IN (?, ?, ?, ?, ?)';
+        const placeholders = CLIENT_STAGES.map(() => '?').join(', ');
+        sql += ` AND c.etapaEmbudo IN (${placeholders})`;
         params.push(...CLIENT_STAGES);
 
         if (busqueda) {
