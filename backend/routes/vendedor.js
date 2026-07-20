@@ -167,13 +167,13 @@ router.get('/dashboard', [auth, esVendedor], async (req, res) => {
         let clientes;
         if (equipoId) {
             clientes = await db.prepare(`
-                SELECT * FROM clientes WHERE equipo_id = ?
+                SELECT id, "etapaEmbudo", "historialEmbudo", "closerAsignado" FROM clientes WHERE equipo_id = ?
             `).all(equipoId);
         } else {
             clientes = await db.prepare(`
-                SELECT DISTINCT c.* FROM clientes c
+                SELECT DISTINCT c.id, c."etapaEmbudo", c."historialEmbudo", c."closerAsignado" FROM clientes c
                 LEFT JOIN actividades a ON c.id = a.cliente
-                WHERE c.prospectorAsignado = ? OR a.vendedor = ?
+                WHERE c."prospectorAsignado" = ? OR a.vendedor = ?
             `).all(prospectorId, prospectorId);
         }
 
@@ -326,13 +326,13 @@ router.get('/dashboard-closer', [auth, esVendedor], async (req, res) => {
         const equipoId = req.usuario.equipo_id;
 
         // Si hay equipo, ver clientes del equipo, si no, solo los propios
-        let sql = 'SELECT * FROM clientes WHERE ';
+        let sql = 'SELECT id, "etapaEmbudo", "historialEmbudo", "closerAsignado" FROM clientes WHERE ';
         let params = [];
         if (equipoId) {
             sql += 'equipo_id = ?';
             params.push(equipoId);
         } else {
-            sql += 'closerAsignado = ?';
+            sql += '"closerAsignado" = ?';
             params.push(closerId);
         }
 
@@ -807,12 +807,20 @@ router.get('/prospectos', [auth, esVendedor], async (req, res) => {
     try {
         const prospectorId = parseInt(req.usuario.id, 10);
         const equipoId = req.usuario.equipo_id;
-        const { etapa, busqueda, scope } = req.query;
+        const { etapa, busqueda, scope, page = 1, limit = 50 } = req.query;
         const visibilityScope = parseScope(scope);
+        const pageNum = parseInt(page, 10) || 1;
+        const limitNum = parseInt(limit, 10) || 50;
+        const offset = (pageNum - 1) * limitNum;
 
-        let sql = `SELECT c.*, u.nombre as closerNombre, owner.nombre as propietarioNombre,
+        let baseSql = `FROM clientes c
+            LEFT JOIN usuarios u ON c."closerAsignado" = u.id
+            LEFT JOIN usuarios owner ON owner.id = COALESCE(c."propietarioId", c."prospectorAsignado", c."vendedorAsignado")
+            WHERE`;
+
+        let selectFields = `SELECT c.*, u.nombre as closerNombre, owner.nombre as propietarioNombre,
             (
-                SELECT MIN(t.fechaLimite)
+                SELECT MIN(t."fechaLimite")
                 FROM tareas t
                 WHERE t.cliente = c.id
                   AND t.titulo = 'Recordatorio de llamada'
@@ -824,11 +832,13 @@ router.get('/prospectos', [auth, esVendedor], async (req, res) => {
                 WHERE a.cliente = c.id
                   AND a.tipo = 'cita'
                   AND (a.resultado = 'pendiente' OR a.resultado IS NULL)
-            ) as proximaCita
-            FROM clientes c
-            LEFT JOIN usuarios u ON c.closerAsignado = u.id
-            LEFT JOIN usuarios owner ON owner.id = COALESCE(c."propietarioId", c.prospectorAsignado, c.vendedorAsignado)
-            WHERE`;
+            ) as proximaCita,
+            (
+                SELECT CASE WHEN (a.resultado = 'recibido' OR a.descripcion LIKE 'Cliente:%') THEN 1 ELSE 0 END
+                FROM actividades a
+                WHERE a.cliente = c.id AND a.tipo = 'whatsapp'
+                ORDER BY a.id DESC LIMIT 1
+            ) as whatsappPendiente`;
 
         const params = [];
         const visibilityWhere = [];
@@ -837,38 +847,49 @@ router.get('/prospectos', [auth, esVendedor], async (req, res) => {
             visibilityWhere.push('COALESCE(c."propietarioId", c.prospectorAsignado, c.vendedorAsignado) = ?');
             params.push(prospectorId);
         } else if (visibilityScope === 'shared') {
-            visibilityWhere.push('COALESCE(c."propietarioId", c.prospectorAsignado, c.vendedorAsignado) <> ?');
-            params.push(prospectorId);
             visibilityWhere.push('c.compartido = TRUE');
             if (equipoId) {
-                visibilityWhere.push('c."equipo_id" = ?');
-                params.push(equipoId);
+                visibilityWhere.push('(COALESCE(c."propietarioId", c.prospectorAsignado, c.vendedorAsignado) = ? OR c."equipo_id" = ? OR c."equipo_id" IS NULL)');
+                params.push(prospectorId, equipoId);
             } else {
-                visibilityWhere.push('1 = 0');
+                visibilityWhere.push('(COALESCE(c."propietarioId", c.prospectorAsignado, c.vendedorAsignado) = ? OR c."equipo_id" IS NULL)');
+                params.push(prospectorId);
             }
         } else {
-            visibilityWhere.push('(COALESCE(c."propietarioId", c.prospectorAsignado, c.vendedorAsignado) = ? OR (c.compartido = TRUE AND COALESCE(c."propietarioId", c.prospectorAsignado, c.vendedorAsignado) <> ?' + (equipoId ? ' AND c."equipo_id" = ?' : '') + '))');
-            params.push(prospectorId, prospectorId);
-            if (equipoId) params.push(equipoId);
+            if (equipoId) {
+                visibilityWhere.push('(COALESCE(c."propietarioId", c.prospectorAsignado, c.vendedorAsignado) = ? OR (c.compartido = TRUE AND (c."equipo_id" = ? OR c."equipo_id" IS NULL)))');
+                params.push(prospectorId, equipoId);
+            } else {
+                visibilityWhere.push('(COALESCE(c."propietarioId", c.prospectorAsignado, c.vendedorAsignado) = ? OR c.compartido = TRUE)');
+                params.push(prospectorId);
+            }
         }
 
-        sql += ` ${visibilityWhere.join(' AND ')}`;
+        baseSql += ` ${visibilityWhere.join(' AND ')}`;
 
-        sql += ' AND c.etapaEmbudo NOT IN (?, ?, ?, ?, ?, ?)';
+        baseSql += ' AND c."etapaEmbudo" NOT IN (?, ?, ?, ?, ?, ?)';
         params.push('venta_ganada', 'cotizacion_realizada', 'contrato_firmado', 'esperando_pago', 'cliente_activo', 'perdido');
 
         if (etapa && etapa !== 'todos') {
-            sql += ' AND c.etapaEmbudo = ?';
+            baseSql += ' AND c."etapaEmbudo" = ?';
             params.push(etapa);
         }
         if (busqueda) {
-            sql += ' AND (c.nombres LIKE ? OR c.apellidoPaterno LIKE ? OR c.empresa LIKE ? OR c.telefono LIKE ?)';
+            baseSql += ' AND (c.nombres LIKE ? OR c."apellidoPaterno" LIKE ? OR c.empresa LIKE ? OR c.telefono LIKE ?)';
             const like = '%' + busqueda + '%';
             params.push(like, like, like, like);
         }
-        sql += ' ORDER BY c.fechaUltimaEtapa DESC';
+        
+        // Count total rows
+        const countSql = `SELECT COUNT(*) as total ${baseSql}`;
+        const countRow = await db.prepare(countSql).get(...params);
+        const total = countRow ? parseInt(countRow.total, 10) : 0;
 
-        const rows = await db.prepare(sql).all(...params);
+        // Fetch paginated data
+        let sql = `${selectFields} ${baseSql} ORDER BY c."fechaUltimaEtapa" DESC LIMIT ? OFFSET ?`;
+        const paginatedParams = [...params, limitNum, offset];
+
+        const rows = await db.prepare(sql).all(...paginatedParams);
 
         // Traer última actividad de cada prospecto en una sola query
         // Usamos createdAt para evitar que una cita futura tape una interacción más reciente.
@@ -902,11 +923,17 @@ router.get('/prospectos', [auth, esVendedor], async (req, res) => {
                 out.customSections = parseHistorialSeguro(c.customSections);
                 out.historialEmbudo = parseHistorialSeguro(c.historialEmbudo);
                 out.propietarioNombre = propietarioNombre || null;
+                out.whatsappPendiente = Boolean(r.whatsappPendiente || r.whatsapppendiente);
             }
             return out || c;
         });
 
-        res.json(prospectos);
+        res.json({
+            data: prospectos,
+            total,
+            page: pageNum,
+            totalPages: Math.ceil(total / limitNum)
+        });
     } catch (error) {
         console.error('Error al obtener prospectos:', error);
         res.status(500).json({ msg: 'Error del servidor' });
@@ -941,19 +968,22 @@ router.get('/clientes-ganados', [auth, esVendedor], async (req, res) => {
             visibilityWhere.push('COALESCE(c."propietarioId", c.prospectorAsignado, c.vendedorAsignado) = ?');
             params.push(prospectorId);
         } else if (visibilityScope === 'shared') {
-            visibilityWhere.push('COALESCE(c."propietarioId", c.prospectorAsignado, c.vendedorAsignado) <> ?');
-            params.push(prospectorId);
             visibilityWhere.push('c.compartido = TRUE');
             if (equipoId) {
-                visibilityWhere.push('c."equipo_id" = ?');
-                params.push(equipoId);
+                visibilityWhere.push('(COALESCE(c."propietarioId", c.prospectorAsignado, c.vendedorAsignado) = ? OR c."equipo_id" = ? OR c."equipo_id" IS NULL)');
+                params.push(prospectorId, equipoId);
             } else {
-                visibilityWhere.push('1 = 0');
+                visibilityWhere.push('(COALESCE(c."propietarioId", c.prospectorAsignado, c.vendedorAsignado) = ? OR c."equipo_id" IS NULL)');
+                params.push(prospectorId);
             }
         } else {
-            visibilityWhere.push('(COALESCE(c."propietarioId", c.prospectorAsignado, c.vendedorAsignado) = ? OR (c.compartido = TRUE AND COALESCE(c."propietarioId", c.prospectorAsignado, c.vendedorAsignado) <> ?' + (equipoId ? ' AND c."equipo_id" = ?' : '') + '))');
-            params.push(prospectorId, prospectorId);
-            if (equipoId) params.push(equipoId);
+            if (equipoId) {
+                visibilityWhere.push('(COALESCE(c."propietarioId", c.prospectorAsignado, c.vendedorAsignado) = ? OR (c.compartido = TRUE AND (c."equipo_id" = ? OR c."equipo_id" IS NULL)))');
+                params.push(prospectorId, equipoId);
+            } else {
+                visibilityWhere.push('(COALESCE(c."propietarioId", c.prospectorAsignado, c.vendedorAsignado) = ? OR c.compartido = TRUE)');
+                params.push(prospectorId);
+            }
         }
 
         sql += ` ${visibilityWhere.join(' AND ')}`;
@@ -1582,7 +1612,7 @@ router.put('/prospectos/:id/editar', [auth, esVendedor], async (req, res) => {
 // POST /api/vendedor/agendar-reunion
 router.post('/agendar-reunion', [auth, esVendedor], async (req, res) => {
     try {
-        const { clienteId, closerId, fechaReunion, notas } = req.body;
+        const { clienteId, closerId, fechaReunion, notas, plataforma, linkPropio } = req.body;
         if (!clienteId || !closerId || !fechaReunion) {
             return res.status(400).json({ msg: 'Faltan datos requeridos' });
         }
@@ -1629,6 +1659,15 @@ router.post('/agendar-reunion', [auth, esVendedor], async (req, res) => {
 
         // ** GOOGLE CALENDAR INTEGRATION **
         let hangoutLink = null;
+        let locationStr = '';
+        if (plataforma === 'propio') {
+            hangoutLink = linkPropio || '';
+            locationStr = hangoutLink;
+        } else if (plataforma === 'mirrowtalk') {
+            hangoutLink = 'MirrowTalk';
+            locationStr = 'MirrowTalk';
+        }
+
         try {
             const closerDetails = await db.prepare('SELECT email, googleRefreshToken, googleAccessToken, googleTokenExpiry FROM usuarios WHERE id = ?').get(closerIdNum);
 
@@ -1678,27 +1717,33 @@ router.post('/agendar-reunion', [auth, esVendedor], async (req, res) => {
                 const event = {
                     summary: `[CITA AGENDADA] - ${cliente.nombres} ${cliente.apellidoPaterno}`,
                     description: `[SISTEMA-CRM]\nCliente: ${cliente.telefono} - ${cliente.empresa || 'Sin empresa'}\nNotas: ${notas || 'Sin notas'}\nAgendado por Prospecter ${req.usuario.nombre}.`,
+                    location: locationStr,
                     start: { dateTime: fechaReunionISO, timeZone: 'America/Mexico_City' },
                     end: { dateTime: finReunionISO, timeZone: 'America/Mexico_City' },
-                    attendees: attendeesList,
-                    conferenceData: {
+                    attendees: attendeesList
+                };
+
+                if (!plataforma || plataforma === 'meet') {
+                    event.conferenceData = {
                         createRequest: {
                             requestId: 'meeting-' + Date.now().toString(),
                             conferenceSolutionKey: { type: 'hangoutsMeet' }
                         }
-                    }
-                };
+                    };
+                }
 
                 const createdEvent = await calendar.events.insert({
                     calendarId: 'primary',
-                    conferenceDataVersion: 1,
+                    conferenceDataVersion: (!plataforma || plataforma === 'meet') ? 1 : 0,
                     requestBody: event
                 });
 
-                hangoutLink = createdEvent.data.hangoutLink;
-                if (!hangoutLink && createdEvent.data.conferenceData?.entryPoints) {
-                    const ep = createdEvent.data.conferenceData.entryPoints.find(e => e.entryPointType === 'video');
-                    if (ep) hangoutLink = ep.uri;
+                if (!plataforma || plataforma === 'meet') {
+                    hangoutLink = createdEvent.data.hangoutLink;
+                    if (!hangoutLink && createdEvent.data.conferenceData?.entryPoints) {
+                        const ep = createdEvent.data.conferenceData.entryPoints.find(e => e.entryPointType === 'video');
+                        if (ep) hangoutLink = ep.uri;
+                    }
                 }
             }
         } catch (calendarError) {

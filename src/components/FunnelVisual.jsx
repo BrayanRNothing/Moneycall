@@ -45,8 +45,8 @@ const FunnelVisual = ({ stages }) => {
                     <React.Fragment key={index}>
                         {/* Card Principal - Ancho y Alto Igual */}
                         <div className={`bg-linear-to-br ${gradientClass} rounded-lg p-2.5 shadow-md hover:shadow-lg transition-all duration-300 relative overflow-hidden group flex-1 h-48`}>
-                            {/* Fondo decorativo */}
-                            <div className="absolute right-0 top-0 h-full w-1/3 bg-white/5 skew-x-12 transform origin-top-right group-hover:scale-110 transition-transform duration-500"></div>
+                            {/* Fondo decorativo (Reflejo original) - z-20 para que cubra los elementos de abajo sin tapar clics */}
+                            <div className="absolute right-0 top-0 h-full w-1/3 bg-white/5 skew-x-12 transform origin-top-right group-hover:scale-110 transition-transform duration-500 z-20 pointer-events-none"></div>
 
                             <div className="relative z-10 h-full flex flex-col">
                                 {/* Header: Título y Total */}
@@ -54,23 +54,25 @@ const FunnelVisual = ({ stages }) => {
                                     <h4 className="text-white font-bold text-[11px] leading-tight uppercase tracking-wider opacity-90">
                                         {stage.etapa}
                                     </h4>
-                                    <div className="text-3xl font-black text-white tracking-tight drop-shadow-md">
+                                    <div className="text-3xl font-black text-white tracking-tight drop-shadow-md leading-none">
                                         {stage.cantidad}
                                     </div>
                                 </div>
 
-                                {/* Contador Hoy - Posicionado absoluto para no mover el layout */}
-                                {stage.contadorHoy > 0 && (
-                                    <div className="absolute top-9 right-2.5 z-20 inline-flex items-center gap-1 bg-white/20 backdrop-blur-md rounded-full px-1.5 py-0.5 border border-white/10">
-                                        <TrendingUp className="w-2 h-2 text-white" />
-                                        <span className="text-white text-[9px] font-bold">
-                                            +{stage.contadorHoy} {stage.labelContador || 'hoy'}
-                                        </span>
-                                    </div>
-                                )}
-
                                 {/* Spacer para empujar stats al fondo */}
                                 <div className="flex-1"></div>
+
+                                {/* Indicador de 'Hoy' justo encima del cuadro de estadísticas */}
+                                {stage.contadorHoy > 0 && (
+                                    <div className="flex justify-end mb-1">
+                                        <div className="inline-flex items-center gap-1 bg-white/20 backdrop-blur-md rounded-full px-1.5 py-0.5 border border-white/10 whitespace-nowrap">
+                                            <TrendingUp className="w-2 h-2 text-white" />
+                                            <span className="text-white text-[9px] font-bold">
+                                                +{stage.contadorHoy} {stage.labelContador || 'hoy'}
+                                            </span>
+                                        </div>
+                                    </div>
+                                )}
 
                                 {/* Estadísticas al fondo */}
                                 {(stage.cantidadExito !== undefined || stage.cantidadPerdida !== undefined) && (

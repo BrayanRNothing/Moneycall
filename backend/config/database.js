@@ -348,7 +348,7 @@ const initDb = async () => {
     cliente INTEGER REFERENCES clientes(id),
     fecha TEXT DEFAULT CURRENT_TIMESTAMP,
     descripcion TEXT,
-    resultado TEXT DEFAULT 'pendiente' CHECK(resultado IN ('exitoso','pendiente','fallido','convertido','descartado','enviado')),
+    resultado TEXT DEFAULT 'pendiente' CHECK(resultado IN ('exitoso','pendiente','fallido','convertido','descartado','enviado','recibido')),
     cambioEtapa INTEGER DEFAULT 0,
     etapaAnterior TEXT,
     etapaNueva TEXT,
@@ -404,6 +404,13 @@ const initDb = async () => {
     mensaje TEXT NOT NULL,
     leido INTEGER DEFAULT 0,
     fecha TEXT DEFAULT CURRENT_TIMESTAMP
+  );
+
+  CREATE TABLE IF NOT EXISTS whatsapp_sessions (
+    id SERIAL PRIMARY KEY,
+    vendedor_id INTEGER UNIQUE REFERENCES usuarios(id) ON DELETE CASCADE,
+    session_data TEXT NOT NULL,
+    "updatedAt" TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
   );
 `;
 
@@ -605,7 +612,7 @@ const initDb = async () => {
         ALTER TABLE actividades DROP CONSTRAINT IF EXISTS actividades_tipo_check;
         ALTER TABLE actividades DROP CONSTRAINT IF EXISTS actividades_resultado_check;
         ALTER TABLE actividades ALTER COLUMN cliente DROP NOT NULL;
-        ALTER TABLE actividades ADD CONSTRAINT actividades_resultado_check CHECK (resultado IN ('exitoso','pendiente','fallido','convertido','descartado','enviado'));
+        ALTER TABLE actividades ADD CONSTRAINT actividades_resultado_check CHECK (resultado IN ('exitoso','pendiente','fallido','convertido','descartado','enviado','recibido'));
       `);
       console.log('✅ Migración: Tabla actividades actualizada (cliente nullable, tipo/resultado checks relajados)');
     } catch (e) {
@@ -641,6 +648,55 @@ const initDb = async () => {
       `);
     } catch (e) {
       console.error('⚠️ Migración propietarioId/compartido falló:', e.message);
+    }
+
+    // Limpieza de clientes LID y prospectos vacíos
+    try {
+      // 1. Eliminar actividades de clientes LID (teléfono de 14 o más caracteres que no sea de México)
+      await internalDb.query(`
+        DELETE FROM actividades 
+        WHERE cliente IN (SELECT id FROM clientes WHERE LENGTH(telefono) >= 14 AND telefono NOT LIKE '+52%')
+      `);
+      // 2. Eliminar clientes LID
+      const resLid = await internalDb.query(`
+        DELETE FROM clientes 
+        WHERE LENGTH(telefono) >= 14 AND telefono NOT LIKE '+52%'
+      `);
+      if (resLid && resLid.rowCount > 0) {
+        console.log(`🧹 Migración: Limpiados ${resLid.rowCount} clientes LID obsoletos.`);
+      }
+
+      // 3. Eliminar actividades de grupos (contienen '-' o empiezan con +1203 y longitud >= 15)
+      await internalDb.query(`
+        DELETE FROM actividades 
+        WHERE cliente IN (
+          SELECT id FROM clientes 
+          WHERE (telefono LIKE '+1203%' AND LENGTH(telefono) >= 15) 
+             OR telefono LIKE '%-%'
+        )
+      `);
+
+      // 4. Eliminar clientes que son grupos
+      const resGrupos = await internalDb.query(`
+        DELETE FROM clientes 
+        WHERE (telefono LIKE '+1203%' AND LENGTH(telefono) >= 15) 
+           OR telefono LIKE '%-%'
+      `);
+      if (resGrupos && resGrupos.rowCount > 0) {
+        console.log(`🧹 Migración: Limpiados ${resGrupos.rowCount} grupos de WhatsApp guardados como contactos.`);
+      }
+
+      // 5. Eliminar clientes auto-creados vacíos (sin ninguna actividad)
+      const resVacios = await internalDb.query(`
+        DELETE FROM clientes 
+        WHERE nombres = 'Prospecto' 
+          AND id NOT IN (SELECT DISTINCT cliente FROM actividades WHERE cliente IS NOT NULL)
+      `);
+      if (resVacios && resVacios.rowCount > 0) {
+        console.log(`🧹 Migración: Limpiados ${resVacios.rowCount} prospectos vacíos sin mensajes.`);
+      }
+    } catch (e) {
+      console.error('⚠️ Limpieza de base de datos falló:', e.message);
     }
 
     // ================================================================
@@ -684,6 +740,41 @@ const initDb = async () => {
       console.log('✅ Migración: equipos creados y usuarios/clientes asignados');
     } catch (e) {
       console.error('⚠️ Migración equipos falló:', e.message);
+    }
+
+    // 5. Limpiar correos electrónicos automáticos de WhatsApp (poner en blanco)
+    try {
+      const res = await internalDb.query(`
+        UPDATE clientes 
+        SET correo = '' 
+        WHERE correo LIKE '%@whatsapp.com' 
+           OR correo LIKE '%@crm-whatsapp.com' 
+           OR correo LIKE '%@whatsapp.net'
+      `);
+      console.log('✅ Migración: Limpiados correos automáticos ficticios de WhatsApp');
+    } catch (e) {
+      console.error('⚠️ Migración de limpieza de correos falló:', e.message);
+    }
+
+    // 6. Crear índices de rendimiento en PostgreSQL
+    try {
+      await internalDb.query(`
+        CREATE INDEX IF NOT EXISTS idx_actividades_cliente_tipo_res ON actividades (cliente, tipo, resultado);
+        CREATE INDEX IF NOT EXISTS idx_actividades_createdat_desc ON actividades ("createdAt" DESC);
+        CREATE INDEX IF NOT EXISTS idx_tareas_cliente_titulo_estado ON tareas (cliente, titulo, estado);
+        CREATE INDEX IF NOT EXISTS idx_clientes_propietario_vendedor ON clientes (
+          COALESCE("propietarioId", "prospectorAsignado", "vendedorAsignado")
+        );
+        CREATE INDEX IF NOT EXISTS idx_clientes_closer ON clientes ("closerAsignado");
+        CREATE INDEX IF NOT EXISTS idx_clientes_etapa ON clientes ("etapaEmbudo");
+        CREATE INDEX IF NOT EXISTS idx_clientes_telefono ON clientes (telefono);
+        CREATE INDEX IF NOT EXISTS idx_actividades_tipo ON actividades (tipo);
+        CREATE INDEX IF NOT EXISTS idx_usuarios_usuario_lower ON usuarios (LOWER(usuario));
+        CREATE INDEX IF NOT EXISTS idx_usuarios_email_lower ON usuarios (LOWER(email));
+      `);
+      console.log('✅ Migración: Índices de rendimiento creados en PostgreSQL');
+    } catch (e) {
+      console.error('⚠️ Creación de índices de rendimiento falló:', e.message);
     }
   } else {
     // SQLite: agregar columnas faltantes

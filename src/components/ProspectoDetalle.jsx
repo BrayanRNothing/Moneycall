@@ -75,6 +75,60 @@ export default function ProspectoDetalle({
     const calendarRolePath = getCalendarRolePath();
     const { currentStep, botActions } = useBotStore();
 
+    const renderBubbleContent = (text) => {
+        const mediaMatch = text.match(/\[(IMAGE|VIDEO|AUDIO|DOCUMENT|STICKER)\]\(([^)]+)\)/i);
+        if (mediaMatch) {
+            const type = mediaMatch[1];
+            let url = mediaMatch[2];
+            
+            if (url.startsWith('/')) {
+                url = `${API_URL}${url}`;
+            }
+            
+            const caption = text.replace(/\[(IMAGE|VIDEO|AUDIO|DOCUMENT|STICKER)\]\(([^)]+)\)\s*-?\s*/i, '');
+            
+            return (
+                <div className="space-y-2 pb-3.5 pr-10">
+                    {type === 'IMAGE' && (
+                        <img 
+                            src={url} 
+                            alt="WhatsApp Media" 
+                            className="rounded-lg max-w-full max-h-60 object-cover cursor-pointer hover:opacity-90 transition-opacity border border-slate-100" 
+                            onClick={() => window.open(url, '_blank')} 
+                        />
+                    )}
+                    {type === 'STICKER' && (
+                        <img 
+                            src={url} 
+                            alt="WhatsApp Sticker" 
+                            className="w-32 h-32 object-contain cursor-pointer hover:scale-105 transition-transform" 
+                            onClick={() => window.open(url, '_blank')} 
+                        />
+                    )}
+                    {type === 'VIDEO' && (
+                        <video src={url} controls className="rounded-lg max-w-full max-h-60 border border-slate-100" />
+                    )}
+                    {type === 'AUDIO' && (
+                        <audio src={url} controls className="w-full max-w-xs scale-90 origin-left" />
+                    )}
+                    {type === 'DOCUMENT' && (
+                        <a 
+                            href={url} 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            className="flex items-center gap-2.5 p-3 rounded-xl bg-slate-100/60 hover:bg-slate-200/60 border border-slate-200/60 transition-colors text-slate-700 font-semibold"
+                        >
+                            <Paperclip size={18} className="text-slate-500 shrink-0" />
+                            <span className="truncate text-xs underline">Ver Documento Recibido</span>
+                        </a>
+                    )}
+                    {caption && <p className="whitespace-pre-wrap leading-relaxed">{caption}</p>}
+                </div>
+            );
+        }
+        return <p className="whitespace-pre-wrap leading-relaxed font-semibold pb-3.5 pr-10">{text}</p>;
+    };
+
     const [prospectoSeleccionado, setProspectoSeleccionado] = useState(initialProspecto);
     const pid = prospectoSeleccionado?.id || prospectoSeleccionado?._id;
 
@@ -86,6 +140,8 @@ export default function ProspectoDetalle({
 
     const [muralTexto, setMuralTexto] = useState('');
     const [guardandoMural, setGuardandoMural] = useState(false);
+    const [canalEnvio, setCanalEnvio] = useState('mural');
+    const [enviandoWhatsApp, setEnviandoWhatsApp] = useState(false);
 
     const [llamadaFlow, setLlamadaFlow] = useState(null);
     const [registrandoActividad, setRegistrandoActividad] = useState(false);
@@ -144,6 +200,7 @@ export default function ProspectoDetalle({
     const [customSections, setCustomSections] = useState(parseSafeArray(initialProspecto?.customSections));
     const [modalNuevaSeccion, setModalNuevaSeccion] = useState(false);
     const [drawerHistorialAbierto, setDrawerHistorialAbierto] = useState(false);
+    const [filtroHistorial, setFiltroHistorial] = useState('bitacora');
 
     const telefonosContacto = useMemo(() => {
         return [prospectoSeleccionado?.telefono, prospectoSeleccionado?.telefono2]
@@ -484,10 +541,11 @@ export default function ProspectoDetalle({
 
             // Recargar prospecto fresco desde el servidor (evitar estado obsoleto)
             const res = await axios.get(`${API_URL}/api/${rolePath}/prospectos`, { headers: getAuthHeaders() });
-            const updated = res.data.find(p => p.id === pid || p._id === pid);
+            const prospectosData = res.data.data ? res.data.data : res.data;
+            const updated = prospectosData.find(p => p.id === pid || p._id === pid);
             if (updated) {
                 setProspectoSeleccionado(updated);
-                setProspectos(res.data);
+                setProspectos(prospectosData);
             }
             // Recargar historial
             handleSeleccionarProspecto(updated || prospectoSeleccionado);
@@ -533,6 +591,33 @@ export default function ProspectoDetalle({
             setMuralTexto('');
         } finally {
             setGuardandoMural(false);
+        }
+    };
+
+    const enviarMensajeWhatsApp = async () => {
+        const texto = muralTexto.trim();
+        if (!texto) return;
+        if (enviandoWhatsApp) return;
+
+        setEnviandoWhatsApp(true);
+        const pid = prospectoSeleccionado?.id || prospectoSeleccionado?._id;
+
+        try {
+            const res = await axios.post(
+                `${API_URL}/api/whatsapp/send`,
+                { clienteId: pid, mensaje: texto },
+                { headers: getAuthHeaders() }
+            );
+            if (res.data.success) {
+                setMuralTexto('');
+                toast.success('Mensaje enviado por WhatsApp');
+                // Recargar historial de actividades
+                handleSeleccionarProspectoProp(prospectoSeleccionado);
+            }
+        } catch (err) {
+            toast.error(err.response?.data?.mensaje || 'Error al enviar WhatsApp');
+        } finally {
+            setEnviandoWhatsApp(false);
         }
     };
 
@@ -711,7 +796,8 @@ export default function ProspectoDetalle({
             toast.success(`Etapa actualizada: ${getEtapaLabel(nuevaEtapa)}`);
             setEditandoEtapa(false);
             const res = await axios.get(`${API_URL}/api/${rolePath}/prospectos`, { headers: getAuthHeaders() });
-            const updated = res.data.find(p => p.id === pid || p._id === pid);
+            const prospectosData = res.data.data ? res.data.data : res.data;
+            const updated = prospectosData.find(p => p.id === pid || p._id === pid);
             if (updated) { setProspectoSeleccionado(updated); }
             if (onActualizado) onActualizado();
         } catch (error) {
@@ -1339,7 +1425,6 @@ export default function ProspectoDetalle({
                     />
 
                     <div id="detalle-prospecto-historial" className={`fixed inset-x-0 bottom-0 z-50 lg:static lg:z-auto transition-transform duration-300 ease-out transform ${drawerHistorialAbierto ? 'translate-y-0' : 'translate-y-full lg:translate-y-0'} lg:transform-none bg-white lg:bg-white border-t lg:border-t-0 lg:border lg:border-slate-200 rounded-t-2xl lg:rounded-xl shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.3)] lg:shadow-sm flex flex-col overflow-hidden h-[88vh] lg:h-full min-h-0`}>
-                        {/* Pequeña barra tirador en móvil */}
                         <div className="w-full flex justify-center py-2 lg:hidden" onTouchMove={(e) => {
                                 // Touch prevent o close on swipe (opcional, por ahora solo visual)
                             }}
@@ -1347,43 +1432,119 @@ export default function ProspectoDetalle({
                             <div className="w-12 h-1.5 bg-slate-300 rounded-full"></div>
                         </div>
 
-                        <div className="p-4 border-b border-slate-100 bg-slate-50/50 lg:rounded-t-xl flex items-center justify-between">
-                            <div>
-                                <h3 className="font-bold text-gray-900 text-sm">Historial de interacciones</h3>
-                                <p className="text-[10px] text-slate-400 mt-0.5">↑ Más reciente arriba</p>
+                        <div className="p-3 border-b border-slate-200/80 bg-slate-50/80 lg:rounded-t-xl flex flex-col gap-2 shrink-0">
+                            <div className="flex items-center justify-between px-1">
+                                <div>
+                                    <h3 className="font-black text-slate-800 text-xs uppercase tracking-wider">Historial del Prospecto</h3>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-[10px] bg-slate-200 text-slate-700 rounded-full px-2 py-0.5 font-bold">
+                                        {
+                                            actividadesContext.filter(act => 
+                                                filtroHistorial === 'whatsapp' ? act.tipo === 'whatsapp' : act.tipo !== 'whatsapp'
+                                            ).length
+                                        }
+                                    </span>
+                                    <button className="lg:hidden p-1.5 bg-slate-200/50 rounded-full text-slate-500 hover:text-slate-800" onClick={() => setDrawerHistorialAbierto(false)}>
+                                        <X className="w-4 h-4" />
+                                    </button>
+                                </div>
                             </div>
-                            <div className="flex items-center gap-2">
-                                <span className="text-xs bg-slate-200 text-slate-600 rounded-full px-2 py-0.5 font-semibold">{actividadesContext.length}</span>
-                                <button className="lg:hidden p-1.5 bg-slate-200/50 rounded-full text-slate-500 hover:text-slate-800" onClick={() => setDrawerHistorialAbierto(false)}>
-                                    <X className="w-4 h-4" />
+                            
+                            {/* Tabs para separar interacciones y whatsapp */}
+                            <div className="flex bg-slate-200/60 p-0.5 rounded-xl">
+                                <button
+                                    onClick={() => {
+                                        setFiltroHistorial('bitacora');
+                                        setCanalEnvio('mural');
+                                    }}
+                                    className={`flex-1 py-1.5 text-[10px] font-black uppercase tracking-wider rounded-lg transition-all ${
+                                        filtroHistorial === 'bitacora'
+                                            ? 'bg-white text-slate-800 shadow-xs'
+                                            : 'text-slate-500 hover:text-slate-700'
+                                    }`}
+                                >
+                                    📓 Bitácora
+                                </button>
+                                <button
+                                    onClick={async () => {
+                                        try {
+                                            const res = await axios.get(`${API_URL}/api/whatsapp/status`, { headers: getAuthHeaders() });
+                                            if (res.data.status !== 'conectado') {
+                                                toast.error('⚠️ Tu sesión de WhatsApp no está conectada. Conéctala en Ajustes.');
+                                            } else {
+                                                setFiltroHistorial('whatsapp');
+                                                setCanalEnvio('whatsapp');
+                                            }
+                                        } catch (err) {
+                                            toast.error('No se pudo verificar el estado de WhatsApp');
+                                        }
+                                    }}
+                                    className={`flex-1 py-1.5 text-[10px] font-black uppercase tracking-wider rounded-lg transition-all ${
+                                        filtroHistorial === 'whatsapp'
+                                            ? 'bg-green-500 text-white shadow-xs shadow-green-500/20'
+                                            : 'text-slate-500 hover:text-slate-700'
+                                    }`}
+                                >
+                                    💬 WhatsApp
                                 </button>
                             </div>
                         </div>
                         <div
-                            className="flex-1 overflow-y-auto px-4 py-4 hide-scrollbar"
+                            className="flex-1 overflow-y-auto px-4 py-4 hide-scrollbar bg-slate-50/30"
                             style={{ minHeight: 0 }}
                         >
                             {loadingContext ? (
                                 <div className="flex justify-center items-center h-32">
                                     <RefreshCw className="w-8 h-8 text-(--theme-500) animate-spin" />
                                 </div>
-                            ) : actividadesContext.length === 0 ? (
+                            ) : actividadesContext.filter(act => filtroHistorial === 'whatsapp' ? act.tipo === 'whatsapp' : act.tipo !== 'whatsapp').length === 0 ? (
                                 <div className="text-center text-gray-400 mt-10">
                                     <Clock className="w-12 h-12 mx-auto mb-3 opacity-30" />
-                                    <p className="text-sm">Sin interacciones registradas aún.</p>
+                                    <p className="text-xs font-bold uppercase tracking-wider">
+                                        {filtroHistorial === 'whatsapp' ? 'Sin mensajes de WhatsApp aún.' : 'Sin interacciones registradas aún.'}
+                                    </p>
                                 </div>
                             ) : (
                                 <div className="relative">
-                                    {/* Línea vertical de tiempo */}
-                                    <div className="absolute left-[13px] top-2 bottom-2 w-px bg-slate-200" />
+                                    {/* Línea vertical de tiempo - Sólo en bitácora */}
+                                    {filtroHistorial === 'bitacora' && (
+                                        <div className="absolute left-[13px] top-2 bottom-2 w-px bg-slate-200" />
+                                    )}
 
-                                    <div className="space-y-0">
-                                        {[...actividadesContext].reverse().map((act, index) => {
-                                            const meta = getActIcon(act);
-                                            const esElMasReciente = index === 0;
+                                    <div className="space-y-0.5">
+                                        {(filtroHistorial === 'whatsapp'
+                                            ? [...actividadesContext].filter(act => act.tipo === 'whatsapp')
+                                            : [...actividadesContext].reverse().filter(act => act.tipo !== 'whatsapp')
+                                        ).map((act, index) => {
+                                                const meta = getActIcon(act);
+                                                const esElMasReciente = index === 0;
 
-                                            const dotColor =
-                                                act.tipo === 'whatsapp' ? 'bg-green-500' :
+                                                const esMensajeWhatsApp = act.tipo === 'whatsapp';
+                                                const esEnviadoPorMi = esMensajeWhatsApp && act.descripcion?.startsWith('Vendedor:');
+                                                const textoLimpio = esMensajeWhatsApp 
+                                                    ? act.descripcion.replace(/^(Vendedor:|Cliente:)\s*/i, '') 
+                                                    : act.descripcion;
+
+                                                if (esMensajeWhatsApp) {
+                                                    return (
+                                                        <div key={act.id || index} className={`flex w-full gap-3 pb-4 ${esEnviadoPorMi ? 'justify-end' : 'justify-start'}`}>
+                                                            <div className={`max-w-[85%] rounded-2xl px-3.5 py-2 shadow-xs text-xs relative leading-relaxed ${
+                                                                esEnviadoPorMi 
+                                                                    ? 'bg-green-500 text-white rounded-br-none' 
+                                                                    : 'bg-white border border-slate-200/80 text-slate-800 rounded-bl-none'
+                                                            }`}>
+                                                                {renderBubbleContent(textoLimpio)}
+                                                                <div className="absolute bottom-1 right-2 flex items-center gap-0.5 text-[8px] select-none opacity-85">
+                                                                    <span>{formatHora(act.fecha)}</span>
+                                                                    {esEnviadoPorMi && <span className="font-bold text-green-200 ml-1">✓✓</span>}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                }
+
+                                                const dotColor =
                                                     act.tipo === 'cita' ? 'bg-(--theme-500)' :
                                                         act.tipo === 'llamada' && act.resultado === 'fallido' ? 'bg-rose-400' :
                                                             act.tipo === 'llamada' ? 'bg-(--theme-500)' :
@@ -1391,78 +1552,90 @@ export default function ProspectoDetalle({
                                                                     act.tipo === 'descartado' ? 'bg-gray-400' :
                                                                         'bg-slate-400';
 
-                                            return (
-                                                <div key={act.id || index} className="relative flex gap-3 pb-4">
-                                                    {/* Punto de la línea de tiempo */}
-                                                    <div className="relative z-10 shrink-0 mt-1.5">
-                                                        <div className={`w-[11px] h-[11px] rounded-full border-2 border-white ${dotColor} shadow-sm`} />
-                                                    </div>
+                                                return (
+                                                    <div key={act.id || index} className="relative flex gap-3 pb-4">
+                                                        {/* Punto de la línea de tiempo */}
+                                                        <div className="relative z-10 shrink-0 mt-1.5">
+                                                            <div className={`w-[11px] h-[11px] rounded-full border-2 border-white ${dotColor} shadow-sm`} />
+                                                        </div>
 
-                                                    {/* Tarjeta */}
-                                                    <div className="flex-1 min-w-0">
-                                                        {esElMasReciente && (
-                                                            <span className="inline-block text-[9px] font-extrabold uppercase tracking-widest text-white bg-(--theme-500) rounded px-1.5 py-0.5 mb-1">
-                                                                Más reciente
-                                                            </span>
-                                                        )}
-                                                        <div className="bg-slate-50 border border-slate-100 rounded-lg px-3 py-2 hover:border-slate-200 transition-colors">
-                                                            <div className="flex items-start justify-between gap-1">
-                                                                <div className="min-w-0">
-                                                                    <p className="text-xs font-bold text-gray-800 leading-tight">{meta.label}</p>
-                                                                    <p className="text-[10px] text-slate-400 mt-0.5">
-                                                                        {new Date(act.fecha).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' })}
-                                                                        {' · '}{formatHora(act.fecha)}
-                                                                        {act.vendedorNombre && <> · <span className="text-slate-500">{act.vendedorNombre}</span></>}
-                                                                    </p>
+                                                        {/* Tarjeta */}
+                                                        <div className="flex-1 min-w-0">
+                                                            {esElMasReciente && (
+                                                                <span className="inline-block text-[9px] font-extrabold uppercase tracking-widest text-white bg-(--theme-500) rounded px-1.5 py-0.5 mb-1">
+                                                                    Más reciente
+                                                                </span>
+                                                            )}
+                                                            <div className="bg-white border border-slate-200/60 rounded-xl px-3.5 py-2.5 hover:border-slate-300 transition-colors">
+                                                                <div className="flex items-start justify-between gap-1">
+                                                                    <div className="min-w-0">
+                                                                        <p className="text-xs font-bold text-gray-800 leading-tight">{meta.label}</p>
+                                                                        <p className="text-[9px] text-slate-400 mt-0.5 font-bold uppercase tracking-wider">
+                                                                            {new Date(act.fecha).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                                                            {' · '}{formatHora(act.fecha)}
+                                                                            {act.vendedorNombre && <> · <span className="text-slate-500">{act.vendedorNombre}</span></>}
+                                                                        </p>
+                                                                    </div>
+                                                                    <button
+                                                                        onClick={() => handleDeleteActividadContext(act.id)}
+                                                                        title={t("Eliminar")}
+                                                                        className="shrink-0 p-1.5 rounded-lg text-slate-300 hover:text-red-500 hover:bg-red-50 transition-all mt-0.5"
+                                                                    >
+                                                                        <Trash2 className="w-3.5 h-3.5" />
+                                                                    </button>
                                                                 </div>
-                                                                <button
-                                                                    onClick={() => handleDeleteActividadContext(act.id)}
-                                                                    title={t("Eliminar")}
-                                                                    className="shrink-0 p-1 rounded text-slate-200 hover:text-red-500 hover:bg-red-50 transition-all mt-0.5"
-                                                                >
-                                                                    <Trash2 className="w-3 h-3" />
-                                                                </button>
+                                                                {getResultadoTexto(act) && (
+                                                                    <p className="text-[10px] text-gray-500 mt-1 font-medium">{getResultadoTexto(act)}</p>
+                                                                )}
+                                                                {act.notas && (
+                                                                    <p className="text-[10px] text-gray-500 mt-1 italic truncate" title={act.notas}>"{act.notas}"</p>
+                                                                )}
+                                                                {act.fechaCita && (
+                                                                    <p className="text-[10px] text-(--theme-600) mt-1 font-semibold">
+                                                                        📅 {new Date(act.fechaCita).toLocaleString('es-MX', { dateStyle: 'short', timeStyle: 'short' })}
+                                                                    </p>
+                                                                )}
                                                             </div>
-                                                            {getResultadoTexto(act) && (
-                                                                <p className="text-[10px] text-gray-500 mt-1 font-medium">{getResultadoTexto(act)}</p>
-                                                            )}
-                                                            {act.notas && (
-                                                                <p className="text-[10px] text-gray-500 mt-1 italic truncate" title={act.notas}>"{act.notas}"</p>
-                                                            )}
-                                                            {act.fechaCita && (
-                                                                <p className="text-[10px] text-(--theme-600) mt-1 font-semibold">
-                                                                    📅 {new Date(act.fechaCita).toLocaleString('es-MX', { dateStyle: 'short', timeStyle: 'short' })}
-                                                                </p>
-                                                            )}
                                                         </div>
                                                     </div>
-                                                </div>
-                                            );
-                                        })}
+                                                );
+                                            })}
                                     </div>
                                 </div>
                             )}
                         </div>
-                        <div className="p-4 border-t border-slate-100 bg-slate-50/50">
+                        <div className="p-3 border-t border-slate-100 bg-slate-50/50 flex flex-col gap-2">
                             <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-2xl p-1.5 shadow-sm focus-within:ring-2 focus-within:ring-(--theme-400)/20 focus-within:border-(--theme-400) transition-all">
                                 <textarea
                                     value={muralTexto}
                                     onChange={(e) => setMuralTexto(e.target.value)}
-                                    placeholder="Escribe una nota rápida en el mural..."
+                                    placeholder={canalEnvio === 'whatsapp' ? "Escribe un mensaje de WhatsApp..." : "Escribe una nota rápida en el mural..."}
                                     className="flex-1 px-3 py-2.5 text-sm border-0 focus:ring-0 outline-none resize-none bg-transparent min-h-[44px] max-h-[120px] scrollbar-hide"
                                     rows={1}
                                     onInput={(e) => {
                                         e.target.style.height = 'auto';
                                         e.target.style.height = e.target.scrollHeight + 'px';
                                     }}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter' && !e.shiftKey) {
+                                            e.preventDefault();
+                                            if (canalEnvio === 'whatsapp') {
+                                                enviarMensajeWhatsApp();
+                                            } else {
+                                                registrarEnMural();
+                                            }
+                                        }
+                                    }}
                                 />
                                 <button
-                                    onClick={registrarEnMural}
-                                    disabled={guardandoMural || !muralTexto.trim()}
-                                    className="shrink-0 w-10 h-10 flex items-center justify-center bg-(--theme-600) hover:bg-(--theme-700) text-white rounded-xl transition-all shadow-sm shadow-(--theme-500)/20 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
-                                    title="Registrar en mural"
+                                    type="button"
+                                    onClick={canalEnvio === 'whatsapp' ? enviarMensajeWhatsApp : registrarEnMural}
+                                    disabled={enviandoWhatsApp || guardandoMural}
+                                    className={`p-2.5 rounded-xl text-white font-bold transition-all active:scale-95 shrink-0 ${
+                                        canalEnvio === 'whatsapp' ? 'bg-green-500 hover:bg-green-600' : 'bg-(--theme-600) hover:bg-(--theme-700)'
+                                    } disabled:opacity-50`}
                                 >
-                                    {guardandoMural ? (
+                                    {enviandoWhatsApp || guardandoMural ? (
                                         <RefreshCw className="w-5 h-5 animate-spin" />
                                     ) : (
                                         <Send className="w-5 h-5" />
@@ -1633,8 +1806,9 @@ export default function ProspectoDetalle({
                                                     toast.success('Reintento programado');
                                                     setLlamadaFlow(null);
                                                     const res = await axios.get(`${API_URL}/api/${rolePath}/prospectos`, { headers: getAuthHeaders() });
-                                                    const updated = res.data.find(p => p.id === pidLocal || p._id === pidLocal);
-                                                    if (updated) { setProspectoSeleccionado(updated); setProspectos(res.data); }
+                                                    const prospectosData = res.data.data ? res.data.data : res.data;
+                                                    const updated = prospectosData.find(p => p.id === pidLocal || p._id === pidLocal);
+                                                    if (updated) { setProspectoSeleccionado(updated); setProspectos(prospectosData); }
                                                 } catch { toast.error('Error al programar reintento'); }
                                                 finally { setRegistrandoActividad(false); }
                                             }}

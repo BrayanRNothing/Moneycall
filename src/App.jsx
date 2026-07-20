@@ -35,6 +35,7 @@ const Register = lazyWithRetry(() => import('./pages/auth/Register.jsx'));
 const Ajustes = lazyWithRetry(() => import('./pages/Ajustes.jsx'));
 const TerminosCondiciones = lazyWithRetry(() => import('./pages/TerminosCondiciones.jsx'));
 const PoliticaPrivacidad = lazyWithRetry(() => import('./pages/PoliticaPrivacidad.jsx'));
+const Contacto = lazyWithRetry(() => import('./pages/Contacto.jsx'));
 
 const NotFound = lazyWithRetry(() => import('./pages/NotFound.jsx'));
 
@@ -46,6 +47,7 @@ const Dashboard = lazyWithRetry(() => import('./pages/Dashboard.jsx'));
 const Calendario = lazyWithRetry(() => import('./pages/Calendario.jsx'));
 const Seguimiento = lazyWithRetry(() => import('./pages/Seguimiento.jsx'));
 const Clientes = lazyWithRetry(() => import('./pages/Clientes.jsx'));
+const Chats = lazyWithRetry(() => import('./pages/Chats.jsx'));
 
 // Shared Components
 const Equipo = lazyWithRetry(() => import('./pages/Equipo.jsx'));
@@ -142,6 +144,8 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/terminos-y-condiciones" element={<TerminosCondiciones />} />
           <Route path="/politica-de-privacidad" element={<PoliticaPrivacidad />} />
+          <Route path="/contacto" element={<Contacto />} />
+          <Route path="/contactanos" element={<Contacto />} />
 
           {/* --- VENDEDOR / CORE --- */}
           <Route path="/vendedor" element={<MainLayout />}>
@@ -149,6 +153,7 @@ function App() {
             <Route path="calendario" element={<Calendario />} />
             <Route path="prospectos" element={<Seguimiento />} />
             <Route path="clientes" element={<Clientes />} />
+            <Route path="chats" element={<Chats />} />
             <Route path="equipo" element={<Equipo />} />
             <Route path="monitoreo" element={<Monitoreo />} />
             <Route path="asignar" element={<AsignadorDashboard />} />

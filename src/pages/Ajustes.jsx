@@ -3,7 +3,7 @@ import {
     User, Lock, Shield, Monitor, LogOut,
     Link2, Link2Off, CheckCircle2, Mail, Phone,
     AlertCircle, Bell, Save, KeyRound, Palette, Camera,
-    Award, Globe
+    Award, Globe, MessageSquare
 } from 'lucide-react';
 import { useTranslation } from '../utils/translations';
 import { useLanguageStore } from '../store/useLanguageStore';
@@ -14,6 +14,7 @@ import { useGoogleLogin } from '@react-oauth/google';
 import API_URL from '../config/api';
 import { getUser, saveUser, getToken } from '../utils/authUtils';
 import useThemeStore, { THEMES } from '../store/themeStore.js';
+import socket from '../config/socket';
 
 const GoogleIcon = ({ size = 20 }) => (
     <svg width={size} height={size} viewBox="0 0 24 24">
@@ -47,13 +48,103 @@ export default function VendedorAjustes() {
     const [savingPass, setSavingPass] = useState(false);
     const [profileForm, setProfileForm] = useState({ nombre: '', email: '', telefono: '' });
     const [passForm, setPassForm] = useState({ next: '', confirm: '' });
-    const [activeTab, setActiveTab] = useState(location.state?.activeTab || 'perfil');
+    const [activeTab, setActiveTab] = useState(() => {
+        const persisted = localStorage.getItem('crm_active_settings_tab');
+        return persisted || location.state?.activeTab || 'perfil';
+    });
     const [googleAccountInfo, setGoogleAccountInfo] = useState(null);
     const [loadingGoogle, setLoadingGoogle] = useState(false);
     // Moneycall states (saved in localStorage for premium persistence)
     const [estructuraScore, setEstructuraScore] = useState(() => Number(localStorage.getItem('crm_estructura_score') || 85));
     const [sistemaScore, setSistemaScore] = useState(() => Number(localStorage.getItem('crm_sistema_score') || 75));
     const [operacionesScore, setOperacionesScore] = useState(() => Number(localStorage.getItem('crm_operaciones_score') || 90));
+
+    // WhatsApp States & Logic
+    const [wsStatus, setWsStatus] = useState('desconectado');
+    const [qrCode, setQrCode] = useState(null);
+
+    useEffect(() => {
+        const storedUser = getUser();
+        if (!storedUser) return;
+
+        const fetchStatus = async () => {
+            try {
+                const res = await fetch(`${API_URL}/api/whatsapp/status`, {
+                    headers: { 'x-auth-token': getToken() }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    setWsStatus(data.status);
+                }
+            } catch (err) {
+                console.error('Error fetching WhatsApp status:', err);
+            }
+        };
+        fetchStatus();
+
+        // Unirse a la sala de Socket.io del usuario
+        socket.emit('join_user', { userId: storedUser.id || storedUser._id, token: getToken() });
+
+        const handleStatus = (data) => {
+            console.log('WS: whatsapp status updated:', data);
+            setWsStatus(data.status);
+            if (data.status === 'conectado' || data.status === 'desconectado') {
+                setQrCode(null);
+            }
+        };
+
+        const handleQr = (qrDataUrl) => {
+            console.log('WS: new whatsapp QR received');
+            setWsStatus('generando_qr');
+            setQrCode(qrDataUrl);
+        };
+
+        socket.on('whatsapp-status', handleStatus);
+        socket.on('whatsapp-qr', handleQr);
+
+        return () => {
+            socket.emit('leave_user', storedUser.id || storedUser._id);
+            socket.off('whatsapp-status', handleStatus);
+            socket.off('whatsapp-qr', handleQr);
+        };
+    }, []);
+
+    const connectWhatsApp = async () => {
+        setWsStatus('generando_qr');
+        setQrCode(null);
+        try {
+            const res = await fetch(`${API_URL}/api/whatsapp/connect`, {
+                method: 'POST',
+                headers: { 'x-auth-token': getToken() }
+            });
+            if (!res.ok) {
+                toast.error('Error al iniciar la conexión de WhatsApp');
+                setWsStatus('desconectado');
+            }
+        } catch (err) {
+            toast.error('Error de conexión con el servidor');
+            setWsStatus('desconectado');
+        }
+    };
+
+    const disconnectWhatsApp = async () => {
+        const tid = toast.loading('Cerrando sesión de WhatsApp...');
+        try {
+            const res = await fetch(`${API_URL}/api/whatsapp/disconnect`, {
+                method: 'POST',
+                headers: { 'x-auth-token': getToken() }
+            });
+            if (res.ok) {
+                setWsStatus('desconectado');
+                setQrCode(null);
+                toast.success('Sesión de WhatsApp cerrada', { id: tid });
+            } else {
+                toast.error('Error al cerrar sesión', { id: tid });
+            }
+        } catch (err) {
+            toast.error('Error de conexión', { id: tid });
+        }
+    };
 
     useEffect(() => {
         localStorage.setItem('crm_estructura_score', estructuraScore);
@@ -236,6 +327,7 @@ export default function VendedorAjustes() {
         { id: 'perfil', label: t('Perfil'), icon: User },
         { id: 'seguridad', label: t('Seguridad'), icon: KeyRound },
         { id: 'integraciones', label: t('Google'), icon: Link2 },
+        { id: 'whatsapp', label: 'WhatsApp', icon: MessageSquare },
         { id: 'colores', label: t('Colores del Sistema'), icon: Palette },
         { id: 'formula', label: t('Fórmula de Ventas'), icon: Award },
         { id: 'notificaciones', label: t('Notificaciones'), icon: Bell },
@@ -306,7 +398,10 @@ export default function VendedorAjustes() {
                                     return (
                                         <button
                                             key={id}
-                                            onClick={() => setActiveTab(id)}
+                                            onClick={() => {
+                                                setActiveTab(id);
+                                                localStorage.setItem('crm_active_settings_tab', id);
+                                            }}
                                             className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold whitespace-nowrap transition-all flex-1 lg:flex-none
                                                 ${isActive
                                                     ? `bg-linear-to-r ${roleBg} text-white shadow-lg shadow-(--theme-500)/20`
@@ -342,7 +437,7 @@ export default function VendedorAjustes() {
                             {/* ═══ TAB: PERFIL ═══ */}
                             {activeTab === 'perfil' && (
                                 <form onSubmit={handleSaveProfile}>
-                                    <div className="bg-white md:rounded-3xl md:shadow-xl border-b md:border border-(--theme-200) overflow-x-hidden overflow-y-auto max-h-[72vh] lg:max-h-none lg:overflow-visible lg:min-h-[460px]">
+                                    <div className="bg-white md:rounded-3xl md:shadow-xl border-b md:border border-(--theme-200) overflow-y-auto max-h-[70vh] md:max-h-[58vh] lg:max-h-[62vh] xl:max-h-[66vh] min-h-[400px]">
                                         <div className="" />
                                         <div className="p-6 sm:p-8 h-full flex flex-col">
                                             <h2 className="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2.5">
@@ -395,7 +490,7 @@ export default function VendedorAjustes() {
                             {/* ═══ TAB: SEGURIDAD ═══ */}
                             {activeTab === 'seguridad' && (
                                 <form onSubmit={handleSavePass}>
-                                    <div className="bg-white md:rounded-3xl md:shadow-xl border-b md:border border-(--theme-200) overflow-x-hidden overflow-y-auto max-h-[72vh] lg:max-h-none lg:overflow-visible lg:min-h-[460px]">
+                                    <div className="bg-white md:rounded-3xl md:shadow-xl border-b md:border border-(--theme-200) overflow-y-auto max-h-[70vh] md:max-h-[58vh] lg:max-h-[62vh] xl:max-h-[66vh] min-h-[400px]">
                                         <div className="" />
                                         <div className="p-6 sm:p-8 h-full flex flex-col">
                                             <h2 className="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2.5">
@@ -459,7 +554,7 @@ export default function VendedorAjustes() {
                             )}
 
                             {activeTab === 'integraciones' && (
-                                <div className="bg-white md:rounded-3xl md:shadow-xl border-b md:border border-(--theme-200) overflow-x-hidden overflow-y-auto max-h-[72vh] lg:max-h-none lg:overflow-visible lg:min-h-[460px]">
+                                <div className="bg-white md:rounded-3xl md:shadow-xl border-b md:border border-(--theme-200) overflow-y-auto max-h-[70vh] md:max-h-[58vh] lg:max-h-[62vh] xl:max-h-[66vh] min-h-[400px]">
                                     <div className="p-4 sm:p-6 h-full flex flex-col">
                                         <h2 className="text-base font-bold text-slate-800 mb-4 flex items-center gap-2">
                                             <div className="p-1.5 rounded-lg bg-white border border-slate-200 shadow-sm">
@@ -571,7 +666,7 @@ export default function VendedorAjustes() {
                             )}
 
                             {activeTab === 'colores' && (
-                                <section className="bg-white md:rounded-3xl md:shadow-xl border-b md:border border-slate-200 overflow-x-hidden overflow-y-auto max-h-[72vh] lg:max-h-none lg:overflow-visible lg:min-h-[460px]">
+                                <section className="bg-white md:rounded-3xl md:shadow-xl border-b md:border border-slate-200 overflow-y-auto max-h-[70vh] md:max-h-[58vh] lg:max-h-[62vh] xl:max-h-[66vh] min-h-[400px]">
                                     <div className="p-4 sm:p-6 bg-(--theme-50)/30 shadow-inner h-full flex flex-col">
                                         <h2 className="text-base font-bold text-slate-800 mb-5 flex items-center gap-2">
                                             <div className="p-2 rounded-xl bg-(--theme-100) text-(--theme-600)">
@@ -620,7 +715,7 @@ export default function VendedorAjustes() {
                             )}
 
                             {activeTab === 'formula' && (
-                                <section className="bg-white md:rounded-3xl md:shadow-xl border-b md:border border-slate-200 overflow-x-hidden overflow-y-auto max-h-[72vh] lg:max-h-none lg:overflow-visible lg:min-h-[460px]">
+                                <section className="bg-white md:rounded-3xl md:shadow-xl border-b md:border border-slate-200 overflow-y-auto max-h-[70vh] md:max-h-[58vh] lg:max-h-[62vh] xl:max-h-[66vh] min-h-[400px]">
                                     <div className="p-6 sm:p-8 h-full flex flex-col justify-between">
                                         <div>
                                             <h2 className="text-base font-bold text-slate-800 mb-5 flex items-center justify-between border-b border-gray-100 pb-3">
@@ -721,7 +816,7 @@ export default function VendedorAjustes() {
                             )}
 
                             {activeTab === 'notificaciones' && (
-                                <section className="bg-white md:rounded-3xl md:shadow-xl border-b md:border border-slate-200 overflow-x-hidden overflow-y-auto max-h-[72vh] lg:max-h-none lg:overflow-visible lg:min-h-[460px]">
+                                <section className="bg-white md:rounded-3xl md:shadow-xl border-b md:border border-slate-200 overflow-y-auto max-h-[70vh] md:max-h-[58vh] lg:max-h-[62vh] xl:max-h-[66vh] min-h-[400px]">
                                     <div className="p-8 sm:p-12 h-full flex flex-col items-center justify-center text-center">
                                         <div className="relative mb-6">
                                             <div className="absolute inset-0 bg-(--theme-500)/20 blur-3xl rounded-full" />
@@ -752,7 +847,7 @@ export default function VendedorAjustes() {
                             )}
 
                             {activeTab === 'idioma' && (
-                                <section className="bg-white md:rounded-3xl md:shadow-xl border-b md:border border-slate-200 overflow-x-hidden overflow-y-auto max-h-[72vh] lg:max-h-none lg:overflow-visible lg:min-h-[460px]">
+                                <section className="bg-white md:rounded-3xl md:shadow-xl border-b md:border border-slate-200 overflow-y-auto max-h-[70vh] md:max-h-[58vh] lg:max-h-[62vh] xl:max-h-[66vh] min-h-[400px]">
                                     <div className="p-6 sm:p-8 h-full flex flex-col justify-between">
                                         <div>
                                             <h2 className="text-base font-bold text-slate-800 mb-5 flex items-center gap-2 border-b border-gray-100 pb-3">
@@ -810,6 +905,171 @@ export default function VendedorAjustes() {
                                                 </button>
                                             </div>
                                         </div>
+                                    </div>
+                                </section>
+                            )}
+
+                            {activeTab === 'whatsapp' && (
+                                <section className="bg-white md:rounded-3xl md:shadow-xl border-b md:border border-slate-200 overflow-y-auto max-h-[70vh] md:max-h-[58vh] lg:max-h-[62vh] xl:max-h-[66vh] min-h-[400px]">
+                                    <style>{`
+                                        @keyframes scan {
+                                            0% { top: 0%; }
+                                            50% { top: 100%; }
+                                            100% { top: 0%; }
+                                        }
+                                        @keyframes pulse-ring {
+                                            0% { transform: scale(0.95); opacity: 0.5; }
+                                            50% { transform: scale(1.1); opacity: 0.8; }
+                                            100% { transform: scale(0.95); opacity: 0.5; }
+                                        }
+                                    `}</style>
+                                    
+                                    <div className="p-6 sm:p-8">
+                                        <h2 className="text-base font-bold text-slate-800 mb-5 flex items-center gap-2 border-b border-gray-100 pb-3">
+                                            <div className="p-2 rounded-xl bg-linear-to-br from-green-500 to-green-600 text-white shadow-md shadow-green-500/20">
+                                                <MessageSquare size={16} />
+                                            </div>
+                                            <span className="font-black">Enlazar WhatsApp</span>
+                                        </h2>
+
+                                        {wsStatus === 'conectado' ? (
+                                            <div className="max-w-xl mx-auto bg-green-50/40 border border-green-100 rounded-3xl p-6 sm:p-8 text-center shadow-xs">
+                                                <div className="relative w-20 h-20 mx-auto mb-6 flex items-center justify-center">
+                                                    <div className="absolute inset-0 bg-green-500/20 rounded-full" style={{ animation: 'pulse-ring 2s infinite' }} />
+                                                    <div className="relative w-16 h-16 bg-green-500 text-white rounded-full flex items-center justify-center shadow-lg shadow-green-500/30">
+                                                        <MessageSquare size={32} />
+                                                    </div>
+                                                    <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-md">
+                                                        <CheckCircle2 className="text-green-500" size={16} fill="currentColor" />
+                                                    </div>
+                                                </div>
+                                                
+                                                <h3 className="text-xl font-black text-green-900 leading-tight">¡WhatsApp Vinculado!</h3>
+                                                <p className="text-xs text-green-600 font-bold mt-1 uppercase tracking-wider">Línea activa en el CRM</p>
+                                                
+                                                <div className="my-6 p-4 bg-white/80 border border-green-100 rounded-2xl text-left space-y-2.5 text-xs text-slate-600">
+                                                    <div className="flex justify-between">
+                                                        <span className="font-bold text-slate-400">Canal de Envío:</span>
+                                                        <span className="font-black text-slate-800">API Baileys Embebido</span>
+                                                    </div>
+                                                    <div className="flex justify-between">
+                                                        <span className="font-bold text-slate-400">Estado de Conexión:</span>
+                                                        <span className="font-black text-green-600 flex items-center gap-1">
+                                                            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" /> En Línea
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex justify-between">
+                                                        <span className="font-bold text-slate-400">Multicuenta:</span>
+                                                        <span className="font-black text-slate-800">Vinculado a tu ID de Vendedor</span>
+                                                    </div>
+                                                </div>
+
+                                                <p className="text-slate-500 text-xs leading-relaxed max-w-sm mx-auto">
+                                                    Los mensajes enviados desde el CRM saldrán desde tu número telefónico. Las respuestas de tus clientes se registrarán automáticamente.
+                                                </p>
+                                                
+                                                <button
+                                                    type="button"
+                                                    onClick={disconnectWhatsApp}
+                                                    className="mt-8 px-6 py-3 bg-red-50 hover:bg-red-100 border border-red-100 text-red-600 font-black text-xs rounded-xl shadow-xs transition-all active:scale-95 uppercase tracking-widest"
+                                                >
+                                                    Desconectar WhatsApp
+                                                </button>
+                                            </div>
+                                        ) : wsStatus === 'generando_qr' ? (
+                                            <div className="grid grid-cols-1 md:grid-cols-[1fr_280px] gap-8 items-center bg-slate-50/50 border border-slate-100 rounded-3xl p-6 sm:p-8">
+                                                {/* Left Column: Instructions */}
+                                                <div className="space-y-5">
+                                                    <div>
+                                                        <h3 className="text-lg font-black text-slate-800 leading-tight">Vincular dispositivo</h3>
+                                                        <p className="text-xs text-slate-400 mt-1">Sigue los pasos en tu teléfono móvil para establecer la conexión:</p>
+                                                    </div>
+
+                                                    <ul className="space-y-3.5 text-xs text-slate-600 font-medium">
+                                                        <li className="flex items-start gap-3">
+                                                            <span className="w-5 h-5 rounded-full bg-green-100 text-green-700 flex items-center justify-center font-black shrink-0 text-[10px]">1</span>
+                                                            <p className="mt-0.5">Abre **WhatsApp** en tu teléfono móvil.</p>
+                                                        </li>
+                                                        <li className="flex items-start gap-3">
+                                                            <span className="w-5 h-5 rounded-full bg-green-100 text-green-700 flex items-center justify-center font-black shrink-0 text-[10px]">2</span>
+                                                            <p className="mt-0.5">Toca el botón de **Menú (⋮)** en Android o **Configuración (⚙️)** en iPhone.</p>
+                                                        </li>
+                                                        <li className="flex items-start gap-3">
+                                                            <span className="w-5 h-5 rounded-full bg-green-100 text-green-700 flex items-center justify-center font-black shrink-0 text-[10px]">3</span>
+                                                            <p className="mt-0.5">Selecciona **Dispositivos vinculados** y presiona **Vincular un dispositivo**.</p>
+                                                        </li>
+                                                        <li className="flex items-start gap-3">
+                                                            <span className="w-5 h-5 rounded-full bg-green-100 text-green-700 flex items-center justify-center font-black shrink-0 text-[10px]">4</span>
+                                                            <p className="mt-0.5">Apunta la cámara de tu teléfono móvil hacia la pantalla para escanear el código QR.</p>
+                                                        </li>
+                                                    </ul>
+
+                                                    <div className="pt-2 border-t border-slate-200/60 text-[10px] text-slate-400 flex items-center gap-1.5 font-semibold">
+                                                        <span>🔒 Conexión cifrada de extremo a extremo</span>
+                                                    </div>
+                                                </div>
+
+                                                {/* Right Column: QR Container */}
+                                                <div className="flex flex-col items-center justify-center text-center space-y-4 shrink-0">
+                                                    <div className="relative p-3 bg-white border border-slate-200 rounded-3xl shadow-md group overflow-hidden">
+                                                        {qrCode ? (
+                                                            <div className="relative w-48 h-48 sm:w-52 sm:h-52">
+                                                                {/* Scanning Laser Line */}
+                                                                <div className="absolute left-0 w-full h-0.5 bg-green-500 shadow-[0_0_6px_#22c55e] z-20" style={{ animation: 'scan 2.5s linear infinite' }} />
+                                                                <img src={qrCode} alt="WhatsApp QR Code" className="w-full h-full relative z-10" />
+                                                            </div>
+                                                        ) : (
+                                                            <div className="w-48 h-48 sm:w-52 sm:h-52 flex flex-col items-center justify-center text-slate-400">
+                                                                <div className="w-8 h-8 border-3 border-slate-100 border-t-green-500 rounded-full animate-spin mb-3" />
+                                                                <p className="text-[9px] uppercase font-black tracking-widest text-slate-400">Generando QR...</p>
+                                                            </div>
+                                                        )}
+                                                    </div>
+
+                                                    <button
+                                                        type="button"
+                                                        onClick={disconnectWhatsApp}
+                                                        className="px-4 py-2 border border-slate-200 text-slate-500 hover:text-red-500 hover:bg-red-50 hover:border-red-100 font-bold text-[10px] rounded-xl transition-all uppercase tracking-wider"
+                                                    >
+                                                        Cancelar Conexión
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <div className="bg-slate-50 border border-slate-100 rounded-3xl p-6 sm:p-8 text-center max-w-xl mx-auto shadow-xs">
+                                                <div className="w-16 h-16 bg-green-100 text-green-600 rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-sm">
+                                                    <MessageSquare size={32} />
+                                                </div>
+                                                
+                                                <h3 className="text-lg font-black text-slate-800">Conecta tu cuenta de WhatsApp</h3>
+                                                <p className="text-slate-500 text-xs mt-2 max-w-sm mx-auto leading-relaxed">
+                                                    Vincula tu línea de WhatsApp personal o business para enviar alertas automáticas y mantener conversaciones fluidas en tiempo real con tus prospectos directamente desde la app.
+                                                </p>
+
+                                                <div className="my-6 grid grid-cols-3 gap-3 text-left">
+                                                    <div className="p-3 bg-white border border-slate-100 rounded-2xl">
+                                                        <div className="text-green-500 font-bold text-xs mb-1">🚀 Cero Costo</div>
+                                                        <p className="text-[10px] text-slate-400 leading-tight">Usa tu línea celular sin pagar costos por mensaje.</p>
+                                                    </div>
+                                                    <div className="p-3 bg-white border border-slate-100 rounded-2xl">
+                                                        <div className="text-green-500 font-bold text-xs mb-1">📂 Historial</div>
+                                                        <p className="text-[10px] text-slate-400 leading-tight">Conserva todo el historial de chats en la ficha del cliente.</p>
+                                                    </div>
+                                                    <div className="p-3 bg-white border border-slate-100 rounded-2xl">
+                                                        <div className="text-green-500 font-bold text-xs mb-1">💬 Multicuenta</div>
+                                                        <p className="text-[10px] text-slate-400 leading-tight">Cada vendedor vincula su propia línea personal.</p>
+                                                    </div>
+                                                </div>
+                                                
+                                                <button
+                                                    type="button"
+                                                    onClick={connectWhatsApp}
+                                                    className="px-8 py-3 bg-green-500 hover:bg-green-600 text-white font-black text-xs rounded-xl shadow-lg shadow-green-500/20 transition-all active:scale-95 uppercase tracking-widest"
+                                                >
+                                                    Vincular WhatsApp
+                                                </button>
+                                            </div>
+                                        )}
                                     </div>
                                 </section>
                             )}

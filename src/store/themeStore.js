@@ -18,6 +18,7 @@ export const THEMES = [
   { id: 'midnight', label: 'Midnight', color: '#334155', className: 'theme-midnight', swatch: 'gradient', swatchGradient: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%)' },
   { id: 'pastel', label: 'Pastel', color: '#a78bfa', className: 'theme-pastel', swatch: 'gradient', swatchGradient: 'linear-gradient(135deg, #a7f3d0 0%, #bfdbfe 50%, #c4b5fd 100%)' },
   { id: 'holografico', label: 'Holografico', color: '#38bdf8', className: 'theme-holografico', swatch: 'gradient', swatchGradient: 'linear-gradient(135deg, #67e8f9 0%, #a78bfa 45%, #f472b6 100%)' },
+  { id: 'platino', label: 'Platino', color: '#3b4d61', className: 'theme-platino', swatch: 'gradient', swatchGradient: 'linear-gradient(135deg, #a7b7c8 0%, #3b4d61 45%, #7c92a9 70%, #161c23 100%)' },
 ];
 
 const useThemeStore = create(

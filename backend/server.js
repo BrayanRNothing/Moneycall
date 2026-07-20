@@ -12,11 +12,13 @@ const app = express();
 
 // ✅ HEALTHCHECK - FIRST PRIORITY (Railway require 200 fast)
 app.get('/health', (req, res) => {
+    const { db } = require('./config/database');
     res.json({ 
         status: 'ok', 
         uptime: process.uptime(),
         env: process.env.NODE_ENV,
-        db_connected: !!process.env.DATABASE_URL
+        database: db ? 'connected' : 'disconnected',
+        postgres: true
     });
 });
 console.log('✅ Healthcheck endpoint ready');
@@ -65,6 +67,7 @@ app.use('/api/equipos', require('./routes/equipos'));
 app.use('/api/plantillas', require('./routes/plantillas'));
 app.use('/api/documentos', require('./routes/documentos'));
 app.use('/api/notificaciones', require('./routes/notificaciones'));
+app.use('/api/whatsapp', require('./routes/whatsapp'));
 console.log('🚀 Rutas registradas correctamente');
 
 
@@ -137,8 +140,73 @@ const io = new Server(server, {
 // Guardar io en la app para usarlo en las rutas
 app.set('io', io);
 
+// Inicializar sesiones de WhatsApp guardadas
+const { initSessions } = require('./services/whatsappManager');
+initSessions(io);
+
 io.on('connection', (socket) => {
     console.log(`⚡ Cliente conectado a WebSockets: ${socket.id}`);
+
+    // Unirse a la sala del usuario para notificaciones individuales de WhatsApp
+    // ✅ SEGURIDAD: Verificar token JWT antes de unirse a una sala de usuario
+    socket.on('join_user', async (payload) => {
+        try {
+            // payload puede ser solo el userId (legado) o { userId, token }
+            let userId, token;
+            if (typeof payload === 'object' && payload !== null) {
+                userId = payload.userId;
+                token = payload.token;
+            } else {
+                // Modo legado: solo el ID — aceptar pero sin QR (no seguro para produccion)
+                userId = payload;
+                token = null;
+            }
+
+            if (!userId) return;
+
+            // Si hay token, validarlo contra el userId
+            if (token) {
+                const jwt = require('jsonwebtoken');
+                const { db } = require('./config/database');
+                try {
+                    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret');
+                    const row = await db.prepare('SELECT id, activo FROM usuarios WHERE id = ?').get(decoded.id);
+                    if (!row || (row.activo === 0 || row.activo === false)) {
+                        socket.emit('auth_error', { mensaje: 'Token inválido' });
+                        return;
+                    }
+                    // Solo puede unirse a su propia sala
+                    if (String(decoded.id) !== String(userId)) {
+                        socket.emit('auth_error', { mensaje: 'No autorizado para unirse a esta sala' });
+                        return;
+                    }
+                } catch (_) {
+                    socket.emit('auth_error', { mensaje: 'Token inválido o expirado' });
+                    return;
+                }
+            }
+
+            socket.join(`user_${userId}`);
+            console.log(`👤 Socket ${socket.id} unió al canal de usuario: user_${userId}`);
+            const { getSessionStatus, getStoredQr } = require('./services/whatsappManager');
+            const status = getSessionStatus(userId);
+            socket.emit('whatsapp-status', { status });
+            if (status === 'generando_qr') {
+                const qrImage = getStoredQr(userId);
+                if (qrImage) {
+                    socket.emit('whatsapp-qr', qrImage);
+                }
+            }
+        } catch (err) {
+            console.error('Socket join_user error:', err.message);
+        }
+    });
+
+    socket.on('leave_user', (userId) => {
+        if (userId) {
+            socket.leave(`user_${userId}`);
+        }
+    });
 
     // Unirse a la sala del equipo (el frontend debe emitir este evento tras el login)
     socket.on('join_team', (equipoId) => {

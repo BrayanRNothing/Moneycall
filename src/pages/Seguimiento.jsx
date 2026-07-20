@@ -154,6 +154,10 @@ const Seguimiento = () => {
     const rolePath = 'vendedor';
     const [prospectos, setProspectos] = useState([]);
     const [loading, setLoading] = useState(true);
+    // Paginación
+    const [page, setPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [totalItems, setTotalItems] = useState(0);
     // Filtros
     const [busquedaProspecto, setBusquedaProspecto] = useState('');
     const [filtroEtapa, setFiltroEtapa] = useState('todos'); // 'todos', 'prospecto_nuevo', 'reunion_agendada', etc.
@@ -289,19 +293,31 @@ const Seguimiento = () => {
         return String(ownerId) === String(currentUserId);
     };
 
-    const cargarDatos = async () => {
+    const cargarDatos = async (currentPage = page) => {
         setLoading(true);
         try {
+            const paramsProspectos = {
+                scope: filtroVisibilidad,
+                etapa: filtroEtapa,
+                busqueda: busquedaProspecto,
+                page: currentPage,
+                limit: 50
+            };
+
             const [resProspectos, resTareas] = await Promise.all([
                 axios.get(`${API_URL}/api/${rolePath}/prospectos`, {
                     headers: getAuthHeaders(),
-                    params: { scope: filtroVisibilidad }
+                    params: paramsProspectos
                 }),
                 axios.get(`${API_URL}/api/tareas`, { headers: getAuthHeaders() })
             ]);
 
             const remindersByCliente = buildReminderByClienteMap(resTareas.data || []);
-            const normalizados = (resProspectos.data || []).map((raw) => {
+            const rawData = resProspectos.data.data ? resProspectos.data.data : resProspectos.data;
+            const metaTotalPages = resProspectos.data.totalPages || 1;
+            const metaTotalItems = resProspectos.data.total || rawData.length;
+
+            const normalizados = (rawData || []).map((raw) => {
                 const p = normalizeProspectoRecordatorio(raw);
                 if (p.proximaLlamada) return p;
 
@@ -311,6 +327,8 @@ const Seguimiento = () => {
             });
 
             setProspectos(normalizados);
+            setTotalPages(metaTotalPages);
+            setTotalItems(metaTotalItems);
             return normalizados; // Retornar datos para el init
         } catch (error) {
             console.error('Error al cargar:', error);
@@ -323,7 +341,7 @@ const Seguimiento = () => {
 
     useEffect(() => {
         const init = async () => {
-            const data = await cargarDatos();
+            const data = await cargarDatos(page);
             // 1. Prioridad: Parámetro 'p' en la URL (para recargas F5 o enlaces directos)
             const urlId = searchParams.get('p');
             // 2. Fallback: location.state.selectedId (para navegación interna desde otra página)
@@ -337,11 +355,11 @@ const Seguimiento = () => {
             }
         };
         init();
-        const interval = setInterval(cargarDatos, 5 * 60 * 1000);
+        const interval = setInterval(() => cargarDatos(page), 5 * 60 * 1000);
 
         const handleSocketUpdate = (obj) => {
             console.log('socket: prospectos actualizados detectado', obj);
-            cargarDatos();
+            cargarDatos(page);
         };
         socket.on('prospectos_actualizados', handleSocketUpdate);
 
@@ -349,7 +367,7 @@ const Seguimiento = () => {
             clearInterval(interval);
             socket.off('prospectos_actualizados', handleSocketUpdate);
         };
-    }, [searchParams, filtroVisibilidad]);
+    }, [searchParams, filtroVisibilidad, filtroEtapa, busquedaProspecto, page]);
 
     const { currentStep } = useBotStore();
 
@@ -541,8 +559,13 @@ const Seguimiento = () => {
             });
         }
 
+        // Visibilidad ('shared' -> solo compartidos; 'mine' y 'all' se gestionan por backend)
+        if (filtroVisibilidad === 'shared') {
+            filtrados = filtrados.filter(p => !!p.compartido);
+        }
+
         return filtrados;
-    }, [prospectos, busquedaProspecto, filtroEtapa, filtroFecha, fechaDesde, fechaHasta, filtroRecordatorio]).sort((a, b) => {
+    }, [prospectos, busquedaProspecto, filtroVisibilidad, filtroEtapa, filtroFecha, fechaDesde, fechaHasta, filtroRecordatorio]).sort((a, b) => {
         // Perdidos siempre al fondo
         const esPerdidoA = a.etapaEmbudo === 'perdido';
         const esPerdidoB = b.etapaEmbudo === 'perdido';
@@ -807,7 +830,7 @@ const Seguimiento = () => {
                                     <div className="space-y-4">
                                         <div>
                                             <div className="flex items-center justify-between mb-1.5">
-                                                <label className="block text-[10px] font-black text-slate-500 uppercase tracking-wider">{t("Teléfonos *")}</label>
+                                                <label className="block text-[10px] font-black text-slate-500 uppercase tracking-wider">{t("Teléfonos * (Incluye Lada ej: +52)")}</label>
                                                 <button
                                                     type="button"
                                                     onClick={() => setFormCrear((f) => ({ ...f, telefonos: [...f.telefonos, ''] }))}
@@ -826,7 +849,7 @@ const Seguimiento = () => {
                                                             onChange={(e) => setFormCrear((f) => { const t = [...f.telefonos]; t[idx] = e.target.value; return { ...f, telefonos: t }; })}
                                                             onFocus={() => handleInputFocus('create_prospect_phone')}
                                                             className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-10 py-3 text-sm focus:ring-2 focus:ring-(--theme-500) focus:bg-white transition-all outline-none font-medium"
-                                                            placeholder="55 1234 5678"
+                                                            placeholder="Ej: +52 81 1216 9211"
                                                         />
                                                         {formCrear.telefonos.length > 1 && (
                                                             <button
@@ -1440,69 +1463,72 @@ const Seguimiento = () => {
             </>
         );
     }
-// VISTA PRINCIPAL (LISTA DE PROSPECTOS)
+    // VISTA PRINCIPAL (LISTA DE PROSPECTOS)
     return (
-        <div className="min-h-screen md:p-6 bg-white md:bg-slate-50 -m-4 md:m-0 p-4 pb-8 md:pb-6">
-            <div className="max-w-full mx-auto space-y-6">
+        <div className="h-full flex flex-col p-3 bg-gray-50/50 animate-in fade-in duration-500">
+            <div className="max-w-full mx-auto flex-1 flex flex-col w-full min-h-0 gap-3">
                 {/* Header */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2 shrink-0 px-1">
                     <div>
-                        <h1 className="text-xl md:text-2xl font-bold text-gray-900 leading-tight">Seguimiento de Prospectos</h1>
-                        <p className="text-xs md:text-sm text-gray-500 mt-0.5 leading-snug">
-                            Selecciona un prospecto para ver su ficha y registrar interacciones
+                        <h1 className="text-[28px] font-black text-gray-900 tracking-tight leading-none mb-1">Prospectos</h1>
+                        <p className="text-sm font-medium text-gray-500">
+                            Cartera de prospectos
                         </p>
                     </div>
-                    <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap w-full sm:w-auto mt-2 sm:mt-0">
+                    <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap w-full sm:w-auto">
                         <button
                             id="btn-importar-csv"
                             onClick={() => setIsImportModalAbierto(true)}
                             disabled={importando}
-                            className="flex-1 sm:flex-none justify-center flex items-center gap-1.5 px-3 py-2 md:px-4 md:py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-50 transition-colors text-[11px] md:text-sm font-medium"
+                            className="flex-1 sm:flex-none justify-center flex items-center gap-1.5 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-50 transition-colors text-sm font-bold"
                             title="Importar prospectos desde CSV"
                         >
-                            {importando ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5 md:w-4 md:h-4" />}
+                            {importando ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
                             {importando ? 'Importando...' : 'Importar CSV'}
                         </button>
                         <button
                             id="btn-exportar-csv"
                             onClick={handleExportCsv}
                             disabled={loading || !prospectosFiltrados.length}
-                            className="flex-1 sm:flex-none justify-center flex items-center gap-1.5 px-3 py-2 md:px-4 md:py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-800 disabled:opacity-50 transition-colors text-[11px] md:text-sm font-medium"
+                            className="flex-1 sm:flex-none justify-center flex items-center gap-1.5 px-4 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-800 disabled:opacity-50 transition-colors text-sm font-bold"
                             title="Exportar lista actual a CSV"
                         >
-                            <Download className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                            <Download className="w-4 h-4" />
                             Exportar CSV
                         </button>
                         <button
                             id="btn-crear-prospecto"
                             onClick={() => setModalCrearAbierto(true)}
-                            className="w-full sm:w-auto justify-center flex items-center gap-2 px-3 py-2 md:px-4 md:py-2 bg-(--theme-600) text-white rounded-lg hover:bg-(--theme-700) transition-colors text-xs md:text-sm font-medium"
+                            className="w-full sm:w-auto justify-center flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-bold shadow-sm"
                         >
-                            <UserPlus className="w-4 h-4 md:w-5 md:h-5" />{t("Crear prospecto")}
+                            <UserPlus className="w-5 h-5" />{t("Crear prospecto")}
                         </button>
                     </div>
                 </div>
 
-                {/* Buscador + Filtros 30/70 */}
-                <div id="seccion-filtros-busqueda" className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
-                    <div className="grid grid-cols-1 lg:grid-cols-[30%_1fr] gap-4 items-center">
-                        {/* 30% Búsqueda */}
-                        <div className="relative w-full">
-                            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 md:w-5 md:h-5 text-gray-400" />
+                {/* Buscador + Filtros */}
+                <div id="seccion-filtros-busqueda" className="bg-white border border-slate-200 rounded-2xl p-3 shadow-sm shrink-0">
+                    <div className="flex flex-col md:flex-row gap-4 items-center">
+                        {/* Búsqueda */}
+                        <div className="relative w-full md:w-[350px]">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                             <input
                                 type="text"
                                 placeholder="Buscar prospectos..."
                                 value={busquedaProspecto}
                                 onChange={(e) => setBusquedaProspecto(e.target.value)}
-                                className="w-full pl-8 md:pl-10 pr-3 md:pr-4 py-1.5 md:py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-(--theme-500) focus:border-(--theme-500) bg-white text-xs md:text-sm"
-                                title="Buscar por nombre, empresa, correo o teléfono"
+                                className="w-full pl-9 pr-12 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-(--theme-500) focus:border-(--theme-500) bg-white text-sm font-medium text-slate-700"
                             />
+                            <div className="absolute right-2 top-1/2 -translate-y-1/2 bg-slate-100 text-[10px] font-bold text-blue-600 px-2 py-0.5 rounded-full">
+                                {prospectosFiltrados.length}/{prospectos.length}
+                            </div>
                         </div>
-                        {/* 70% Filtros */}
-                        <div className="hidden md:flex flex-wrap md:flex-wrap pb-2 -mx-2 px-2 md:mx-0 md:px-0 gap-2 items-center w-full">
-                            <Filter className="w-4 h-4 text-slate-400 shrink-0 hidden md:block" />
-                            {/* Filtros rápidos por contacto */}
-                            <div className="flex flex-nowrap md:flex-wrap gap-1.5 shrink-0">
+                        
+                        {/* Filtros */}
+                        <div className="flex items-center gap-3 w-full overflow-x-auto scrollbar-hide">
+                            <Filter className="w-4 h-4 text-slate-400 shrink-0" />
+                            
+                            <div className="flex items-center bg-slate-50 p-1 rounded-xl border border-slate-100 shrink-0">
                                 {[
                                     { value: 'mine', label: 'Mis prospectos' },
                                     { value: 'shared', label: 'Compartidos' },
@@ -1511,48 +1537,42 @@ const Seguimiento = () => {
                                     <button
                                         key={btn.value}
                                         onClick={() => setFiltroVisibilidad(btn.value)}
-                                        className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all whitespace-nowrap ${filtroVisibilidad === btn.value
-                                            ? 'bg-slate-800 text-white border-slate-800 shadow-sm'
-                                            : 'bg-slate-50 text-slate-600 border-slate-200 hover:border-slate-400 hover:text-slate-800'
+                                        className={`px-3 py-1.5 rounded-lg text-[13px] font-bold transition-all whitespace-nowrap ${filtroVisibilidad === btn.value
+                                            ? 'bg-slate-700 text-white shadow-sm'
+                                            : 'text-slate-500 hover:text-slate-700 hover:bg-slate-100/50'
                                             }`}
                                     >
                                         {btn.label}
                                     </button>
                                 ))}
                             </div>
-                            <div className="w-px h-6 bg-slate-200 mx-1 shrink-0 hidden md:block"></div>
-                            <div id="seccion-filtros-etapa" className="flex flex-nowrap md:flex-wrap gap-1.5 shrink-0">
-                                {[
-                                    { value: 'todos', label: 'Todos' },
-                                    { value: 'en_contacto', label: 'En contacto' },
-                                    { value: 'sin_respuesta', label: 'Sin contacto' },
-                                    { value: 'no_contactado', label: 'No contactado' },
-                                    { value: 'con_cita', label: 'Con cita' },
-                                ].map(btn => (
+                            
+                            <div className="w-px h-6 bg-slate-200 shrink-0"></div>
+                            
+                            <select 
+                                value={filtroEtapa} 
+                                onChange={(e) => setFiltroEtapa(e.target.value)}
+                                className="bg-transparent border-0 text-[13px] font-bold text-slate-700 cursor-pointer focus:ring-0 p-0 pr-6 shrink-0"
+                            >
+                                <option value="todos">Todos los prospectos</option>
+                                <option value="en_contacto">En contacto</option>
+                                <option value="sin_respuesta">Sin contacto</option>
+                                <option value="no_contactado">No contactado</option>
+                                <option value="con_cita">Con cita</option>
+                            </select>
 
-                                    <button
-                                        key={btn.value}
-                                        onClick={() => setFiltroEtapa(btn.value)}
-                                        className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all whitespace-nowrap ${filtroEtapa === btn.value
-                                            ? 'bg-(--theme-600) text-white border-(--theme-600) shadow-sm'
-                                            : 'bg-slate-50 text-slate-600 border-slate-200 hover:border-(--theme-400) hover:text-(--theme-700)'
-                                            }`}
-                                    >
-                                        {btn.label}
-                                    </button>
-                                ))}
-                            </div>
                             {/* Recordatorio pendiente */}
                             <button
                                 onClick={() => setFiltroRecordatorio(v => !v)}
-                                className={`shrink-0 flex items-center justify-center w-8 h-8 rounded-lg border text-sm transition-all ${filtroRecordatorio
-                                    ? 'bg-(--theme-50) border-(--theme-400) text-(--theme-700)'
-                                    : 'bg-slate-50 border-slate-200 text-slate-500 hover:border-slate-300'
+                                className={`shrink-0 flex items-center justify-center w-8 h-8 rounded-lg border text-sm transition-all ml-auto ${filtroRecordatorio
+                                    ? 'bg-amber-50 border-amber-400 text-amber-700'
+                                    : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300'
                                     }`}
                                 title="Solo con recordatorio de llamada"
                             >
-                                <Bell className="w-3.5 h-3.5" />
+                                <Bell className="w-4 h-4" />
                             </button>
+                            
                             {/* Reset filtros */}
                             {(filtroEtapa !== 'todos' || filtroRecordatorio || busquedaProspecto || filtroVisibilidad !== 'mine') && (
                                 <button
@@ -1565,56 +1585,56 @@ const Seguimiento = () => {
                             )}
                         </div>
                     </div>
-                    {/* Contador de resultados */}
-                    <p className="text-xs text-slate-400 mt-2">
-                        Mostrando <span className="font-semibold text-slate-600">{prospectosFiltrados.length}</span> de <span className="font-semibold text-slate-600">{prospectos.length}</span> prospectos
-                    </p>
                 </div>
 
                 {/* Lista de Prospectos (Tarjetas o Tabla simplificada) */}
                 {loading ? (
-                    <div className="bg-white md:border md:border-slate-200 md:rounded-2xl md:shadow-sm overflow-hidden">
-                        <div className="overflow-x-auto">
+                    <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex-1 flex flex-col min-h-0">
+                        <div className="px-6 py-4 border-b border-slate-100 shrink-0">
+                            <h2 className="text-[13px] font-black text-slate-800 tracking-wider">MI LISTA (CARGANDO...)</h2>
+                        </div>
+                        <div className="flex-1 overflow-auto">
                             <table className="min-w-full text-sm">
-                                <thead className="bg-slate-50/80 text-slate-400 uppercase">
+                                <thead className="bg-white border-b border-slate-100 text-slate-400 uppercase">
                                     <tr>
-                                        <th className="px-4 py-4"><div className="h-2.5 bg-slate-200/80 rounded-full w-20 animate-pulse"></div></th>
-                                        <th className="px-4 py-4"><div className="h-2.5 bg-slate-200/80 rounded-full w-24 animate-pulse"></div></th>
-                                        <th className="px-4 py-4"><div className="h-2.5 bg-slate-200/80 rounded-full w-20 animate-pulse"></div></th>
-                                        <th className="px-4 py-4 text-center"><div className="h-2.5 bg-slate-200/80 rounded-full w-16 mx-auto animate-pulse"></div></th>
-                                        <th className="px-4 py-4"><div className="h-2.5 bg-slate-200/80 rounded-full w-28 animate-pulse"></div></th>
-                                        <th className="px-4 py-4"><div className="h-2.5 bg-slate-200/80 rounded-full w-24 animate-pulse"></div></th>
-                                        <th className="px-4 py-4 text-center"><div className="h-2.5 bg-slate-200/80 rounded-full w-14 mx-auto animate-pulse"></div></th>
+                                        <th className="px-6 py-3 text-left font-bold text-[10px] tracking-widest w-1/5"><div className="h-2.5 bg-slate-200/80 rounded-full w-20 animate-pulse"></div></th>
+                                        <th className="px-6 py-3 text-left font-bold text-[10px] tracking-widest"><div className="h-2.5 bg-slate-200/80 rounded-full w-24 animate-pulse"></div></th>
+                                        <th className="px-6 py-3 text-left font-bold text-[10px] tracking-widest w-1/5"><div className="h-2.5 bg-slate-200/80 rounded-full w-20 animate-pulse"></div></th>
+                                        <th className="px-6 py-3 text-center font-bold text-[10px] tracking-widest"><div className="h-2.5 bg-slate-200/80 rounded-full w-16 mx-auto animate-pulse"></div></th>
+                                        <th className="px-6 py-3 text-left font-bold text-[10px] tracking-widest"><div className="h-2.5 bg-slate-200/80 rounded-full w-28 animate-pulse"></div></th>
+                                        <th className="px-6 py-3 text-left font-bold text-[10px] tracking-widest"><div className="h-2.5 bg-slate-200/80 rounded-full w-24 animate-pulse"></div></th>
+                                        <th className="px-6 py-3 text-center font-bold text-[10px] tracking-widest"><div className="h-2.5 bg-slate-200/80 rounded-full w-14 mx-auto animate-pulse"></div></th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100">
                                     {[1, 2, 3, 4, 5].map((idx) => (
                                         <tr key={idx}>
-                                            <td className="px-4 py-5 font-medium">
+                                            <td className="px-6 py-5 font-medium">
                                                 <div className="space-y-2">
                                                     <div className="h-4 bg-slate-200/80 rounded-md w-32 animate-pulse"></div>
                                                     <div className="h-3 bg-slate-100 rounded-md w-24 animate-pulse"></div>
-                                                    <div className="flex items-center gap-1 pt-0.5">
+                                                    <div className="flex items-center gap-1 pt-1">
                                                         {[1, 2, 3, 4, 5].map((s) => (
-                                                            <div key={s} className="h-2.5 w-2.5 rounded-full bg-amber-100 animate-pulse"></div>
+                                                            <div key={s} className="h-2.5 w-2.5 rounded-full bg-slate-100 animate-pulse"></div>
                                                         ))}
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td className="px-4 py-5"><div className="h-4 bg-slate-100 rounded-md w-24 animate-pulse"></div></td>
-                                            <td className="px-4 py-5">
+                                            <td className="px-6 py-5"><div className="h-3 bg-slate-100 rounded-md w-8 animate-pulse"></div></td>
+                                            <td className="px-6 py-5">
                                                 <div className="space-y-1.5">
                                                     <div className="h-3.5 bg-slate-100 rounded-md w-28 animate-pulse"></div>
-                                                    <div className="h-3.5 bg-slate-100 rounded-md w-20 animate-pulse"></div>
+                                                    <div className="h-3.5 bg-slate-100 rounded-md w-32 animate-pulse"></div>
                                                 </div>
                                             </td>
-                                            <td className="px-4 py-5 text-center"><div className="h-5 bg-slate-200/80 rounded-full w-20 mx-auto animate-pulse"></div></td>
-                                            <td className="px-4 py-5"><div className="h-4 bg-slate-100 rounded-md w-36 animate-pulse"></div></td>
-                                            <td className="px-4 py-5"><div className="h-4 bg-slate-100 rounded-md w-24 animate-pulse"></div></td>
-                                            <td className="px-4 py-5 text-center">
-                                                <div className="flex justify-center gap-1.5">
-                                                    <div className="h-7 w-7 rounded-lg bg-slate-100 animate-pulse"></div>
-                                                    <div className="h-7 w-7 rounded-lg bg-slate-100 animate-pulse"></div>
+                                            <td className="px-6 py-5 text-center"><div className="h-6 bg-slate-200/80 rounded-full w-24 mx-auto animate-pulse"></div></td>
+                                            <td className="px-6 py-5"><div className="h-3.5 bg-slate-100 rounded-md w-24 animate-pulse"></div></td>
+                                            <td className="px-6 py-5"><div className="h-3.5 bg-slate-100 rounded-md w-24 animate-pulse"></div></td>
+                                            <td className="px-6 py-5 text-center">
+                                                <div className="flex justify-center gap-2">
+                                                    <div className="h-4 w-4 rounded-full bg-slate-100 animate-pulse"></div>
+                                                    <div className="h-4 w-4 rounded-full bg-slate-100 animate-pulse"></div>
+                                                    <div className="h-4 w-4 rounded-full bg-slate-100 animate-pulse"></div>
                                                 </div>
                                             </td>
                                         </tr>
@@ -1624,78 +1644,85 @@ const Seguimiento = () => {
                         </div>
                     </div>
                 ) : prospectosFiltrados.length === 0 ? (
-                    <div className="bg-white md:rounded-2xl p-12 min-h-60 flex flex-col items-center justify-center text-center">
+                    <div className="bg-white rounded-2xl p-12 flex-1 flex flex-col items-center justify-center text-center border border-slate-200 shadow-sm min-h-0">
                         <User className="w-12 h-12 text-slate-300 mb-4" />
-                        <p className="text-gray-500 font-medium">No se encontraron prospectos.</p>
-                        <p className="text-gray-400 text-sm mt-1">Intenta con otra busqueda o crea uno nuevo.</p>
+                        <p className="text-gray-500 font-bold">No se encontraron prospectos.</p>
+                        <p className="text-gray-400 text-sm mt-1 font-medium">Intenta con otra busqueda o crea uno nuevo.</p>
                     </div>
                 ) : (
-                    <div className="bg-white md:border md:border-slate-200 md:rounded-2xl md:shadow-sm overflow-hidden">
-                        <div className="overflow-x-auto">
+                    <div className="bg-white border border-slate-200 rounded-2xl shadow-sm flex-1 flex flex-col min-h-0">
+                        <div className="px-6 py-4 border-b border-slate-100 shrink-0">
+                            <h2 className="text-[13px] font-black text-slate-700 tracking-wider uppercase">
+                                {filtroVisibilidad === 'mine'
+                                    ? `MI LISTA (PRIVADOS) (${prospectosFiltrados.length})`
+                                    : filtroVisibilidad === 'shared'
+                                    ? `MI LISTA (COMPARTIDOS) (${prospectosFiltrados.length})`
+                                    : `TODOS LOS VISIBLES (${prospectosFiltrados.length})`}
+                            </h2>
+                        </div>
+                        <div className="flex-1 overflow-auto">
                             <table id="tabla-prospectos" className="min-w-full text-sm">
-                                <thead className="bg-slate-100/70 text-slate-500 uppercase">
+                                <thead className="bg-white sticky top-0 z-10 border-b border-slate-100 text-slate-400 uppercase">
                                     <tr>
-                                        <th className="px-2 md:px-4 py-2 md:py-3 text-left font-semibold text-[10px] md:text-xs">Cliente</th>
-                                        <th className="px-2 md:px-4 py-2 md:py-3 text-left font-semibold text-[10px] md:text-xs">{t("Empresa")}</th>
-                                        <th className="px-2 md:px-4 py-2 md:py-3 text-left font-semibold text-[10px] md:text-xs">{t("Contacto")}</th>
-                                        <th className="px-2 md:px-4 py-2 md:py-3 text-center font-semibold text-[9px] md:text-xs uppercase tracking-wider">{t("Etapa")}</th>
-                                        <th className="px-2 md:px-4 py-2 md:py-3 text-left font-semibold text-[10px] md:text-xs whitespace-nowrap">Última interacción</th>
-                                        <th className="px-2 md:px-4 py-2 md:py-3 text-left font-semibold text-[10px] md:text-xs">Recordatorio</th>
-                                        <th className="px-2 md:px-4 py-2 md:py-3 text-center font-semibold text-[10px] md:text-xs">{t("Acciones")}</th>
+                                        <th className="px-6 py-3 text-left font-bold text-[10px] tracking-widest w-1/5">Cliente</th>
+                                        <th className="px-6 py-3 text-left font-bold text-[10px] tracking-widest w-1/5">Contacto</th>
+                                        <th className="px-6 py-3 text-center font-bold text-[10px] tracking-widest">Etapa</th>
+                                        <th className="px-6 py-3 text-left font-bold text-[10px] tracking-widest">Última interacción</th>
+                                        <th className="px-6 py-3 text-left font-bold text-[10px] tracking-widest">Recordatorio</th>
+                                        <th className="px-6 py-3 text-center font-bold text-[10px] tracking-widest">Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100">
                                     {prospectosFiltrados.map((p) => (
                                         <tr key={p._id || p.id} className="hover:bg-slate-50/70 transition-colors cursor-pointer" onClick={() => handleSeleccionarProspecto(p)}>
-                                            <td className="px-2 md:px-4 py-2 md:py-3 whitespace-nowrap">
+                                            <td className="px-6 py-4 whitespace-nowrap">
                                                 <div className="flex flex-col">
-                                                    <p className="font-bold text-gray-900 leading-tight text-[11px] md:text-sm">
+                                                    <p className="font-bold text-gray-900 leading-tight text-sm flex items-center gap-1.5 mb-0.5">
                                                         {p.nombres} {p.apellidoPaterno}
+                                                        {p.whatsappPendiente && (
+                                                            <span className="inline-flex items-center gap-1 bg-emerald-500 text-white text-[8px] font-extrabold uppercase tracking-wider px-1.5 py-0.5 rounded-md shadow-xs" title="Mensaje de WhatsApp pendiente de responder">
+                                                                <span className="relative flex h-1.5 w-1.5">
+                                                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                                                                    <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-white"></span>
+                                                                </span>
+                                                                Wpp
+                                                            </span>
+                                                        )}
                                                     </p>
-                                                    <p className="text-[9px] md:text-[10px] text-slate-400 mt-0.5 max-w-[100px] md:max-w-none truncate">
-                                                        {(p.esPropietario === true || isOwnerRecord(p))
-                                                            ? 'Propietario: tú'
-                                                            : `Compartido por: ${p.propietarioNombre || 'usuario'}`}
+                                                    <p className="text-[11px] text-gray-500 max-w-[180px] truncate mb-1">
+                                                        {p.empresa || '—'}
                                                     </p>
-                                                    <div className="flex items-center gap-0.5 text-yellow-500 scale-[0.6] md:scale-75 origin-left mt-0.5">
+                                                    <div className="flex items-center gap-0.5 text-yellow-500 scale-75 origin-left">
                                                         {[1, 2, 3, 4, 5].map((value) => (
-                                                            <Star key={value} className={`w-3.5 h-3.5 ${p.interes >= value ? 'fill-yellow-400' : 'fill-slate-100 text-slate-300'}`} />
+                                                            <Star key={value} className={`w-3.5 h-3.5 ${p.interes >= value ? 'fill-yellow-400 text-yellow-400' : 'fill-slate-100 text-slate-200'}`} />
                                                         ))}
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td className="px-2 md:px-4 py-2 md:py-3 text-gray-600 text-[10px] md:text-sm whitespace-nowrap max-w-[90px] md:max-w-none truncate">{p.empresa || '—'}</td>
-                                            <td className="px-2 md:px-4 py-2 md:py-3 whitespace-nowrap">
-                                                <div className="space-y-0.5">
-                                                    {p.telefono ? (
-                                                        <p className="flex items-center gap-1 text-gray-700 text-sm font-medium">
-                                                            <Phone className="w-3.5 h-3.5 text-gray-400 shrink-0" />
-                                                            {p.telefono}
-                                                        </p>
-                                                    ) : p.correo ? (() => {
-                                                        const emails = p.correo.split(',').map(e => e.trim()).filter(Boolean);
-                                                        return (
-                                                            <p className="flex items-center gap-1 text-gray-500 text-sm" title={p.correo}>
-                                                                <Mail className="w-3.5 h-3.5 text-gray-400 shrink-0" />
-                                                                <span>{emails[0]}{emails.length > 1 ? ' ...' : ''}</span>
-                                                            </p>
-                                                        );
-                                                    })() : (
-                                                        <span className="text-xs text-slate-400 italic">{t("Sin contacto")}</span>
-                                                    )}
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="space-y-1.5">
+                                                    <p className="flex items-center gap-1.5 text-gray-500 text-xs">
+                                                        <Phone className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                                                        {p.telefono || '—'}
+                                                    </p>
+                                                    <p className="flex items-center gap-1.5 text-gray-500 text-xs">
+                                                        <Mail className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                                                        {p.correo ? p.correo.split(',')[0].trim() : '—'}
+                                                    </p>
                                                 </div>
                                             </td>
-                                            <td className="px-2 md:px-4 py-2 md:py-3 text-center whitespace-nowrap">
+                                            <td className="px-6 py-4 text-center whitespace-nowrap">
                                                 {p.etapaEmbudo === 'prospecto_nuevo' && !p.ultimaActTipo ? (
-                                                    <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-500">{t("No contactado")}
+                                                    <span className="px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest bg-red-100 text-red-600">
+                                                        {t("SIN CONTACTO")}
                                                     </span>
                                                 ) : (
-                                                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${getEtapaColor(p.etapaEmbudo)}`}>
+                                                    <span className={`px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest ${getEtapaColor(p.etapaEmbudo)}`}>
                                                         {getEtapaLabel(p.etapaEmbudo)}
                                                     </span>
                                                 )}
                                             </td>
-                                            <td className="px-2 md:px-4 py-2 md:py-3 max-w-[140px] md:max-w-[200px]">
+                                            <td className="px-6 py-4 max-w-[200px]">
                                                 {p.ultimaActTipo ? (
                                                     <div className="flex items-start gap-1.5">
                                                         <div className="mt-0.5 shrink-0">
@@ -1705,26 +1732,26 @@ const Seguimiento = () => {
                                                             {p.ultimaActTipo === 'cita' && <Calendar className="w-3 h-3 text-(--theme-500)" />}
                                                             {!['llamada', 'whatsapp', 'correo', 'cita'].includes(p.ultimaActTipo) && <Clock className="w-3 h-3 text-slate-400" />}
                                                         </div>
-                                                        <p className="text-[11px] text-slate-600 leading-snug" title={p.ultimaActNotas || ''}>
+                                                        <p className="text-xs text-blue-600 leading-snug" title={p.ultimaActNotas || ''}>
                                                             {p.ultimaActNotas
                                                                 ? (p.ultimaActNotas.length > 50 ? p.ultimaActNotas.slice(0, 50) + '…' : p.ultimaActNotas)
                                                                 : <span className="italic text-slate-400">{getTipoLabel(p.ultimaActTipo)}</span>}
                                                         </p>
                                                     </div>
                                                 ) : (
-                                                    <span className="text-xs text-slate-300 italic">Sin interacciones</span>
+                                                    <span className="text-xs text-slate-300 italic font-medium">Sin interacciones</span>
                                                 )}
                                             </td>
-                                            <td className="px-2 md:px-4 py-2 md:py-3 whitespace-nowrap">
+                                            <td className="px-6 py-4 whitespace-nowrap">
                                                  <div className="flex flex-col gap-1.5">
                                                      {/* Próxima Cita (Meeting) */}
                                                      {p.proximaCita && (() => {
                                                          const esVencido = new Date(p.proximaCita) < new Date();
                                                          return (
                                                              <div className={`flex items-center gap-1.5 ${esVencido ? 'text-red-600' : 'text-indigo-600'}`}>
-                                                                 <Video className="w-3 h-3 shrink-0" />
-                                                                 <span className="text-[10px] font-bold leading-tight uppercase tracking-tighter">
-                                                                     Cita: {new Date(p.proximaCita).toLocaleString('es-MX', {
+                                                                 <Video className="w-3.5 h-3.5 shrink-0" />
+                                                                 <span className="text-xs font-medium leading-tight tracking-tight">
+                                                                     {new Date(p.proximaCita).toLocaleString('es-MX', {
                                                                          day: 'numeric',
                                                                          month: 'short',
                                                                          hour: '2-digit',
@@ -1738,15 +1765,14 @@ const Seguimiento = () => {
 
                                                      {/* Recordatorio de Llamada */}
                                                      {p.proximaLlamada && (() => {
-                                                         // Si ya mostramos la cita y la fecha es la misma, no duplicamos como llamada
                                                          const citaMismaFecha = p.proximaCita && (new Date(p.proximaLlamada).getTime() === new Date(p.proximaCita).getTime());
                                                          if (citaMismaFecha) return null;
 
                                                          const esVencido = new Date(p.proximaLlamada) < new Date();
                                                          return (
-                                                             <div className={`flex items-center gap-1.5 ${esVencido ? 'text-red-600' : 'text-emerald-00'}`}>
-                                                                 <Phone className="w-3 h-3 shrink-0" />
-                                                                 <span className="text-[10px] font-bold leading-tight uppercase tracking-tighter">
+                                                             <div className={`flex items-center gap-1.5 ${esVencido ? 'text-red-600' : 'text-slate-600'}`}>
+                                                                 <Phone className="w-3.5 h-3.5 shrink-0" />
+                                                                 <span className="text-xs font-medium leading-tight tracking-tight">
                                                                      {new Date(p.proximaLlamada).toLocaleString('es-MX', {
                                                                          day: 'numeric',
                                                                          month: 'short',
@@ -1760,49 +1786,71 @@ const Seguimiento = () => {
                                                      })()}
 
                                                      {!p.proximaLlamada && !p.proximaCita && (
-                                                         <span className="text-xs text-slate-400 italic">Sin pendiente</span>
+                                                         <span className="text-xs text-slate-300 italic font-medium">Sin pendiente</span>
                                                      )}
                                                  </div>
                                              </td>
-                                            <td className="px-2 md:px-4 py-2 md:py-3 text-center whitespace-nowrap">
-                                                <div className="flex items-center justify-center gap-1.5 md:gap-3">
+                                            <td className="px-6 py-4 text-center whitespace-nowrap">
+                                                <div className="flex items-center justify-center gap-2">
                                                     {(p.esPropietario === true || isOwnerRecord(p)) && (
                                                         <button
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
                                                                 handleToggleCompartido(p, !p.compartido);
                                                             }}
-                                                            className={`btn-compartir-prospecto inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold border transition-colors ${p.compartido
-                                                                ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
-                                                                : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
-                                                                }`}
-                                                            title="Compartir u ocultar este prospecto"
+                                                            className={`p-1.5 rounded-lg transition-all border ${
+                                                                p.compartido
+                                                                    ? 'bg-emerald-50 text-emerald-600 border-emerald-200 shadow-xs'
+                                                                    : 'text-slate-300 hover:text-emerald-500 border-transparent hover:bg-slate-50'
+                                                            }`}
+                                                            title={p.compartido ? 'Compartido (clic para volver privado)' : 'Privado (clic para compartir)'}
                                                         >
-                                                            <Share2 className="w-3 h-3" />
-                                                            {p.compartido ? 'Compartido' : 'Privado'}
+                                                            <Share2 className="w-4 h-4" />
                                                         </button>
                                                     )}
                                                     <button
                                                         onClick={(e) => { e.stopPropagation(); abrirModalEditar(p); }}
-                                                        className="text-gray-400 hover:text-(--theme-600) transition-colors p-2 rounded-full hover:bg-(--theme-50)"
+                                                        className="text-slate-300 hover:text-(--theme-600) transition-colors p-1.5 rounded-md hover:bg-slate-50"
                                                         title="Editar Prospecto"
                                                     >
                                                         <Edit2 className="w-4 h-4" />
                                                     </button>
                                                     <button
                                                         onClick={(e) => { e.stopPropagation(); setProspectoAEliminar(p); }}
-                                                        className="text-gray-400 hover:text-red-500 transition-colors p-2 rounded-full hover:bg-red-50"
+                                                        className="text-slate-300 hover:text-red-500 transition-colors p-1.5 rounded-md hover:bg-slate-50"
                                                         title="Eliminar Prospecto"
                                                     >
                                                         <Trash2 className="w-4 h-4" />
                                                     </button>
-
                                                 </div>
                                             </td>
                                         </tr>
                                     ))}
                                 </tbody>
                             </table>
+                        </div>
+                        {/* Paginación */}
+                        <div className="flex flex-col sm:flex-row items-center justify-between p-4 border-t border-slate-100 bg-white rounded-b-xl gap-4">
+                            <span className="text-sm text-slate-500 font-medium">Mostrando {prospectos.length} de {totalItems} prospectos</span>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    disabled={page === 1}
+                                    onClick={() => setPage(page - 1)}
+                                    className="px-3 py-1.5 border border-slate-200 rounded text-sm disabled:opacity-50 hover:bg-slate-50 font-medium text-slate-700"
+                                >
+                                    Anterior
+                                </button>
+                                <span className="px-3 py-1.5 text-sm font-semibold text-slate-700 bg-slate-50 rounded border border-slate-100">
+                                    Página {page} de {totalPages}
+                                </span>
+                                <button
+                                    disabled={page >= totalPages}
+                                    onClick={() => setPage(page + 1)}
+                                    className="px-3 py-1.5 border border-slate-200 rounded text-sm disabled:opacity-50 hover:bg-slate-50 font-medium text-slate-700"
+                                >
+                                    Siguiente
+                                </button>
+                            </div>
                         </div>
                     </div>
                 )}

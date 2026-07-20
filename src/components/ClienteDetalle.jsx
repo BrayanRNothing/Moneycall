@@ -635,10 +635,11 @@ export default function ClienteDetalle({
 
             // Recargar Cliente fresco desde el servidor (evitar estado obsoleto)
             const res = await axios.get(`${API_URL}/api/${rolePath}/prospectos`, { headers: getAuthHeaders() });
-            const updated = res.data.find(p => p.id === pid || p._id === pid);
+            const prospectosData = res.data.data ? res.data.data : res.data;
+            const updated = prospectosData.find(p => p.id === pid || p._id === pid);
             if (updated) {
                 setClienteSeleccionado(updated);
-                setClientes(res.data);
+                setClientes(prospectosData);
             }
             // Recargar historial
             handleSeleccionarCliente(updated || ClienteSeleccionado);
@@ -970,7 +971,8 @@ export default function ClienteDetalle({
             toast.success(`Etapa actualizada: ${getEtapaLabel(nuevaEtapa)}`);
             setEditandoEtapa(false);
             const res = await axios.get(`${API_URL}/api/${rolePath}/prospectos`, { headers: getAuthHeaders() });
-            const updated = res.data.find(p => p.id === pid || p._id === pid);
+            const prospectosData = res.data.data ? res.data.data : res.data;
+            const updated = prospectosData.find(p => p.id === pid || p._id === pid);
             if (updated) { setClienteSeleccionado(updated); }
             if (onActualizado) onActualizado();
         } catch (error) {
@@ -1796,8 +1798,9 @@ export default function ClienteDetalle({
                                                     toast.success('Reintento programado');
                                                     setLlamadaFlow(null);
                                                     const res = await axios.get(`${API_URL}/api/${rolePath}/prospectos`, { headers: getAuthHeaders() });
-                                                    const updated = res.data.find(p => p.id === pidLocal || p._id === pidLocal);
-                                                    if (updated) { setClienteSeleccionado(updated); setClientes(res.data); }
+                                                    const prospectosData = res.data.data ? res.data.data : res.data;
+                                                    const updated = prospectosData.find(p => p.id === pidLocal || p._id === pidLocal);
+                                                    if (updated) { setClienteSeleccionado(updated); setClientes(prospectosData); }
                                                 } catch { toast.error('Error al programar reintento'); }
                                                 finally { setRegistrandoActividad(false); }
                                             }}

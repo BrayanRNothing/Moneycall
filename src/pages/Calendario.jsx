@@ -69,11 +69,13 @@ const Calendario = () => {
   const [selectedProspect, setSelectedProspect] = useState("");
   const [busySlots, setBusySlots] = useState([]);
   const [selectedTimeSlot, setSelectedTimeSlot] = useState(null);
+  const [showTimeModal, setShowTimeModal] = useState(false);
+  const [plataforma, setPlataforma] = useState("meet");
+  const [linkPropio, setLinkPropio] = useState("");
   const [createdEventLink, setCreatedEventLink] = useState(null);
   const [bookingCheck, setBookingCheck] = useState(null);
   const [closerLinkedToGoogle, setCloserLinkedToGoogle] = useState(true);
   const [googleLinked, setGoogleLinked] = useState(null);
-  const [showSyncPrompt, setShowSyncPrompt] = useState(false);
   const [misReuniones, setMisReuniones] = useState([]);
   const [loadingMisReuniones, setLoadingMisReuniones] = useState(false);
   const [formData, setFormData] = useState({
@@ -86,6 +88,12 @@ const Calendario = () => {
   ); // 'agenda' o 'agendar'
   const [googleEvents, setGoogleEvents] = useState([]);
   const [loadingGoogleEvents, setLoadingGoogleEvents] = useState(false);
+
+  useEffect(() => {
+    if (!closerLinkedToGoogle && plataforma === "meet") {
+      setPlataforma("mirrowtalk");
+    }
+  }, [closerLinkedToGoogle, plataforma]);
 
   // Para controlar el input de invitados en el modal de edición
   const [editInvitadoInput, setEditInvitadoInput] = useState("");
@@ -398,8 +406,8 @@ const Calendario = () => {
           headers: { "x-auth-token": token },
         });
         if (res.ok) {
-          const data = await res.json();
-          setProspectos(data);
+          const rawData = await res.json();
+          setProspectos(rawData.data ? rawData.data : rawData);
         }
       } catch (error) {
         console.error("Error fetching prospects:", error);
@@ -443,9 +451,6 @@ const Calendario = () => {
         if (data?.notLinked || data?.connected === false) {
           sessionStorage.removeItem("googleLinkedConfirmed");
           setGoogleLinked(false);
-          if (!isQuiet && !sessionStorage.getItem("dismissedSyncPrompt")) {
-            setShowSyncPrompt(true);
-          }
         } else {
           // Recordar en sesión que el usuario está vinculado para no mostrar modal al volver
           sessionStorage.setItem("googleLinkedConfirmed", "true");
@@ -458,12 +463,6 @@ const Calendario = () => {
         if (data.notLinked || res.status === 401) {
           sessionStorage.removeItem("googleLinkedConfirmed");
           setGoogleLinked(false);
-          // Mostrar prompt pantalla completa SOLO si:
-          // 1. No ha sido omitido esta sesión
-          // 2. No es una revisión silenciosa (focus / recarga)
-          if (!isQuiet && !sessionStorage.getItem("dismissedSyncPrompt")) {
-            setShowSyncPrompt(true);
-          }
         }
         // Si es un error 500 u otro error temporal, no cambiamos el estado de vinculación
       }
@@ -853,6 +852,8 @@ const Calendario = () => {
             fechaReunion: startDateTime.toISOString(),
             notas: formData.notas,
             invitados: formData.invitados,
+            plataforma,
+            linkPropio,
           }),
         },
       );
@@ -1220,42 +1221,64 @@ const Calendario = () => {
     );
   };
 
-  const SyncPromptModal = () => {
-    if (!showSyncPrompt) return null;
+  const TimeSelectionModal = () => {
+    if (!showTimeModal) return null;
     return (
-      <div className="fixed inset-0 z-[500] flex items-center justify-center p-4 backdrop-blur-md bg-slate-900/40">
-        <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden transform animate-in zoom-in-95 duration-200">
-          <div className="p-8 text-center">
-            <div className="w-20 h-20 bg-(--theme-50) rounded-full flex items-center justify-center mx-auto mb-6">
-              <div className="w-14 h-14 bg-(--theme-500) rounded-2xl flex items-center justify-center rotate-12 shadow-lg shadow-(--theme-500)/30">
-                <LinkIcon className="w-8 h-8 text-white -rotate-12" />
-              </div>
-            </div>
-            <h3 className="text-2xl font-black text-slate-900 mb-2">
-              Vincula tu Calendario
+      <div className="fixed inset-0 z-[400] flex items-center justify-center p-4 backdrop-blur-sm bg-slate-900/40 animate-in fade-in duration-200">
+        <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden flex flex-col max-h-[80vh]">
+          <div className="flex items-center justify-between p-4 border-b border-slate-100">
+            <h3 className="text-sm font-black text-slate-800 flex items-center gap-2">
+              <Clock className="w-4 h-4 text-(--theme-500)" />
+              Seleccionar Horario
             </h3>
-            <p className="text-sm text-slate-500 leading-relaxed mb-8">
-              Para poder crear salas de{" "}
-              <span className="font-bold text-slate-700">Google Meet</span> y
-              gestionar tus citas automáticamente, necesitamos conectar con tu
-              cuenta de Google.
-            </p>
-            <div className="space-y-3">
-              <button
-                onClick={() => navigate("/vendedor/ajustes", { state: { activeTab: "integraciones" } })}
-                className="w-full py-4 bg-(--theme-500) text-white rounded-2xl font-black text-sm hover:bg-[#7cb342] transition-all shadow-lg shadow-(--theme-500)/20"
-              >
-                IR A VINCULAR AHORA
-              </button>
-              <button
-                onClick={() => {
-                  sessionStorage.setItem("dismissedSyncPrompt", "true");
-                  setShowSyncPrompt(false);
-                }}
-                className="w-full py-3 text-xs font-bold text-slate-400 hover:text-slate-600 transition-colors"
-              >
-                Omitir por ahora
-              </button>
+            <button onClick={() => setShowTimeModal(false)} className="text-slate-400 hover:text-slate-600 transition-colors">
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+          <div className="p-4 overflow-y-auto flex-1 custom-scrollbar">
+            <div className="grid grid-cols-3 gap-2">
+              {selectedDate && selectedDate.getDay() !== 0 ? (
+                generateSlotsForDay(selectedDate).length > 0 ? (
+                  generateSlotsForDay(selectedDate).map((slot, idx) => {
+                    const timeStr = slot.start.toLocaleTimeString("es-ES", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    });
+                    const isSelected = selectedTimeSlot?.start.getTime() === slot.start.getTime();
+                    return (
+                      <button
+                        key={idx}
+                        type="button"
+                        disabled={slot.isBusy}
+                        onClick={() => {
+                          if (!slot.isBusy) {
+                            setSelectedTimeSlot(slot);
+                            setShowTimeModal(false);
+                          }
+                        }}
+                        className={`w-full py-2.5 border rounded-xl text-[10px] font-bold text-center transition-all duration-150
+                          ${slot.isBusy
+                            ? "bg-slate-50 border-slate-100 text-slate-300 cursor-not-allowed line-through"
+                            : isSelected
+                              ? "bg-(--theme-600) border-(--theme-600) text-white shadow-md ring-1 ring-white ring-offset-1"
+                              : "bg-white border-slate-200 text-slate-600 hover:border-(--theme-500) hover:text-(--theme-600) hover:bg-(--theme-50)"
+                          }`}
+                      >
+                        {timeStr}
+                      </button>
+                    );
+                  })
+                ) : (
+                  <div className="col-span-3 text-[10px] text-slate-400 text-center py-6 bg-slate-50/50 rounded-2xl italic border border-dashed border-slate-200 flex flex-col items-center gap-2">
+                    <VideoOff className="w-4 h-4 opacity-30" />
+                    Sin horarios disponibles
+                  </div>
+                )
+              ) : (
+                <div className="col-span-3 text-[10px] text-slate-400 text-center py-6 bg-slate-50/50 rounded-2xl italic border border-dashed border-slate-200">
+                  Día festivo / descanso
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -1267,7 +1290,7 @@ const Calendario = () => {
     <div className="h-full flex flex-col md:p-5 overflow-hidden -mx-4 -mt-4 md:m-0">
       <ResultModal />
       <EditMeetingModal />
-      <SyncPromptModal />
+      <TimeSelectionModal />
       <div className="flex-1 flex flex-col space-y-4 overflow-hidden min-h-0 bg-white md:bg-transparent">
         {/* Main Grid */}
         <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-0 md:gap-6 min-h-0">
@@ -1434,12 +1457,6 @@ const Calendario = () => {
                             {selectedDate.toLocaleDateString("es-MX", { weekday: "long", day: "numeric", month: "short" }).toUpperCase()}
                           </p>
                         </div>
-                        {selectedCloser && !closerLinkedToGoogle && (
-                          <div className="px-2 py-1 bg-amber-50 border border-amber-100 rounded-lg flex items-center gap-1">
-                            <AlertCircle className="w-3 h-3 text-amber-500" />
-                            <span className="text-[8px] font-black text-amber-600 uppercase tracking-tighter">SIN SYNC</span>
-                          </div>
-                        )}
                       </div>
 
                       {/* Toggle Prospecto / Cliente — simple */}
@@ -1582,58 +1599,51 @@ const Calendario = () => {
                           </div>
                         </div>
 
-                        {/* 3. Horarios Grid (Compacto) */}
+                        {/* 3. Plataforma de videollamada */}
+                        <div className="shrink-0 space-y-2.5">
+                          <label className="flex items-center gap-1.5 text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                            <VideoIcon className="w-3 h-3 text-(--theme-500)" /> Plataforma
+                          </label>
+                          <select
+                            value={plataforma}
+                            onChange={(e) => setPlataforma(e.target.value)}
+                            className="w-full h-9 pl-3 pr-8 text-[11px] font-bold text-slate-700 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-(--theme-500)/20 focus:border-(--theme-500) outline-none transition-all cursor-pointer appearance-none"
+                          >
+                            <option value="meet" disabled={!closerLinkedToGoogle}>Google Meet {!closerLinkedToGoogle && "(Requiere vincular cuenta)"}</option>
+                            <option value="mirrowtalk">MirrowTalk</option>
+                            <option value="propio">Link Propio</option>
+                          </select>
+                          {!closerLinkedToGoogle && (
+                            <p className="text-[9px] font-bold text-amber-500 mt-1.5 ml-1">
+                              * El vendedor no ha vinculado su cuenta de Google.
+                            </p>
+                          )}
+                          {plataforma === "propio" && (
+                            <input
+                              type="url"
+                              value={linkPropio}
+                              onChange={(e) => setLinkPropio(e.target.value)}
+                              placeholder="https://..."
+                              className="w-full h-9 px-3 text-[11px] font-medium border border-slate-200 bg-slate-50 rounded-xl focus:ring-2 focus:ring-(--theme-500)/30 outline-none transition-all mt-2"
+                            />
+                          )}
+                        </div>
+
+                        {/* 4. Horarios (Botón que abre modal) */}
                         <div className="shrink-0">
                           <label className="flex items-center gap-1.5 text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">
-                            <Clock className="w-3 h-3" /> Horarios Disponibles
+                            <Clock className="w-3 h-3 text-(--theme-500)" /> Horario
                           </label>
-                          <div className="grid grid-cols-3 gap-1.5 max-h-[220px] overflow-y-auto pr-1 custom-scrollbar">
-                            {selectedDate && selectedDate.getDay() !== 0 ? (
-                              generateSlotsForDay(selectedDate).length > 0 ? (
-                                generateSlotsForDay(selectedDate).map(
-                                  (slot, idx) => {
-                                    const timeStr =
-                                      slot.start.toLocaleTimeString("es-ES", {
-                                        hour: "2-digit",
-                                        minute: "2-digit",
-                                      });
-                                    const isSelected =
-                                      selectedTimeSlot?.start.getTime() ===
-                                      slot.start.getTime();
-                                    return (
-                                      <button
-                                        key={idx}
-                                        type="button"
-                                        disabled={slot.isBusy}
-                                        onClick={() =>
-                                          !slot.isBusy &&
-                                          setSelectedTimeSlot(slot)
-                                        }
-                                        className={`w-full py-1.5 border rounded-lg text-[10px] font-bold text-center transition-all duration-150
-                                          ${slot.isBusy
-                                            ? "bg-slate-50 border-slate-100 text-slate-300 cursor-not-allowed line-through"
-                                            : isSelected
-                                              ? "bg-(--theme-600) border-(--theme-600) text-white shadow-md ring-1 ring-white ring-offset-1"
-                                              : "bg-white border-slate-200 text-slate-600 hover:border-(--theme-500) hover:text-(--theme-600) hover:bg-(--theme-50)"
-                                          }`}
-                                      >
-                                        {timeStr}
-                                      </button>
-                                    );
-                                  },
-                                )
-                              ) : (
-                                <div className="col-span-3 text-[10px] text-slate-400 text-center py-6 bg-slate-50/50 rounded-2xl italic border border-dashed border-slate-200 flex flex-col items-center justify-center gap-2">
-                                  <VideoOff className="w-4 h-4 opacity-30" />
-                                  Sin horarios disponibles
-                                </div>
-                              )
-                            ) : (
-                              <div className="col-span-3 text-[10px] text-slate-400 text-center py-6 bg-slate-50/50 rounded-2xl italic border border-dashed border-slate-200">
-                                Día festivo / descanso
-                              </div>
-                            )}
-                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setShowTimeModal(true)}
+                            className="w-full h-10 border border-slate-200 bg-white rounded-xl text-[11px] font-bold text-slate-600 hover:border-(--theme-500) hover:text-(--theme-600) transition-all flex justify-between items-center px-3 shadow-sm"
+                          >
+                            <span>
+                              {selectedTimeSlot ? selectedTimeSlot.start.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" }) : "Seleccionar horario..."}
+                            </span>
+                            <Clock className="w-4 h-4 opacity-50" />
+                          </button>
                         </div>
 
                         {/* 4. Notas y Pie (Compacto) */}
@@ -1660,14 +1670,19 @@ const Calendario = () => {
                           <button
                             type="submit"
                             disabled={!selectedTimeSlot || !selectedProspect}
-                            className="w-full py-3.5 px-4 rounded-2xl font-black uppercase tracking-widest text-[11px] transition-all disabled:opacity-40 disabled:grayscale disabled:shadow-none disabled:cursor-not-allowed"
-                            style={{
-                              background: (!selectedTimeSlot || !selectedProspect)
-                                ? undefined
-                                : "linear-gradient(135deg, var(--theme-600) 0%, var(--theme-500) 100%)",
-                              color: "white",
-                              boxShadow: (!selectedTimeSlot || !selectedProspect) ? "none" : "0 8px 24px -4px color-mix(in srgb, var(--theme-500) 35%, transparent)",
-                            }}
+                            className={`w-full py-3.5 px-4 rounded-2xl font-black uppercase tracking-widest text-[11px] transition-all ${
+                              (!selectedTimeSlot || !selectedProspect)
+                                ? "bg-slate-200 text-slate-400 cursor-not-allowed shadow-none"
+                                : "text-white hover:scale-[1.02] active:scale-[0.98]"
+                            }`}
+                            style={
+                              (!selectedTimeSlot || !selectedProspect)
+                                ? {}
+                                : {
+                                    background: "linear-gradient(135deg, var(--theme-600) 0%, var(--theme-500) 100%)",
+                                    boxShadow: "0 8px 24px -4px color-mix(in srgb, var(--theme-500) 35%, transparent)",
+                                  }
+                            }
                           >
                             {selectedTimeSlot
                               ? `✓ Confirmar · ${selectedTimeSlot.start.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })}`

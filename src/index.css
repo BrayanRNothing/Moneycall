@@ -255,6 +255,21 @@ body {
   --theme-950: #701a75;
 }
 
+/* THEME: PLATINO */
+.theme-platino {
+  --theme-50: #f5f7f9;
+  --theme-100: #e6eaef;
+  --theme-200: #ccd5df;
+  --theme-300: #a7b7c8;
+  --theme-400: #7c92a9;
+  --theme-500: #3b4d61;
+  --theme-600: #2d3b4a;
+  --theme-700: #232e3a;
+  --theme-800: #1b242d;
+  --theme-900: #161c23;
+  --theme-950: #0d1116;
+}
+
 /* Safe area support para móviles (notch, barras del navegador) */
 .pb-safe {
   padding-bottom: env(safe-area-inset-bottom, 0);

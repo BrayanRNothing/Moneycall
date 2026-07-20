@@ -8,8 +8,8 @@
   },
   "scripts": {
     "start": "node server.js",
-    "dev": "NODE_ENV=development nodemon server.js",
-    "dev:windows": "set NODE_ENV=development && nodemon server.js",
+    "dev": "NODE_ENV=development nodemon --ignore sessions/ --ignore uploads/ server.js",
+    "dev:windows": "set NODE_ENV=development && nodemon --ignore sessions/ --ignore uploads/ server.js",
     "seed": "node seed.js",
     "db:backup": "node backup_db.js",
     "db:restore": "node restore_db.js",
@@ -20,6 +20,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@whiskeysockets/baileys": "^7.0.0-rc13",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
     "dotenv": "^17.3.1",
@@ -29,6 +30,8 @@
     "jsonwebtoken": "^9.0.3",
     "multer": "^2.1.1",
     "pg": "^8.11.3",
+    "pino": "^10.3.1",
+    "qrcode": "^1.5.4",
     "socket.io": "^4.8.3"
   },
   "devDependencies": {

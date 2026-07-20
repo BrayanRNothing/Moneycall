@@ -258,44 +258,33 @@ export default function Monitoreo() {
     const formatMoney = (val) => new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', maximumFractionDigits: 0 }).format(val);
 
     return (
-        <div className="min-h-[100%] flex flex-col md:bg-slate-50 md:p-6 bg-white -m-4 md:m-0 p-4 pb-8 md:pb-6 h-full animate-in fade-in duration-500">
-            <div className="max-w-full mx-auto space-y-6 flex-1 flex flex-col w-full min-h-0">
-                
-                {/* Cabecera Principal */}
-                <div className="bg-white md:rounded-2xl p-5 border border-slate-200 shadow-sm md:shadow-md transition-all shrink-0">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                        <div className="flex items-center gap-4">
-                            {selectedMember ? (
-                                <button 
-                                    onClick={() => setSelectedMember(null)}
-                                    className="w-10 h-10 rounded-xl bg-gray-50 border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-100 transition-all shadow-sm group"
-                                >
-                                    <ChevronLeft size={24} className="group-hover:-translate-x-1 transition-transform" />
-                                </button>
-                            ) : (
-                                <div className="w-14 h-14 rounded-2xl bg-linear-to-br from-(--theme-500) to-(--theme-600) flex items-center justify-center shadow-lg shadow-(--theme-500)/20">
-                                    <Activity size={28} className="text-white" />
-                                </div>
-                            )}
-                            <div>
-                                <h1 className="text-xl md:text-2xl font-bold tracking-tight text-gray-900 leading-tight">
-                                    {selectedMember ? `${t('Monitoreo: ')}${selectedMember.nombre}` : t('Monitoreo del Equipo')}
-                                </h1>
-                                <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mt-1">
-                                    {selectedMember ? t('Línea de tiempo de acciones') : t('Supervisa en tiempo real a los miembros de tu equipo')}
-                                </p>
-                            </div>
-                        </div>
-
-                        <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 md:gap-3 w-full md:w-auto mt-2 md:mt-0">
-                            <button
-                                className="flex-1 sm:flex-none justify-center flex items-center gap-1.5 px-3 py-2 md:px-4 md:py-2.5 bg-white border border-gray-200 rounded-xl text-[11px] md:text-xs font-bold text-gray-600 hover:bg-gray-50 transition-all shadow-sm"
-                                onClick={selectedMember ? () => { fetchActividades(selectedMember.id); fetchProspectos(selectedMember.id); } : fetchMiembrosConDatos}
+        <div className="h-full flex flex-col p-3 bg-gray-50/50 animate-in fade-in duration-500">
+            <div className="max-w-full mx-auto flex-1 flex flex-col w-full min-h-0 gap-3">
+                <div className="flex items-center justify-between mb-1.5 px-1 shrink-0">
+                    <div className="flex items-center gap-1.5">
+                        {selectedMember ? (
+                            <button 
+                                onClick={() => setSelectedMember(null)}
+                                className="mr-1 text-gray-500 hover:text-gray-700 transition-colors"
                             >
-                                <RefreshCw size={14} className={(selectedMember ? (loadingActs || loadingProps) : loading) ? 'animate-spin' : ''} />
-                                {t('ACTUALIZAR')}
+                                <ChevronLeft size={18} />
                             </button>
-                        </div>
+                        ) : (
+                            <Activity className="w-4 h-4 text-(--theme-600)" />
+                        )}
+                        <span className="text-sm font-bold text-gray-700 uppercase tracking-widest">
+                            {selectedMember ? `${t('Monitoreo: ')}${selectedMember.nombre}` : t('Monitoreo del Equipo')}
+                        </span>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                        <button
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-[11px] font-bold text-gray-600 hover:bg-gray-50 transition-all shadow-sm"
+                            onClick={selectedMember ? () => { fetchActividades(selectedMember.id); fetchProspectos(selectedMember.id); } : fetchMiembrosConDatos}
+                        >
+                            <RefreshCw size={14} className={(selectedMember ? (loadingActs || loadingProps) : loading) ? 'animate-spin' : ''} />
+                            <span className="hidden sm:inline">{t('ACTUALIZAR')}</span>
+                        </button>
                     </div>
                 </div>
 
@@ -309,45 +298,7 @@ export default function Monitoreo() {
                 {/* Vista Principal de Monitoreo (Leaderboard + KPIs) */}
                 {!selectedMember && (
                     <div className="flex-1 flex flex-col gap-6 min-h-0 animate-in fade-in slide-in-from-bottom-4 duration-700">
-                        {/* KPIs Agregados del Equipo */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 shrink-0">
-                            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4 hover:shadow-md transition-all">
-                                <div className="p-3.5 bg-blue-50 text-blue-600 rounded-xl">
-                                    <Users size={24} />
-                                </div>
-                                <div>
-                                    <p className="text-xs font-extrabold text-gray-400 uppercase tracking-wider">{t('Miembros Disponibles')}</p>
-                                    <h3 className="text-2xl font-black text-gray-900 mt-1">{miembros.length}</h3>
-                                </div>
-                            </div>
-                            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4 hover:shadow-md transition-all">
-                                <div className="p-3.5 bg-emerald-50 text-emerald-600 rounded-xl">
-                                    <Briefcase size={24} />
-                                </div>
-                                <div>
-                                    <p className="text-xs font-extrabold text-gray-400 uppercase tracking-wider">{t('Contactos asignados')}</p>
-                                    <h3 className="text-2xl font-black text-gray-900 mt-1">{teamKpis.totalLeads}</h3>
-                                </div>
-                            </div>
-                            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4 hover:shadow-md transition-all">
-                                <div className="p-3.5 bg-purple-50 text-purple-600 rounded-xl">
-                                    <DollarSign size={24} />
-                                </div>
-                                <div>
-                                    <p className="text-xs font-extrabold text-gray-400 uppercase tracking-wider">{t('Pipeline Activo')}</p>
-                                    <h3 className="text-2xl font-black text-gray-900 mt-1">{formatMoney(teamKpis.totalPipelineValue)}</h3>
-                                </div>
-                            </div>
-                            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4 hover:shadow-md transition-all">
-                                <div className="p-3.5 bg-amber-50 text-amber-600 rounded-xl">
-                                    <Activity size={24} />
-                                </div>
-                                <div>
-                                    <p className="text-xs font-extrabold text-gray-400 uppercase tracking-wider">{t('Interacciones Hoy')}</p>
-                                    <h3 className="text-2xl font-black text-gray-900 mt-1">{teamKpis.totalTodayActs}</h3>
-                                </div>
-                            </div>
-                        </div>
+
 
                         {/* Leaderboard / Tabla de Rendimiento */}
                         <div className="bg-white md:rounded-2xl p-5 border border-slate-200 shadow-sm flex-1 flex flex-col min-h-0">

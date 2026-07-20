@@ -50,8 +50,8 @@ const FloatingSidebar = ({ menuItems, userInfo, title = 'crmoneycall', subtitle 
         : 'hover:bg-(--theme-50) hover:text-(--theme-700)';
 
     const activeClasses = isDark
-        ? 'bg-(--theme-600) text-white shadow-lg shadow-(--theme-600)/30'
-        : 'bg-(--theme-500) text-white shadow-lg shadow-(--theme-500)/30';
+        ? 'text-(--theme-400) font-bold bg-transparent'
+        : 'text-(--theme-600) font-bold bg-transparent';
 
     const inactiveClasses = isDark
         ? 'text-gray-400'
@@ -60,7 +60,7 @@ const FloatingSidebar = ({ menuItems, userInfo, title = 'crmoneycall', subtitle 
     const borderClass = isDark ? 'border-gray-800' : 'border-gray-100';
     return (
         <aside
-            className={`flex flex-col border rounded-2xl transition-all duration-300 premium-reflejo ${containerClasses} ${isCollapsed ? 'w-20' : 'w-64'
+            className={`flex flex-col border rounded-2xl transition-all duration-300 premium-reflejo ${containerClasses} ${isCollapsed ? 'w-16' : 'w-48'
                 }`}
         >
             {/* Header */}
@@ -74,7 +74,6 @@ const FloatingSidebar = ({ menuItems, userInfo, title = 'crmoneycall', subtitle 
                         <div className="w-14 h-10 flex items-center justify-center transition-all duration-300 group-hover:scale-95">
                             {logo ? logo : <BrandGlyph />}
                         </div>
-                        <span className="absolute -bottom-1 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-white" />
                         <div className="absolute inset-0 flex items-center justify-center translate-x-5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                             <ChevronRight size={24} className={`${isDark ? 'text-white' : 'text-gray-800'}`} />
                         </div>
@@ -127,7 +126,7 @@ const FloatingSidebar = ({ menuItems, userInfo, title = 'crmoneycall', subtitle 
             {/* Content Wrapper with vertical shift animation */}
             <div className={`flex-1 flex flex-col transition-all duration-500 ease-in-out ${isCollapsed ? 'translate-y-0' : '-translate-y-1'}`}>
                 {/* Navigation */}
-                <nav className="flex-1 p-3 flex flex-col overflow-y-auto scrollbar-hide">
+                <nav className="flex-1 p-2 flex flex-col overflow-y-auto scrollbar-hide">
                     {/* Regular items */}
                     <div className="space-y-1">
                         {menuItems.filter(i => !i.isBottom).map((item, index) => {
@@ -159,7 +158,7 @@ const FloatingSidebar = ({ menuItems, userInfo, title = 'crmoneycall', subtitle 
                                                     toggleAccordion(item.name);
                                                 }
                                             }}
-                                            className={`w-full flex items-center ${isCollapsed ? 'justify-center px-0' : 'gap-3 px-3'} py-3 rounded-xl transition-all ${hasActiveChild && isCollapsed ? activeClasses : `${inactiveClasses} ${hoverClasses}`}`}
+                                            className={`w-full flex items-center ${isCollapsed ? 'justify-center px-0' : 'gap-3 px-2'} py-2.5 rounded-xl transition-all ${hasActiveChild && isCollapsed ? activeClasses : `${inactiveClasses} ${hoverClasses}`}`}
                                             title={isCollapsed ? t(item.name) : ''}
                                         >
                                             <div className="shrink-0">{item.icon}</div>
@@ -173,7 +172,7 @@ const FloatingSidebar = ({ menuItems, userInfo, title = 'crmoneycall', subtitle 
 
                                         {/* Submenú Flotante (cuando está contraído) */}
                                         {isCollapsed && item.children && (
-                                            <div className="fixed left-22 ml-1 invisible group-hover/accordion:visible opacity-0 group-hover/accordion:opacity-100 transition-all duration-200 z-100">
+                                            <div className="fixed left-16 ml-1 invisible group-hover/accordion:visible opacity-0 group-hover/accordion:opacity-100 transition-all duration-200 z-100">
                                                 <div className={`${containerClasses} border rounded-2xl p-2 min-w-[180px] backdrop-blur-xl`}>
                                                     <div className={`px-3 py-2 border-b ${borderClass} mb-1`}>
                                                         <p className="text-xs font-bold uppercase tracking-wider opacity-50">{t(item.name)}</p>
@@ -216,7 +215,7 @@ const FloatingSidebar = ({ menuItems, userInfo, title = 'crmoneycall', subtitle 
                             }
                             return (
                                 <Link key={index} to={item.path}
-                                    className={`flex items-center ${isCollapsed ? 'justify-center px-0' : 'gap-3 px-3'} py-3 rounded-xl transition-all ${isActive ? activeClasses : `${inactiveClasses} ${hoverClasses}`}`}
+                                    className={`flex items-center ${isCollapsed ? 'justify-center px-0' : 'gap-3 px-2'} py-2.5 rounded-xl transition-all ${isActive ? activeClasses : `${inactiveClasses} ${hoverClasses}`}`}
                                     title={isCollapsed ? t(item.name) : ''}
                                 >
                                     <div className="shrink-0">{item.icon}</div>
@@ -250,7 +249,7 @@ const FloatingSidebar = ({ menuItems, userInfo, title = 'crmoneycall', subtitle 
                                                     toggleAccordion(item.name);
                                                 }
                                             }}
-                                            className={`w-full flex items-center ${isCollapsed ? 'justify-center px-0' : 'gap-3 px-3'} py-3 rounded-xl transition-all ${hasActiveChild && isCollapsed ? activeClasses : `${inactiveClasses} ${hoverClasses}`}`}
+                                            className={`w-full flex items-center ${isCollapsed ? 'justify-center px-0' : 'gap-3 px-2'} py-2.5 rounded-xl transition-all ${hasActiveChild && isCollapsed ? activeClasses : `${inactiveClasses} ${hoverClasses}`}`}
                                             title={isCollapsed ? t(item.name) : ''}
                                         >
                                             <div className="shrink-0">{item.icon}</div>
@@ -264,7 +263,7 @@ const FloatingSidebar = ({ menuItems, userInfo, title = 'crmoneycall', subtitle 
 
                                         {/* Submenú Flotante (cuando está contraído) */}
                                         {isCollapsed && item.children && (
-                                            <div className="fixed left-22 bottom-4 ml-1 invisible group-hover/accordion:visible opacity-0 group-hover/accordion:opacity-100 transition-all duration-200 z-100">
+                                            <div className="fixed left-16 bottom-4 ml-1 invisible group-hover/accordion:visible opacity-0 group-hover/accordion:opacity-100 transition-all duration-200 z-100">
                                                 <div className={`${containerClasses} border rounded-2xl p-2 min-w-[180px] backdrop-blur-xl`}>
                                                     <div className={`px-3 py-2 border-b ${borderClass} mb-1`}>
                                                         <p className="text-xs font-bold uppercase tracking-wider opacity-50">{t(item.name)}</p>
@@ -306,7 +305,7 @@ const FloatingSidebar = ({ menuItems, userInfo, title = 'crmoneycall', subtitle 
                             }
                             return (
                                 <Link key={`bot-${index}`} to={item.path}
-                                    className={`flex items-center ${isCollapsed ? 'justify-center px-0' : 'gap-3 px-3'} py-3 rounded-xl transition-all ${isActive ? activeClasses : `${inactiveClasses} ${hoverClasses}`}`}
+                                    className={`flex items-center ${isCollapsed ? 'justify-center px-0' : 'gap-3 px-2'} py-2.5 rounded-xl transition-all ${isActive ? activeClasses : `${inactiveClasses} ${hoverClasses}`}`}
                                     title={isCollapsed ? t(item.name) : ''}
                                 >
                                     <div className="shrink-0">{item.icon}</div>

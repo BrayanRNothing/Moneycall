@@ -367,7 +367,8 @@ const Dashboard = () => {
                 const pendientesVistos = new Set();
 
                 if (resProspectos.status === 'fulfilled') {
-                    const leads = (resProspectos.value.data || []).filter(p => !!p.proximaLlamada && (p.nombres || p.nombre));
+                    const prospectosData = resProspectos.value.data.data ? resProspectos.value.data.data : resProspectos.value.data;
+                    const leads = (prospectosData || []).filter(p => !!p.proximaLlamada && (p.nombres || p.nombre));
                     leads.forEach((lead) => {
                         const key = getItemKey(lead, ['proximaLlamada', 'nombres', 'apellidoPaterno', 'telefono']);
                         if (!pendientesVistos.has(key)) {

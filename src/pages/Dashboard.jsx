@@ -1,4 +1,4 @@
-import { useTranslation } from '../utils/translations';
+ import { useTranslation } from '../utils/translations';
 import React, { useState, useEffect } from 'react';
 import { Phone, UserPlus, Calendar, TrendingUp, RefreshCw, Clock, CheckCircle2, Target, MessageSquare, ExternalLink, Users, Award, DollarSign, AlertTriangle, TrendingDown, Zap, Bell, ArrowRightLeft, PercentCircle, BarChart3, Search, FileText, Video, Globe, XCircle, Plus, Pencil, Trash2, Activity, ChevronRight, LogIn, LogOut, History, MousePointer2 } from 'lucide-react';
 import axios from 'axios';
@@ -240,6 +240,7 @@ const Dashboard = () => {
     const [closerData, setCloserData] = useState(null);
     const [recordatorios, setRecordatorios] = useState([]);
     const [reuniones, setReuniones] = useState([]);
+    const [sidebarTab, setSidebarTab] = useState('recordatorios');
 
     const [loadingReuniones, setLoadingReuniones] = useState(true);
     const [periodo, setPeriodo] = useState('dia');
@@ -475,7 +476,8 @@ const Dashboard = () => {
                 const pendientesVistos = new Set();
 
                 if (resProspectos.status === 'fulfilled') {
-                    const leads = (resProspectos.value.data || []).filter(p => !!p.proximaLlamada && (p.nombres || p.nombre));
+                    const prospectosData = resProspectos.value.data.data ? resProspectos.value.data.data : resProspectos.value.data;
+                    const leads = (prospectosData || []).filter(p => !!p.proximaLlamada && (p.nombres || p.nombre));
                     leads.forEach((lead) => {
                         const key = getItemKey(lead, ['proximaLlamada', 'nombres', 'apellidoPaterno', 'telefono']);
                         if (!pendientesVistos.has(key)) {
@@ -781,13 +783,10 @@ const Dashboard = () => {
                 <div className="flex items-center justify-between mb-1.5 px-1">
                     <div className="flex items-center gap-1.5">
                         <TrendingUp className="w-4 h-4 text-(--theme-600)" />
-                        <span className="text-sm font-bold text-gray-700 uppercase tracking-widest">{t("Resumen de Ventas")}</span>
+                        <span className="text-sm font-bold text-gray-700 uppercase tracking-widest">{t("Conversión de Prospectos")}</span>
                     </div>
 
                     <div className="flex items-center gap-3">
-                        <div className="bg-white border border-gray-200 rounded-lg p-0.5 shadow-sm h-full flex items-center justify-center relative z-50">
-                            <NotificacionesBell />
-                        </div>
                         <div id="dashboard-period-selector" className="flex items-center gap-1 bg-white border border-gray-200 rounded-lg p-1 shadow-sm">
                             {PERIODOS.map(p => (
                                 <button
@@ -897,180 +896,198 @@ const Dashboard = () => {
             <div className="flex-1 flex flex-col xl:flex-row gap-4 min-h-0 overflow-y-auto xl:overflow-hidden pr-0.5 scrollbar-hide">
 
                 <div className="flex-1 flex flex-col min-w-0">
-                    <div className="shrink-0 relative z-20">
-                        <div id="dashboard-tabs-container" className="flex items-end gap-2.5 overflow-x-auto pb-px -mb-px" style={{ scrollbarWidth: 'none' }}>
-                            {[
-                                { key: 'resumen', label: 'Resumen', Icon: TrendingUp },
-                                { key: 'kpis', label: 'Métricas', Icon: BarChart3 },
-                                { key: 'moneycall', label: 'Proactividad Moneycall', Icon: Phone },
-                                { key: 'tareas', label: 'Tareas', Icon: Bell },
-                                { key: 'acciones', label: 'Acciones', Icon: Activity },
-                                { key: 'proximamente', label: 'Próximamente', Icon: Zap }
-                            ].map(tab => (
-                                <button
-                                    key={tab.key}
-                                    onClick={() => setHealthTab(tab.key)}
-                                    className={`px-3.5 py-2 text-xs font-extrabold transition-all border whitespace-nowrap flex items-center gap-1.5 ${healthTab === tab.key
-                                        ? 'bg-white text-(--theme-700) border-gray-200 border-b-white rounded-t-xl rounded-b-none -mb-px relative z-20'
-                                        : 'bg-white text-gray-500 border-gray-200 rounded-xl shadow-sm mb-1 hover:-translate-y-0.5 hover:bg-gray-50 hover:text-gray-700'
-                                        }`}
-                                >
-                                    <tab.Icon className="w-3.5 h-3.5" />
-                                    {tab.label}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
- 
-                    <div className={`flex-1 min-h-0 relative z-10 bg-white border border-gray-200 rounded-xl p-3 shadow-sm flex flex-col ${healthTab === 'resumen' ? 'rounded-tl-none' : ''}`}>
+                    <div className="flex-1 min-h-0 relative z-10 bg-white border border-gray-200 rounded-xl p-3 shadow-sm flex flex-col">
                         <div className="flex-1 min-h-0 overflow-y-auto xl:pr-1 scrollbar-hide" style={{ scrollbarWidth: 'none' }}>
-                            {healthTab === 'resumen' && (
-                                <div className="h-full flex flex-col gap-4 animate-in fade-in duration-500">
-                                    {/* SECCIÓN 1: SALUD OPERATIVA (KPIs DE PROCESO) */}
-                                    <div id="dashboard-kpi-cards" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 shrink-0">
-                                        <MetricKPICard
-                                            title={t("Velocidad de Respuesta")}
-                                            value={closerData?.eficiencia?.responseTimeHoras || 0}
-                                            format="number"
-                                            icon={<Zap />}
-                                            detail="Horas prom. 1er contacto"
-                                            thresholds={{ good: 2, okay: 6 }}
-                                            reverse={true}
-                                        />
-                                        <MetricKPICard
-                                            title={t("Tasa de Asistencia")}
-                                            value={closerData?.tasasConversion?.asistencia || 0}
-                                            format="percent"
-                                            icon={<Users />}
-                                            detail={closerData?.tasasConversion?.asistenciaDetalle || "Show-up en citas agendadas"}
-                                            thresholds={{ good: 75, okay: 50 }}
-                                        />
-                                        <MetricKPICard
-                                            title={t("Ciclo de Cierre")}
-                                            value={closerData?.eficiencia?.cicloVentaDias || 0}
-                                            format="number"
-                                            icon={<RefreshCw />}
-                                            detail="Días prom. entrada a cierre"
-                                            thresholds={{ good: 5, okay: 12 }}
-                                            reverse={true}
-                                        />
-                                        <MetricKPICard
-                                            title={t("Ticket Promedio")}
-                                            value={cP.ventasCount > 0 ? cP.ventasMonto / cP.ventasCount : 0}
-                                            format="money"
-                                            icon={<DollarSign />}
-                                            detail={`Promedio en el período (${cP.ventasCount} ventas)`}
-                                            color="emerald"
-                                        />
-                                    </div>
-
-                                    {/* SECCIÓN 2: CENTRO DE ACCIÓN (ENFOQUE INMEDIATO) */}
-                                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 flex-1 min-h-0 pb-1">
-                                        {/* Agenda Prioritaria */}
-                                        <div id="dashboard-agenda-prioritaria" className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm flex flex-col h-full">
-                                            <div className="flex items-center justify-between mb-6 shrink-0">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-10 h-10 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-500 shadow-xs">
-                                                        <Calendar className="w-5 h-5" />
-                                                    </div>
-                                                    <div>
-                                                        <h3 className="text-sm font-black uppercase tracking-widest text-gray-800">{t("Agenda Prioritaria")}</h3>
-                                                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tight">{t("Próximos compromisos")}</p>
-                                                    </div>
-                                                </div>
-                                                <button onClick={() => navigate('/vendedor/calendario')} className="text-(--theme-600) text-[10px] font-black uppercase tracking-widest hover:underline px-2 py-1">{t("Ver Calendario")}</button>
+                            <div className="h-full flex flex-col gap-4 animate-in fade-in duration-500">
+                                    {/* SECCIÓN 1: ATAJOS RÁPIDOS Y KPIs */}
+                                    <div className="h-full flex flex-col lg:flex-row gap-4 p-1">
+                                        {/* COLUMNA IZQUIERDA: ATAJOS RÁPIDOS */}
+                                        <div className="lg:w-1/2 flex flex-col bg-white border border-gray-200 rounded-lg p-6 shadow-xs overflow-hidden">
+                                            <div className="mb-4 shrink-0 flex items-center gap-2">
+                                                <button
+                                                    onClick={() => setHealthTab('resumen')}
+                                                    className={`px-3 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-md transition-all flex items-center gap-1.5 ${healthTab === 'resumen'
+                                                        ? 'bg-(--theme-50) text-(--theme-600)'
+                                                        : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50'
+                                                        }`}
+                                                >
+                                                    <TrendingUp className="w-3.5 h-3.5" />
+                                                    Atajos Rpidos
+                                                </button>
+                                                <button
+                                                    onClick={() => setHealthTab('tareas')}
+                                                    className={`px-3 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-md transition-all flex items-center gap-1.5 ${healthTab === 'tareas'
+                                                        ? 'bg-(--theme-50) text-(--theme-600)'
+                                                        : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50'
+                                                        }`}
+                                                >
+                                                    <Bell className="w-3.5 h-3.5" />
+                                                    Tareas
+                                                </button>
                                             </div>
+                                            {healthTab === 'resumen' ? (
+                                                <div className="grid grid-cols-2 gap-3 flex-1">
+                                                    <button 
+                                                        onClick={() => navigate('/vendedor/prospectos')}
+                                                        className="flex flex-col items-center justify-center p-4 bg-gray-50/30 border border-gray-100 rounded-lg hover:border-gray-300 hover:bg-gray-50 hover:shadow-sm transition-all group"
+                                                    >
+                                                        <UserPlus className="w-7 h-7 text-gray-400 mb-2 group-hover:text-gray-600 transition-colors stroke-[1.5]" />
+                                                        <span className="text-[10px] font-black text-gray-500 group-hover:text-gray-700 uppercase tracking-widest text-center transition-colors">Crear Prospecto</span>
+                                                    </button>
 
-                                            <div className="flex-1 overflow-y-auto space-y-3 pr-1 scrollbar-hide">
-                                                {reuniones.length === 0 ? (
-                                                    <div className="h-full flex flex-col items-center justify-center text-center opacity-40 py-8">
-                                                        <Calendar className="w-8 h-8 mb-2" />
-                                                        <p className="text-[10px] font-black uppercase tracking-widest leading-tight">{t("Sin citas próximas")}</p>
-                                                    </div>
-                                                ) : (
-                                                    reuniones.map((reunion, i) => (
-                                                        <div 
-                                                            key={i} 
-                                                            onClick={() => handleReunionClick(reunion)}
-                                                            className="group p-3 bg-gray-50/50 rounded-xl border border-gray-100 hover:border-indigo-200 hover:bg-white transition-all cursor-pointer hover:shadow-xs"
-                                                        >
-                                                            <div className="flex items-center justify-between">
-                                                                <div className="flex items-center gap-3">
-                                                                    <div className="w-8 h-8 bg-white border border-gray-100 rounded-lg flex items-center justify-center text-xs font-black text-indigo-600">
-                                                                        {new Date(reunion.fecha).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })}
-                                                                    </div>
-                                                                    <div>
-                                                                        <p className="text-xs font-black text-gray-800 leading-tight uppercase truncate max-w-[150px]">{reunion.cliente?.nombres} {reunion.cliente?.apellidoPaterno || ''}</p>
-                                                                        <p className="text-[9px] text-gray-400 font-bold uppercase mt-0.5">{new Date(reunion.fecha).toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric' })}</p>
-                                                                    </div>
-                                                                </div>
-                                                                <div className="flex items-center gap-2">
-                                                                    {reunion.googleMeetLink && (
-                                                                        <a 
-                                                                            href={reunion.googleMeetLink} 
-                                                                            target="_blank" 
-                                                                            rel="noopener noreferrer" 
-                                                                            onClick={(e) => e.stopPropagation()} 
-                                                                            className="p-1.5 hover:bg-indigo-50 rounded-lg text-indigo-500 hover:text-indigo-600 transition-colors shrink-0"
-                                                                            title={t("Unirse a la videollamada")}
-                                                                        >
-                                                                            <Video className="w-4 h-4" />
-                                                                        </a>
-                                                                    )}
-                                                                    <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-indigo-400 group-hover:translate-x-1 transition-all" />
-                                                                </div>
+                                                    <button 
+                                                        onClick={() => navigate('/vendedor/clientes')}
+                                                        className="flex flex-col items-center justify-center p-4 bg-gray-50/30 border border-gray-100 rounded-lg hover:border-gray-300 hover:bg-gray-50 hover:shadow-sm transition-all group"
+                                                    >
+                                                        <Users className="w-7 h-7 text-gray-400 mb-2 group-hover:text-gray-600 transition-colors stroke-[1.5]" />
+                                                        <span className="text-[10px] font-black text-gray-500 group-hover:text-gray-700 uppercase tracking-widest text-center transition-colors">Registrar Cliente</span>
+                                                    </button>
+
+                                                    <button 
+                                                        onClick={() => {
+                                                            setEditingTask(null);
+                                                            setNewTask({ titulo: '', descripcion: '', prioridad: 'media' });
+                                                            setShowTaskModal(true);
+                                                        }}
+                                                        className="flex flex-col items-center justify-center p-4 bg-gray-50/30 border border-gray-100 rounded-lg hover:border-gray-300 hover:bg-gray-50 hover:shadow-sm transition-all group"
+                                                    >
+                                                        <Bell className="w-7 h-7 text-gray-400 mb-2 group-hover:text-gray-600 transition-colors stroke-[1.5]" />
+                                                        <span className="text-[10px] font-black text-gray-500 group-hover:text-gray-700 uppercase tracking-widest text-center transition-colors">Nueva Tarea</span>
+                                                    </button>
+
+                                                    <button 
+                                                        onClick={() => navigate('/vendedor/calendario')}
+                                                        className="flex flex-col items-center justify-center p-4 bg-gray-50/30 border border-gray-100 rounded-lg hover:border-gray-300 hover:bg-gray-50 hover:shadow-sm transition-all group"
+                                                    >
+                                                        <Calendar className="w-7 h-7 text-gray-400 mb-2 group-hover:text-gray-600 transition-colors stroke-[1.5]" />
+                                                        <span className="text-[10px] font-black text-gray-500 group-hover:text-gray-700 uppercase tracking-widest text-center transition-colors">Calendario</span>
+                                                    </button>
+                                                </div>
+                                            ) : (
+                                                <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+                                                    <div className="flex items-center justify-between mb-3 px-1">
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="w-8 h-8 bg-(--theme-50) rounded-xl flex items-center justify-center text-(--theme-600) shadow-xs">
+                                                                <Bell className="w-4 h-4" />
+                                                            </div>
+                                                            <div>
+                                                                <h3 className="text-[11px] font-black uppercase tracking-widest text-gray-800">Tareas de Equipo</h3>
                                                             </div>
                                                         </div>
-                                                    ))
-                                                )}
-                                            </div>
-                                        </div>
+                                                        <button
+                                                            onClick={() => {
+                                                                setEditingTask(null);
+                                                                setNewTask({ titulo: '', descripcion: '', prioridad: 'media' });
+                                                                setShowTaskModal(true);
+                                                            }}
+                                                            className="px-3 py-1.5 bg-(--theme-600) hover:bg-(--theme-700) text-white rounded-lg shadow-sm transition-all flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest"
+                                                        >
+                                                            <Plus className="w-3.5 h-3.5" />
+                                                            NUEVA
+                                                        </button>
+                                                    </div>
 
-                                        {/* Tareas Críticas del Equipo */}
-                                        <div id="dashboard-tareas-criticas" className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm flex flex-col h-full">
-                                            <div className="flex items-center justify-between mb-6 shrink-0">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-10 h-10 bg-rose-50 rounded-2xl flex items-center justify-center text-rose-500 shadow-xs">
-                                                        <Bell className="w-5 h-5" />
-                                                    </div>
-                                                    <div>
-                                                        <h3 className="text-sm font-black uppercase tracking-widest text-gray-800">{t("Tareas Críticas")}</h3>
-                                                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tight">{t("Acciones prioritarias")}</p>
-                                                    </div>
-                                                </div>
-                                                <button onClick={() => setHealthTab('tareas')} className="text-rose-500 text-[10px] font-black uppercase tracking-widest hover:underline px-2 py-1">{t("Ver Todas")}</button>
-                                            </div>
-
-                                            <div className="flex-1 overflow-y-auto space-y-3 pr-1 scrollbar-hide">
-                                                {teamTasks.filter(t => t.prioridad === 'alta' && t.estado !== 'completada').length === 0 ? (
-                                                    <div className="h-full flex flex-col items-center justify-center text-center opacity-40 py-8">
-                                                        <CheckCircle2 className="w-8 h-8 mb-2 text-emerald-500" />
-                                                        <p className="text-[10px] font-black uppercase tracking-widest leading-tight">{t("Sin tareas críticas")}</p>
-                                                    </div>
-                                                ) : (
-                                                    teamTasks
-                                                        .filter(t => t.prioridad === 'alta' && t.estado !== 'completada')
-                                                        .slice(0, 4)
-                                                        .map((tarea, i) => (
-                                                            <div key={i} className="group p-3 bg-gray-50/50 rounded-xl border border-gray-100 hover:border-rose-200 hover:bg-white transition-all border-l-4 border-l-rose-500">
-                                                                <div className="flex items-center justify-between">
-                                                                    <div className="min-w-0 flex-1">
-                                                                        <h4 className="text-xs font-black text-gray-800 uppercase tracking-tight truncate">{tarea.titulo}</h4>
-                                                                        <p className="text-[9px] text-gray-400 font-bold uppercase mt-0.5 truncate">{tarea.descripcion || 'Sin descripción'}</p>
+                                                    <div className="flex-1 overflow-y-auto space-y-2 pr-1 scrollbar-hide">
+                                                        {teamTasks.map((t) => (
+                                                            <div key={t.id || t._id} className={`group relative p-3 rounded-xl border transition-all ${t.estado === 'completada' ? 'bg-gray-50/50 border-gray-100 opacity-60' : 'bg-white border-gray-100 hover:border-(--theme-200) hover:shadow-sm'}`}>
+                                                                <div className="flex items-start gap-3">
+                                                                    <button
+                                                                        onClick={() => toggleTaskStatus(t)}
+                                                                        className={`mt-0.5 w-4 h-4 rounded-md border-2 flex items-center justify-center transition-colors ${t.estado === 'completada' ? 'bg-green-500 border-green-500 text-white' : 'border-gray-300 hover:border-(--theme-500)'}`}
+                                                                    >
+                                                                        {t.estado === 'completada' && <CheckCircle2 className="w-2.5 h-2.5" />}
+                                                                    </button>
+                                                                    <div className="flex-1 min-w-0">
+                                                                        <div className="flex items-center gap-2 mb-1">
+                                                                            <h4 className={`text-xs font-bold truncate ${t.estado === 'completada' ? 'line-through text-gray-400' : 'text-gray-800'}`}>{t.titulo}</h4>
+                                                                            <span className={`text-[7px] font-black px-1.5 py-0.5 rounded-full uppercase border ${t.prioridad === 'alta' ? 'bg-rose-50 text-rose-600 border-rose-100' :
+                                                                                t.prioridad === 'media' ? 'bg-amber-50 text-amber-600 border-amber-100' :
+                                                                                    'bg-blue-50 text-blue-600 border-blue-100'
+                                                                                }`}>
+                                                                                {t.prioridad}
+                                                                            </span>
+                                                                        </div>
+                                                                        <div className="flex items-center gap-3 mt-1.5">
+                                                                            <span className="text-[9px] font-bold text-gray-400 flex items-center gap-1 bg-gray-50 px-1.5 py-0.5 rounded-md">
+                                                                                <Users className="w-2.5 h-2.5 text-gray-400" />
+                                                                                <span className="text-gray-600 truncate max-w-[60px]">{t.vendedorNombre || '...'}</span>
+                                                                            </span>
+                                                                        </div>
                                                                     </div>
-                                                                    <div className="flex items-center gap-2 ml-3">
-                                                                        <span className="text-[8px] font-black text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded border border-rose-100 uppercase">{t("Hoy")}</span>
-                                                                        <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-rose-500 group-hover:translate-x-1 transition-all" />
+                                                                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                                        <button onClick={() => { setEditingTask(t); setNewTask({ titulo: t.titulo, descripcion: t.descripcion, prioridad: t.prioridad, fechaLimite: t.fechaLimite }); setShowTaskModal(true); }} className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-400 hover:text-(--theme-600)"><Pencil className="w-3 h-3" /></button>
+                                                                        <button onClick={() => handleDeleteTask(t.id || t._id)} className="p-1.5 hover:bg-rose-50 rounded-lg text-gray-400 hover:text-rose-600"><Trash2 className="w-3 h-3" /></button>
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                        ))
-                                                )}
+                                                        ))}
+                                                        {teamTasks.length === 0 && (
+                                                            <div className="flex flex-col items-center justify-center py-8 text-center">
+                                                                <Bell className="w-6 h-6 text-gray-200 mb-2" />
+                                                                <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em]">Sin tareas</p>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {/* COLUMNA DERECHA: ESTADO GENERAL */}
+                                        <div className="lg:w-1/2 flex flex-col bg-white border border-gray-200 rounded-lg p-6 shadow-xs">
+                                            <div className="mb-4 shrink-0">
+                                                <h3 className="text-xs font-black uppercase tracking-widest text-gray-800">ESTADO GENERAL</h3>
+                                            </div>
+                                            
+                                            <div className="flex flex-col gap-2.5 flex-1 justify-between">
+                                                {/* Velocidad de Respuesta */}
+                                                <div className="flex items-center justify-between px-4 py-3 bg-gray-50/50 border border-gray-100 rounded-lg group hover:border-gray-300 hover:shadow-sm transition-all">
+                                                    <div>
+                                                        <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-0.5">Velocidad de Respuesta</h4>
+                                                        <span className="text-lg font-black text-gray-700">{closerData?.eficiencia?.responseTimeHoras || 0} hrs</span>
+                                                    </div>
+                                                    <div className="w-8 h-8 rounded-md bg-gray-100 flex items-center justify-center group-hover:bg-gray-200 transition-colors">
+                                                        <Zap className="w-4 h-4 text-gray-600" />
+                                                    </div>
+                                                </div>
+
+                                                {/* Tasa de Asistencia */}
+                                                <div className="flex items-center justify-between px-4 py-3 bg-gray-50/50 border border-gray-100 rounded-lg group hover:border-gray-300 hover:shadow-sm transition-all">
+                                                    <div>
+                                                        <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-0.5">Tasa de Asistencia</h4>
+                                                        <span className="text-lg font-black text-gray-700">{closerData?.tasasConversion?.asistencia || 0}%</span>
+                                                    </div>
+                                                    <div className="w-8 h-8 rounded-md bg-gray-100 flex items-center justify-center group-hover:bg-gray-200 transition-colors">
+                                                        <Users className="w-4 h-4 text-gray-600" />
+                                                    </div>
+                                                </div>
+
+                                                {/* Ciclo de Cierre */}
+                                                <div className="flex items-center justify-between px-4 py-3 bg-gray-50/50 border border-gray-100 rounded-lg group hover:border-gray-300 hover:shadow-sm transition-all">
+                                                    <div>
+                                                        <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-0.5">Ciclo de Cierre</h4>
+                                                        <span className="text-lg font-black text-gray-700">{closerData?.eficiencia?.cicloVentaDias || 0} días</span>
+                                                    </div>
+                                                    <div className="w-8 h-8 rounded-md bg-gray-100 flex items-center justify-center group-hover:bg-gray-200 transition-colors">
+                                                        <RefreshCw className="w-4 h-4 text-gray-600" />
+                                                    </div>
+                                                </div>
+
+                                                {/* Ticket Promedio */}
+                                                <div className="flex items-center justify-between px-4 py-3 bg-gray-50/50 border border-gray-100 rounded-lg group hover:border-gray-300 hover:shadow-sm transition-all">
+                                                    <div>
+                                                        <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-0.5">Ticket Promedio</h4>
+                                                        <span className="text-lg font-black text-gray-700">
+                                                            {formatMoney.format(cP.ventasCount > 0 ? cP.ventasMonto / cP.ventasCount : 0)}
+                                                        </span>
+                                                    </div>
+                                                    <div className="w-8 h-8 rounded-md bg-gray-100 flex items-center justify-center group-hover:bg-gray-200 transition-colors">
+                                                        <DollarSign className="w-4 h-4 text-gray-600" />
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            )}
 
                             {healthTab === 'kpis' && (
                                 <div className="flex flex-col gap-4 h-full min-h-0">
@@ -1239,213 +1256,6 @@ const Dashboard = () => {
                                 </div>
                             )}
 
-                            {healthTab === 'tareas' && (
-                                <div className="space-y-3 h-full flex flex-col">
-                                    <div className="flex-1 bg-white border border-gray-200 rounded-xl p-4 shadow-sm flex flex-col min-h-0">
-                                        <div className="flex items-center justify-between mb-4 px-1">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 bg-(--theme-50) rounded-2xl flex items-center justify-center text-(--theme-600) shadow-xs">
-                                                    <Bell className="w-5 h-5" />
-                                                </div>
-                                                <div>
-                                                    <h3 className="text-sm font-black uppercase tracking-widest text-gray-800">Tareas de Equipo</h3>
-                                                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tight">Gestión colaborativa</p>
-                                                </div>
-                                            </div>
-                                            <button
-                                                onClick={() => {
-                                                    setEditingTask(null);
-                                                    setNewTask({ titulo: '', descripcion: '', prioridad: 'media' });
-                                                    setShowTaskModal(true);
-                                                }}
-                                                className="px-4 py-2 bg-(--theme-600) hover:bg-(--theme-700) text-white rounded-xl shadow-lg shadow-(--theme-500)/20 transition-all flex items-center gap-2 text-[10px] font-black uppercase tracking-widest"
-                                            >
-                                                <Plus className="w-4 h-4" />
-                                                NUEVA TAREA
-                                            </button>
-                                        </div>
-
-                                        <div className="flex-1 overflow-y-auto space-y-2.5 pr-2 scrollbar-hide">
-                                            {teamTasks.map((t) => (
-                                                <div key={t.id || t._id} className={`group relative p-4 rounded-xl border transition-all ${t.estado === 'completada' ? 'bg-gray-50/50 border-gray-100 opacity-60' : 'bg-white border-gray-100 hover:border-(--theme-200) hover:shadow-md'}`}>
-                                                    <div className="flex items-start gap-4">
-                                                        <button
-                                                            onClick={() => toggleTaskStatus(t)}
-                                                            className={`mt-1 w-5 h-5 rounded-lg border-2 flex items-center justify-center transition-colors ${t.estado === 'completada' ? 'bg-green-500 border-green-500 text-white' : 'border-gray-300 hover:border-(--theme-500)'}`}
-                                                        >
-                                                            {t.estado === 'completada' && <CheckCircle2 className="w-3.5 h-3.5" />}
-                                                        </button>
-                                                        <div className="flex-1 min-w-0">
-                                                            <div className="flex items-center gap-3 mb-1">
-                                                                <h4 className={`text-sm font-bold truncate ${t.estado === 'completada' ? 'line-through text-gray-400' : 'text-gray-800'}`}>{t.titulo}</h4>
-                                                                <span className={`text-[8px] font-black px-2 py-0.5 rounded-full uppercase border ${t.prioridad === 'alta' ? 'bg-rose-50 text-rose-600 border-rose-100' :
-                                                                    t.prioridad === 'media' ? 'bg-amber-50 text-amber-600 border-amber-100' :
-                                                                        'bg-blue-50 text-blue-600 border-blue-100'
-                                                                    }`}>
-                                                                    {t.prioridad}
-                                                                </span>
-                                                            </div>
-                                                            {t.descripcion && <p className="text-xs text-gray-500 leading-relaxed max-w-2xl">{t.descripcion}</p>}
-                                                            <div className="flex items-center gap-4 mt-2.5">
-                                                                <span className="text-[10px] font-bold text-gray-400 flex items-center gap-1.5 bg-gray-50 px-2 py-1 rounded-lg">
-                                                                    <Users className="w-3 h-3 text-gray-400" />
-                                                                    POR: <span className="text-gray-600">{t.vendedorNombre || 'Cargando...'}</span>
-                                                                </span>
-                                                                {t.fechaLimite && (
-                                                                    <span className={`text-[10px] font-bold flex items-center gap-1.5 px-2 py-1 rounded-lg ${new Date(t.fechaLimite) < new Date() && t.estado !== 'completada' ? 'bg-rose-50 text-rose-600' : 'bg-gray-50 text-gray-400'}`}>
-                                                                        <Calendar className="w-3 h-3" />
-                                                                        LIMITE: {new Date(t.fechaLimite).toLocaleDateString('es-MX', { day: '2-digit', month: 'short' })}
-                                                                    </span>
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                        <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                            <button
-                                                                onClick={() => {
-                                                                    setEditingTask(t);
-                                                                    setNewTask({ titulo: t.titulo, descripcion: t.descripcion, prioridad: t.prioridad, fechaLimite: t.fechaLimite });
-                                                                    setShowTaskModal(true);
-                                                                }}
-                                                                className="p-2 hover:bg-gray-100 rounded-xl text-gray-400 hover:text-(--theme-600) transition-colors border border-transparent hover:border-gray-200"
-                                                            >
-                                                                <Pencil className="w-3.5 h-3.5" />
-                                                            </button>
-                                                            <button
-                                                                onClick={() => handleDeleteTask(t.id || t._id)}
-                                                                className="p-2 hover:bg-rose-50 rounded-xl text-gray-400 hover:text-rose-600 transition-colors border border-transparent hover:border-rose-100"
-                                                            >
-                                                                <Trash2 className="w-3.5 h-3.5" />
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                            {teamTasks.length === 0 && (
-                                                <div className="flex-1 flex flex-col items-center justify-center py-20 bg-gray-50/30 rounded-2xl border-2 border-dashed border-gray-100">
-                                                    <div className="w-16 h-16 bg-white rounded-3xl shadow-sm flex items-center justify-center mb-4 border border-gray-100">
-                                                        <Bell className="w-8 h-8 text-gray-200" />
-                                                    </div>
-                                                    <p className="text-xs font-black text-gray-400 uppercase tracking-[0.2em]">Sin tareas activas</p>
-                                                    <p className="text-[10px] text-gray-300 font-bold uppercase mt-1">Tu equipo está al día</p>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-
-
-                            {healthTab === 'acciones' && (
-                                <div className="h-full flex flex-col animate-in fade-in slide-in-from-bottom-2 duration-500">
-                                    <div className="flex items-center justify-between mb-4 px-1">
-                                        <div>
-                                            <h3 className="text-xs font-black uppercase tracking-widest text-gray-800">Acciones Realizadas</h3>
-                                            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tight">Historial de actividad reciente</p>
-                                        </div>
-                                        <button
-                                            onClick={fetchActividades}
-                                            disabled={loadingActividades}
-                                            className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors text-gray-400"
-                                        >
-                                            <RefreshCw className={`w-3.5 h-3.5 ${loadingActividades ? 'animate-spin' : ''}`} />
-                                        </button>
-                                    </div>
-
-                                    {loadingActividades ? (
-                                        <div className="flex-1 flex items-center justify-center py-20">
-                                            <RefreshCw className="w-8 h-8 text-(--theme-200) animate-spin" />
-                                        </div>
-                                    ) : actividades.length === 0 ? (
-                                        <div className="flex-1 flex flex-col items-center justify-center py-20 bg-gray-50/50 rounded-2xl border-2 border-dashed border-gray-100">
-                                            <History className="w-10 h-10 text-gray-200 mb-3" />
-                                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Sin actividad registrada</p>
-                                        </div>
-                                    ) : (
-                                        <div className="flex-1 overflow-y-auto pr-1 space-y-2.5 scrollbar-hide">
-                                            {actividades.map((act, idx) => {
-                                                const IconMap = {
-                                                    login: LogIn,
-                                                    registro: UserPlus,
-                                                    equipo: Users,
-                                                    llamada: Phone,
-                                                    whatsapp: MessageSquare,
-                                                    cita: Calendar,
-                                                    mensaje: FileText,
-                                                    correo: Globe,
-                                                    prospecto: UserPlus
-                                                };
-                                                const ColorMap = {
-                                                    login: 'text-emerald-500 bg-emerald-50 border-emerald-100',
-                                                    registro: 'text-indigo-500 bg-indigo-50 border-indigo-100',
-                                                    equipo: 'text-amber-500 bg-amber-50 border-amber-100',
-                                                    llamada: 'text-blue-500 bg-blue-50 border-blue-100',
-                                                    whatsapp: 'text-green-500 bg-green-50 border-green-100',
-                                                    cita: 'text-purple-500 bg-purple-50 border-purple-100',
-                                                    mensaje: 'text-slate-500 bg-slate-50 border-slate-100',
-                                                    correo: 'text-rose-500 bg-rose-50 border-rose-100',
-                                                    prospecto: 'text-cyan-500 bg-cyan-50 border-cyan-100'
-                                                };
-                                                const ActionIcon = IconMap[act.tipo] || Activity;
-                                                const colors = ColorMap[act.tipo] || 'text-gray-500 bg-gray-50 border-gray-100';
-
-                                                return (
-                                                    <div key={act.id || idx} className="group relative flex gap-3 p-3 bg-white border border-gray-100 rounded-xl hover:border-gray-200 hover:shadow-xs transition-all duration-300">
-                                                        <div className={`shrink-0 w-9 h-9 rounded-xl border flex items-center justify-center ${colors.split(' ').slice(0, 3).join(' ')} shadow-xs`}>
-                                                            <ActionIcon className="w-4 h-4" />
-                                                        </div>
-
-                                                        <div className="flex-1 min-w-0">
-                                                            <div className="flex items-center justify-between gap-2">
-                                                                <p className="text-[11px] font-black text-gray-800 uppercase tracking-tight truncate">
-                                                                    {act.vendedor?.nombre || 'Sistema'}
-                                                                </p>
-                                                                <span className="text-[9px] font-bold text-gray-400 whitespace-nowrap bg-gray-50 px-1.5 py-0.5 rounded-md uppercase tracking-tighter">
-                                                                    {new Date(act.fecha || act.createdAt).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })}
-                                                                </span>
-                                                            </div>
-                                                            <h4 className="text-[10px] font-bold text-gray-500 mt-0.5 line-clamp-1 uppercase tracking-tight">
-                                                                {act.descripcion}
-                                                            </h4>
-                                                            {act.cliente && (
-                                                                <div className="mt-1.5 flex items-center gap-1.5 px-2 py-1 bg-gray-50/50 rounded-lg border border-gray-100/50 w-fit">
-                                                                    <div className="w-1.5 h-1.5 rounded-full bg-(--theme-400)"></div>
-                                                                    <p className="text-[9px] font-black text-(--theme-600) uppercase tracking-widest truncate max-w-[150px]">
-                                                                        {act.cliente.nombres} {act.cliente.apellidoPaterno}
-                                                                        {act.cliente.empresa && <span className="ml-1 opacity-50 font-bold">({act.cliente.empresa})</span>}
-                                                                    </p>
-                                                                </div>
-                                                            )}
-                                                        </div>
-
-                                                        {/* Línea decorativa para el feed */}
-                                                        {idx < actividades.length - 1 && (
-                                                            <div className="absolute left-[29.5px] top-[48px] bottom-[-20px] w-px bg-linear-to-b from-gray-100 to-transparent z-0"></div>
-                                                        )}
-                                                    </div>
-                                                );
-                                            })}
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-
-                            {healthTab === 'proximamente' && (
-                                <div className="h-full flex flex-col items-center justify-center p-8 text-center animate-in fade-in zoom-in-95 duration-500">
-                                    <div className="w-16 h-16 bg-(--theme-50) rounded-2xl flex items-center justify-center mb-6 shadow-xs border border-(--theme-100)">
-                                        <Zap className="w-8 h-8 text-(--theme-500)" />
-                                    </div>
-                                    <h3 className="text-sm font-black text-gray-800 uppercase tracking-widest mb-3">CRM en Desarrollo</h3>
-                                    <p className="text-xs text-gray-400 font-bold leading-relaxed max-w-xs uppercase tracking-tight">
-                                        Este CRM está en desarrollo continuo. Si tienes ideas para nuevas funciones o necesitas ayuda, no dudes en contactarnos.
-                                    </p>
-                                    <div className="mt-8 flex gap-3">
-                                        <div className="px-4 py-2 bg-white border border-gray-100 rounded-xl shadow-xs text-[10px] font-black text-gray-500 uppercase tracking-widest">
-                                            Feedback v2.0
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-
                             {healthTab === 'moneycall' && (
                                 <div className="flex flex-col gap-6 animate-in fade-in duration-500 pb-4">
                                     <div className="flex items-center justify-between px-2">
@@ -1575,128 +1385,146 @@ const Dashboard = () => {
                 <div className="w-80 shrink-0 flex flex-col gap-3 overflow-y-auto scrollbar-hide" style={{ scrollbarWidth: 'none' }}>
 
                     <div className="bg-(--theme-50)/40 border border-gray-200 rounded-xl p-4 shadow-sm flex flex-col flex-1 min-h-0">
-                        <h3 className="text-sm font-bold text-gray-700 flex items-center gap-2 mb-4 shrink-0 uppercase tracking-widest">
-                            <Phone className="w-4 h-4 text-rose-500" /> Recordatorios Pendientes
-                        </h3>
-                        <div className="flex-1 overflow-y-auto space-y-2" style={{ scrollbarWidth: 'none' }}>
-                            {recordatorios.length === 0 ? (
-                                <p className="text-xs text-gray-400 text-center py-3">Sin recordatorios hoy.</p>
-                            ) : (
-                                recordatorios.map((p, idx) => {
-                                    const esVencido = new Date(p.proximaLlamada) < new Date();
-                                    return (
-                                        <div
-                                            key={p.id || p._id || `rec-${idx}`}
-                                            className={`relative overflow-hidden group ${esVencido ? 'bg-linear-to-br from-rose-500 to-rose-600' : 'bg-linear-to-br from-(--theme-500) to-(--theme-600)'} rounded-lg p-2 shadow-sm hover:shadow-md transition-all cursor-pointer`}
-                                            onClick={() => {
-                                                if (p.esCliente) {
-                                                    navigate('/vendedor/clientes', { state: { selectedId: p.id || p._id } });
-                                                } else {
-                                                    navigate('/vendedor/prospectos', { state: { selectedId: p.id || p._id } });
-                                                }
-                                            }}
-                                        >
-                                            {/* Fondo decorativo */}
-                                            <div className="absolute right-0 top-0 h-full w-1/4 bg-white/10 skew-x-12 transform origin-top-right transition-transform duration-500"></div>
-
-                                            <div className="relative z-10">
-                                                <div className="flex items-center justify-between gap-1 overflow-hidden">
-                                                    <div className="text-[11px] font-bold text-white truncate max-w-[70%]">
-                                                        {p.nombre || `${p.nombres || ''} ${p.apellidoPaterno || ''}`.trim()}
-                                                    </div>
-                                                    {p.esCliente && (
-                                                        <span className="text-[7px] font-black bg-white/20 text-white px-1 py-0.5 rounded backdrop-blur-sm uppercase tracking-tighter border border-white/10">Cliente</span>
-                                                    )}
-                                                </div>
-
-                                                <div className="flex items-center justify-between mt-1 gap-1">
-                                                    <div className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full flex items-center gap-1 bg-white/20 text-white backdrop-blur-sm border border-white/10 shrink-0`}>
-                                                        <Clock className="w-2 h-2" />
-                                                        {new Date(p.proximaLlamada).toLocaleString('es-MX', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
-                                                        {esVencido && <span className="ml-0.5 font-black opacity-80">⚠</span>}
-                                                    </div>
-                                                    {p.telefono && (
-                                                        <div className="flex items-center gap-0.5 text-[9px] text-white/80 font-medium truncate">
-                                                            <Phone className="w-2 h-2" />
-                                                            {p.telefono}
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    );
-                                })
-                            )}
+                        <div className="flex items-center gap-1 mb-4 shrink-0 bg-black/5 rounded-lg p-1">
+                            <button
+                                onClick={() => setSidebarTab('recordatorios')}
+                                className={`flex-1 flex items-center justify-center gap-1.5 px-1 py-1.5 rounded-md text-[10px] font-bold transition-all uppercase tracking-wide min-w-0 ${
+                                    sidebarTab === 'recordatorios'
+                                        ? 'bg-white text-(--theme-600) shadow-sm border border-gray-200/50'
+                                        : 'text-gray-500 hover:text-gray-700 hover:bg-black/5'
+                                }`}
+                            >
+                                <Phone className={`w-3 h-3 shrink-0 ${sidebarTab === 'recordatorios' ? 'text-rose-500' : ''}`} />
+                                <span className="whitespace-nowrap truncate">Recordatorios</span>
+                            </button>
+                            <button
+                                onClick={() => setSidebarTab('citas')}
+                                className={`flex-1 flex items-center justify-center gap-1.5 px-1 py-1.5 rounded-md text-[10px] font-bold transition-all uppercase tracking-wide min-w-0 ${
+                                    sidebarTab === 'citas'
+                                        ? 'bg-white text-(--theme-600) shadow-sm border border-gray-200/50'
+                                        : 'text-gray-500 hover:text-gray-700 hover:bg-black/5'
+                                }`}
+                            >
+                                <Calendar className={`w-3 h-3 shrink-0 ${sidebarTab === 'citas' ? 'text-(--theme-500)' : ''}`} />
+                                <span className="whitespace-nowrap truncate">Próximas Citas</span>
+                            </button>
                         </div>
-                    </div>
-
-                    <div className="bg-(--theme-50)/40 border border-gray-200 rounded-xl p-4 shadow-sm flex flex-col flex-1 min-h-0">
-                        <h3 className="text-sm font-bold text-gray-700 flex items-center gap-2 mb-4 shrink-0 uppercase tracking-widest">
-                            <Calendar className="w-4 h-4 text-(--theme-500)" /> Próximas Citas
-                        </h3>
                         <div className="flex-1 overflow-y-auto space-y-2" style={{ scrollbarWidth: 'none' }}>
-                            {loadingReuniones ? (
-                                <div className="flex justify-center p-4"><RefreshCw className="animate-spin text-gray-400 w-4 h-4" /></div>
-                            ) : reuniones.length === 0 ? (
-                                <p className="text-xs text-gray-400 text-center py-3">Libre de reuniones.</p>
-                            ) : (
-                                reuniones.map(r => {
-                                    const rFecha = new Date(r.fecha);
-                                    const esHoy = rFecha.toDateString() === new Date().toDateString();
+                            {sidebarTab === 'recordatorios' && (
+                                recordatorios.length === 0 ? (
+                                    <p className="text-xs text-gray-400 text-center py-3">Sin recordatorios hoy.</p>
+                                ) : (
+                                    recordatorios.map((p, idx) => {
+                                        const esVencido = new Date(p.proximaLlamada) < new Date();
+                                        return (
+                                            <div
+                                                key={p.id || p._id || `rec-${idx}`}
+                                                className={`relative overflow-hidden group ${esVencido ? 'bg-linear-to-br from-rose-500 to-rose-600' : 'bg-linear-to-br from-(--theme-500) to-(--theme-600)'} rounded-lg p-2 shadow-sm hover:shadow-md transition-all cursor-pointer`}
+                                                onClick={() => {
+                                                    if (p.esCliente) {
+                                                        navigate('/vendedor/clientes', { state: { selectedId: p.id || p._id } });
+                                                    } else {
+                                                        navigate('/vendedor/prospectos', { state: { selectedId: p.id || p._id } });
+                                                    }
+                                                }}
+                                            >
+                                                {/* Fondo decorativo */}
+                                                <div className="absolute right-0 top-0 h-full w-1/4 bg-white/10 skew-x-12 transform origin-top-right transition-transform duration-500"></div>
 
-                                    return (
-                                        <div
-                                            key={r.id || r._id}
-                                            className={`relative overflow-hidden group ${esHoy ? 'bg-linear-to-br from-emerald-500 to-emerald-600' : 'bg-linear-to-br from-indigo-600 to-indigo-700'} rounded-lg p-2.5 shadow-sm hover:shadow-md transition-all cursor-pointer`}
-                                            onClick={() => handleReunionClick(r)}
-                                        >
-                                            {/* Fondo decorativo */}
-                                            <div className="absolute right-0 top-0 h-full w-1/4 bg-white/10 skew-x-12 transform origin-top-right transition-transform duration-500 group-hover:w-1/3"></div>
-
-                                            <div className="relative z-10">
-                                                <div className="flex items-center justify-between gap-1 overflow-hidden mb-1.5">
-                                                    <div className="text-[11px] font-bold text-white truncate flex items-center gap-1.5">
-                                                        <div className="w-5 h-5 rounded-md bg-white/20 flex items-center justify-center shrink-0">
-                                                            <Video className="w-3 h-3 text-white" />
+                                                <div className="relative z-10">
+                                                    <div className="flex items-center justify-between gap-1 overflow-hidden">
+                                                        <div className="text-[11px] font-bold text-white truncate max-w-[70%]">
+                                                            {p.nombre || `${p.nombres || ''} ${p.apellidoPaterno || ''}`.trim()}
                                                         </div>
-                                                        {r.cliente?.nombres} {r.cliente?.apellidoPaterno}
-                                                    </div>
-                                                    {esHoy && (
-                                                        <span className="text-[7px] font-black bg-white/30 text-white px-1.5 py-0.5 rounded-full backdrop-blur-sm uppercase tracking-tighter border border-white/10 whitespace-nowrap animate-pulse">{t("Hoy")}</span>
-                                                    )}
-                                                </div>
-
-                                                <div className="flex flex-col gap-2">
-                                                    <div className="flex justify-between items-center gap-1">
-                                                        <div className="text-[9px] font-bold text-white bg-white/20 backdrop-blur-sm border border-white/10 px-1.5 py-0.5 rounded-full flex items-center gap-1">
-                                                            <Clock className="w-2 h-2" />
-                                                            {rFecha.toLocaleString('es-MX', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
-                                                        </div>
-                                                        {r.cliente?.telefono && (
-                                                            <div className="text-[9px] text-white/90 font-medium flex items-center gap-0.5 mt-0.5">
-                                                                <Phone className="w-2 h-2" />
-                                                                {r.cliente.telefono}
-                                                            </div>
+                                                        {p.esCliente && (
+                                                            <span className="text-[7px] font-black bg-white/20 text-white px-1 py-0.5 rounded backdrop-blur-sm uppercase tracking-tighter border border-white/10">Cliente</span>
                                                         )}
                                                     </div>
 
-                                                    {r.googleMeetLink && (
-                                                        <a
-                                                            href={r.googleMeetLink.startsWith('http') ? r.googleMeetLink : `https://${r.googleMeetLink}`}
-                                                            target="_blank"
-                                                            rel="noopener noreferrer"
-                                                            className="flex items-center justify-center gap-1.5 py-1.5 px-3 bg-white text-indigo-700 rounded-lg text-[9px] font-black hover:bg-indigo-50 transition-colors shadow-sm active:scale-95"
-                                                            onClick={(e) => e.stopPropagation()}
-                                                        >
-                                                            <Video className="w-2.5 h-2.5" />
-                                                            UNIRSE A GOOGLE MEET
-                                                        </a>
-                                                    )}
+                                                    <div className="flex items-center justify-between mt-1 gap-1">
+                                                        <div className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full flex items-center gap-1 bg-white/20 text-white backdrop-blur-sm border border-white/10 shrink-0`}>
+                                                            <Clock className="w-2 h-2" />
+                                                            {new Date(p.proximaLlamada).toLocaleString('es-MX', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                                                            {esVencido && <span className="ml-0.5 font-black opacity-80">⚠</span>}
+                                                        </div>
+                                                        {p.telefono && (
+                                                            <div className="flex items-center gap-0.5 text-[9px] text-white/80 font-medium truncate">
+                                                                <Phone className="w-2 h-2" />
+                                                                {p.telefono}
+                                                            </div>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    );
-                                })
+                                        );
+                                    })
+                                )
+                            )}
+                            
+                            {sidebarTab === 'citas' && (
+                                loadingReuniones ? (
+                                    <div className="flex justify-center p-4"><RefreshCw className="animate-spin text-gray-400 w-4 h-4" /></div>
+                                ) : reuniones.length === 0 ? (
+                                    <p className="text-xs text-gray-400 text-center py-3">Libre de reuniones.</p>
+                                ) : (
+                                    reuniones.map(r => {
+                                        const rFecha = new Date(r.fecha);
+                                        const esHoy = rFecha.toDateString() === new Date().toDateString();
+
+                                        return (
+                                            <div
+                                                key={r.id || r._id}
+                                                className={`relative overflow-hidden group ${esHoy ? 'bg-linear-to-br from-emerald-500 to-emerald-600' : 'bg-linear-to-br from-indigo-600 to-indigo-700'} rounded-lg p-2.5 shadow-sm hover:shadow-md transition-all cursor-pointer`}
+                                                onClick={() => handleReunionClick(r)}
+                                            >
+                                                {/* Fondo decorativo */}
+                                                <div className="absolute right-0 top-0 h-full w-1/4 bg-white/10 skew-x-12 transform origin-top-right transition-transform duration-500 group-hover:w-1/3"></div>
+
+                                                <div className="relative z-10">
+                                                    <div className="flex items-center justify-between gap-1 overflow-hidden mb-1.5">
+                                                        <div className="text-[11px] font-bold text-white truncate flex items-center gap-1.5">
+                                                            <div className="w-5 h-5 rounded-md bg-white/20 flex items-center justify-center shrink-0">
+                                                                <Video className="w-3 h-3 text-white" />
+                                                            </div>
+                                                            {r.cliente?.nombres} {r.cliente?.apellidoPaterno}
+                                                        </div>
+                                                        {esHoy && (
+                                                            <span className="text-[7px] font-black bg-white/30 text-white px-1.5 py-0.5 rounded-full backdrop-blur-sm uppercase tracking-tighter border border-white/10 whitespace-nowrap animate-pulse">{t("Hoy")}</span>
+                                                        )}
+                                                    </div>
+
+                                                    <div className="flex flex-col gap-2">
+                                                        <div className="flex justify-between items-center gap-1">
+                                                            <div className="text-[9px] font-bold text-white bg-white/20 backdrop-blur-sm border border-white/10 px-1.5 py-0.5 rounded-full flex items-center gap-1">
+                                                                <Clock className="w-2 h-2" />
+                                                                {rFecha.toLocaleString('es-MX', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                                                            </div>
+                                                            {r.cliente?.telefono && (
+                                                                <div className="text-[9px] text-white/90 font-medium flex items-center gap-0.5 mt-0.5">
+                                                                    <Phone className="w-2 h-2" />
+                                                                    {r.cliente.telefono}
+                                                                </div>
+                                                            )}
+                                                        </div>
+
+                                                        {r.googleMeetLink && (
+                                                            <a
+                                                                href={r.googleMeetLink.startsWith('http') ? r.googleMeetLink : `https://${r.googleMeetLink}`}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="flex items-center justify-center gap-1.5 py-1.5 px-3 bg-white text-indigo-700 rounded-lg text-[9px] font-black hover:bg-indigo-50 transition-colors shadow-sm active:scale-95"
+                                                                onClick={(e) => e.stopPropagation()}
+                                                            >
+                                                                <Video className="w-2.5 h-2.5" />
+                                                                UNIRSE A GOOGLE MEET
+                                                            </a>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                    })
+                                )
                             )}
                         </div>
                     </div>
