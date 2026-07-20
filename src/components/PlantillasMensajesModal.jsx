@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import { FileText, Copy, MessageSquare, Mail, Plus, Trash2, X, ExternalLink } from 'lucide-react';
 import API_URL from '../config/api';
 import { getToken, getUser } from '../utils/authUtils';
+import useConfirmStore from '../store/confirmStore';
 
 const getAuthHeaders = () => ({ 'x-auth-token': getToken() || '' });
 
@@ -97,16 +98,25 @@ export default function PlantillasMensajesModal({ contacto, scope = 'prospecto' 
     }
   };
 
-  const deleteTemplate = async (id) => {
-    if (!window.confirm('¿Eliminar esta plantilla?')) return;
-    try {
-      await axios.delete(`${API_URL}/api/plantillas/${id}`, { headers: getAuthHeaders() });
-      toast.success('Plantilla eliminada');
-      if (String(selectedId) === String(id)) setSelectedId(null);
-      loadTemplates();
-    } catch (error) {
-      toast.error(error?.response?.data?.mensaje || 'No se pudo eliminar');
-    }
+  const confirmModal = useConfirmStore((state) => state.confirmModal);
+
+  const deleteTemplate = (id) => {
+    confirmModal({
+      title: '¿Eliminar plantilla?',
+      message: 'Esta acción eliminará la plantilla de mensajes.',
+      confirmText: 'Eliminar',
+      variant: 'danger',
+      onConfirm: async () => {
+        try {
+          await axios.delete(`${API_URL}/api/plantillas/${id}`, { headers: getAuthHeaders() });
+          toast.success('Plantilla eliminada');
+          if (String(selectedId) === String(id)) setSelectedId(null);
+          loadTemplates();
+        } catch (error) {
+          toast.error(error?.response?.data?.mensaje || 'No se pudo eliminar');
+        }
+      }
+    });
   };
 
   const waNumber = normalizePhone(contacto?.telefono || contacto?.telefono2 || '');

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Calendar, Phone, MessageSquare, User, CheckCircle2, AlertCircle, Zap, Trash2 } from 'lucide-react';
+import useConfirmStore from '../store/confirmStore';
 
 /**
  * COMPONENTE MEJORADO: HistorialInteracciones
@@ -15,15 +16,24 @@ export const HistorialInteracciones = ({ timeline = [], esProspector = true, onD
     const [filtroTipo, setFiltroTipo] = useState('todos');
     const [deletingId, setDeletingId] = useState(null);
 
-    const handleDelete = async (item) => {
+    const confirmModal = useConfirmStore((state) => state.confirmModal);
+
+    const handleDelete = (item) => {
         if (!onDeleteActividad) return;
-        if (!window.confirm(`¿Eliminar esta ${item.tipoActividad || 'actividad'} registrada el ${new Date(item.fecha).toLocaleDateString('es-MX')}? Esta acción no se puede deshacer.`)) return;
-        setDeletingId(item.id);
-        try {
-            await onDeleteActividad(item.id);
-        } finally {
-            setDeletingId(null);
-        }
+        confirmModal({
+            title: '¿Eliminar actividad?',
+            message: `¿Eliminar esta ${item.tipoActividad || 'actividad'} registrada el ${new Date(item.fecha).toLocaleDateString('es-MX')}? Esta acción no se puede deshacer.`,
+            confirmText: 'Eliminar',
+            variant: 'danger',
+            onConfirm: async () => {
+                setDeletingId(item.id);
+                try {
+                    await onDeleteActividad(item.id);
+                } finally {
+                    setDeletingId(null);
+                }
+            }
+        });
     };
 
     // Mapeo de iconos por tipo de evento

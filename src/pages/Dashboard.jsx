@@ -11,6 +11,8 @@ import StatCard from '../components/ui/StatCard';
 
 import MetricKPICard from '../components/ui/MetricKPICard';
 import NotificacionesBell from '../components/NotificacionesBell';
+import toast from 'react-hot-toast';
+import useConfirmStore from '../store/confirmStore';
 
 const PERIODOS = [
     { key: 'dia', label: 'Hoy', suffix: 'hoy' },
@@ -571,15 +573,26 @@ const Dashboard = () => {
         }
     };
 
-    const handleDeleteTask = async (id) => {
-        if (!window.confirm('¿Estás seguro de eliminar esta tarea?')) return;
-        try {
-            await axios.delete(`${API_URL}/api/tareas/${id}`, { headers: getAuthHeaders() });
-            cargarListas(true);
-            socket.emit('prospectos_actualizados');
-        } catch (error) {
-            console.error('Error al eliminar tarea:', error);
-        }
+    const confirmModal = useConfirmStore((state) => state.confirmModal);
+
+    const handleDeleteTask = (id) => {
+        confirmModal({
+            title: '¿Eliminar tarea?',
+            message: 'Esta acción eliminará la tarea del sistema.',
+            confirmText: 'Eliminar',
+            variant: 'danger',
+            onConfirm: async () => {
+                try {
+                    await axios.delete(`${API_URL}/api/tareas/${id}`, { headers: getAuthHeaders() });
+                    cargarListas(true);
+                    socket.emit('prospectos_actualizados');
+                    toast.success('Tarea eliminada');
+                } catch (error) {
+                    console.error('Error al eliminar tarea:', error);
+                    toast.error('No se pudo eliminar la tarea');
+                }
+            }
+        });
     };
 
     const toggleTaskStatus = async (task) => {

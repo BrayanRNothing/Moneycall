@@ -27,6 +27,8 @@ import {
 import toast from "react-hot-toast";
 
 import API_URL from "../config/api";
+import socket from "../config/socket";
+import useConfirmStore from "../store/confirmStore";
 import { getToken, getUser } from "../utils/authUtils";
 
 const DAYS = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
@@ -250,25 +252,31 @@ const Calendario = () => {
     }
   };
 
-  const handleEliminarReunion = async (id) => {
-    if (!window.confirm("¿Eliminar esta reunión?")) return;
-    const t = toast.loading("Eliminando...");
-    try {
-      const res = await fetch(`${API_URL}/api/actividades/${id}`, {
-        method: "DELETE",
-        headers: { "x-auth-token": getToken() },
-      });
-      if (!res.ok) {
-        const d = await res.json();
-        throw new Error(d.mensaje);
+  const handleEliminarReunion = (id) => {
+    confirmModal({
+      title: '¿Eliminar reunión?',
+      message: 'Esta acción eliminará la reunión del calendario.',
+      confirmText: 'Eliminar',
+      variant: 'danger',
+      onConfirm: async () => {
+        const t = toast.loading("Eliminando...");
+        try {
+          const res = await fetch(`${API_URL}/api/actividades/${id}`, {
+            method: "DELETE",
+            headers: { "x-auth-token": getToken() },
+          });
+          if (!res.ok) {
+            const d = await res.json();
+            throw new Error(d.mensaje);
+          }
+          toast.success("Reunión eliminada", { id: t });
+          setSelectedEvent(null);
+          await cargarMisReuniones();
+        } catch (error) {
+          toast.error(error.message || "No se pudo eliminar", { id: t });
+        }
       }
-      toast.success("Reunión eliminada");
-      await cargarMisReuniones();
-    } catch (e) {
-      toast.error(e.message || "Error al eliminar");
-    } finally {
-      toast.dismiss(t);
-    }
+    });
   };
 
   const handleActualizarReunion = async () => {

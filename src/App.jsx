@@ -12,6 +12,7 @@ import SkeletonLoader from './components/ui/SkeletonLoader.jsx';
 import React, { Suspense, lazy, useEffect } from 'react';
 import useThemeStore, { THEMES } from './store/themeStore.js';
 import ScrollToTop from './components/ScrollToTop.jsx';
+import GlobalConfirmModal from './components/ui/GlobalConfirmModal.jsx';
 
 const lazyWithRetry = (importer) =>
   lazy(async () => {
@@ -72,6 +73,7 @@ function App() {
   return (
     <BrowserRouter>
       <ScrollToTop />
+      <GlobalConfirmModal />
       <Toaster
         position="top-right"
         toastOptions={{

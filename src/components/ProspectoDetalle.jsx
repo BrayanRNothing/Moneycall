@@ -11,6 +11,7 @@ import {
 
 import { getToken, getUser } from '../utils/authUtils';
 import API_URL from '../config/api';
+import useConfirmStore from '../store/confirmStore';
 import TimeWheelPicker from './TimeWheelPicker';
 import HistorialInteracciones from './HistorialInteracciones';
 import PlantillasMensajesModal from './PlantillasMensajesModal';
@@ -310,16 +311,25 @@ export default function ProspectoDetalle({
         handleSeleccionarProspectoProp(prospectoSeleccionado);
     };
 
-    const handleDeleteActividadContext = async (actividadId) => {
-        if (!window.confirm('¿Eliminar esta actividad? Esta acción no se puede deshacer.')) return;
-        try {
-            await axios.delete(`${API_URL}/api/actividades/${actividadId}`, { headers: getAuthHeaders() });
-            setActividadesContext(prev => prev.filter(a => a.id !== actividadId));
-            toast.success('Actividad eliminada');
-        } catch (error) {
-            console.error(error);
-            toast.error('No se pudo eliminar la actividad');
-        }
+    const confirmModal = useConfirmStore((state) => state.confirmModal);
+
+    const handleDeleteActividadContext = (actividadId) => {
+        confirmModal({
+            title: '¿Eliminar actividad?',
+            message: 'Esta acción eliminará la actividad seleccionada.',
+            confirmText: 'Eliminar',
+            variant: 'danger',
+            onConfirm: async () => {
+                try {
+                    await axios.delete(`${API_URL}/api/actividades/${actividadId}`, { headers: getAuthHeaders() });
+                    setActividadesContext(prev => prev.filter(a => a.id !== actividadId));
+                    toast.success('Actividad eliminada');
+                } catch (error) {
+                    console.error(error);
+                    toast.error('No se pudo eliminar la actividad');
+                }
+            }
+        });
     };
 
     const actualizarInteres = async (id, nuevoInteres) => {
@@ -680,24 +690,31 @@ export default function ProspectoDetalle({
         }
     };
 
-    const handleDescartarCita = async (cita) => {
-        if (!window.confirm('¿Descartar esta reunión? Se eliminará de la base de datos y se intentará quitar de Google Calendar.')) return;
-        try {
-            const id = cita.id || cita._id;
-            // 1. Eliminar de Google Calendar (intento)
-            try {
-                await axios.delete(`${API_URL}/api/google/event-by-activity/${id}`, { headers: getAuthHeaders() });
-            } catch (gErr) {
-                console.warn('No se pudo eliminar de Google Calendar:', gErr.message);
+    const handleDescartarCita = (cita) => {
+        confirmModal({
+            title: '¿Descartar esta reunión?',
+            message: 'Se eliminará de la base de datos y se intentará quitar de Google Calendar.',
+            confirmText: 'Descartar reunión',
+            variant: 'warning',
+            onConfirm: async () => {
+                try {
+                    const id = cita.id || cita._id;
+                    // 1. Eliminar de Google Calendar (intento)
+                    try {
+                        await axios.delete(`${API_URL}/api/google/event-by-activity/${id}`, { headers: getAuthHeaders() });
+                    } catch (gErr) {
+                        console.warn('No se pudo eliminar de Google Calendar:', gErr.message);
+                    }
+                    // 2. Eliminar de la BD
+                    await axios.delete(`${API_URL}/api/actividades/${id}`, { headers: getAuthHeaders() });
+                    setActividadesContext(prev => prev.filter(a => (a.id || a._id) !== id));
+                    toast.success('Reunión descartada');
+                } catch (error) {
+                    console.error(error);
+                    toast.error('Error al descartar la reunión');
+                }
             }
-            // 2. Eliminar de la BD
-            await axios.delete(`${API_URL}/api/actividades/${id}`, { headers: getAuthHeaders() });
-            setActividadesContext(prev => prev.filter(a => (a.id || a._id) !== id));
-            toast.success('Reunión descartada');
-        } catch (error) {
-            console.error(error);
-            toast.error('Error al descartar la reunión');
-        }
+        });
     };
 
     const handleActualizarCita = async () => {

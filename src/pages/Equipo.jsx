@@ -3,6 +3,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { Users, UserPlus, Edit2, Power, Crown, Shield, X, Check, Loader2, RefreshCw, Trash2, Search, Download, AlertTriangle } from 'lucide-react';
 import { getUser, getToken } from '../utils/authUtils';
 import API_URL from '../config/api';
+import toast from 'react-hot-toast';
+import useConfirmStore from '../store/confirmStore';
 
 const ROL_UNICO = { value: 'vendedor', label: 'Vendedor', color: '#10b981', bg: '#d1fae5' };
 
@@ -131,55 +133,75 @@ export default function Equipo() {
     }
   };
 
-  const handleToggleMember = async (miembro) => {
+  const confirmModal = useConfirmStore((state) => state.confirmModal);
+
+  const handleToggleMember = (miembro) => {
     if (String(miembro.id) === String(userAuth?.id)) return;
-    if (!window.confirm(`¿Desactivar a ${miembro.nombre}?`)) return;
-    try {
-      const res = await fetch(`${API_URL}/api/equipos/miembro/${miembro.id}`, {
-        method: 'DELETE', headers
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.mensaje);
-      fetchEquipo();
-    } catch (e) {
-      alert(e.message);
-    }
+    confirmModal({
+      title: `¿Desactivar a ${miembro.nombre}?`,
+      message: 'El miembro perderá el acceso a la plataforma hasta que sea reactivado.',
+      confirmText: 'Desactivar',
+      variant: 'warning',
+      onConfirm: async () => {
+        try {
+          const res = await fetch(`${API_URL}/api/equipos/miembro/${miembro.id}`, { method: 'DELETE', headers });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.mensaje || 'Error al desactivar');
+          toast.success(`Se desactivó a ${miembro.nombre}`);
+          fetchEquipo();
+        } catch (e) {
+          toast.error(e.message || 'Error al desactivar miembro');
+        }
+      }
+    });
   };
 
-  const handleReactivateMember = async (miembro) => {
-    if (!window.confirm(`¿Reactivar a ${miembro.nombre}?`)) return;
-    try {
-      const res = await fetch(`${API_URL}/api/equipos/miembro/${miembro.id}/reactivar`, {
-        method: 'PATCH', headers
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.mensaje);
-      fetchEquipo();
-    } catch (e) {
-      alert(e.message);
-    }
+  const handleReactivateMember = (miembro) => {
+    confirmModal({
+      title: `¿Reactivar a ${miembro.nombre}?`,
+      message: 'El miembro recuperará el acceso a la plataforma con su rol asignado.',
+      confirmText: 'Reactivar',
+      variant: 'info',
+      onConfirm: async () => {
+        try {
+          const res = await fetch(`${API_URL}/api/equipos/miembro/${miembro.id}/reactivar`, { method: 'PATCH', headers });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.mensaje || 'Error al reactivar');
+          toast.success(`Se reactivó a ${miembro.nombre}`);
+          fetchEquipo();
+        } catch (e) {
+          toast.error(e.message || 'Error al reactivar miembro');
+        }
+      }
+    });
   };
 
-  const handleDeleteMember = async (miembro) => {
+  const handleDeleteMember = (miembro) => {
     if (String(miembro.id) === String(userAuth?.id)) {
-      alert('No puedes eliminarte a ti mismo');
+      toast.error('No puedes eliminarte a ti mismo');
       return;
     }
     if (String(miembro.id) === String(equipo.owner_id)) {
-      alert('No puedes eliminar al propietario del equipo');
+      toast.error('No puedes eliminar al propietario del equipo');
       return;
     }
-    if (!window.confirm(`¿Eliminar permanentemente a ${miembro.nombre} del equipo?`)) return;
-    try {
-      const res = await fetch(`${API_URL}/api/equipos/miembro/${miembro.id}/eliminar`, {
-        method: 'DELETE', headers
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.mensaje);
-      fetchEquipo();
-    } catch (e) {
-      alert(e.message);
-    }
+    confirmModal({
+      title: `¿Eliminar permanentemente a ${miembro.nombre}?`,
+      message: 'Esta acción eliminará al miembro de forma definitiva del equipo.',
+      confirmText: 'Eliminar permanentemente',
+      variant: 'danger',
+      onConfirm: async () => {
+        try {
+          const res = await fetch(`${API_URL}/api/equipos/miembro/${miembro.id}/eliminar`, { method: 'DELETE', headers });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.mensaje || 'Error al eliminar');
+          toast.success(`Se eliminó a ${miembro.nombre} del equipo`);
+          fetchEquipo();
+        } catch (e) {
+          toast.error(e.message || 'Error al eliminar miembro');
+        }
+      }
+    });
   };
 
   const openEditModal = (miembro) => {
@@ -204,11 +226,12 @@ export default function Equipo() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.mensaje || 'No se pudo actualizar el miembro');
+      toast.success('Miembro actualizado correctamente');
       setEditMember(null);
       setEditForm(initialEditForm);
       fetchEquipo();
     } catch (e2) {
-      alert(e2.message);
+      toast.error(e2.message || 'Error al actualizar miembro');
     } finally {
       setEditLoading(false);
     }
@@ -238,7 +261,7 @@ export default function Equipo() {
       a.remove();
       window.URL.revokeObjectURL(url);
     } catch (e) {
-      alert(e.message);
+      toast.error(e.message || 'Error al exportar CSV');
     }
   };
 
@@ -256,8 +279,9 @@ export default function Equipo() {
       setEquipo(prev => ({ ...prev, nombre: nuevoNombre }));
       setRenameMode(false);
       fetchEquipo();
+      toast.success('Nombre del equipo actualizado');
     } catch (e) {
-      alert(e.message);
+      toast.error(e.message || 'Error al renombrar equipo');
     } finally {
       setRenameLoading(false);
     }

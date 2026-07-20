@@ -5,6 +5,7 @@ import { UserPlus, Users, Loader2, Pencil, Trash2, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import API_URL from '../config/api';
 import { getToken, getUser } from '../utils/authUtils';
+import useConfirmStore from '../store/confirmStore';
 
 const initialForm = {
   usuario: '',
@@ -164,30 +165,34 @@ export default function AdminPanel() {
     }
   };
 
-  const handleDeleteOwner = async (owner) => {
-    const confirmDelete = window.confirm(`¿Seguro que quieres eliminar a ${owner.nombre}?`);
-    if (!confirmDelete) return;
+  const confirmModal = useConfirmStore((state) => state.confirmModal);
 
-    setDeletingId(owner.id);
-    try {
-      const res = await fetch(`${API_URL}/api/usuarios/team-owners/${owner.id}`, {
-        method: 'DELETE',
-        headers: { 'x-auth-token': token }
-      });
+  const handleDeleteOwner = (owner) => {
+    confirmModal({
+      title: `¿Eliminar a ${owner.nombre}?`,
+      message: 'Esta acción eliminará al usuario propietario y su configuración.',
+      confirmText: 'Eliminar',
+      variant: 'danger',
+      onConfirm: async () => {
+        setDeletingId(owner.id);
+        try {
+          const res = await fetch(`${API_URL}/api/usuarios/team-owners/${owner.id}`, {
+            method: 'DELETE',
+            headers: { 'x-auth-token': token }
+          });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.mensaje || 'No se pudo eliminar propietario de equipo');
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.mensaje || 'No se pudo eliminar propietario de equipo');
 
-      toast.success('Propietario de equipo eliminado');
-      if (editingOwner && editingOwner.id === owner.id) {
-        handleCancelEdit();
+          toast.success(data.mensaje || 'Propietario de equipo eliminado');
+          setOwners((prev) => prev.filter((o) => o.id !== owner.id));
+        } catch (error) {
+          toast.error(error.message || 'Error al eliminar propietario de equipo');
+        } finally {
+          setDeletingId(null);
+        }
       }
-      fetchOwners();
-    } catch (error) {
-      toast.error(error.message || 'Error al eliminar propietario de equipo');
-    } finally {
-      setDeletingId(null);
-    }
+    });
   };
 
   const toggleOwnerMembers = (ownerId) => {
