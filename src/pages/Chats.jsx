@@ -375,7 +375,7 @@ export default function Chats() {
                               c.telefono?.includes(searchQuery);
         if (!matchesSearch) return false;
 
-        const isCl = ['venta_ganada', 'cotizacion_realizada', 'contrato_firmado', 'esperando_pago', 'cliente_activo'].includes(c.etapaEmbudo);
+        const isCl = ['venta_ganada', 'cliente_activo'].includes(c.etapaEmbudo);
         if (chatFilter === 'prospectos') return !isCl;
         if (chatFilter === 'clientes') return isCl;
         if (chatFilter === 'conMensajes') return !!c.lastMessageTime;

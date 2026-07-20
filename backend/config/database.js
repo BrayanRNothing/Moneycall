@@ -940,6 +940,22 @@ const initDb = async () => {
     `).run();
   } catch (e) { /* ignorar */ }
 
+  // Limpiar formato de teléfonos en clientes (remover @s.whatsapp.net y caracteres extra)
+  try {
+    const clientsWithBadPhone = await db.prepare("SELECT id, telefono FROM clientes WHERE telefono LIKE '%@%' OR telefono LIKE '% %' OR telefono LIKE '%-%' OR telefono LIKE '%(%'").all();
+    if (clientsWithBadPhone && clientsWithBadPhone.length > 0) {
+      for (const c of clientsWithBadPhone) {
+        if (c.telefono) {
+          const cleanDigits = c.telefono.split('@')[0].replace(/\D/g, '');
+          if (cleanDigits) {
+            await db.prepare('UPDATE clientes SET telefono = ? WHERE id = ?').run(`+${cleanDigits}`, c.id);
+          }
+        }
+      }
+      console.log(`🧹 Migración: Limpiados ${clientsWithBadPhone.length} formatos de teléfonos en la base de datos.`);
+    }
+  } catch (e) { /* ignorar */ }
+
   // MIGRACIÓN POSTGRESQL PARA EL NUEVO ROL (vendedor)
   if (isPostgres) {
     try {

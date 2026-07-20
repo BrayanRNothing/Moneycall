@@ -168,7 +168,8 @@ async function ensureProspectExists(vendedorId, phone, name = '', io) {
 
             const now = new Date().toISOString();
             const hist = JSON.stringify([{ etapa: 'prospecto_nuevo', fecha: now, vendedor: vendedorId }]);
-            const rawFormattedPhone = phone.startsWith('+') ? phone : `+${phone}`;
+            const cleanDigits = phone.split('@')[0].replace(/\D/g, '');
+            const rawFormattedPhone = `+${cleanDigits}`;
 
             let nombres = 'Contacto';
             let apellidoPaterno = 'WhatsApp';
@@ -372,7 +373,8 @@ async function handleIncomingMessage(vendedorId, phone, text, io, pushName = '',
 
             const now = new Date().toISOString();
             const hist = JSON.stringify([{ etapa: 'prospecto_nuevo', fecha: now, vendedor: vendedorId }]);
-            const rawFormattedPhone = phone.startsWith('+') ? phone : `+${phone}`;
+            const cleanDigits = phone.split('@')[0].replace(/\D/g, '');
+            const rawFormattedPhone = `+${cleanDigits}`;
 
             // Buscar nombre del contacto en la agenda del celular o en el perfil de WhatsApp
             const contactJid = phone.split('@')[0];

@@ -86,7 +86,7 @@ const isGoogleAuthError = (error) => {
     );
 };
 
-const CLIENT_STAGES = ['venta_ganada', 'cotizacion_realizada', 'contrato_firmado', 'esperando_pago', 'cliente_activo'];
+const CLIENT_STAGES = ['venta_ganada', 'cliente_activo'];
 const NON_PROSPECT_STAGES = [...CLIENT_STAGES, 'perdido'];
 
 // Helper: calcula métricas para un período dado por filtro SQL en campo fecha (actividades) y fechaRegistro (clientes)
