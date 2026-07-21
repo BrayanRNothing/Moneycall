@@ -184,8 +184,6 @@ async function updateClientNameIfGeneric(vendedorId, phone, name, io) {
 // Asegurar que exista un prospecto para un teléfono/JID individual de WhatsApp recibido de chats o contactos
 async function ensureProspectExists(vendedorId, phone, name = '', io) {
     if (!phone || isGroupOrNonPersonJid(phone)) return;
-    // Omitir totalmente si no se especifica un nombre guardado real en la agenda
-    if (!hasRealSavedName(name)) return;
 
     const cleanPhone = phone.replace(/\D/g, '').slice(-10);
     if (cleanPhone.length < 10 || isGroupOrNonPersonJid(cleanPhone)) return;
@@ -789,15 +787,7 @@ async function connectClient(vendedorId, io) {
                 const remoteJid = msg.key?.remoteJid || '';
                 const remoteJidAlt = msg.key?.remoteJidAlt || '';
 
-                // Rechazar de inmediato cualquier mensaje de grupo o mayor a 6 meses
-                if (
-                    isOlderThan6Months(msg) ||
-                    remoteJid.includes('@g.us') ||
-                    remoteJidAlt.includes('@g.us') ||
-                    msg.key?.participant ||
-                    isGroupOrNonPersonJid(remoteJid) ||
-                    isGroupOrNonPersonJid(remoteJidAlt)
-                ) {
+                if (isOlderThan6Months(msg) || msg.key?.participant) {
                     continue;
                 }
 
@@ -998,15 +988,7 @@ async function processHistoricalMessages(vendedorId, messages, io) {
             const remoteJid = msg.key?.remoteJid || '';
             const remoteJidAlt = msg.key?.remoteJidAlt || '';
 
-            if (
-                remoteJid.includes('@g.us') ||
-                remoteJidAlt.includes('@g.us') ||
-                msg.key?.participant ||
-                isGroupOrNonPersonJid(remoteJid) ||
-                isGroupOrNonPersonJid(remoteJidAlt)
-            ) {
-                return false;
-            }
+            if (msg.key?.participant) return false;
 
             const rawJid = remoteJid.endsWith('@s.whatsapp.net') ? remoteJid : (remoteJidAlt.endsWith('@s.whatsapp.net') ? remoteJidAlt : (remoteJid || remoteJidAlt));
             const jid = resolveLidToPhone(rawJid, sessionDir);
