@@ -634,7 +634,7 @@ async function connectClient(vendedorId, io) {
     });
 
     sock.ev.on('connection.update', async (update) => {
-        const { connection, lastDisconnect, qr } = update;
+        const { connection, lastDisconnect, qr, receivedPendingNotifications } = update;
         
         if (qr) {
             console.log(`[WhatsApp user_${vendedorId}] QR code generated, converting to image URL`);
@@ -677,13 +677,19 @@ async function connectClient(vendedorId, io) {
                 io.to(`user_${vendedorId}`).emit('whatsapp-status', { status: 'desconectado' });
             }
         } else if (connection === 'open') {
-            console.log(`[WhatsApp user_${vendedorId}] ¡Conexión exitosa y activa!`);
-            connectionStatuses[vendedorId] = 'conectado';
+            console.log(`[WhatsApp user_${vendedorId}] ¡Conexión exitosa y activa! Sincronizando historial...`);
+            connectionStatuses[vendedorId] = 'sincronizando';
             resetReconnectDelay(vendedorId); // Reiniciar contador de reintentos
             delete storedQrs[vendedorId];
             await saveSessionToDb(vendedorId, sessionDir);
-            io.to(`user_${vendedorId}`).emit('whatsapp-status', { status: 'conectado' });
+            io.to(`user_${vendedorId}`).emit('whatsapp-status', { status: 'sincronizando' });
             startHeartbeat(vendedorId, io); // Iniciar heartbeat de monitoreo
+        }
+
+        if (receivedPendingNotifications) {
+            console.log(`[WhatsApp user_${vendedorId}] ¡Sincronización de historial completada!`);
+            connectionStatuses[vendedorId] = 'conectado';
+            io.to(`user_${vendedorId}`).emit('whatsapp-status', { status: 'conectado' });
         }
     });
 

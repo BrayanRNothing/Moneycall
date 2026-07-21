@@ -932,7 +932,7 @@ export default function VendedorAjustes() {
                                             <span className="font-black">Enlazar WhatsApp</span>
                                         </h2>
 
-                                        {wsStatus === 'conectado' ? (
+                                        {wsStatus === 'conectado' || wsStatus === 'sincronizando' ? (
                                             <div className="max-w-xl mx-auto bg-green-50/40 border border-green-100 rounded-3xl p-6 sm:p-8 text-center shadow-xs">
                                                 <div className="relative w-20 h-20 mx-auto mb-6 flex items-center justify-center">
                                                     <div className="absolute inset-0 bg-green-500/20 rounded-full" style={{ animation: 'pulse-ring 2s infinite' }} />
@@ -954,9 +954,15 @@ export default function VendedorAjustes() {
                                                     </div>
                                                     <div className="flex justify-between">
                                                         <span className="font-bold text-slate-400">Estado de Conexión:</span>
-                                                        <span className="font-black text-green-600 flex items-center gap-1">
-                                                            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" /> En Línea
-                                                        </span>
+                                                        {wsStatus === 'sincronizando' ? (
+                                                            <span className="font-black text-amber-500 flex items-center gap-1">
+                                                                <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" /> Sincronizando...
+                                                            </span>
+                                                        ) : (
+                                                            <span className="font-black text-green-600 flex items-center gap-1">
+                                                                <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" /> En Línea
+                                                            </span>
+                                                        )}
                                                     </div>
                                                     <div className="flex justify-between">
                                                         <span className="font-bold text-slate-400">Multicuenta:</span>

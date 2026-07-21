@@ -198,7 +198,7 @@ export default function Chats() {
     }, []);
 
     useEffect(() => {
-        if (wsStatus === 'conectado') {
+        if (wsStatus === 'conectado' || wsStatus === 'sincronizando') {
             fetchChatsList(false);
         }
     }, [wsStatus]);
@@ -527,7 +527,7 @@ export default function Chats() {
     }
 
     // ─── PANTALLA: WhatsApp no conectado / generando QR ──────────────────────
-    if (wsStatus !== 'conectado') {
+    if (wsStatus !== 'conectado' && wsStatus !== 'sincronizando') {
         return (
             <div className="h-full flex items-center justify-center p-6" style={{ background: 'linear-gradient(135deg, #f0fdf4 0%, #f8fafc 60%, #eff6ff 100%)' }}>
                 <div className="max-w-sm w-full bg-white rounded-3xl shadow-2xl border border-slate-200/60 overflow-hidden">
@@ -689,9 +689,15 @@ export default function Chats() {
                         </div>
                         <div>
                             <h2 className="text-sm font-black text-slate-800 leading-tight">Mis Conversaciones</h2>
-                            <p className="text-[10px] text-green-600 font-bold flex items-center gap-1">
-                                <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-ping" /> Conectado
-                            </p>
+                            {wsStatus === 'sincronizando' ? (
+                                <p className="text-[10px] text-amber-600 font-bold flex items-center gap-1" title="WhatsApp está conectando y descargando el historial de mensajes de tu teléfono. Esto puede tardar unos minutos.">
+                                    <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse" /> Sincronizando...
+                                </p>
+                            ) : (
+                                <p className="text-[10px] text-green-600 font-bold flex items-center gap-1">
+                                    <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-ping" /> Conectado
+                                </p>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -889,6 +895,13 @@ export default function Chats() {
                                 )}
                             </div>
                         </div>
+
+                        {wsStatus === 'sincronizando' && (
+                            <div className="bg-amber-500/10 border-b border-amber-500/20 px-4 py-2.5 text-center text-[11px] text-amber-700 font-extrabold flex items-center justify-center gap-2 select-none shrink-0">
+                                <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-ping" />
+                                <span>Descargando historial de mensajes... Por favor espera a que se complete para ver tus chats ordenados y actualizados.</span>
+                            </div>
+                        )}
 
                         {/* Historial de Mensajes (Estilo WhatsApp) */}
                         <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 md:p-6 space-y-3.5 whatsapp-bg scrollbar-thin">
