@@ -500,14 +500,7 @@ async function handleIncomingMessage(vendedorId, phone, text, io, pushName = '',
                     io.to(`team_${client.equipo_id}`).emit('prospectos_actualizados');
                 }
 
-                // Emitir evento de nuevo mensaje de WhatsApp para notificaciones globales
-                io.emit('new-whatsapp-message', {
-                    clientId: client.id,
-                    nombres: client.nombres,
-                    apellidoPaterno: client.apellidoPaterno,
-                    telefono: client.telefono,
-                    text: text
-                });
+                // Emitir evento de nuevo mensaje de WhatsApp solo al usuario dueño de la sesion por privacidad
                 io.to(`user_${vendedorId}`).emit('new-whatsapp-message', {
                     clientId: client.id,
                     nombres: client.nombres,
