@@ -139,19 +139,19 @@ router.get('/chats', auth, async (req, res) => {
                         SELECT a.descripcion 
                         FROM actividades a 
                         WHERE a.cliente = c.id AND a.tipo = 'whatsapp' AND a.resultado != 'nota_interna'
-                        ORDER BY a.id DESC LIMIT 1
+                        ORDER BY a."createdAt" DESC LIMIT 1
                     ) AS "lastMessage",
                     (
-                        SELECT a."fecha" 
+                        SELECT a."createdAt" 
                         FROM actividades a 
                         WHERE a.cliente = c.id AND a.tipo = 'whatsapp' AND a.resultado != 'nota_interna'
-                        ORDER BY a.id DESC LIMIT 1
+                        ORDER BY a."createdAt" DESC LIMIT 1
                     ) AS "lastMessageTime",
                     (
                         SELECT a.resultado 
                         FROM actividades a 
                         WHERE a.cliente = c.id AND a.tipo = 'whatsapp' AND a.resultado != 'nota_interna'
-                        ORDER BY a.id DESC LIMIT 1
+                        ORDER BY a."createdAt" DESC LIMIT 1
                     ) AS "lastResult"
                 FROM clientes c
             `;
@@ -194,19 +194,19 @@ router.get('/chats', auth, async (req, res) => {
                         SELECT a.descripcion 
                         FROM actividades a 
                         WHERE a.cliente = c.id AND a.tipo = 'whatsapp' AND a.resultado != 'nota_interna' AND a.vendedor = ?
-                        ORDER BY a.id DESC LIMIT 1
+                        ORDER BY a."createdAt" DESC LIMIT 1
                     ) AS "lastMessage",
                     (
-                        SELECT a."fecha" 
+                        SELECT a."createdAt" 
                         FROM actividades a 
                         WHERE a.cliente = c.id AND a.tipo = 'whatsapp' AND a.resultado != 'nota_interna' AND a.vendedor = ?
-                        ORDER BY a.id DESC LIMIT 1
+                        ORDER BY a."createdAt" DESC LIMIT 1
                     ) AS "lastMessageTime",
                     (
                         SELECT a.resultado 
                         FROM actividades a 
                         WHERE a.cliente = c.id AND a.tipo = 'whatsapp' AND a.resultado != 'nota_interna' AND a.vendedor = ?
-                        ORDER BY a.id DESC LIMIT 1
+                        ORDER BY a."createdAt" DESC LIMIT 1
                     ) AS "lastResult"
                 FROM clientes c
             `;
@@ -285,7 +285,7 @@ router.get('/chats/:clienteId', auth, async (req, res) => {
         }
 
         const activities = await db.prepare(
-            'SELECT id, descripcion, resultado, "fecha" AS "createdAt", "fecha" FROM actividades WHERE cliente = ? AND tipo = ? ORDER BY id ASC'
+            'SELECT id, descripcion, resultado, "createdAt", "fecha" FROM actividades WHERE cliente = ? AND tipo = ? ORDER BY "createdAt" ASC'
         ).all(clienteId, 'whatsapp');
         
         res.json(activities);
