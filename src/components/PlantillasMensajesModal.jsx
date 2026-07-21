@@ -1,29 +1,15 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { FileText, Copy, MessageSquare, Mail, Plus, Trash2, X, ExternalLink } from 'lucide-react';
 import API_URL from '../config/api';
-import { getToken, getUser } from '../utils/authUtils';
+import { getToken } from '../utils/authUtils';
 import useConfirmStore from '../store/confirmStore';
+import { applyTemplate } from '../utils/templateUtils';
 
 const getAuthHeaders = () => ({ 'x-auth-token': getToken() || '' });
 
 const normalizePhone = (value) => String(value || '').replace(/\D/g, '');
-
-const applyTemplate = (text, contacto) => {
-  const user = getUser();
-  const replacements = {
-    '{{nombre}}': String(contacto?.nombres || '').trim(),
-    '{{empresa}}': String(contacto?.empresa || '').trim(),
-    '{{telefono}}': String(contacto?.telefono || '').trim(),
-    '{{correo}}': String(contacto?.correo || '').trim(),
-    '{{etapa}}': String(contacto?.etapaEmbudo || '').trim(),
-    '{{vendedor}}': String(user?.nombre || '').trim(),
-    '{{fecha_hoy}}': new Date().toLocaleDateString('es-MX')
-  };
-
-  return Object.entries(replacements).reduce((acc, [k, v]) => acc.split(k).join(v), text || '');
-};
 
 export default function PlantillasMensajesModal({ contacto, scope = 'prospecto', onSelectTemplate }) {
   const [open, setOpen] = useState(false);

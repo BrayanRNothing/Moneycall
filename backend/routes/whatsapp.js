@@ -37,7 +37,7 @@ router.post('/disconnect', auth, async (req, res) => {
 // POST /api/whatsapp/send - Enviar mensaje manual
 router.post('/send', auth, async (req, res) => {
     const vendedorId = req.usuario.id;
-    const { clienteId, mensaje } = req.body;
+    const { clienteId, mensaje, isInternalNote } = req.body;
 
     if (!clienteId || !mensaje || !String(mensaje).trim()) {
         return res.status(400).json({ mensaje: 'Faltan campos requeridos: clienteId y mensaje' });
@@ -64,12 +64,18 @@ router.post('/send', auth, async (req, res) => {
             }
         }
 
-        // ✅ PRIMERO enviar el mensaje. Si falla, no registramos nada en DB.
-        await sendMessage(vendedorId, client.telefono, textoFinal);
+        if (isInternalNote) {
+            // ✅ Es nota interna: Solo guardar en base de datos, NO enviar a Baileys
+            await db.prepare('INSERT INTO actividades (tipo, vendedor, cliente, descripcion, resultado) VALUES (?, ?, ?, ?, ?)')
+                .run('whatsapp', vendedorId, clienteId, textoFinal, 'nota_interna');
+        } else {
+            // ✅ PRIMERO enviar el mensaje. Si falla, no registramos nada en DB.
+            await sendMessage(vendedorId, client.telefono, textoFinal);
 
-        // ✅ Luego registrar en la base de datos (solo si el envío fue exitoso)
-        await db.prepare('INSERT INTO actividades (tipo, vendedor, cliente, descripcion, resultado) VALUES (?, ?, ?, ?, ?)')
-            .run('whatsapp', vendedorId, clienteId, `Vendedor: ${textoFinal}`, 'enviado');
+            // ✅ Luego registrar en la base de datos (solo si el envío fue exitoso)
+            await db.prepare('INSERT INTO actividades (tipo, vendedor, cliente, descripcion, resultado) VALUES (?, ?, ?, ?, ?)')
+                .run('whatsapp', vendedorId, clienteId, `Vendedor: ${textoFinal}`, 'enviado');
+        }
 
         // Transición automática de etapa si estaba en Sin Contacto
         if (client.etapaEmbudo === 'prospecto_nuevo') {

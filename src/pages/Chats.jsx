@@ -3,7 +3,7 @@ import {
     Search, Send, Phone, User, MessageSquare, 
     Smile, Paperclip, MoreVertical, 
     Link, Sparkles, RefreshCw, LogOut, ArrowLeft,
-    CheckCircle2, Filter
+    CheckCircle2, Filter, StickyNote
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import API_URL from '../config/api';
@@ -13,6 +13,7 @@ import toast from 'react-hot-toast';
 import axios from 'axios';
 import PlantillasMensajesModal from '../components/PlantillasMensajesModal';
 import TimeWheelPicker from '../components/TimeWheelPicker';
+import { applyTemplate } from '../utils/templateUtils';
 
 const EMOJIS = [
     '😀', '😂', '🤣', '😊', '😍', '🥰', '😘', '😜', '😎', '🥳', 
@@ -20,6 +21,8 @@ const EMOJIS = [
     '🔥', '✨', '⭐', '❤️', '💖', '💙', '💚', '💛', '💜', '🖤', 
     '🎉', '🎁', '🚀', '💡', '⏰', '📞', '📱', '💬', '📍', '💵'
 ];
+
+const getAuthHeaders = () => ({ 'x-auth-token': getToken() || '' });
 
 export default function Chats() {
     const navigate = useNavigate();
@@ -43,6 +46,13 @@ export default function Chats() {
     const [showCitaModal, setShowCitaModal] = useState(false);
     const [updatingEtapa, setUpdatingEtapa] = useState(false);
     
+    // Estados para Notas Internas y Slash Commands
+    const [isNoteMode, setIsNoteMode] = useState(false);
+    const [templates, setTemplates] = useState([]);
+    const [showSlashMenu, setShowSlashMenu] = useState(false);
+    const [slashQuery, setSlashQuery] = useState('');
+    const [slashIndex, setSlashIndex] = useState(0);
+
     const messagesEndRef = useRef(null);
     const messagesContainerRef = useRef(null);
     const currentUser = getUser();
@@ -237,21 +247,36 @@ export default function Chats() {
         }
     }, [messages, loadingMessages]);
 
-    // 6. Enviar mensaje por WhatsApp
+    // 5.5 Cargar plantillas para Slash Commands
+    useEffect(() => {
+        const loadTemplates = async () => {
+            try {
+                const res = await axios.get(`${API_URL}/api/plantillas?scope=prospecto`, { headers: getAuthHeaders() });
+                setTemplates(res.data);
+            } catch (err) {
+                console.error('Error loading templates:', err);
+            }
+        };
+        loadTemplates();
+    }, []);
+
+    // 6. Enviar mensaje por WhatsApp (o Nota Interna)
     const handleSendMessage = async (e) => {
         if (e) e.preventDefault();
         if (!messageText.trim() || sending || !activeChat) return;
 
         setSending(true);
         const txt = messageText.trim();
+        const wasNote = isNoteMode;
         setMessageText('');
         setShowEmojiPicker(false); // Cerrar picker al enviar
+        setShowSlashMenu(false);
 
         // Mensaje optimista: mostrarlo inmediatamente en la UI antes de confirmar
         const optimisticMsg = {
             id: `optimistic_${Date.now()}`,
-            descripcion: `Vendedor: ${txt}`,
-            resultado: 'enviado',
+            descripcion: wasNote ? txt : `Vendedor: ${txt}`,
+            resultado: wasNote ? 'nota_interna' : 'enviado',
             createdAt: new Date().toISOString()
         };
         setMessages(prev => [...prev, optimisticMsg]);
@@ -265,7 +290,8 @@ export default function Chats() {
                 },
                 body: JSON.stringify({
                     clienteId: activeChat.id,
-                    mensaje: txt
+                    mensaje: txt,
+                    isInternalNote: wasNote
                 })
             });
 
@@ -289,10 +315,69 @@ export default function Chats() {
 
     // Manejar Shift+Enter para salto de línea, Enter solo para enviar
     const handleKeyDown = (e) => {
+        if (showSlashMenu) {
+            const filtered = templates.filter(t => t.nombre.toLowerCase().includes(slashQuery.toLowerCase()));
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                setSlashIndex(prev => (prev + 1) % filtered.length);
+                return;
+            }
+            if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                setSlashIndex(prev => (prev - 1 + filtered.length) % filtered.length);
+                return;
+            }
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                if (filtered[slashIndex]) {
+                    handleSelectSlashTemplate(filtered[slashIndex]);
+                }
+                return;
+            }
+            if (e.key === 'Escape') {
+                setShowSlashMenu(false);
+                return;
+            }
+        }
+
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             handleSendMessage();
         }
+    };
+
+    const handleTextChange = (e) => {
+        const val = e.target.value;
+        setMessageText(val);
+
+        // Detectar Slash Commands
+        const cursorPosition = e.target.selectionStart;
+        const textBeforeCursor = val.slice(0, cursorPosition);
+        const lastSlashIndex = textBeforeCursor.lastIndexOf('/');
+
+        if (lastSlashIndex !== -1) {
+            const query = textBeforeCursor.slice(lastSlashIndex + 1);
+            // Mostrar menú si no hay espacios en el query (es una sola palabra)
+            if (!query.includes(' ')) {
+                setSlashQuery(query);
+                setShowSlashMenu(true);
+                setSlashIndex(0);
+                return;
+            }
+        }
+        setShowSlashMenu(false);
+    };
+
+    const handleSelectSlashTemplate = (template) => {
+        const txt = applyTemplate(template.contenido, activeChat);
+        const lastSlashIndex = messageText.lastIndexOf('/');
+        if (lastSlashIndex !== -1) {
+            const beforeSlash = messageText.slice(0, lastSlashIndex);
+            setMessageText(beforeSlash + txt + ' ');
+        } else {
+            setMessageText(txt);
+        }
+        setShowSlashMenu(false);
     };
 
     const handleUpdateEtapa = async (nuevaEtapa) => {
@@ -827,11 +912,19 @@ export default function Chats() {
                                         >
                                             <div
                                                 className={`max-w-[85%] sm:max-w-[70%] px-3.5 py-2 rounded-2xl bubble-shadow text-slate-800 text-xs font-semibold relative ${
-                                                    isFromMe 
-                                                        ? 'bg-[#d9fdd3] rounded-tr-none' 
-                                                        : 'bg-white rounded-tl-none'
+                                                    m.resultado === 'nota_interna'
+                                                        ? 'bg-amber-100 border border-amber-300 rounded-tr-none text-amber-900 shadow-sm'
+                                                        : isFromMe 
+                                                            ? 'bg-[#d9fdd3] rounded-tr-none' 
+                                                            : 'bg-white rounded-tl-none'
                                                 }`}
                                             >
+                                                {m.resultado === 'nota_interna' && (
+                                                    <div className="flex items-center gap-1.5 mb-1 text-[10px] uppercase font-black tracking-wider text-amber-600/80">
+                                                        <StickyNote size={12} />
+                                                        <span>Nota Interna</span>
+                                                    </div>
+                                                )}
                                                 {renderBubbleContent(msgText)}
                                                 <div className="absolute bottom-1 right-2 flex items-center gap-0.5 text-[9px] text-slate-400 font-bold select-none">
                                                     <span>{formatTime(m.createdAt)}</span>
@@ -845,16 +938,41 @@ export default function Chats() {
                         </div>
 
                         {/* Barra de Input WhatsApp */}
-                        <form onSubmit={handleSendMessage} className="p-3 bg-slate-50 border-t border-slate-200/80 flex items-center gap-3 shrink-0">
-                            <div className="relative">
+                        <form onSubmit={handleSendMessage} className="p-3 bg-slate-50 border-t border-slate-200/80 flex items-center gap-3 shrink-0 relative">
+                            {/* Slash Commands Menu */}
+                            {showSlashMenu && templates.length > 0 && (
+                                <div className="absolute bottom-[calc(100%+0.5rem)] left-0 w-80 max-h-64 overflow-y-auto bg-white border border-slate-200 rounded-2xl shadow-xl z-50 flex flex-col p-1.5 animate-in fade-in slide-in-from-bottom-2 duration-100">
+                                    <div className="px-3 py-2 text-[10px] font-black uppercase tracking-wider text-slate-400 border-b border-slate-100 mb-1">
+                                        Plantillas (USA LAS FLECHAS Y ENTER)
+                                    </div>
+                                    {templates.filter(t => t.nombre.toLowerCase().includes(slashQuery.toLowerCase())).length === 0 ? (
+                                        <div className="p-3 text-xs text-center text-slate-500 font-medium">No se encontraron plantillas.</div>
+                                    ) : (
+                                        templates.filter(t => t.nombre.toLowerCase().includes(slashQuery.toLowerCase())).map((t, idx) => (
+                                            <button
+                                                key={t.id}
+                                                type="button"
+                                                onClick={() => handleSelectSlashTemplate(t)}
+                                                className={`w-full text-left px-3 py-2 rounded-xl text-xs transition-colors flex flex-col gap-0.5 ${idx === slashIndex ? 'bg-green-50' : 'hover:bg-slate-50'}`}
+                                            >
+                                                <span className={`font-bold ${idx === slashIndex ? 'text-green-700' : 'text-slate-800'}`}>/{t.nombre}</span>
+                                                <span className="text-[10px] text-slate-500 truncate">{t.contenido}</span>
+                                            </button>
+                                        ))
+                                    )}
+                                </div>
+                            )}
+
+                            <div className="flex items-center gap-1 relative">
                                 <button 
                                     type="button" 
                                     onClick={() => setShowEmojiPicker(!showEmojiPicker)}
                                     className={`p-2 rounded-xl transition-colors ${showEmojiPicker ? 'bg-slate-200 text-green-600' : 'text-slate-500 hover:bg-slate-200'}`}
+                                    title="Emojis"
                                 >
                                     <Smile size={20} />
                                 </button>
-                                
+
                                 {showEmojiPicker && (
                                     <>
                                         <div 
@@ -880,6 +998,15 @@ export default function Chats() {
                                         </div>
                                     </>
                                 )}
+
+                                <button
+                                    type="button"
+                                    onClick={() => setIsNoteMode(!isNoteMode)}
+                                    className={`p-2 rounded-xl transition-colors ${isNoteMode ? 'bg-amber-100 text-amber-600' : 'text-slate-500 hover:bg-slate-200'}`}
+                                    title={isNoteMode ? "Modo Nota Interna Activado" : "Escribir Nota Interna"}
+                                >
+                                    <StickyNote size={20} />
+                                </button>
                             </div>
 
                             <PlantillasMensajesModal 
@@ -891,12 +1018,16 @@ export default function Chats() {
                             
                             <textarea
                                 rows={1}
-                                placeholder="Escribe un mensaje... (Enter para enviar, Shift+Enter para nueva línea)"
+                                placeholder={isNoteMode ? "Escribe una nota interna... (No será enviada)" : "Escribe un mensaje... (/ para plantillas)"}
                                 value={messageText}
-                                onChange={(e) => setMessageText(e.target.value)}
+                                onChange={handleTextChange}
                                 onKeyDown={handleKeyDown}
                                 disabled={sending}
-                                className="flex-1 px-4 py-2.5 rounded-2xl bg-white border border-slate-200/80 text-xs text-slate-700 placeholder-slate-400 outline-none focus:border-green-500 transition-all font-semibold shadow-inner disabled:opacity-50 resize-none max-h-28 overflow-y-auto"
+                                className={`flex-1 px-4 py-2.5 rounded-2xl border text-xs text-slate-700 placeholder-slate-400 outline-none transition-all font-semibold shadow-inner disabled:opacity-50 resize-none max-h-28 overflow-y-auto ${
+                                    isNoteMode 
+                                        ? 'bg-amber-50/50 border-amber-200 focus:border-amber-400' 
+                                        : 'bg-white border-slate-200/80 focus:border-green-500'
+                                }`}
                                 style={{ minHeight: '40px' }}
                             />
 
