@@ -683,7 +683,7 @@ async function connectClient(vendedorId, io) {
     sock.ev.on('messaging-history.set', async ({ chats, contacts, messages, isLatest }) => {
         console.log(`[WhatsApp user_${vendedorId}] Historial inicial recibido: ${chats?.length || 0} chats, ${contacts?.length || 0} contactos, ${messages?.length || 0} mensajes.`);
         
-        // Cargar contactos y asegurar prospectos en la base de datos
+        // Guardar mapa de nombres en memoria sin crear prospectos masivos en la base de datos
         if (contacts) {
             for (const contact of contacts) {
                 if (contact.id && !isGroupOrNonPersonJid(contact.id)) {
@@ -691,9 +691,6 @@ async function connectClient(vendedorId, io) {
                     const name = contact.name || contact.verifiedName || contact.notify || '';
                     if (phone && name) {
                         contactNames[phone] = name;
-                    }
-                    if (hasRealSavedName(name)) {
-                        await ensureProspectExists(vendedorId, phone, name, io);
                     }
                 }
             }
@@ -704,14 +701,14 @@ async function connectClient(vendedorId, io) {
                 if (chat.id && !isGroupOrNonPersonJid(chat.id)) {
                     const phone = chat.id.split('@')[0];
                     const name = contactNames[phone] || chat.name || '';
-                    if (hasRealSavedName(name)) {
-                        await ensureProspectExists(vendedorId, phone, name, io);
+                    if (phone && name) {
+                        contactNames[phone] = name;
                     }
                 }
             }
         }
 
-        // Importar mensajes de forma asíncrona
+        // Importar mensajes de chats de forma asíncrona
         if (messages && messages.length > 0) {
             processHistoricalMessages(vendedorId, messages, io).catch(err => {
                 console.error(`[WhatsApp user_${vendedorId}] Error al procesar historial:`, err.message);
@@ -728,9 +725,6 @@ async function connectClient(vendedorId, io) {
                 if (phone && name) {
                     contactNames[phone] = name;
                 }
-                if (hasRealSavedName(name)) {
-                    await ensureProspectExists(vendedorId, phone, name, io);
-                }
             }
         }
     });
@@ -744,9 +738,6 @@ async function connectClient(vendedorId, io) {
                 if (phone && name) {
                     contactNames[phone] = name;
                 }
-                if (hasRealSavedName(name)) {
-                    await ensureProspectExists(vendedorId, phone, name, io);
-                }
             }
         }
     });
@@ -759,9 +750,6 @@ async function connectClient(vendedorId, io) {
                 const name = update.name || update.verifiedName || update.notify || '';
                 if (phone && name) {
                     contactNames[phone] = name;
-                }
-                if (hasRealSavedName(name)) {
-                    await ensureProspectExists(vendedorId, phone, name, io);
                 }
             }
         }
@@ -1055,72 +1043,6 @@ async function processHistoricalMessages(vendedorId, messages, io) {
             let isNew = false;
 
             if (!client) {
-                // Buscar nombre en la agenda del celular o en el perfil de WhatsApp
-                const savedName = contactNames[phone] || '';
-                if (!hasRealSavedName(savedName)) {
-                    // Omitir la creación de prospecto si no tiene un nombre guardado real
-                    continue;
-                }
-
-                console.log(`[WhatsApp user_${vendedorId}] Teléfono ${phone} (${savedName}) no registrado (historial). Creando prospecto automático...`);
-                
-                let equipoId = null;
-                const vendedor = await db.prepare('SELECT equipo_id FROM usuarios WHERE id = ?').get(vendedorId);
-                if (vendedor) {
-                    equipoId = vendedor.equipo_id || null;
-                }
-
-                const now = new Date().toISOString();
-                const hist = JSON.stringify([{ etapa: 'prospecto_nuevo', fecha: now, vendedor: vendedorId }]);
-                const rawFormattedPhone = phone.startsWith('+') ? phone : `+${phone}`;
-
-                let nombres = 'Prospecto';
-                let apellidoPaterno = `WhatsApp (${rawFormattedPhone})`;
-                
-                if (savedName) {
-                    const parts = savedName.trim().split(/\s+/);
-                    if (parts.length > 0) {
-                        nombres = parts[0];
-                        if (parts.length > 1) {
-                            apellidoPaterno = parts.slice(1).join(' ');
-                        } else {
-                            apellidoPaterno = '';
-                        }
-                    }
-                }
-
-                try {
-                    await db.prepare(`
-                        INSERT INTO clientes (nombres, "apellidoPaterno", "apellidoMaterno", telefono, correo, empresa, estado, "etapaEmbudo", "historialEmbudo", "vendedorAsignado", "prospectorAsignado", "closerAsignado", "fechaUltimaEtapa", "equipo_id", "propietarioId", compartido, fuente)
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                    `).run(
-                        nombres,
-                        apellidoPaterno,
-                        '',
-                        rawFormattedPhone,
-                        '',
-                        'Contacto WhatsApp',
-                        'proceso',
-                        'prospecto_nuevo',
-                        hist,
-                        vendedorId,
-                        vendedorId,
-                        vendedorId,
-                        now,
-                        equipoId,
-                        vendedorId,
-                        0,
-                        'WhatsApp'
-                    );
-
-                    const newlyCreated = await db.prepare('SELECT id FROM clientes ORDER BY id DESC LIMIT 1').get();
-                    clientId = newlyCreated ? newlyCreated.id : null;
-                    isNew = true;
-                    totalCreated++;
-                    // Registrar el nuevo cliente en la lista global de clientes para futuras comparaciones
-                    allClients.push({ id: clientId, telefono: phone });
-                } catch (err) {
-                    console.error(`Error creando cliente histórico ${phone}:`, err.message);
                     continue;
                 }
             } else {
