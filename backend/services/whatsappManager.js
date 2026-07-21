@@ -678,7 +678,6 @@ async function connectClient(vendedorId, io) {
     sock.ev.on('messaging-history.set', async ({ chats, contacts, messages, isLatest }) => {
         console.log(`[WhatsApp user_${vendedorId}] Historial inicial recibido: ${chats?.length || 0} chats, ${contacts?.length || 0} contactos, ${messages?.length || 0} mensajes.`);
         
-        // Guardar mapa de nombres en memoria sin crear prospectos masivos en la base de datos
         if (contacts) {
             for (const contact of contacts) {
                 if (contact.id && !isGroupOrNonPersonJid(contact.id)) {
@@ -686,6 +685,9 @@ async function connectClient(vendedorId, io) {
                     const name = contact.name || contact.verifiedName || contact.notify || '';
                     if (phone && name) {
                         contactNames[phone] = name;
+                    }
+                    if (hasRealSavedName(name)) {
+                        await ensureProspectExists(vendedorId, phone, name, io);
                     }
                 }
             }
@@ -698,6 +700,9 @@ async function connectClient(vendedorId, io) {
                     const name = contactNames[phone] || chat.name || '';
                     if (phone && name) {
                         contactNames[phone] = name;
+                    }
+                    if (hasRealSavedName(name)) {
+                        await ensureProspectExists(vendedorId, phone, name, io);
                     }
                 }
             }
@@ -720,6 +725,9 @@ async function connectClient(vendedorId, io) {
                 if (phone && name) {
                     contactNames[phone] = name;
                 }
+                if (hasRealSavedName(name)) {
+                    await ensureProspectExists(vendedorId, phone, name, io);
+                }
             }
         }
     });
@@ -733,6 +741,9 @@ async function connectClient(vendedorId, io) {
                 if (phone && name) {
                     contactNames[phone] = name;
                 }
+                if (hasRealSavedName(name)) {
+                    await ensureProspectExists(vendedorId, phone, name, io);
+                }
             }
         }
     });
@@ -745,6 +756,9 @@ async function connectClient(vendedorId, io) {
                 const name = update.name || update.verifiedName || update.notify || '';
                 if (phone && name) {
                     contactNames[phone] = name;
+                }
+                if (hasRealSavedName(name)) {
+                    await ensureProspectExists(vendedorId, phone, name, io);
                 }
             }
         }

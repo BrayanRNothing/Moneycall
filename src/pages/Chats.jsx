@@ -931,7 +931,7 @@ export default function Chats() {
                                                 )}
                                                 {renderBubbleContent(msgText)}
                                                 <div className="absolute bottom-1 right-2 flex items-center gap-0.5 text-[9px] text-slate-400 font-bold select-none">
-                                                    <span>{formatTime(m.createdAt)}</span>
+                                                    <span>{formatTime(m.createdAt || m.fecha)}</span>
                                                 </div>
                                             </div>
                                         </div>

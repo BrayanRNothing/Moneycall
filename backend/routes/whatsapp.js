@@ -173,11 +173,7 @@ router.get('/chats', auth, async (req, res) => {
                     "lastResult"
                 FROM sub
                 WHERE telefono IS NOT NULL AND telefono != ''
-                ORDER BY 
-                    CASE WHEN "lastMessageTime" IS NOT NULL THEN 0 ELSE 1 END,
-                    CAST("lastMessageTime" AS TEXT) DESC,
-                    CAST("ultimaInteraccion" AS TEXT) DESC,
-                    CAST("fechaRegistro" AS TEXT) DESC
+                ORDER BY COALESCE("lastMessageTime", "ultimaInteraccion", "fechaRegistro") DESC
             `;
         } else {
             // Incluir clientes donde el usuario es vendedor, closer o propietario
@@ -199,11 +195,7 @@ router.get('/chats', auth, async (req, res) => {
                     OR "closerAsignado" = ?
                     OR (compartido = true AND "equipo_id" = (SELECT equipo_id FROM usuarios WHERE id = ?))
                   )
-                ORDER BY 
-                    CASE WHEN "lastMessageTime" IS NOT NULL THEN 0 ELSE 1 END,
-                    CAST("lastMessageTime" AS TEXT) DESC,
-                    CAST("ultimaInteraccion" AS TEXT) DESC,
-                    CAST("fechaRegistro" AS TEXT) DESC
+                ORDER BY COALESCE("lastMessageTime", "ultimaInteraccion", "fechaRegistro") DESC
             `;
             params = [vendedorId, vendedorId, vendedorId];
         }
@@ -253,7 +245,7 @@ router.get('/chats/:clienteId', auth, async (req, res) => {
         }
 
         const activities = await db.prepare(
-            'SELECT id, descripcion, resultado, "fecha" FROM actividades WHERE cliente = ? AND tipo = ? ORDER BY id ASC'
+            'SELECT id, descripcion, resultado, "fecha" AS "createdAt", "fecha" FROM actividades WHERE cliente = ? AND tipo = ? ORDER BY id ASC'
         ).all(clienteId, 'whatsapp');
         
         res.json(activities);
