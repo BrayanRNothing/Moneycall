@@ -405,20 +405,15 @@ async function handleIncomingMessage(vendedorId, phone, text, io, pushName = '',
             return clean1 === cleanIncoming || clean2 === cleanIncoming;
         });
 
-        // Si el cliente no existe, lo creamos únicamente si el contacto tiene un nombre real guardado en la agenda
+        // Si el cliente no existe y es un mensaje 1 a 1 directo real:
         if (matchingClients.length === 0) {
             if (isGroupOrNonPersonJid(phone) || msgKey.participant || msgKey.remoteJid?.includes('@g.us')) return;
             
-            // Buscar nombre del contacto en la agenda del celular o en el perfil de WhatsApp
+            // Buscar nombre del contacto en la agenda del celular o en el perfil de WhatsApp (pushName)
             const contactJid = phone.split('@')[0];
             const savedName = contactNames[contactJid] || contactNames[cleanIncoming] || pushName || '';
 
-            if (!hasRealSavedName(savedName)) {
-                console.log(`[WhatsApp user_${vendedorId}] Omitiendo creación de prospecto para ${phone} por no tener nombre guardado real.`);
-                return;
-            }
-
-            console.log(`[WhatsApp user_${vendedorId}] Teléfono ${phone} (${savedName}) registrado. Creando prospecto automático...`);
+            console.log(`[WhatsApp user_${vendedorId}] Teléfono ${phone} (${savedName || 'Sin nombre'}) registrado via 1-a-1. Creando prospecto...`);
             
             let equipoId = null;
             const vendedor = await db.prepare('SELECT equipo_id FROM usuarios WHERE id = ?').get(vendedorId);
@@ -431,8 +426,20 @@ async function handleIncomingMessage(vendedorId, phone, text, io, pushName = '',
             const cleanDigits = phone.split('@')[0].replace(/\D/g, '');
             const rawFormattedPhone = `+${cleanDigits}`;
 
-            let nombres = 'Prospecto';
-            let apellidoPaterno = '';
+            let nombres = 'Cliente';
+            let apellidoPaterno = `WhatsApp (${rawFormattedPhone})`;
+            
+            if (savedName && savedName.trim()) {
+                const parts = savedName.trim().split(/\s+/);
+                if (parts.length > 0) {
+                    nombres = parts[0];
+                    if (parts.length > 1) {
+                        apellidoPaterno = parts.slice(1).join(' ');
+                    } else {
+                        apellidoPaterno = '';
+                    }
+                }
+            }
             
             if (savedName) {
                 const parts = savedName.trim().split(/\s+/);
@@ -1043,7 +1050,63 @@ async function processHistoricalMessages(vendedorId, messages, io) {
             let isNew = false;
 
             if (!client) {
-                continue;
+                // Crear prospecto para chats 1 a 1 reales con mensajes históricos
+                const savedName = contactNames[phone] || '';
+                const cleanDigits = phone.split('@')[0].replace(/\D/g, '');
+                const rawFormattedPhone = `+${cleanDigits}`;
+
+                let equipoId = null;
+                const vendedor = await db.prepare('SELECT equipo_id FROM usuarios WHERE id = ?').get(vendedorId);
+                if (vendedor) equipoId = vendedor.equipo_id || null;
+
+                const now = new Date().toISOString();
+                const hist = JSON.stringify([{ etapa: 'prospecto_nuevo', fecha: now, vendedor: vendedorId }]);
+
+                let nombres = 'Contacto';
+                let apellidoPaterno = `WhatsApp (${rawFormattedPhone})`;
+
+                if (savedName && savedName.trim()) {
+                    const parts = savedName.trim().split(/\s+/);
+                    if (parts.length > 0) {
+                        nombres = parts[0];
+                        apellidoPaterno = parts.slice(1).join(' ') || '';
+                    }
+                }
+
+                try {
+                    await db.prepare(`
+                        INSERT INTO clientes (nombres, "apellidoPaterno", "apellidoMaterno", telefono, correo, empresa, estado, "etapaEmbudo", "historialEmbudo", "vendedorAsignado", "prospectorAsignado", "closerAsignado", "fechaUltimaEtapa", "equipo_id", "propietarioId", compartido, fuente)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    `).run(
+                        nombres,
+                        apellidoPaterno,
+                        '',
+                        rawFormattedPhone,
+                        '',
+                        'Contacto WhatsApp',
+                        'proceso',
+                        'prospecto_nuevo',
+                        hist,
+                        vendedorId,
+                        vendedorId,
+                        vendedorId,
+                        now,
+                        equipoId,
+                        vendedorId,
+                        0,
+                        'WhatsApp'
+                    );
+
+                    const newlyCreated = await db.prepare('SELECT id FROM clientes ORDER BY id DESC LIMIT 1').get();
+                    clientId = newlyCreated ? newlyCreated.id : null;
+                    isNew = true;
+                    if (clientId) {
+                        allClients.push({ id: clientId, telefono: phone });
+                    }
+                } catch (err) {
+                    console.error(`Error al crear prospecto para chat histórico 1-a-1 ${phone}:`, err.message);
+                    continue;
+                }
             } else {
                 clientId = client.id;
             }

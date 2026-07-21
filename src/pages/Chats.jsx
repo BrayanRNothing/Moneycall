@@ -194,8 +194,12 @@ export default function Chats() {
     };
 
     useEffect(() => {
+        fetchChatsList(true);
+    }, []);
+
+    useEffect(() => {
         if (wsStatus === 'conectado') {
-            fetchChatsList(true);
+            fetchChatsList(false);
         }
     }, [wsStatus]);
 
