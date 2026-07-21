@@ -1043,8 +1043,7 @@ async function processHistoricalMessages(vendedorId, messages, io) {
             let isNew = false;
 
             if (!client) {
-                    continue;
-                }
+                continue;
             } else {
                 clientId = client.id;
             }
