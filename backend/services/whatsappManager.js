@@ -397,7 +397,7 @@ async function handleIncomingMessage(vendedorId, phone, text, io, pushName = '',
         if (cleanIncoming.length < 10 || isGroupOrNonPersonJid(cleanIncoming)) return;
 
         // Obtener todos los clientes para poder compararlos limpiamente
-        const allClients = await db.prepare('SELECT id, nombres, "apellidoPaterno", telefono, telefono2, "equipo_id" FROM clientes').all();
+        const allClients = await db.prepare('SELECT id, nombres, "apellidoPaterno", telefono, telefono2, "equipo_id", "vendedorAsignado", "prospectorAsignado", "propietarioId" FROM clientes').all();
 
         let matchingClients = allClients.filter(c => {
             const clean1 = String(c.telefono || '').replace(/\D/g, '').slice(-10);
@@ -478,6 +478,12 @@ async function handleIncomingMessage(vendedorId, phone, text, io, pushName = '',
                 await updateClientNameIfGeneric(vendedorId, cleanIncoming, discoveredName, io);
             }
             for (const client of matchingClients) {
+                // Reasignar si está asignado a otro vendedor
+                if (client.vendedorAsignado !== vendedorId) {
+                    await db.prepare('UPDATE clientes SET "vendedorAsignado" = ?, "prospectorAsignado" = ?, "propietarioId" = ? WHERE id = ?')
+                        .run(vendedorId, vendedorId, vendedorId, client.id);
+                }
+
                 // Registrar actividad en la base de datos
                 await db.prepare('INSERT INTO actividades (tipo, vendedor, cliente, descripcion, resultado) VALUES (?, ?, ?, ?, ?)')
                     .run('whatsapp', vendedorId, client.id, `Cliente: ${text}`, 'recibido');
@@ -485,7 +491,7 @@ async function handleIncomingMessage(vendedorId, phone, text, io, pushName = '',
                 // Actualizar última interacción
                 await db.prepare('UPDATE clientes SET "ultimaInteraccion" = CURRENT_TIMESTAMP WHERE id = ?').run(client.id);
 
-                console.log(`[WhatsApp user_${vendedorId}] Mensaje entrante registrado para cliente id ${client.id}`);
+                console.log(`[WhatsApp user_${vendedorId}] Mensaje entrante registrado para cliente id ${client.id} (Reasignado a ${vendedorId})`);
 
                 // Emitir por WebSockets globalmente y por canal para recarga automática
                 io.emit('prospectos_actualizados');
@@ -524,7 +530,7 @@ async function handleOutgoingMessageFromOtherDevice(vendedorId, phone, text, io,
         const cleanIncoming = phone.replace(/\D/g, '').slice(-10);
         if (cleanIncoming.length < 10 || isGroupOrNonPersonJid(cleanIncoming)) return;
 
-        const allClients = await db.prepare('SELECT id, nombres, "apellidoPaterno", telefono, telefono2, "equipo_id", "etapaEmbudo", "historialEmbudo" FROM clientes').all();
+        const allClients = await db.prepare('SELECT id, nombres, "apellidoPaterno", telefono, telefono2, "equipo_id", "etapaEmbudo", "historialEmbudo", "vendedorAsignado", "prospectorAsignado", "propietarioId" FROM clientes').all();
         const matchingClients = allClients.filter(c => {
             const clean1 = String(c.telefono || '').replace(/\D/g, '').slice(-10);
             const clean2 = String(c.telefono2 || '').replace(/\D/g, '').slice(-10);
@@ -535,6 +541,12 @@ async function handleOutgoingMessageFromOtherDevice(vendedorId, phone, text, io,
             await ensureProspectExists(vendedorId, phone, '', io);
         } else {
             for (const client of matchingClients) {
+                // Reasignar si está asignado a otro vendedor
+                if (client.vendedorAsignado !== vendedorId) {
+                    await db.prepare('UPDATE clientes SET "vendedorAsignado" = ?, "prospectorAsignado" = ?, "propietarioId" = ? WHERE id = ?')
+                        .run(vendedorId, vendedorId, vendedorId, client.id);
+                }
+
                 const desc = `Vendedor: ${text}`;
                 
                 // Buscar el último mensaje idéntico para evitar duplicados
@@ -575,7 +587,7 @@ async function handleOutgoingMessageFromOtherDevice(vendedorId, phone, text, io,
                         await db.prepare('UPDATE clientes SET "ultimaInteraccion" = CURRENT_TIMESTAMP WHERE id = ?').run(client.id);
                     }
 
-                    console.log(`[WhatsApp user_${vendedorId}] Mensaje saliente externo registrado para cliente id ${client.id}`);
+                    console.log(`[WhatsApp user_${vendedorId}] Mensaje saliente externo registrado para cliente id ${client.id} (Reasignado a ${vendedorId})`);
 
                     io.emit('prospectos_actualizados');
                     io.to(`user_${vendedorId}`).emit('prospectos_actualizados');
@@ -998,7 +1010,7 @@ async function processHistoricalMessages(vendedorId, messages, io) {
         console.log(`[WhatsApp user_${vendedorId}] Procesando historial: ${validMessages.length} mensajes válidos...`);
 
         // Obtener todos los clientes actuales
-        const allClients = await db.prepare('SELECT id, nombres, "apellidoPaterno", telefono, telefono2 FROM clientes').all();
+        const allClients = await db.prepare('SELECT id, nombres, "apellidoPaterno", telefono, telefono2, "vendedorAsignado", "prospectorAsignado", "propietarioId" FROM clientes').all();
 
         // 1. Obtener todas las actividades de tipo 'whatsapp' de los clientes existentes en una sola consulta para evitar N consultas
         const existingClientIds = allClients.map(c => c.id).filter(Boolean);
@@ -1008,7 +1020,8 @@ async function processHistoricalMessages(vendedorId, messages, io) {
                 FROM actividades 
                 WHERE cliente IN (${existingClientIds.map(() => '?').join(',')}) 
                   AND tipo = 'whatsapp'
-              `).all(...existingClientIds)
+                  AND vendedor = ?
+              `).all(...existingClientIds, vendedorId)
             : [];
 
         // Guardar las actividades existentes en un Set en memoria
@@ -1108,6 +1121,11 @@ async function processHistoricalMessages(vendedorId, messages, io) {
                 }
             } else {
                 clientId = client.id;
+                // Si el cliente está asignado a otro vendedor, reasignarlo al vendedor de esta sesión de WhatsApp
+                if (client.vendedorAsignado !== vendedorId) {
+                    await db.prepare('UPDATE clientes SET "vendedorAsignado" = ?, "prospectorAsignado" = ?, "propietarioId" = ? WHERE id = ?')
+                        .run(vendedorId, vendedorId, vendedorId, clientId);
+                }
             }
 
             if (!clientId) continue;
