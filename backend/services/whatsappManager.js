@@ -694,11 +694,14 @@ async function connectClient(vendedorId, io) {
         
         if (contacts) {
             for (const contact of contacts) {
-                if (contact.id && !isGroupOrNonPersonJid(contact.id)) {
-                    const phone = contact.id.split('@')[0];
-                    const name = contact.name || contact.verifiedName || contact.notify || '';
-                    if (phone && name) {
-                        contactNames[phone] = name;
+                if (contact.id) {
+                    const resolvedJid = resolveLidToPhone(contact.id, sessionDir);
+                    if (!isGroupOrNonPersonJid(resolvedJid)) {
+                        const phone = resolvedJid.split('@')[0];
+                        const name = contact.name || contact.verifiedName || contact.notify || '';
+                        if (phone && name) {
+                            contactNames[phone] = name;
+                        }
                     }
                 }
             }
@@ -706,14 +709,17 @@ async function connectClient(vendedorId, io) {
 
         if (chats) {
             for (const chat of chats) {
-                if (chat.id && !isGroupOrNonPersonJid(chat.id)) {
-                    const phone = chat.id.split('@')[0];
-                    const name = contactNames[phone] || chat.name || '';
-                    if (phone) {
-                        if (name) {
-                            contactNames[phone] = name;
+                if (chat.id) {
+                    const resolvedJid = resolveLidToPhone(chat.id, sessionDir);
+                    if (!isGroupOrNonPersonJid(resolvedJid)) {
+                        const phone = resolvedJid.split('@')[0];
+                        const name = contactNames[phone] || chat.name || '';
+                        if (phone) {
+                            if (name) {
+                                contactNames[phone] = name;
+                            }
+                            await ensureProspectExists(vendedorId, phone, name, io);
                         }
-                        await ensureProspectExists(vendedorId, phone, name, io);
                     }
                 }
             }
@@ -730,11 +736,14 @@ async function connectClient(vendedorId, io) {
     sock.ev.on('contacts.set', async ({ contacts }) => {
         if (!contacts) return;
         for (const contact of contacts) {
-            if (contact.id && !isGroupOrNonPersonJid(contact.id)) {
-                const phone = contact.id.split('@')[0];
-                const name = contact.name || contact.verifiedName || contact.notify || '';
-                if (phone && name) {
-                    contactNames[phone] = name;
+            if (contact.id) {
+                const resolvedJid = resolveLidToPhone(contact.id, sessionDir);
+                if (!isGroupOrNonPersonJid(resolvedJid)) {
+                    const phone = resolvedJid.split('@')[0];
+                    const name = contact.name || contact.verifiedName || contact.notify || '';
+                    if (phone && name) {
+                        contactNames[phone] = name;
+                    }
                 }
             }
         }
@@ -743,11 +752,14 @@ async function connectClient(vendedorId, io) {
     sock.ev.on('contacts.upsert', async (contacts) => {
         if (!contacts) return;
         for (const contact of contacts) {
-            if (contact.id && !isGroupOrNonPersonJid(contact.id)) {
-                const phone = contact.id.split('@')[0];
-                const name = contact.name || contact.verifiedName || contact.notify || '';
-                if (phone && name) {
-                    contactNames[phone] = name;
+            if (contact.id) {
+                const resolvedJid = resolveLidToPhone(contact.id, sessionDir);
+                if (!isGroupOrNonPersonJid(resolvedJid)) {
+                    const phone = resolvedJid.split('@')[0];
+                    const name = contact.name || contact.verifiedName || contact.notify || '';
+                    if (phone && name) {
+                        contactNames[phone] = name;
+                    }
                 }
             }
         }
@@ -756,11 +768,14 @@ async function connectClient(vendedorId, io) {
     sock.ev.on('contacts.update', async (updates) => {
         if (!updates) return;
         for (const update of updates) {
-            if (update.id && !isGroupOrNonPersonJid(update.id)) {
-                const phone = update.id.split('@')[0];
-                const name = update.name || update.verifiedName || update.notify || '';
-                if (phone && name) {
-                    contactNames[phone] = name;
+            if (update.id) {
+                const resolvedJid = resolveLidToPhone(update.id, sessionDir);
+                if (!isGroupOrNonPersonJid(resolvedJid)) {
+                    const phone = resolvedJid.split('@')[0];
+                    const name = update.name || update.verifiedName || update.notify || '';
+                    if (phone && name) {
+                        contactNames[phone] = name;
+                    }
                 }
             }
         }
