@@ -886,7 +886,29 @@ async function connectClient(vendedorId, io) {
                             await handleIncomingMessage(vendedorId, phone, desc, io, msg.pushName, msg.key);
                         }
                     } catch (err) {
-                        console.error(`[WhatsApp user_${vendedorId}] Error downloading media:`, err.message);
+                        console.error(`[WhatsApp user_${vendedorId}] Error downloading media:`, err);
+                        
+                        // Fallback: Si falla la descarga física del archivo, guardamos un texto descriptivo para no perder el mensaje en el CRM.
+                        let fallbackText = '';
+                        if (mediaType === 'document') {
+                            fallbackText = `📄 Documento: ${mediaObj.fileName || 'documento.pdf'}`;
+                        } else if (mediaType === 'image') {
+                            fallbackText = mediaObj.caption ? `📷 Imagen: ${mediaObj.caption}` : '📷 Imagen';
+                        } else if (mediaType === 'video') {
+                            fallbackText = mediaObj.caption ? `🎥 Video: ${mediaObj.caption}` : '🎥 Video';
+                        } else if (mediaType === 'audio') {
+                            fallbackText = '🎵 Nota de voz';
+                        } else if (mediaType === 'sticker') {
+                            fallbackText = '🎨 Sticker';
+                        } else {
+                            fallbackText = `[${mediaType.toUpperCase()}]`;
+                        }
+
+                        if (isFromMe) {
+                            await handleOutgoingMessageFromOtherDevice(vendedorId, phone, fallbackText, io, msg.key);
+                        } else {
+                            await handleIncomingMessage(vendedorId, phone, fallbackText, io, msg.pushName, msg.key);
+                        }
                     }
                 } else {
                     // Procesar mensaje de texto estándar
