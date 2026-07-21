@@ -1064,9 +1064,6 @@ async function processHistoricalMessages(vendedorId, messages, io) {
                 const hist = JSON.stringify([{ etapa: 'prospecto_nuevo', fecha: now, vendedor: vendedorId }]);
                 const rawFormattedPhone = phone.startsWith('+') ? phone : `+${phone}`;
 
-                // Buscar nombre en la agenda del celular o en el perfil de WhatsApp
-                const savedName = contactNames[phone] || '';
-                
                 let nombres = 'Prospecto';
                 let apellidoPaterno = `WhatsApp (${rawFormattedPhone})`;
                 
