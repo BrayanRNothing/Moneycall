@@ -56,7 +56,7 @@ function resolveLidToPhone(jid, sessionDir) {
     return jid;
 }
 
-// Validar si un JID o teléfono corresponde a un grupo de WhatsApp, transmisión o ID no individual
+// Validar si un JID o teléfono corresponde a un grupo de WhatsApp, transmisión, LID o ID no individual
 function isGroupOrNonPersonJid(jidOrPhone) {
     if (!jidOrPhone) return true;
     const str = String(jidOrPhone).toLowerCase().trim();
@@ -65,14 +65,24 @@ function isGroupOrNonPersonJid(jidOrPhone) {
         str.includes('@g.us') || 
         str.includes('@broadcast') || 
         str.includes('@newsletter') || 
-        str.includes('@call')
+        str.includes('@call') ||
+        str.includes('@lid')
     ) {
         return true;
     }
 
     const digitsOnly = str.replace(/\D/g, '');
     
-    if (digitsOnly.length > 15 || digitsOnly.startsWith('120363')) {
+    // LIDs de WhatsApp (14+ dígitos) y números de grupos o virtuales
+    if (
+        digitsOnly.length >= 14 || 
+        digitsOnly.startsWith('120363') || 
+        digitsOnly.startsWith('102') || 
+        digitsOnly.startsWith('149') || 
+        digitsOnly.startsWith('100') || 
+        digitsOnly.startsWith('101') ||
+        digitsOnly.startsWith('237')
+    ) {
         return true;
     }
 
