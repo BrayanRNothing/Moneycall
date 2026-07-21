@@ -104,11 +104,11 @@ export default function Chats() {
                             <span className="truncate text-xs underline">Ver Documento Recibido</span>
                         </a>
                     )}
-                    {caption && <p className="whitespace-pre-wrap leading-relaxed">{caption}</p>}
+                    {caption && <p className="whitespace-pre-wrap break-all leading-relaxed">{caption}</p>}
                 </div>
             );
         }
-        return <p className="whitespace-pre-wrap leading-relaxed pb-3.5 pr-10">{text}</p>;
+        return <p className="whitespace-pre-wrap break-all leading-relaxed pb-3.5 pr-10">{text}</p>;
     };
 
     // 1. Verificar estado de WhatsApp al cargar
@@ -915,7 +915,7 @@ export default function Chats() {
                                             className={`flex ${isFromMe ? 'justify-end' : 'justify-start'} animate-in fade-in-50 duration-200`}
                                         >
                                             <div
-                                                className={`max-w-[85%] sm:max-w-[70%] px-3.5 py-2 rounded-2xl bubble-shadow text-slate-800 text-xs font-semibold relative ${
+                                                className={`max-w-[85%] sm:max-w-[70%] px-3.5 py-2 rounded-2xl bubble-shadow text-slate-800 text-xs font-semibold relative break-words overflow-hidden ${
                                                     m.resultado === 'nota_interna'
                                                         ? 'bg-amber-100 border border-amber-300 rounded-tr-none text-amber-900 shadow-sm'
                                                         : isFromMe 
