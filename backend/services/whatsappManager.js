@@ -1136,11 +1136,26 @@ async function processHistoricalMessages(vendedorId, messages, io) {
             // Recopilar mensajes para insertar en lote
             for (const msg of sorted) {
                 if (isOlderThan6Months(msg)) continue;
-                // Obtener texto (soportar texto simple y extended text)
-                const text = msg.message?.conversation || 
-                             msg.message?.extendedTextMessage?.text || 
-                             msg.message?.imageMessage?.caption || 
-                             msg.message?.videoMessage?.caption || '';
+                // Obtener texto (soportar texto simple, extended text y representaciones de multimedia)
+                let text = msg.message?.conversation || 
+                           msg.message?.extendedTextMessage?.text || '';
+                
+                if (!text) {
+                    if (msg.message?.documentMessage) {
+                        const fileName = msg.message.documentMessage.fileName || 'documento.pdf';
+                        text = `📄 Documento: ${fileName}`;
+                    } else if (msg.message?.imageMessage) {
+                        const caption = msg.message.imageMessage.caption || '';
+                        text = caption ? `📷 Imagen: ${caption}` : '📷 Imagen';
+                    } else if (msg.message?.videoMessage) {
+                        const caption = msg.message.videoMessage.caption || '';
+                        text = caption ? `🎥 Video: ${caption}` : '🎥 Video';
+                    } else if (msg.message?.audioMessage) {
+                        text = '🎵 Nota de voz';
+                    } else if (msg.message?.stickerMessage) {
+                        text = '🎨 Sticker';
+                    }
+                }
                 
                 if (!text) continue;
 
