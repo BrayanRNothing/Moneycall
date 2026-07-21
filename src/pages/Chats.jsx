@@ -10,6 +10,9 @@ import API_URL from '../config/api';
 import { getToken, getUser } from '../utils/authUtils';
 import socket from '../config/socket';
 import toast from 'react-hot-toast';
+import axios from 'axios';
+import PlantillasMensajesModal from '../components/PlantillasMensajesModal';
+import TimeWheelPicker from '../components/TimeWheelPicker';
 
 const EMOJIS = [
     '😀', '😂', '🤣', '😊', '😍', '🥰', '😘', '😜', '😎', '🥳', 
@@ -37,6 +40,8 @@ export default function Chats() {
     const [showMenu, setShowMenu] = useState(false);
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     const [chatFilter, setChatFilter] = useState('todos'); // todos | conMensajes | prospectos | clientes
+    const [showCitaModal, setShowCitaModal] = useState(false);
+    const [updatingEtapa, setUpdatingEtapa] = useState(false);
     
     const messagesEndRef = useRef(null);
     const messagesContainerRef = useRef(null);
@@ -287,6 +292,41 @@ export default function Chats() {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             handleSendMessage();
+        }
+    };
+
+    const handleUpdateEtapa = async (nuevaEtapa) => {
+        if (!activeChat) return;
+        setUpdatingEtapa(true);
+        try {
+            await axios.put(`${API_URL}/api/vendedor/prospectos/${activeChat.id}`, {
+                etapaEmbudo: nuevaEtapa
+            }, {
+                headers: { 'x-auth-token': getToken() }
+            });
+            toast.success('Etapa actualizada');
+            setActiveChat(prev => ({ ...prev, etapaEmbudo: nuevaEtapa }));
+            fetchChatsList(false); // Refrescar lista de chats de fondo
+        } catch (error) {
+            toast.error(error?.response?.data?.msg || 'Error al actualizar etapa');
+        } finally {
+            setUpdatingEtapa(false);
+        }
+    };
+
+    const handleAgendarCita = async (fechaCita) => {
+        if (!activeChat) return;
+        try {
+            await axios.put(`${API_URL}/api/vendedor/prospectos/${activeChat.id}`, {
+                proximaLlamada: fechaCita
+            }, {
+                headers: { 'x-auth-token': getToken() }
+            });
+            toast.success('Cita agendada correctamente');
+            setShowCitaModal(false);
+            setActiveChat(prev => ({ ...prev, proximaLlamada: fechaCita }));
+        } catch (error) {
+            toast.error(error?.response?.data?.msg || 'Error al agendar cita');
         }
     };
 
@@ -692,6 +732,28 @@ export default function Chats() {
                             </div>
                             
                             <div className="flex items-center gap-2 relative">
+                                <select
+                                    value={activeChat.etapaEmbudo || 'prospecto_nuevo'}
+                                    onChange={(e) => handleUpdateEtapa(e.target.value)}
+                                    disabled={updatingEtapa}
+                                    className="text-xs bg-slate-100 border border-slate-200 text-slate-700 font-semibold py-1.5 px-2 rounded-lg cursor-pointer focus:outline-none focus:ring-1 focus:ring-(--theme-500) appearance-none hover:bg-slate-200 transition-colors hidden sm:block"
+                                >
+                                    <option value="prospecto_nuevo">Sin contacto</option>
+                                    <option value="en_contacto">En contacto</option>
+                                    <option value="reunion_agendada">Cita agendada</option>
+                                    <option value="reunion_realizada">Cita realizada</option>
+                                    <option value="en_negociacion">Negociación</option>
+                                    <option value="venta_ganada">Venta ganada</option>
+                                    <option value="perdido">Perdido</option>
+                                </select>
+                                
+                                <button 
+                                    onClick={() => setShowCitaModal(true)}
+                                    className="hidden sm:flex items-center gap-1.5 text-xs bg-(--theme-50) text-(--theme-700) hover:bg-(--theme-100) font-bold py-1.5 px-3 rounded-lg transition-colors border border-(--theme-100)"
+                                >
+                                    <span>🗓</span> Agendar
+                                </button>
+
                                 <button 
                                     onClick={() => setShowMenu(!showMenu)}
                                     className="p-2 hover:bg-slate-200 rounded-xl text-slate-500 transition-colors"
@@ -819,9 +881,13 @@ export default function Chats() {
                                     </>
                                 )}
                             </div>
-                            <button type="button" className="p-2 hover:bg-slate-200 rounded-xl text-slate-500 transition-colors">
-                                <Paperclip size={20} />
-                            </button>
+
+                            <PlantillasMensajesModal 
+                                contacto={activeChat} 
+                                onSelectTemplate={(texto) => {
+                                    setMessageText((prev) => prev + (prev ? ' ' : '') + texto);
+                                }}
+                            />
                             
                             <textarea
                                 rows={1}
@@ -870,6 +936,29 @@ export default function Chats() {
                     </div>
                 )}
             </div>
+
+            {/* Modal para agendar cita */}
+            {showCitaModal && activeChat && (
+                <div className="fixed inset-0 z-[1200] flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" onClick={() => setShowCitaModal(false)} />
+                    <div className="relative bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl animate-in fade-in slide-in-from-bottom-4">
+                        <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100">
+                            <div className="w-10 h-10 rounded-xl bg-(--theme-50) text-(--theme-600) flex items-center justify-center">
+                                <span className="text-xl">🗓</span>
+                            </div>
+                            <div>
+                                <h3 className="font-black text-slate-800 tracking-tight leading-tight">Agendar cita</h3>
+                                <p className="text-xs text-slate-500 font-medium">con {activeChat.nombres}</p>
+                            </div>
+                        </div>
+
+                        <TimeWheelPicker
+                            onSelect={handleAgendarCita}
+                            onCancel={() => setShowCitaModal(false)}
+                        />
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

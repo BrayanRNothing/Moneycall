@@ -1474,7 +1474,7 @@ router.put('/prospectos/:id', auth, async (req, res) => {
     try {
         const prospectoId = parseInt(req.params.id);
         const usuarioId = parseInt(req.usuario.id, 10);
-        const { interes, proximaLlamada, customMetricLabel, customMetricValue, customSections } = req.body;
+        const { interes, proximaLlamada, customMetricLabel, customMetricValue, customSections, etapaEmbudo } = req.body;
 
         const cliente = await db.prepare('SELECT * FROM clientes WHERE id = ?').get(prospectoId);
         if (!cliente) return res.status(404).json({ msg: 'Prospecto no encontrado' });
@@ -1492,6 +1492,24 @@ router.put('/prospectos/:id', auth, async (req, res) => {
         if (customSections !== undefined) {
             updates.push('customSections = ?');
             params.push(typeof customSections === 'string' ? customSections : JSON.stringify(customSections));
+        }
+        
+        if (etapaEmbudo && etapaEmbudo !== cliente.etapaEmbudo) {
+            const now = new Date().toISOString();
+            updates.push('etapaEmbudo = ?');
+            params.push(etapaEmbudo);
+            updates.push('fechaUltimaEtapa = ?');
+            params.push(now);
+
+            const hist = cliente.historialEmbudo ? JSON.parse(cliente.historialEmbudo) : [];
+            hist.push({
+                etapa: etapaEmbudo,
+                fecha: now,
+                vendedor: usuarioId,
+                descripcion: `Edición: Cambio de etapa a ${etapaEmbudo}`
+            });
+            updates.push('historialEmbudo = ?');
+            params.push(JSON.stringify(hist));
         }
 
         if (updates.length > 0) {

@@ -25,7 +25,7 @@ const applyTemplate = (text, contacto) => {
   return Object.entries(replacements).reduce((acc, [k, v]) => acc.split(k).join(v), text || '');
 };
 
-export default function PlantillasMensajesModal({ contacto, scope = 'prospecto' }) {
+export default function PlantillasMensajesModal({ contacto, scope = 'prospecto', onSelectTemplate }) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [templates, setTemplates] = useState([]);
@@ -240,32 +240,47 @@ export default function PlantillasMensajesModal({ contacto, scope = 'prospecto' 
                 </div>
 
                 <div className="flex flex-wrap gap-2 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => copyToClipboard(rendered)}
-                    className="px-3 py-2 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 text-sm font-semibold inline-flex items-center gap-2"
-                  >
-                    <Copy className="w-4 h-4" /> Copiar
-                  </button>
-
-                  {waUrl && (
-                    <a
-                      href={waUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="px-3 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 text-sm font-semibold inline-flex items-center gap-2"
+                  {onSelectTemplate ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onSelectTemplate(rendered);
+                        setOpen(false);
+                      }}
+                      className="px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 text-sm font-semibold inline-flex items-center gap-2"
                     >
-                      <ExternalLink className="w-4 h-4" /> Abrir WhatsApp
-                    </a>
-                  )}
+                      <MessageSquare className="w-4 h-4" /> Insertar en el chat
+                    </button>
+                  ) : (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => copyToClipboard(rendered)}
+                        className="px-3 py-2 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 text-sm font-semibold inline-flex items-center gap-2"
+                      >
+                        <Copy className="w-4 h-4" /> Copiar
+                      </button>
 
-                  {mailUrl && (
-                    <a
-                      href={mailUrl}
-                      className="px-3 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 text-sm font-semibold inline-flex items-center gap-2"
-                    >
-                      <ExternalLink className="w-4 h-4" /> Abrir Correo
-                    </a>
+                      {waUrl && (
+                        <a
+                          href={waUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-3 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 text-sm font-semibold inline-flex items-center gap-2"
+                        >
+                          <ExternalLink className="w-4 h-4" /> Abrir WhatsApp
+                        </a>
+                      )}
+
+                      {mailUrl && (
+                        <a
+                          href={mailUrl}
+                          className="px-3 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 text-sm font-semibold inline-flex items-center gap-2"
+                        >
+                          <ExternalLink className="w-4 h-4" /> Abrir Correo
+                        </a>
+                      )}
+                    </>
                   )}
                 </div>
               </div>
