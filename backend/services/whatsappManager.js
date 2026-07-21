@@ -440,21 +440,9 @@ async function handleIncomingMessage(vendedorId, phone, text, io, pushName = '',
                     }
                 }
             }
-            
-            if (savedName) {
-                const parts = savedName.trim().split(/\s+/);
-                if (parts.length > 0) {
-                    nombres = parts[0];
-                    if (parts.length > 1) {
-                        apellidoPaterno = parts.slice(1).join(' ');
-                    } else {
-                        apellidoPaterno = '';
-                    }
-                }
-            }
 
             await db.prepare(`
-                INSERT INTO clientes (nombres, apellidoPaterno, apellidoMaterno, telefono, correo, empresa, estado, etapaEmbudo, historialEmbudo, vendedorAsignado, prospectorAsignado, closerAsignado, fechaUltimaEtapa, "equipo_id", "propietarioId", compartido, fuente)
+                INSERT INTO clientes (nombres, "apellidoPaterno", "apellidoMaterno", telefono, correo, empresa, estado, "etapaEmbudo", "historialEmbudo", "vendedorAsignado", "prospectorAsignado", "closerAsignado", "fechaUltimaEtapa", "equipo_id", "propietarioId", compartido, fuente)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `).run(
                 nombres,
