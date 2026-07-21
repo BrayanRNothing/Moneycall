@@ -37,6 +37,24 @@ function resetReconnectDelay(vendedorId) {
     retryCount[vendedorId] = 0;
 }
 
+// Desempaquetar y obtener el contenido real del mensaje (soportar mensajes efímeros, de una sola vista, etc.)
+function getRealMessage(message) {
+    if (!message) return null;
+    if (message.ephemeralMessage) {
+        return getRealMessage(message.ephemeralMessage.message);
+    }
+    if (message.viewOnceMessage) {
+        return getRealMessage(message.viewOnceMessage.message);
+    }
+    if (message.viewOnceMessageV2) {
+        return getRealMessage(message.viewOnceMessageV2.message);
+    }
+    if (message.documentWithCaptionMessage) {
+        return getRealMessage(message.documentWithCaptionMessage.message);
+    }
+    return message;
+}
+
 // Resolver identificadores LID a números de teléfono reales utilizando el mapeo guardado por Baileys
 function resolveLidToPhone(jid, sessionDir) {
     if (!jid || !jid.endsWith('@lid')) return jid;
@@ -810,6 +828,9 @@ async function connectClient(vendedorId, io) {
 
                 const isFromMe = msg.key.fromMe;
                 
+                const messageContent = getRealMessage(msg.message);
+                if (!messageContent) continue;
+
                 // Identificar si contiene archivos multimedia
                 const mediaKeys = ['imageMessage', 'videoMessage', 'documentMessage', 'audioMessage', 'stickerMessage'];
                 let isMedia = false;
@@ -817,10 +838,10 @@ async function connectClient(vendedorId, io) {
                 let mediaObj = null;
 
                 for (const key of mediaKeys) {
-                    if (msg.message[key]) {
+                    if (messageContent[key]) {
                         isMedia = true;
                         mediaType = key.replace('Message', ''); // 'image', 'video', 'document', 'audio', 'sticker'
-                        mediaObj = msg.message[key];
+                        mediaObj = messageContent[key];
                         break;
                     }
                 }
@@ -869,7 +890,7 @@ async function connectClient(vendedorId, io) {
                     }
                 } else {
                     // Procesar mensaje de texto estándar
-                    const text = msg.message.conversation || msg.message.extendedTextMessage?.text || '';
+                    const text = messageContent.conversation || messageContent.extendedTextMessage?.text || '';
                     if (text) {
                         if (isFromMe) {
                             await handleOutgoingMessageFromOtherDevice(vendedorId, phone, text, io, msg.key);
@@ -1136,23 +1157,26 @@ async function processHistoricalMessages(vendedorId, messages, io) {
             // Recopilar mensajes para insertar en lote
             for (const msg of sorted) {
                 if (isOlderThan6Months(msg)) continue;
+                const messageContent = getRealMessage(msg.message);
+                if (!messageContent) continue;
+
                 // Obtener texto (soportar texto simple, extended text y representaciones de multimedia)
-                let text = msg.message?.conversation || 
-                           msg.message?.extendedTextMessage?.text || '';
+                let text = messageContent.conversation || 
+                           messageContent.extendedTextMessage?.text || '';
                 
                 if (!text) {
-                    if (msg.message?.documentMessage) {
-                        const fileName = msg.message.documentMessage.fileName || 'documento.pdf';
+                    if (messageContent.documentMessage) {
+                        const fileName = messageContent.documentMessage.fileName || 'documento.pdf';
                         text = `📄 Documento: ${fileName}`;
-                    } else if (msg.message?.imageMessage) {
-                        const caption = msg.message.imageMessage.caption || '';
+                    } else if (messageContent.imageMessage) {
+                        const caption = messageContent.imageMessage.caption || '';
                         text = caption ? `📷 Imagen: ${caption}` : '📷 Imagen';
-                    } else if (msg.message?.videoMessage) {
-                        const caption = msg.message.videoMessage.caption || '';
+                    } else if (messageContent.videoMessage) {
+                        const caption = messageContent.videoMessage.caption || '';
                         text = caption ? `🎥 Video: ${caption}` : '🎥 Video';
-                    } else if (msg.message?.audioMessage) {
+                    } else if (messageContent.audioMessage) {
                         text = '🎵 Nota de voz';
-                    } else if (msg.message?.stickerMessage) {
+                    } else if (messageContent.stickerMessage) {
                         text = '🎨 Sticker';
                     }
                 }
