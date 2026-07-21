@@ -229,11 +229,18 @@ async function saveSessionToDb(vendedorId, sessionDir) {
         const sessionData = {};
         for (const file of files) {
             const filePath = path.join(sessionDir, file);
-            const stats = await fs.promises.stat(filePath);
-            if (stats.isFile()) {
-                // Leer como base64 de forma asíncrona para soportar archivos binarios y de texto
-                const rawBuffer = await fs.promises.readFile(filePath);
-                sessionData[file] = rawBuffer.toString('base64');
+            try {
+                const stats = await fs.promises.stat(filePath);
+                if (stats.isFile()) {
+                    // Leer como base64 de forma asíncrona para soportar archivos binarios y de texto
+                    const rawBuffer = await fs.promises.readFile(filePath);
+                    sessionData[file] = rawBuffer.toString('base64');
+                }
+            } catch (fileErr) {
+                // Ignorar si el archivo fue eliminado por Baileys después de readdir
+                if (fileErr.code !== 'ENOENT') {
+                    console.warn(`[WhatsApp user_${vendedorId}] Advertencia al leer archivo de sesión ${file}:`, fileErr.message);
+                }
             }
         }
         const dbData = JSON.stringify(sessionData);
