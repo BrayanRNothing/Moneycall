@@ -97,15 +97,10 @@ router.post('/send', auth, async (req, res) => {
             await db.prepare('UPDATE clientes SET "ultimaInteraccion" = CURRENT_TIMESTAMP WHERE id = ?').run(clienteId);
         }
 
-        // Emitir actualizaciones
+        // Emitir actualizaciones globalmente y a la sala
         const io = req.app.get('io');
+        io.emit('prospectos_actualizados');
         io.to(`user_${vendedorId}`).emit('prospectos_actualizados');
-        if (client.equipo_id) {
-            io.to(`team_${client.equipo_id}`).emit('prospectos_actualizados');
-        }
-        if (client.propietarioId && String(client.propietarioId) !== String(vendedorId)) {
-            io.to(`user_${client.propietarioId}`).emit('prospectos_actualizados');
-        }
 
         res.json({ success: true, mensaje: 'Mensaje enviado correctamente' });
     } catch (err) {
@@ -141,68 +136,42 @@ router.get('/chats', auth, async (req, res) => {
                 (
                     SELECT a.descripcion 
                     FROM actividades a 
-                    WHERE a.cliente = c.id AND a.tipo = 'whatsapp' 
+                    WHERE a.cliente = c.id AND a.tipo = 'whatsapp' AND a.resultado != 'nota_interna'
                     ORDER BY a.id DESC LIMIT 1
                 ) AS "lastMessage",
                 (
                     SELECT a."fecha" 
                     FROM actividades a 
-                    WHERE a.cliente = c.id AND a.tipo = 'whatsapp' 
+                    WHERE a.cliente = c.id AND a.tipo = 'whatsapp' AND a.resultado != 'nota_interna'
                     ORDER BY a.id DESC LIMIT 1
                 ) AS "lastMessageTime",
                 (
                     SELECT a.resultado 
                     FROM actividades a 
-                    WHERE a.cliente = c.id AND a.tipo = 'whatsapp' 
+                    WHERE a.cliente = c.id AND a.tipo = 'whatsapp' AND a.resultado != 'nota_interna'
                     ORDER BY a.id DESC LIMIT 1
                 ) AS "lastResult"
             FROM clientes c
         `;
 
-        if (rol === 'admin') {
-            sql = `
-                WITH sub AS (${selectBase})
-                SELECT 
-                    id, 
-                    nombres, 
-                    "apellidoPaterno", 
-                    telefono, 
-                    "etapaEmbudo", 
-                    "lastMessage", 
-                    "lastMessageTime", 
-                    "lastResult"
-                FROM sub
-                WHERE telefono IS NOT NULL AND telefono != ''
-                  AND "lastMessageTime" IS NOT NULL
-                ORDER BY COALESCE("lastMessageTime", "ultimaInteraccion", "fechaRegistro") DESC
-            `;
-        } else {
-            // Incluir clientes donde el usuario es vendedor, closer o propietario
-            sql = `
-                WITH sub AS (${selectBase})
-                SELECT 
-                    id, 
-                    nombres, 
-                    "apellidoPaterno", 
-                    telefono, 
-                    "etapaEmbudo", 
-                    "lastMessage", 
-                    "lastMessageTime", 
-                    "lastResult"
-                FROM sub
-                WHERE telefono IS NOT NULL AND telefono != ''
-                  AND "lastMessageTime" IS NOT NULL
-                  AND (
-                    COALESCE("propietarioId", "prospectorAsignado", "vendedorAsignado") = ?
-                    OR "closerAsignado" = ?
-                    OR (compartido = true AND "equipo_id" = (SELECT equipo_id FROM usuarios WHERE id = ?))
-                  )
-                ORDER BY COALESCE("lastMessageTime", "ultimaInteraccion", "fechaRegistro") DESC
-            `;
-            params = [vendedorId, vendedorId, vendedorId];
-        }
+        sql = `
+            WITH sub AS (${selectBase})
+            SELECT 
+                id, 
+                nombres, 
+                "apellidoPaterno", 
+                telefono, 
+                "etapaEmbudo", 
+                "lastMessage", 
+                "lastMessageTime", 
+                "lastResult"
+            FROM sub
+            WHERE telefono IS NOT NULL AND telefono != ''
+              AND "lastMessageTime" IS NOT NULL
+            ORDER BY COALESCE("lastMessageTime", "ultimaInteraccion", "fechaRegistro") DESC
+        `;
 
-        const rows = await db.prepare(sql).all(...params);
+        const rows = await db.prepare(sql).all();
 
         const chats = rows.map(r => ({
             id: r.id,
@@ -316,12 +285,10 @@ router.post('/chats/:id/toggle-client', auth, async (req, res) => {
                 ? 'Marcado como Prospecto en el chat' 
                 : 'Marcado como Cliente en el chat', 'enviado');
 
-        // Emitir actualizaciones
+        // Emitir actualizaciones globalmente y a la sala
         const io = req.app.get('io');
+        io.emit('prospectos_actualizados');
         io.to(`user_${vendedorId}`).emit('prospectos_actualizados');
-        if (client.equipo_id) {
-            io.to(`team_${client.equipo_id}`).emit('prospectos_actualizados');
-        }
 
         res.json({ success: true, etapaEmbudo: etapaNueva, mensaje: 'Estado actualizado correctamente' });
     } catch (err) {

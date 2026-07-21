@@ -487,13 +487,21 @@ async function handleIncomingMessage(vendedorId, phone, text, io, pushName = '',
 
                 console.log(`[WhatsApp user_${vendedorId}] Mensaje entrante registrado para cliente id ${client.id}`);
 
-                // Emitir por WebSockets para recarga automática
+                // Emitir por WebSockets globalmente y por canal para recarga automática
+                io.emit('prospectos_actualizados');
                 io.to(`user_${vendedorId}`).emit('prospectos_actualizados');
                 if (client.equipo_id) {
                     io.to(`team_${client.equipo_id}`).emit('prospectos_actualizados');
                 }
 
                 // Emitir evento de nuevo mensaje de WhatsApp para notificaciones globales
+                io.emit('new-whatsapp-message', {
+                    clientId: client.id,
+                    nombres: client.nombres,
+                    apellidoPaterno: client.apellidoPaterno,
+                    telefono: client.telefono,
+                    text: text
+                });
                 io.to(`user_${vendedorId}`).emit('new-whatsapp-message', {
                     clientId: client.id,
                     nombres: client.nombres,
@@ -569,6 +577,7 @@ async function handleOutgoingMessageFromOtherDevice(vendedorId, phone, text, io,
 
                     console.log(`[WhatsApp user_${vendedorId}] Mensaje saliente externo registrado para cliente id ${client.id}`);
 
+                    io.emit('prospectos_actualizados');
                     io.to(`user_${vendedorId}`).emit('prospectos_actualizados');
                     if (client.equipo_id) {
                         io.to(`team_${client.equipo_id}`).emit('prospectos_actualizados');
