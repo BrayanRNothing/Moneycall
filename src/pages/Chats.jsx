@@ -267,11 +267,12 @@ export default function Chats() {
     // 6. Enviar mensaje por WhatsApp (o Nota Interna)
     const handleSendMessage = async (e) => {
         if (e) e.preventDefault();
-        if (!messageText.trim() || sending || !activeChat) return;
+        if (!messageText.trim() || !activeChat) return;
 
-        setSending(true);
         const txt = messageText.trim();
         const wasNote = isNoteMode;
+        
+        // Limpiar el input inmediatamente para que el usuario pueda seguir escribiendo
         setMessageText('');
         setShowEmojiPicker(false); // Cerrar picker al enviar
         setShowSlashMenu(false);
@@ -285,36 +286,34 @@ export default function Chats() {
         };
         setMessages(prev => [...prev, optimisticMsg]);
 
-        try {
-            const res = await fetch(`${API_URL}/api/whatsapp/send`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'x-auth-token': getToken()
-                },
-                body: JSON.stringify({
-                    clienteId: activeChat.id,
-                    mensaje: txt,
-                    isInternalNote: wasNote
-                })
-            });
-
+        // Enviar al servidor en segundo plano
+        fetch(`${API_URL}/api/whatsapp/send`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-auth-token': getToken()
+            },
+            body: JSON.stringify({
+                clienteId: activeChat.id,
+                mensaje: txt,
+                isInternalNote: wasNote
+            })
+        })
+        .then(async (res) => {
             if (!res.ok) {
                 const errorData = await res.json();
                 throw new Error(errorData.mensaje || errorData.error || 'Error al enviar mensaje');
             }
-
-            // Refrescar mensajes reales desde servidor (para obtener el ID correcto)
-            await fetchMessages(activeChat.id);
+            // Refrescar mensajes reales desde servidor de fondo
+            fetchMessages(activeChat.id);
             fetchChatsList(false);
-        } catch (err) {
-            toast.error(err.message);
+        })
+        .catch((err) => {
+            toast.error(`Error al enviar mensaje: "${txt.substring(0, 20)}...". ${err.message}`);
             // Revertir mensaje optimista y restaurar texto
             setMessages(prev => prev.filter(m => m.id !== optimisticMsg.id));
             setMessageText(txt);
-        } finally {
-            setSending(false);
-        }
+        });
     };
 
     // Manejar Shift+Enter para salto de línea, Enter solo para enviar
@@ -1039,7 +1038,6 @@ export default function Chats() {
                                 value={messageText}
                                 onChange={handleTextChange}
                                 onKeyDown={handleKeyDown}
-                                disabled={sending}
                                 className={`flex-1 px-4 py-2.5 rounded-2xl border text-xs text-slate-700 placeholder-slate-400 outline-none transition-all font-semibold shadow-inner disabled:opacity-50 resize-none max-h-28 overflow-y-auto ${
                                     isNoteMode 
                                         ? 'bg-amber-50/50 border-amber-200 focus:border-amber-400' 
@@ -1050,14 +1048,10 @@ export default function Chats() {
 
                             <button
                                 type="submit"
-                                disabled={!messageText.trim() || sending}
+                                disabled={!messageText.trim()}
                                 className="p-3 bg-green-500 hover:bg-green-600 disabled:bg-slate-300 text-white rounded-full shadow-lg shadow-green-500/20 active:scale-95 transition-all shrink-0"
                             >
-                                {sending ? (
-                                    <RefreshCw className="w-5 h-5 animate-spin" />
-                                ) : (
-                                    <Send className="w-5 h-5 translate-x-[1px] -translate-y-[1px]" />
-                                )}
+                                <Send className="w-5 h-5 translate-x-[1px] -translate-y-[1px]" />
                             </button>
                         </form>
                     </>
