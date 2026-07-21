@@ -137,6 +137,7 @@ router.get('/chats', auth, async (req, res) => {
                 c."closerAsignado",
                 c.compartido,
                 c."equipo_id",
+                c."fechaRegistro",
                 (
                     SELECT a.descripcion 
                     FROM actividades a 
