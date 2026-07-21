@@ -118,60 +118,116 @@ router.get('/chats', auth, async (req, res) => {
         let sql;
         let params = [];
 
-        const selectBase = `
-            SELECT 
-                c.id,
-                c.nombres,
-                c."apellidoPaterno",
-                c.telefono,
-                c."etapaEmbudo",
-                c."ultimaInteraccion",
-                c."propietarioId",
-                c."prospectorAsignado",
-                c."vendedorAsignado",
-                c."closerAsignado",
-                c.compartido,
-                c."equipo_id",
-                c."fechaRegistro",
-                (
-                    SELECT a.descripcion 
-                    FROM actividades a 
-                    WHERE a.cliente = c.id AND a.tipo = 'whatsapp' AND a.resultado != 'nota_interna'
-                    ORDER BY a.id DESC LIMIT 1
-                ) AS "lastMessage",
-                (
-                    SELECT a."fecha" 
-                    FROM actividades a 
-                    WHERE a.cliente = c.id AND a.tipo = 'whatsapp' AND a.resultado != 'nota_interna'
-                    ORDER BY a.id DESC LIMIT 1
-                ) AS "lastMessageTime",
-                (
-                    SELECT a.resultado 
-                    FROM actividades a 
-                    WHERE a.cliente = c.id AND a.tipo = 'whatsapp' AND a.resultado != 'nota_interna'
-                    ORDER BY a.id DESC LIMIT 1
-                ) AS "lastResult"
-            FROM clientes c
-        `;
+        if (rol === 'admin') {
+            const selectBase = `
+                SELECT 
+                    c.id,
+                    c.nombres,
+                    c."apellidoPaterno",
+                    c.telefono,
+                    c."etapaEmbudo",
+                    c."ultimaInteraccion",
+                    c."propietarioId",
+                    c."prospectorAsignado",
+                    c."vendedorAsignado",
+                    c."closerAsignado",
+                    c.compartido,
+                    c."equipo_id",
+                    c."fechaRegistro",
+                    (
+                        SELECT a.descripcion 
+                        FROM actividades a 
+                        WHERE a.cliente = c.id AND a.tipo = 'whatsapp' AND a.resultado != 'nota_interna'
+                        ORDER BY a.id DESC LIMIT 1
+                    ) AS "lastMessage",
+                    (
+                        SELECT a."fecha" 
+                        FROM actividades a 
+                        WHERE a.cliente = c.id AND a.tipo = 'whatsapp' AND a.resultado != 'nota_interna'
+                        ORDER BY a.id DESC LIMIT 1
+                    ) AS "lastMessageTime",
+                    (
+                        SELECT a.resultado 
+                        FROM actividades a 
+                        WHERE a.cliente = c.id AND a.tipo = 'whatsapp' AND a.resultado != 'nota_interna'
+                        ORDER BY a.id DESC LIMIT 1
+                    ) AS "lastResult"
+                FROM clientes c
+            `;
 
-        sql = `
-            WITH sub AS (${selectBase})
-            SELECT 
-                id, 
-                nombres, 
-                "apellidoPaterno", 
-                telefono, 
-                "etapaEmbudo", 
-                "lastMessage", 
-                "lastMessageTime", 
-                "lastResult"
-            FROM sub
-            WHERE telefono IS NOT NULL AND telefono != ''
-              AND "lastMessageTime" IS NOT NULL
-            ORDER BY COALESCE("lastMessageTime", "ultimaInteraccion", "fechaRegistro") DESC
-        `;
+            sql = `
+                WITH sub AS (${selectBase})
+                SELECT 
+                    id, 
+                    nombres, 
+                    "apellidoPaterno", 
+                    telefono, 
+                    "etapaEmbudo", 
+                    "lastMessage", 
+                    "lastMessageTime", 
+                    "lastResult"
+                FROM sub
+                WHERE telefono IS NOT NULL AND telefono != ''
+                  AND "lastMessageTime" IS NOT NULL
+                ORDER BY COALESCE("lastMessageTime", "ultimaInteraccion", "fechaRegistro") DESC
+            `;
+        } else {
+            const selectBase = `
+                SELECT 
+                    c.id,
+                    c.nombres,
+                    c."apellidoPaterno",
+                    c.telefono,
+                    c."etapaEmbudo",
+                    c."ultimaInteraccion",
+                    c."propietarioId",
+                    c."prospectorAsignado",
+                    c."vendedorAsignado",
+                    c."closerAsignado",
+                    c.compartido,
+                    c."equipo_id",
+                    c."fechaRegistro",
+                    (
+                        SELECT a.descripcion 
+                        FROM actividades a 
+                        WHERE a.cliente = c.id AND a.tipo = 'whatsapp' AND a.resultado != 'nota_interna' AND a.vendedor = ?
+                        ORDER BY a.id DESC LIMIT 1
+                    ) AS "lastMessage",
+                    (
+                        SELECT a."fecha" 
+                        FROM actividades a 
+                        WHERE a.cliente = c.id AND a.tipo = 'whatsapp' AND a.resultado != 'nota_interna' AND a.vendedor = ?
+                        ORDER BY a.id DESC LIMIT 1
+                    ) AS "lastMessageTime",
+                    (
+                        SELECT a.resultado 
+                        FROM actividades a 
+                        WHERE a.cliente = c.id AND a.tipo = 'whatsapp' AND a.resultado != 'nota_interna' AND a.vendedor = ?
+                        ORDER BY a.id DESC LIMIT 1
+                    ) AS "lastResult"
+                FROM clientes c
+            `;
 
-        const rows = await db.prepare(sql).all();
+            sql = `
+                WITH sub AS (${selectBase})
+                SELECT 
+                    id, 
+                    nombres, 
+                    "apellidoPaterno", 
+                    telefono, 
+                    "etapaEmbudo", 
+                    "lastMessage", 
+                    "lastMessageTime", 
+                    "lastResult"
+                FROM sub
+                WHERE telefono IS NOT NULL AND telefono != ''
+                  AND "lastMessageTime" IS NOT NULL
+                ORDER BY COALESCE("lastMessageTime", "ultimaInteraccion", "fechaRegistro") DESC
+            `;
+            params = [vendedorId, vendedorId, vendedorId];
+        }
+
+        const rows = await db.prepare(sql).all(...params);
 
         const chats = rows.map(r => ({
             id: r.id,
@@ -208,7 +264,8 @@ router.get('/chats/:clienteId', auth, async (req, res) => {
 
             const propietario = client.propietarioId ?? client.prospectorAsignado ?? client.vendedorAsignado;
             const hasAccess = String(propietario) === String(vendedorId) ||
-                              String(client.closerAsignado) === String(vendedorId);
+                              String(client.closerAsignado) === String(vendedorId) ||
+                              (await db.prepare('SELECT 1 FROM actividades WHERE cliente = ? AND tipo = ? AND vendedor = ? LIMIT 1').get(clienteId, 'whatsapp', vendedorId)) !== undefined;
 
             if (!hasAccess) {
                 return res.status(403).json({ mensaje: 'No tienes acceso a este chat' });
