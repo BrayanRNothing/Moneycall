@@ -171,7 +171,7 @@ router.get('/chats', auth, async (req, res) => {
                 FROM sub
                 WHERE telefono IS NOT NULL AND telefono != ''
                   AND ("lastMessageTime" IS NOT NULL OR fuente = 'WhatsApp')
-                ORDER BY COALESCE("lastMessageTime", "ultimaInteraccion", "fechaRegistro") DESC
+                ORDER BY COALESCE("lastMessageTime", "ultimaInteraccion"::timestamptz, "fechaRegistro"::timestamptz) DESC
             `;
         } else {
             const selectBase = `
@@ -234,7 +234,7 @@ router.get('/chats', auth, async (req, res) => {
                         WHERE act.cliente = sub.id AND act.tipo = 'whatsapp' AND act.vendedor = ?
                     )
                   )
-                ORDER BY COALESCE("lastMessageTime", "ultimaInteraccion", "fechaRegistro") DESC
+                ORDER BY COALESCE("lastMessageTime", "ultimaInteraccion"::timestamptz, "fechaRegistro"::timestamptz) DESC
             `;
             params = [vendedorId, vendedorId, vendedorId, vendedorId, vendedorId, vendedorId];
         }
