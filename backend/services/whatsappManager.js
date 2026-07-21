@@ -686,7 +686,7 @@ async function connectClient(vendedorId, io) {
                 io.to(`user_${vendedorId}`).emit('whatsapp-status', { status: 'desconectado' });
             }
         } else if (connection === 'open') {
-            console.log(`[WhatsApp user_${vendedorId}] ¡Conexión exitosa!`);
+            console.log(`[WhatsApp user_${vendedorId}] ¡Conexión exitosa y activa!`);
             connectionStatuses[vendedorId] = 'conectado';
             resetReconnectDelay(vendedorId); // Reiniciar contador de reintentos
             delete storedQrs[vendedorId];
