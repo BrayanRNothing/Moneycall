@@ -134,6 +134,7 @@ router.get('/chats', auth, async (req, res) => {
                     c.compartido,
                     c."equipo_id",
                     c."fechaRegistro",
+                    c.fuente,
                     (
                         SELECT a.descripcion 
                         FROM actividades a 
@@ -165,10 +166,11 @@ router.get('/chats', auth, async (req, res) => {
                     "etapaEmbudo", 
                     "lastMessage", 
                     "lastMessageTime", 
-                    "lastResult"
+                    "lastResult",
+                    fuente
                 FROM sub
                 WHERE telefono IS NOT NULL AND telefono != ''
-                  AND "lastMessageTime" IS NOT NULL
+                  AND ("lastMessageTime" IS NOT NULL OR fuente = 'WhatsApp')
                 ORDER BY COALESCE("lastMessageTime", "ultimaInteraccion", "fechaRegistro") DESC
             `;
         } else {
@@ -187,6 +189,7 @@ router.get('/chats', auth, async (req, res) => {
                     c.compartido,
                     c."equipo_id",
                     c."fechaRegistro",
+                    c.fuente,
                     (
                         SELECT a.descripcion 
                         FROM actividades a 
@@ -218,13 +221,22 @@ router.get('/chats', auth, async (req, res) => {
                     "etapaEmbudo", 
                     "lastMessage", 
                     "lastMessageTime", 
-                    "lastResult"
+                    "lastResult",
+                    fuente
                 FROM sub
                 WHERE telefono IS NOT NULL AND telefono != ''
-                  AND "lastMessageTime" IS NOT NULL
+                  AND ("lastMessageTime" IS NOT NULL OR fuente = 'WhatsApp')
+                  AND (
+                    COALESCE("propietarioId", "prospectorAsignado", "vendedorAsignado") = ?
+                    OR "closerAsignado" = ?
+                    OR EXISTS (
+                        SELECT 1 FROM actividades act 
+                        WHERE act.cliente = sub.id AND act.tipo = 'whatsapp' AND act.vendedor = ?
+                    )
+                  )
                 ORDER BY COALESCE("lastMessageTime", "ultimaInteraccion", "fechaRegistro") DESC
             `;
-            params = [vendedorId, vendedorId, vendedorId];
+            params = [vendedorId, vendedorId, vendedorId, vendedorId, vendedorId, vendedorId];
         }
 
         const rows = await db.prepare(sql).all(...params);

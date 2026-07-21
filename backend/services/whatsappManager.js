@@ -704,8 +704,11 @@ async function connectClient(vendedorId, io) {
                 if (chat.id && !isGroupOrNonPersonJid(chat.id)) {
                     const phone = chat.id.split('@')[0];
                     const name = contactNames[phone] || chat.name || '';
-                    if (phone && name) {
-                        contactNames[phone] = name;
+                    if (phone) {
+                        if (name) {
+                            contactNames[phone] = name;
+                        }
+                        await ensureProspectExists(vendedorId, phone, name, io);
                     }
                 }
             }
