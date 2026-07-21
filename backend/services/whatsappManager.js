@@ -83,6 +83,31 @@ function isGroupOrNonPersonJid(jidOrPhone) {
     return false;
 }
 
+// Verificar si un contacto tiene un nombre real guardado en la agenda de contactos (no genérico ni número crudo ni de grupos)
+function hasRealSavedName(name) {
+    if (!name || typeof name !== 'string') return false;
+    const trimmed = name.trim();
+    if (!trimmed || trimmed.length < 2) return false;
+    
+    // Rechazar si es un número de teléfono puro o formateado (+..., 521...)
+    if (trimmed.startsWith('+') || /^\+?\d[\d\s\-()]{6,}\d$/.test(trimmed)) return false;
+
+    const lower = trimmed.toLowerCase();
+    if (
+        lower.startsWith('contacto whatsapp') ||
+        lower.startsWith('prospecto whatsapp') ||
+        lower.startsWith('contacto') ||
+        lower.startsWith('prospecto') ||
+        lower.startsWith('whatsapp') ||
+        lower.includes('@g.us') ||
+        lower.includes('@broadcast') ||
+        lower.includes('@newsletter')
+    ) {
+        return false;
+    }
+    return true;
+}
+
 // Verificar si un mensaje de WhatsApp es más antiguo a 6 meses (180 días)
 function isOlderThan6Months(msg) {
     if (!msg) return false;
@@ -149,6 +174,9 @@ async function updateClientNameIfGeneric(vendedorId, phone, name, io) {
 // Asegurar que exista un prospecto para un teléfono/JID individual de WhatsApp recibido de chats o contactos
 async function ensureProspectExists(vendedorId, phone, name = '', io) {
     if (!phone || isGroupOrNonPersonJid(phone)) return;
+    // Omitir totalmente si no se especifica un nombre guardado real en la agenda
+    if (!hasRealSavedName(name)) return;
+
     const cleanPhone = phone.replace(/\D/g, '').slice(-10);
     if (cleanPhone.length < 10 || isGroupOrNonPersonJid(cleanPhone)) return;
 
@@ -367,10 +395,20 @@ async function handleIncomingMessage(vendedorId, phone, text, io, pushName = '',
             return clean1 === cleanIncoming || clean2 === cleanIncoming;
         });
 
-        // Si el cliente no existe, lo creamos automáticamente como un prospecto nuevo
+        // Si el cliente no existe, lo creamos únicamente si el contacto tiene un nombre real guardado en la agenda
         if (matchingClients.length === 0) {
-            if (isGroupOrNonPersonJid(phone)) return;
-            console.log(`[WhatsApp user_${vendedorId}] Teléfono ${phone} no registrado. Creando prospecto automático...`);
+            if (isGroupOrNonPersonJid(phone) || msgKey.participant || msgKey.remoteJid?.includes('@g.us')) return;
+            
+            // Buscar nombre del contacto en la agenda del celular o en el perfil de WhatsApp
+            const contactJid = phone.split('@')[0];
+            const savedName = contactNames[contactJid] || contactNames[cleanIncoming] || pushName || '';
+
+            if (!hasRealSavedName(savedName)) {
+                console.log(`[WhatsApp user_${vendedorId}] Omitiendo creación de prospecto para ${phone} por no tener nombre guardado real.`);
+                return;
+            }
+
+            console.log(`[WhatsApp user_${vendedorId}] Teléfono ${phone} (${savedName}) registrado. Creando prospecto automático...`);
             
             let equipoId = null;
             const vendedor = await db.prepare('SELECT equipo_id FROM usuarios WHERE id = ?').get(vendedorId);
@@ -383,12 +421,8 @@ async function handleIncomingMessage(vendedorId, phone, text, io, pushName = '',
             const cleanDigits = phone.split('@')[0].replace(/\D/g, '');
             const rawFormattedPhone = `+${cleanDigits}`;
 
-            // Buscar nombre del contacto en la agenda del celular o en el perfil de WhatsApp
-            const contactJid = phone.split('@')[0];
-            const savedName = contactNames[contactJid] || contactNames[cleanIncoming] || pushName || '';
-            
             let nombres = 'Prospecto';
-            let apellidoPaterno = `WhatsApp (${rawFormattedPhone})`;
+            let apellidoPaterno = '';
             
             if (savedName) {
                 const parts = savedName.trim().split(/\s+/);
@@ -642,13 +676,15 @@ async function connectClient(vendedorId, io) {
         // Cargar contactos y asegurar prospectos en la base de datos
         if (contacts) {
             for (const contact of contacts) {
-                if (contact.id) {
+                if (contact.id && !isGroupOrNonPersonJid(contact.id)) {
                     const phone = contact.id.split('@')[0];
                     const name = contact.name || contact.verifiedName || contact.notify || '';
                     if (phone && name) {
                         contactNames[phone] = name;
                     }
-                    await ensureProspectExists(vendedorId, phone, name, io);
+                    if (hasRealSavedName(name)) {
+                        await ensureProspectExists(vendedorId, phone, name, io);
+                    }
                 }
             }
         }
@@ -658,12 +694,14 @@ async function connectClient(vendedorId, io) {
                 if (chat.id && !isGroupOrNonPersonJid(chat.id)) {
                     const phone = chat.id.split('@')[0];
                     const name = contactNames[phone] || chat.name || '';
-                    await ensureProspectExists(vendedorId, phone, name, io);
+                    if (hasRealSavedName(name)) {
+                        await ensureProspectExists(vendedorId, phone, name, io);
+                    }
                 }
             }
         }
 
-        // Importar mensajes y crear prospectos de forma asíncrona
+        // Importar mensajes de forma asíncrona
         if (messages && messages.length > 0) {
             processHistoricalMessages(vendedorId, messages, io).catch(err => {
                 console.error(`[WhatsApp user_${vendedorId}] Error al procesar historial:`, err.message);
@@ -680,7 +718,9 @@ async function connectClient(vendedorId, io) {
                 if (phone && name) {
                     contactNames[phone] = name;
                 }
-                await ensureProspectExists(vendedorId, phone, name, io);
+                if (hasRealSavedName(name)) {
+                    await ensureProspectExists(vendedorId, phone, name, io);
+                }
             }
         }
     });
@@ -694,7 +734,9 @@ async function connectClient(vendedorId, io) {
                 if (phone && name) {
                     contactNames[phone] = name;
                 }
-                await ensureProspectExists(vendedorId, phone, name, io);
+                if (hasRealSavedName(name)) {
+                    await ensureProspectExists(vendedorId, phone, name, io);
+                }
             }
         }
     });
@@ -708,7 +750,9 @@ async function connectClient(vendedorId, io) {
                 if (phone && name) {
                     contactNames[phone] = name;
                 }
-                await ensureProspectExists(vendedorId, phone, name, io);
+                if (hasRealSavedName(name)) {
+                    await ensureProspectExists(vendedorId, phone, name, io);
+                }
             }
         }
     });
@@ -1001,7 +1045,14 @@ async function processHistoricalMessages(vendedorId, messages, io) {
             let isNew = false;
 
             if (!client) {
-                console.log(`[WhatsApp user_${vendedorId}] Teléfono ${phone} no registrado (historial). Creando prospecto automático...`);
+                // Buscar nombre en la agenda del celular o en el perfil de WhatsApp
+                const savedName = contactNames[phone] || '';
+                if (!hasRealSavedName(savedName)) {
+                    // Omitir la creación de prospecto si no tiene un nombre guardado real
+                    continue;
+                }
+
+                console.log(`[WhatsApp user_${vendedorId}] Teléfono ${phone} (${savedName}) no registrado (historial). Creando prospecto automático...`);
                 
                 let equipoId = null;
                 const vendedor = await db.prepare('SELECT equipo_id FROM usuarios WHERE id = ?').get(vendedorId);
