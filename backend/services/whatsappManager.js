@@ -686,9 +686,6 @@ async function connectClient(vendedorId, io) {
                     if (phone && name) {
                         contactNames[phone] = name;
                     }
-                    if (hasRealSavedName(name)) {
-                        await ensureProspectExists(vendedorId, phone, name, io);
-                    }
                 }
             }
         }
@@ -700,9 +697,6 @@ async function connectClient(vendedorId, io) {
                     const name = contactNames[phone] || chat.name || '';
                     if (phone && name) {
                         contactNames[phone] = name;
-                    }
-                    if (hasRealSavedName(name)) {
-                        await ensureProspectExists(vendedorId, phone, name, io);
                     }
                 }
             }
@@ -725,9 +719,6 @@ async function connectClient(vendedorId, io) {
                 if (phone && name) {
                     contactNames[phone] = name;
                 }
-                if (hasRealSavedName(name)) {
-                    await ensureProspectExists(vendedorId, phone, name, io);
-                }
             }
         }
     });
@@ -741,9 +732,6 @@ async function connectClient(vendedorId, io) {
                 if (phone && name) {
                     contactNames[phone] = name;
                 }
-                if (hasRealSavedName(name)) {
-                    await ensureProspectExists(vendedorId, phone, name, io);
-                }
             }
         }
     });
@@ -756,9 +744,6 @@ async function connectClient(vendedorId, io) {
                 const name = update.name || update.verifiedName || update.notify || '';
                 if (phone && name) {
                     contactNames[phone] = name;
-                }
-                if (hasRealSavedName(name)) {
-                    await ensureProspectExists(vendedorId, phone, name, io);
                 }
             }
         }

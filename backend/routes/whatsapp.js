@@ -173,6 +173,7 @@ router.get('/chats', auth, async (req, res) => {
                     "lastResult"
                 FROM sub
                 WHERE telefono IS NOT NULL AND telefono != ''
+                  AND "lastMessageTime" IS NOT NULL
                 ORDER BY COALESCE("lastMessageTime", "ultimaInteraccion", "fechaRegistro") DESC
             `;
         } else {
@@ -190,6 +191,7 @@ router.get('/chats', auth, async (req, res) => {
                     "lastResult"
                 FROM sub
                 WHERE telefono IS NOT NULL AND telefono != ''
+                  AND "lastMessageTime" IS NOT NULL
                   AND (
                     COALESCE("propietarioId", "prospectorAsignado", "vendedorAsignado") = ?
                     OR "closerAsignado" = ?
