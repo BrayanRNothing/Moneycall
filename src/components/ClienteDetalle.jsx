@@ -121,10 +121,7 @@ export default function ClienteDetalle({
     const [monedaSeleccionada, setMonedaSeleccionada] = useState(initialCliente?.customMetricLabel || 'MXN');
     const [valorCliente, setValorCliente] = useState(initialCliente?.customMetricValue || '');
     const [guardandoMetrica, setGuardandoMetrica] = useState(false);
-    // Toggle: mostrar botón de Venta o Llamada
-    const [modoBotonPrincipal, setModoBotonPrincipal] = useState(() => {
-        return localStorage.getItem('crm_modo_boton_principal') || 'llamada';
-    });
+    
     // Modal de registro de venta
     const [modalVenta, setModalVenta] = useState(false);
     const [ventaForm, setVentaForm] = useState({ descripcion: '', monto: '', tipo: 'venta', notas: '' });
@@ -247,10 +244,10 @@ export default function ClienteDetalle({
     }, [initialCliente?.id, initialCliente?._id]);
 
     useEffect(() => {
-        if (modalHistorialVentas && pid) {
+        if (pid) {
             cargarVentasHistorial();
         }
-    }, [modalHistorialVentas, pid]);
+    }, [pid]);
 
     const cargarRecordatorios = async (ClienteId) => {
         try {
@@ -822,9 +819,8 @@ export default function ClienteDetalle({
             setPdfArchivo(null);
             toast.success('Venta registrada en el historial');
             
-            if (modalHistorialVentas) {
-                cargarVentasHistorial();
-            }
+            cargarVentasHistorial();
+
             if (onActualizado) await onActualizado();
         } catch {
             toast.error('Error al registrar la venta');
@@ -1221,40 +1217,20 @@ export default function ClienteDetalle({
                             guardandoMetrica={guardandoMetrica}
                             handleGuardarMetricaPersonalizada={handleGuardarMetricaPersonalizada}
                             customSections={customSections}
+                            ventasHistorial={ventasHistorial}
                         />
 
 
                         {/* ==================== ÁRBOL DE LLAMADA ==================== */}
                         <div className="space-y-3">
                             <div id="detalle-cliente-acciones-seguimiento" className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                                {/* Botón principal intercambiable: Registrar Venta / Registrar Llamada */}
-                                <div className="relative group/main">
-                                    <button
-                                        onClick={modoBotonPrincipal === 'venta' ? manejarRegistrarVenta : () => setLlamadaFlow({ paso: 'tipo_llamada', tipoCall: '', contesto: null, fechaProxima: '', notas: '' })}
-                                        className={`flex flex-col items-center justify-center gap-2 border-2 rounded-xl p-4 transition-all shadow-sm font-bold text-sm text-center leading-tight w-full h-full ${
-                                            modoBotonPrincipal === 'venta'
-                                                ? 'bg-emerald-50 border-emerald-300 text-emerald-700 hover:border-emerald-500'
-                                                : 'bg-white border-slate-200 hover:border-(--theme-500) text-gray-700 hover:text-(--theme-600)'
-                                        }`}
-                                    >
-                                        {modoBotonPrincipal === 'venta'
-                                            ? <><TrendingUp className="w-6 h-6 text-emerald-600" /> Registrar Venta</>
-                                            : <><Phone className="w-6 h-6 text-(--theme-500)" /> Registrar Llamada</>
-                                        }
-                                    </button>
-                                    {/* Botón pequeño para cambiar modo */}
-                                    <button
-                                        onClick={() => {
-                                            const nuevo = modoBotonPrincipal === 'venta' ? 'llamada' : 'venta';
-                                            setModoBotonPrincipal(nuevo);
-                                            localStorage.setItem('crm_modo_boton_principal', nuevo);
-                                        }}
-                                        className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-slate-200 hover:bg-(--theme-500) hover:text-white text-slate-500 rounded-full text-[9px] flex items-center justify-center transition-all shadow-sm opacity-0 group-hover/main:opacity-100"
-                                        title={`Cambiar a ${modoBotonPrincipal === 'venta' ? 'Registrar Llamada' : 'Registrar Venta'}`}
-                                    >
-                                        ⇄
-                                    </button>
-                                </div>
+                                {/* Botón principal: Registrar Llamada */}
+                                <button
+                                    onClick={() => setLlamadaFlow({ paso: 'tipo_llamada', tipoCall: '', contesto: null, fechaProxima: '', notas: '' })}
+                                    className="flex flex-col items-center justify-center gap-2 bg-white border-2 border-slate-200 hover:border-(--theme-500) rounded-xl p-4 text-gray-700 hover:text-(--theme-600) transition-all shadow-sm font-bold text-sm text-center leading-tight w-full h-full"
+                                >
+                                    <Phone className="w-6 h-6 text-(--theme-500)" /> Registrar Llamada
+                                </button>
                                 {/* Recordatorio de llamada */}
                                 <button
                                     onClick={abrirNuevoRecordatorio}
@@ -1283,13 +1259,13 @@ export default function ClienteDetalle({
                                     <Calendar className="w-6 h-6" />
                                     Agendar Reunión
                                 </button>
-                                {/* Historial de Ventas */}
+                                {/* Venta */}
                                 <button
-                                    onClick={() => setModalHistorialVentas(true)}
-                                    className="flex flex-col items-center justify-center gap-2 bg-white border-2 border-slate-200 hover:border-emerald-500 rounded-xl p-4 text-gray-700 hover:text-emerald-600 transition-all shadow-sm font-bold text-sm text-center leading-tight"
+                                    onClick={manejarRegistrarVenta}
+                                    className="flex flex-col items-center justify-center gap-2 bg-emerald-50 border-2 border-emerald-200 hover:border-emerald-500 rounded-xl p-4 text-emerald-700 hover:bg-emerald-100 transition-all shadow-sm font-bold text-sm text-center leading-tight"
                                 >
-                                    <History className="w-6 h-6 text-emerald-500" />
-                                    Historial Ventas
+                                    <TrendingUp className="w-6 h-6 text-emerald-600" />
+                                    Registrar Venta
                                 </button>
                             </div>
 
@@ -1496,21 +1472,13 @@ export default function ClienteDetalle({
                                                     </p>
                                                 )}
                                             </div>
-                                            <div className="flex gap-2 mt-3 shrink-0">
+                                            <div className="mt-3 shrink-0">
                                                 <button
-                                                    onClick={manejarRegistrarVenta}
-                                                    className="flex-1 py-2 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-xs"
-                                                    title="Registrar Compra/Venta"
+                                                    onClick={() => setModalHistorialVentas(true)}
+                                                    className="w-full py-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-xs"
+                                                    title="Ver Historial de Ventas"
                                                 >
-                                                    <Plus className="w-3.5 h-3.5" />
-                                                    Registrar
-                                                </button>
-                                                <button
-                                                    onClick={() => setDrawerHistorialAbierto(true)}
-                                                    className="flex-1 py-2 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-700 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-xs"
-                                                    title="Abrir Historial Completo"
-                                                >
-                                                    <List className="w-3.5 h-3.5" />{t("Historial")}
+                                                    <History className="w-3.5 h-3.5 text-slate-500" /> Historial de Ventas
                                                 </button>
                                             </div>
                                         </div>
