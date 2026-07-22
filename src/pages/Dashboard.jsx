@@ -1043,44 +1043,125 @@ const Dashboard = () => {
                                             )}
                                         </div>
 
-                                        {/* COLUMNA DERECHA: ESTADO GENERAL */}
-                                        <div className="lg:w-1/2 flex flex-col bg-white border border-gray-200 rounded-lg p-6 shadow-xs">
-                                            <div className="mb-4 shrink-0">
-                                                <h3 className="text-xs font-black uppercase tracking-widest text-gray-800">ESTADO GENERAL</h3>
+                                        {/* COLUMNA DERECHA: DESGLOSE DETALLADO */}
+                                        <div className="lg:w-1/2 flex flex-col bg-white border border-gray-200 rounded-lg p-4 shadow-xs overflow-hidden">
+                                            <div className="mb-3 shrink-0">
+                                                <h3 className="text-xs font-black uppercase tracking-widest text-gray-800">DESGLOSE DETALLADO</h3>
+                                                <p className="text-[9px] text-gray-400 font-bold mt-0.5">Vista general de tu pipeline</p>
                                             </div>
                                             
-                                            <div className="flex flex-col gap-3 flex-1 justify-between">
-                                                {/* Cantidad de Prospectos */}
-                                                <div className="flex-1 flex items-center justify-between px-4 py-4 bg-gray-50/50 border border-gray-100 rounded-lg group hover:border-gray-300 hover:shadow-sm transition-all">
-                                                    <div>
-                                                        <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-0.5">Prospectos</h4>
-                                                        <span className="text-xl font-black text-gray-700">{formatNumber.format(totalEntrada)}</span>
-                                                    </div>
-                                                    <div className="w-12 h-12 rounded-md bg-gray-100 flex items-center justify-center group-hover:bg-gray-200 transition-colors">
-                                                        <Users className="w-7 h-7 text-gray-500" />
+                                            <div className="flex-1 overflow-y-auto space-y-3 pr-1 scrollbar-hide" style={{ scrollbarWidth: 'none' }}>
+                                                {/* Embudo desglosado */}
+                                                <div className="space-y-1.5">
+                                                    <h4 className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Pipeline por etapa</h4>
+                                                    {[
+                                                        { label: 'Prospectos nuevos', count: vendedorData.embudo.prospecto_nuevo || 0, color: 'bg-blue-500', textColor: 'text-blue-600' },
+                                                        { label: 'En contacto', count: vendedorData.embudo.en_contacto || 0, color: 'bg-emerald-500', textColor: 'text-emerald-600' },
+                                                        { label: 'Reunión agendada', count: vendedorData.embudo.reunion_agendada || 0, color: 'bg-violet-500', textColor: 'text-violet-600' },
+                                                        { label: 'En negociación', count: closerData.embudo.en_negociacion || 0, color: 'bg-amber-500', textColor: 'text-amber-600' },
+                                                        { label: 'Venta ganada', count: closerData.embudo.venta_ganada || 0, color: 'bg-green-500', textColor: 'text-green-600' },
+                                                        { label: 'Perdidos', count: closerData.embudo.perdido || 0, color: 'bg-rose-400', textColor: 'text-rose-500' },
+                                                    ].map((stage, i) => {
+                                                        const maxCount = Math.max(totalEntrada, 1);
+                                                        const pct = Math.min((stage.count / maxCount) * 100, 100);
+                                                        return (
+                                                            <div key={i} className="flex items-center gap-2 group">
+                                                                <span className="text-[10px] font-bold text-gray-500 w-28 truncate shrink-0">{stage.label}</span>
+                                                                <div className="flex-1 h-4 bg-gray-50 rounded-full overflow-hidden relative">
+                                                                    <div className={`h-full ${stage.color} rounded-full transition-all duration-700`} style={{ width: `${Math.max(pct, stage.count > 0 ? 4 : 0)}%` }} />
+                                                                </div>
+                                                                <span className={`text-xs font-black ${stage.textColor} w-8 text-right tabular-nums`}>{stage.count}</span>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+
+                                                {/* Separador */}
+                                                <div className="border-t border-gray-100" />
+
+                                                {/* Métricas del periodo */}
+                                                <div className="space-y-1.5">
+                                                    <h4 className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Actividad {periodoSuffix}</h4>
+                                                    <div className="grid grid-cols-2 gap-2">
+                                                        <div className="bg-blue-50/50 border border-blue-100/50 rounded-lg px-3 py-2">
+                                                            <span className="text-[9px] font-bold text-blue-400 uppercase tracking-wider block">Nuevos</span>
+                                                            <span className="text-lg font-black text-blue-600 tabular-nums">{prospectosNuevosPeriodo}</span>
+                                                        </div>
+                                                        <div className="bg-emerald-50/50 border border-emerald-100/50 rounded-lg px-3 py-2">
+                                                            <span className="text-[9px] font-bold text-emerald-400 uppercase tracking-wider block">Llamadas</span>
+                                                            <span className="text-lg font-black text-emerald-600 tabular-nums">{mP.llamadas || 0}</span>
+                                                        </div>
+                                                        <div className="bg-violet-50/50 border border-violet-100/50 rounded-lg px-3 py-2">
+                                                            <span className="text-[9px] font-bold text-violet-400 uppercase tracking-wider block">Mensajes</span>
+                                                            <span className="text-lg font-black text-violet-600 tabular-nums">{mP.mensajes || 0}</span>
+                                                        </div>
+                                                        <div className="bg-amber-50/50 border border-amber-100/50 rounded-lg px-3 py-2">
+                                                            <span className="text-[9px] font-bold text-amber-400 uppercase tracking-wider block">Reuniones</span>
+                                                            <span className="text-lg font-black text-amber-600 tabular-nums">{mP.reuniones || 0}</span>
+                                                        </div>
                                                     </div>
                                                 </div>
 
-                                                {/* Cantidad de Clientes */}
-                                                <div className="flex-1 flex items-center justify-between px-4 py-4 bg-gray-50/50 border border-gray-100 rounded-lg group hover:border-gray-300 hover:shadow-sm transition-all">
-                                                    <div>
-                                                        <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-0.5">Clientes</h4>
-                                                        <span className="text-xl font-black text-gray-700">{formatNumber.format(ganadas)}</span>
+                                                {/* Separador */}
+                                                <div className="border-t border-gray-100" />
+
+                                                {/* Ingresos desglose */}
+                                                <div className="space-y-1.5">
+                                                    <h4 className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Ingresos</h4>
+                                                    <div className="flex items-end justify-between">
+                                                        <div>
+                                                            <span className="text-[9px] font-bold text-gray-400 uppercase block">Este periodo</span>
+                                                            <span className="text-xl font-black text-gray-800">{formatMoney.format(cP.ventasMonto || 0)}</span>
+                                                        </div>
+                                                        <div className="text-right">
+                                                            <span className="text-[9px] font-bold text-gray-400 uppercase block">Cierres</span>
+                                                            <span className="text-xl font-black text-green-600">{cP.ventasCount || 0}</span>
+                                                        </div>
                                                     </div>
-                                                    <div className="w-12 h-12 rounded-md bg-gray-100 flex items-center justify-center group-hover:bg-gray-200 transition-colors">
-                                                        <Target className="w-7 h-7 text-gray-500" />
+                                                    {(cP.ventasCount || 0) > 0 && (
+                                                        <div className="mt-1 bg-green-50/50 border border-green-100/50 rounded-lg px-3 py-2">
+                                                            <div className="flex justify-between items-center">
+                                                                <span className="text-[9px] font-bold text-green-500 uppercase">Ticket promedio</span>
+                                                                <span className="text-sm font-black text-green-600">{formatMoney.format(cP.ventasMonto / cP.ventasCount)}</span>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                    {/* Total acumulado */}
+                                                    <div className="mt-1 bg-gray-50/80 border border-gray-100 rounded-lg px-3 py-2">
+                                                        <div className="flex justify-between items-center">
+                                                            <span className="text-[9px] font-bold text-gray-400 uppercase">Total acumulado</span>
+                                                            <span className="text-sm font-black text-gray-600">{formatMoney.format(closerData.metricas?.ventas?.montoTotal || 0)}</span>
+                                                        </div>
+                                                        <div className="flex justify-between items-center mt-0.5">
+                                                            <span className="text-[9px] font-bold text-gray-400 uppercase">Ventas totales</span>
+                                                            <span className="text-sm font-black text-gray-600">{closerData.metricas?.ventas?.totales || 0}</span>
+                                                        </div>
                                                     </div>
                                                 </div>
 
-                                                {/* Ingresos Generados */}
-                                                <div className="flex-1 flex items-center justify-between px-4 py-4 bg-gray-50/50 border border-gray-100 rounded-lg group hover:border-gray-300 hover:shadow-sm transition-all">
-                                                    <div>
-                                                        <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-0.5">Ingresos</h4>
-                                                        <span className="text-xl font-black text-gray-700">{formatMoney.format(cP.ventasMonto || 0)}</span>
-                                                    </div>
-                                                    <div className="w-12 h-12 rounded-md bg-gray-100 flex items-center justify-center group-hover:bg-gray-200 transition-colors">
-                                                        <DollarSign className="w-7 h-7 text-gray-500" />
-                                                    </div>
+                                                {/* Tasas de conversión */}
+                                                <div className="border-t border-gray-100" />
+                                                <div className="space-y-1.5">
+                                                    <h4 className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Tasas de conversión</h4>
+                                                    {[
+                                                        { label: 'Contacto', value: tasaContacto, desc: `${enContacto} de ${totalEntrada}` },
+                                                        { label: 'Agendamiento', value: tasaAgendamiento, desc: `${negociacion} de ${enContacto}` },
+                                                        { label: 'Cierre', value: tasaCierre, desc: `${ganadas} de ${negociacion}` },
+                                                        { label: 'Global', value: tasaGlobal, desc: `${ganadas} de ${totalLeadsHistoricos}` },
+                                                    ].map((rate, i) => (
+                                                        <div key={i} className="flex items-center gap-2">
+                                                            <span className="text-[10px] font-bold text-gray-500 w-24 shrink-0">{rate.label}</span>
+                                                            <div className="flex-1 h-3 bg-gray-50 rounded-full overflow-hidden">
+                                                                <div 
+                                                                    className={`h-full rounded-full transition-all duration-700 ${
+                                                                        rate.value >= 30 ? 'bg-green-500' : rate.value >= 15 ? 'bg-amber-500' : 'bg-rose-400'
+                                                                    }`} 
+                                                                    style={{ width: `${Math.min(rate.value, 100)}%` }} 
+                                                                />
+                                                            </div>
+                                                            <span className="text-[10px] font-black text-gray-600 w-10 text-right tabular-nums">{formatPercent(rate.value)}</span>
+                                                        </div>
+                                                    ))}
                                                 </div>
                                             </div>
                                         </div>
