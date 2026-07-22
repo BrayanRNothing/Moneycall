@@ -730,6 +730,14 @@ export default function Chats() {
                             )}
                         </div>
                     </div>
+                    <button
+                        type="button"
+                        onClick={() => navigate('/vendedor/ajustes')}
+                        className="px-2 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-[10px] font-extrabold flex items-center gap-1 transition-all shrink-0"
+                        title="Ver recomendaciones y reglas anti-spam de WhatsApp en Ajustes"
+                    >
+                        <span>⚠️</span> Rules Anti-Spam
+                    </button>
                 </div>
 
                 {/* Búsqueda */}

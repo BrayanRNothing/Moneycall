@@ -3,7 +3,7 @@ import {
     User, Lock, Shield, Monitor, LogOut,
     Link2, Link2Off, CheckCircle2, Mail, Phone,
     AlertCircle, Bell, Save, KeyRound, Palette, Camera,
-    Award, Globe, MessageSquare
+    Award, Globe, MessageSquare, AlertTriangle
 } from 'lucide-react';
 import { useTranslation } from '../utils/translations';
 import { useLanguageStore } from '../store/useLanguageStore';
@@ -1076,6 +1076,67 @@ export default function VendedorAjustes() {
                                                 </button>
                                             </div>
                                         )}
+
+                                        {/* Seccion de Advertencias Anti-Spam y Politicas de Meta */}
+                                        <div className="mt-8 pt-6 border-t border-slate-200/80">
+                                            <div className="bg-amber-50/90 border border-amber-200/90 rounded-3xl p-6 text-left shadow-xs">
+                                                <div className="flex items-start gap-3.5 mb-4">
+                                                    <div className="p-2.5 rounded-2xl bg-amber-500 text-white shrink-0 shadow-md shadow-amber-500/20">
+                                                        <AlertTriangle size={22} />
+                                                    </div>
+                                                    <div>
+                                                        <h4 className="text-sm sm:text-base font-black text-amber-950 leading-tight">
+                                                            ⚠️ Advertencias de Uso y Políticas Anti-Spam de WhatsApp
+                                                        </h4>
+                                                        <p className="text-xs text-amber-800/90 mt-1 font-semibold leading-relaxed">
+                                                            Para evitar bloqueos o suspensiones temporales/definitivas por parte de Meta, sigue rigurosamente estas reglas de uso recomendadas:
+                                                        </p>
+                                                    </div>
+                                                </div>
+
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 text-xs">
+                                                    <div className="p-4 bg-white/95 border border-amber-200/60 rounded-2xl space-y-1.5 shadow-xs">
+                                                        <p className="font-extrabold text-amber-900 flex items-center gap-2">
+                                                            <span>🛑</span> No envíes Spam o Mensajes Masivos
+                                                        </p>
+                                                        <p className="text-[11px] text-slate-600 leading-relaxed font-medium">
+                                                            No envíes mensajes a contactos que no te conozcan, no hayan solicitado información o no tengan guardado tu número telefónico.
+                                                        </p>
+                                                    </div>
+
+                                                    <div className="p-4 bg-white/95 border border-amber-200/60 rounded-2xl space-y-1.5 shadow-xs">
+                                                        <p className="font-extrabold text-amber-900 flex items-center gap-2">
+                                                            <span>⏱️</span> Mantén Ritmo y Pausas Humanas
+                                                        </p>
+                                                        <p className="text-[11px] text-slate-600 leading-relaxed font-medium">
+                                                            Evita enviar decenas de mensajes por segundo. Los patrones de envío instantáneo activan los filtros automatizados de spam de WhatsApp.
+                                                        </p>
+                                                    </div>
+
+                                                    <div className="p-4 bg-white/95 border border-amber-200/60 rounded-2xl space-y-1.5 shadow-xs">
+                                                        <p className="font-extrabold text-amber-900 flex items-center gap-2">
+                                                            <span>📝</span> Personaliza tus Textos y Plantillas
+                                                        </p>
+                                                        <p className="text-[11px] text-slate-600 leading-relaxed font-medium">
+                                                            Evita enviar exactamente la misma plantilla o texto idéntico a múltiples prospectos. Usa variables (nombres, empresas) para variarlo.
+                                                        </p>
+                                                    </div>
+
+                                                    <div className="p-4 bg-white/95 border border-amber-200/60 rounded-2xl space-y-1.5 shadow-xs">
+                                                        <p className="font-extrabold text-amber-900 flex items-center gap-2">
+                                                            <span>🚫</span> Cuidado con Chips o SIMs Nuevas
+                                                        </p>
+                                                        <p className="text-[11px] text-slate-600 leading-relaxed font-medium">
+                                                            Los números de teléfono recién creados tienen menor reputación en servidores de WhatsApp y son altamente propensos a bloqueos por reporte.
+                                                        </p>
+                                                    </div>
+                                                </div>
+
+                                                <div className="mt-4 pt-3.5 border-t border-amber-200/70 text-[11px] text-amber-900 font-bold flex items-center gap-2">
+                                                    <span>🛡️ Nota: La responsabilidad sobre la reputación y uso de la línea telefónica recae en el usuario de la cuenta.</span>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </section>
                             )}
