@@ -131,29 +131,29 @@ router.get('/chats', auth, async (req, res) => {
                         SELECT a.descripcion 
                         FROM actividades a 
                         WHERE a.cliente = c.id AND a.tipo = 'whatsapp' AND (a.resultado IS NULL OR a.resultado != 'nota_interna')
-                        ORDER BY COALESCE(a."createdAt", a.fecha) DESC LIMIT 1
+                        ORDER BY COALESCE(CAST(a."createdAt" AS TEXT), CAST(a.fecha AS TEXT)) DESC LIMIT 1
                     ) AS "lastMessage",
                     (
-                        SELECT COALESCE(a."createdAt", a.fecha)
+                        SELECT COALESCE(CAST(a."createdAt" AS TEXT), CAST(a.fecha AS TEXT))
                         FROM actividades a 
                         WHERE a.cliente = c.id AND a.tipo = 'whatsapp' AND (a.resultado IS NULL OR a.resultado != 'nota_interna')
-                        ORDER BY COALESCE(a."createdAt", a.fecha) DESC LIMIT 1
+                        ORDER BY COALESCE(CAST(a."createdAt" AS TEXT), CAST(a.fecha AS TEXT)) DESC LIMIT 1
                     ) AS "lastMessageTime",
                     (
                         SELECT a.resultado 
                         FROM actividades a 
                         WHERE a.cliente = c.id AND a.tipo = 'whatsapp' AND (a.resultado IS NULL OR a.resultado != 'nota_interna')
-                        ORDER BY COALESCE(a."createdAt", a.fecha) DESC LIMIT 1
+                        ORDER BY COALESCE(CAST(a."createdAt" AS TEXT), CAST(a.fecha AS TEXT)) DESC LIMIT 1
                     ) AS "lastResult"
                 FROM clientes c
                 WHERE c.telefono IS NOT NULL AND c.telefono != ''
                 ORDER BY COALESCE(
                     CAST(
                         (
-                            SELECT COALESCE(a."createdAt", a.fecha)
+                            SELECT COALESCE(CAST(a."createdAt" AS TEXT), CAST(a.fecha AS TEXT))
                             FROM actividades a 
                             WHERE a.cliente = c.id AND a.tipo = 'whatsapp' AND (a.resultado IS NULL OR a.resultado != 'nota_interna')
-                            ORDER BY COALESCE(a."createdAt", a.fecha) DESC LIMIT 1
+                            ORDER BY COALESCE(CAST(a."createdAt" AS TEXT), CAST(a.fecha AS TEXT)) DESC LIMIT 1
                         ) AS TEXT
                     ),
                     CAST(c."ultimaInteraccion" AS TEXT),
@@ -177,19 +177,19 @@ router.get('/chats', auth, async (req, res) => {
                         SELECT a.descripcion 
                         FROM actividades a 
                         WHERE a.cliente = c.id AND a.tipo = 'whatsapp' AND (a.resultado IS NULL OR a.resultado != 'nota_interna')
-                        ORDER BY COALESCE(a."createdAt", a.fecha) DESC LIMIT 1
+                        ORDER BY COALESCE(CAST(a."createdAt" AS TEXT), CAST(a.fecha AS TEXT)) DESC LIMIT 1
                     ) AS "lastMessage",
                     (
-                        SELECT COALESCE(a."createdAt", a.fecha)
+                        SELECT COALESCE(CAST(a."createdAt" AS TEXT), CAST(a.fecha AS TEXT))
                         FROM actividades a 
                         WHERE a.cliente = c.id AND a.tipo = 'whatsapp' AND (a.resultado IS NULL OR a.resultado != 'nota_interna')
-                        ORDER BY COALESCE(a."createdAt", a.fecha) DESC LIMIT 1
+                        ORDER BY COALESCE(CAST(a."createdAt" AS TEXT), CAST(a.fecha AS TEXT)) DESC LIMIT 1
                     ) AS "lastMessageTime",
                     (
                         SELECT a.resultado 
                         FROM actividades a 
                         WHERE a.cliente = c.id AND a.tipo = 'whatsapp' AND (a.resultado IS NULL OR a.resultado != 'nota_interna')
-                        ORDER BY COALESCE(a."createdAt", a.fecha) DESC LIMIT 1
+                        ORDER BY COALESCE(CAST(a."createdAt" AS TEXT), CAST(a.fecha AS TEXT)) DESC LIMIT 1
                     ) AS "lastResult"
                 FROM clientes c
                 WHERE c.telefono IS NOT NULL AND c.telefono != ''
@@ -206,10 +206,10 @@ router.get('/chats', auth, async (req, res) => {
                 ORDER BY COALESCE(
                     CAST(
                         (
-                            SELECT COALESCE(a."createdAt", a.fecha)
+                            SELECT COALESCE(CAST(a."createdAt" AS TEXT), CAST(a.fecha AS TEXT))
                             FROM actividades a 
                             WHERE a.cliente = c.id AND a.tipo = 'whatsapp' AND (a.resultado IS NULL OR a.resultado != 'nota_interna')
-                            ORDER BY COALESCE(a."createdAt", a.fecha) DESC LIMIT 1
+                            ORDER BY COALESCE(CAST(a."createdAt" AS TEXT), CAST(a.fecha AS TEXT)) DESC LIMIT 1
                         ) AS TEXT
                     ),
                     CAST(c."ultimaInteraccion" AS TEXT),
@@ -268,7 +268,7 @@ router.get('/chats/:clienteId', auth, async (req, res) => {
         }
 
         const activities = await db.prepare(
-            'SELECT id, descripcion, resultado, "createdAt", "fecha" FROM actividades WHERE cliente = ? AND tipo = ? ORDER BY COALESCE("createdAt", "fecha") ASC, id ASC'
+            'SELECT id, descripcion, resultado, "createdAt", "fecha" FROM actividades WHERE cliente = ? AND tipo = ? ORDER BY COALESCE(CAST("createdAt" AS TEXT), CAST("fecha" AS TEXT)) ASC, id ASC'
         ).all(clienteId, 'whatsapp');
         
         res.json(activities);
