@@ -153,7 +153,8 @@ const pgMap = {
   vendedornombre: 'vendedorNombre', vendedorrol: 'vendedorRol', closernombre: 'closerNombre', propietarionombre: 'propietarioNombre',
   sitioweb: 'sitioWeb', googlemeetlink: 'googleMeetLink',
   custommetriclabel: 'customMetricLabel', custommetricvalue: 'customMetricValue',
-  customsections: 'customSections', fuente: 'fuente', motivoperdida: 'motivoPerdida'
+  customsections: 'customSections', fuente: 'fuente', motivoperdida: 'motivoPerdida',
+  lastmessage: 'lastMessage', lastmessagetime: 'lastMessageTime', lastresult: 'lastResult'
 };
 
 const mapPgRow = (row) => {

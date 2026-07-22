@@ -113,6 +113,7 @@ router.post('/send', auth, async (req, res) => {
 router.get('/chats', auth, async (req, res) => {
     const vendedorId = req.usuario.id;
     const { rol } = req.usuario;
+    const vendedorIdNum = parseInt(vendedorId, 10);
     try {
         let rows = [];
         if (rol === 'admin') {
@@ -158,6 +159,8 @@ router.get('/chats', auth, async (req, res) => {
                 ) DESC
             `).all();
         } else {
+            const vId = !isNaN(vendedorIdNum) ? vendedorIdNum : vendedorId;
+            const vStr = String(vendedorId);
             rows = await db.prepare(`
                 SELECT 
                     c.id,
@@ -189,13 +192,13 @@ router.get('/chats', auth, async (req, res) => {
                 FROM clientes c
                 WHERE c.telefono IS NOT NULL AND c.telefono != ''
                   AND (
-                    c."vendedorAsignado" = ?
-                    OR c."prospectorAsignado" = ?
-                    OR c."propietarioId" = ?
-                    OR c."closerAsignado" = ?
+                    c."vendedorAsignado" = ? OR c."vendedorAsignado" = ?
+                    OR c."prospectorAsignado" = ? OR c."prospectorAsignado" = ?
+                    OR c."propietarioId" = ? OR c."propietarioId" = ?
+                    OR c."closerAsignado" = ? OR c."closerAsignado" = ?
                     OR EXISTS (
                         SELECT 1 FROM actividades act 
-                        WHERE act.cliente = c.id AND act.tipo = 'whatsapp' AND act.vendedor = ?
+                        WHERE act.cliente = c.id AND act.tipo = 'whatsapp' AND (act.vendedor = ? OR act.vendedor = ?)
                     )
                   )
                 ORDER BY COALESCE(
@@ -208,20 +211,25 @@ router.get('/chats', auth, async (req, res) => {
                     c."ultimaInteraccion",
                     c."fechaRegistro"
                 ) DESC
-            `).all(vendedorId, vendedorId, vendedorId, vendedorId, vendedorId);
+            `).all(vId, vStr, vId, vStr, vId, vStr, vId, vStr, vId, vStr);
         }
 
-        const chats = (rows || []).map(r => ({
-            id: r.id,
-            nombres: r.nombres || 'Sin nombre',
-            apellidoPaterno: r.apellidoPaterno || '',
-            telefono: r.telefono,
-            etapaEmbudo: r.etapaEmbudo || 'prospecto_nuevo',
-            lastMessage: r.lastMessage || '',
-            lastMessageTime: r.lastMessageTime || null,
-            lastMessageFromMe: r.lastResult === 'enviado',
-            unanswered: r.lastResult === 'recibido' || (r.lastMessage || '').startsWith('Cliente:')
-        }));
+        const chats = (rows || []).map(r => {
+            const lastMsg = r.lastMessage || r.lastmessage || '';
+            const lastMsgTime = r.lastMessageTime || r.lastmessagetime || null;
+            const lastRes = r.lastResult || r.lastresult || '';
+            return {
+                id: r.id,
+                nombres: r.nombres || r.name || 'Sin nombre',
+                apellidoPaterno: r.apellidoPaterno || r.apellidopaterno || '',
+                telefono: r.telefono,
+                etapaEmbudo: r.etapaEmbudo || r.etapaembudo || 'prospecto_nuevo',
+                lastMessage: lastMsg,
+                lastMessageTime: lastMsgTime,
+                lastMessageFromMe: lastRes === 'enviado',
+                unanswered: lastRes === 'recibido' || (lastMsg || '').startsWith('Cliente:')
+            };
+        });
 
         res.json(chats);
     } catch (err) {
