@@ -129,7 +129,22 @@ export default function Chats() {
     const startRecording = async () => {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            const mediaRecorder = new MediaRecorder(stream);
+            
+            // Determinar tipo MIME compatible con el navegador
+            let mimeType = 'audio/webm;codecs=opus';
+            if (typeof MediaRecorder !== 'undefined') {
+                if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
+                    mimeType = 'audio/webm;codecs=opus';
+                } else if (MediaRecorder.isTypeSupported('audio/ogg;codecs=opus')) {
+                    mimeType = 'audio/ogg;codecs=opus';
+                } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
+                    mimeType = 'audio/mp4';
+                } else if (MediaRecorder.isTypeSupported('audio/webm')) {
+                    mimeType = 'audio/webm';
+                }
+            }
+
+            const mediaRecorder = new MediaRecorder(stream, { mimeType });
             mediaRecorderRef.current = mediaRecorder;
             audioChunksRef.current = [];
 
@@ -140,7 +155,7 @@ export default function Chats() {
             };
 
             mediaRecorder.onstop = () => {
-                const blob = new Blob(audioChunksRef.current, { type: 'audio/ogg; codecs=opus' });
+                const blob = new Blob(audioChunksRef.current, { type: mimeType });
                 setAudioBlob(blob);
             };
 
@@ -297,7 +312,7 @@ export default function Chats() {
                         <video src={url} controls className="rounded-lg max-w-full max-h-60 border border-slate-100" />
                     )}
                     {type === 'AUDIO' && (
-                        <audio src={url} controls className="w-full max-w-xs scale-90 origin-left" />
+                        <audio src={url} controls className="block w-[240px] max-w-full my-1.5 focus:outline-none" />
                     )}
                     {type === 'DOCUMENT' && (
                         <a 

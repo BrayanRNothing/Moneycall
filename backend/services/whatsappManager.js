@@ -1052,7 +1052,7 @@ async function sendMediaMessage(vendedorId, numero, mediaType, fileBuffer, fileN
     if (mediaType === 'audio') {
         messageContent = {
             audio: fileBuffer,
-            mimetype: mimeType || 'audio/ogg; codecs=opus',
+            mimetype: 'audio/ogg; codecs=opus',
             ptt: true
         };
     } else if (mediaType === 'image') {

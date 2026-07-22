@@ -110,7 +110,7 @@ export default function ProspectoDetalle({
                         <video src={url} controls className="rounded-lg max-w-full max-h-60 border border-slate-100" />
                     )}
                     {type === 'AUDIO' && (
-                        <audio src={url} controls className="w-full max-w-xs scale-90 origin-left" />
+                        <audio src={url} controls className="block w-[240px] max-w-full my-1.5 focus:outline-none" />
                     )}
                     {type === 'DOCUMENT' && (
                         <a 
