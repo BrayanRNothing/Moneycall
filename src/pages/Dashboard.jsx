@@ -725,26 +725,24 @@ const Dashboard = () => {
     const formatNumber = new Intl.NumberFormat('es-MX');
 
     const isTotal = periodo === 'total';
-    const totalEntrada = isTotal ? (vendedorData.embudo.total || 0) : (mP.prospectos || 0);
-    const enContacto = isTotal ? (vendedorData.embudo.en_contacto || 0) : (mP.llamadas || 0);
-    const sinContactar = isTotal ? Math.max(0, (vendedorData.embudo.total || 0) - (vendedorData.embudo.en_contacto || 0)) : Math.max(0, totalEntrada - enContacto);
+    // Always show real embudo total as the main "Prospectos activos" number
+    const totalEntrada = vendedorData.embudo.total || 0;
+    const prospectosNuevosPeriodo = mP.prospectos || 0;
+    const enContacto = vendedorData.embudo.en_contacto || 0;
+    const sinContactar = Math.max(0, totalEntrada - enContacto);
     const negociacion = isTotal ? ((vendedorData.embudo.reunion_agendada || 0) + (closerData.embudo.reunion_realizada || 0) + (closerData.embudo.propuesta_enviada || 0)) : (mP.reuniones || 0);
     const ganadas = isTotal ? (closerData.embudo.venta_ganada || 0) : (cP.ventasCount || 0);
-    const totalLeadsHistoricos = isTotal
-        ? (vendedorData.embudo.total || 0) + (closerData.embudo.venta_ganada || 0) + (closerData.embudo.perdido || 0)
-        : totalEntrada;
+    const totalLeadsHistoricos = totalEntrada + (closerData.embudo.venta_ganada || 0) + (closerData.embudo.perdido || 0);
     
-    const tasaGlobal = isTotal
-        ? (totalLeadsHistoricos > 0 ? clampPercent((ganadas / totalLeadsHistoricos) * 100) : 0)
-        : (totalEntrada > 0 ? clampPercent((ganadas / totalEntrada) * 100) : 0);
+    const tasaGlobal = totalLeadsHistoricos > 0 ? clampPercent((ganadas / totalLeadsHistoricos) * 100) : 0;
 
-    const tasaContacto = isTotal
-        ? clampPercent(vendedorData.tasasConversion.contacto || 0)
-        : (totalEntrada > 0 ? clampPercent((enContacto / totalEntrada) * 100) : 0);
+    const tasaContacto = totalEntrada > 0
+        ? clampPercent((enContacto / totalEntrada) * 100)
+        : clampPercent(vendedorData.tasasConversion.contacto || 0);
 
-    const tasaAgendamiento = isTotal
-        ? ((vendedorData.embudo.en_contacto || 0) > 0 ? clampPercent((negociacion / (vendedorData.embudo.en_contacto || 1)) * 100) : 0)
-        : (enContacto > 0 ? clampPercent((negociacion / enContacto) * 100) : 0);
+    const tasaAgendamiento = enContacto > 0
+        ? clampPercent((negociacion / enContacto) * 100)
+        : 0;
 
     const tasaCierre = negociacion > 0 ? clampPercent((ganadas / negociacion) * 100) : 0;
     const etapasDebiles = [
@@ -770,7 +768,7 @@ const Dashboard = () => {
     mergeFuentes(closerData?.analisisFuentes);
 
     const cardsResumen = [
-        { title: 'Prospectos activos', value: formatNumber.format(totalEntrada), icon: '👥', color: 'blue', subtext: `${mP.prospectos || 0} recibidos ${periodoSuffix}` },
+        { title: 'Prospectos activos', value: formatNumber.format(totalEntrada), icon: '👥', color: 'blue', subtext: `${prospectosNuevosPeriodo} nuevos ${periodoSuffix}` },
         { title: 'En contacto', value: formatNumber.format(enContacto), icon: '📞', color: 'green', subtext: `${sinContactar} todavía sin tocar` },
         { title: 'En negociación', value: formatNumber.format(negociacion), icon: '🤝', color: 'purple', subtext: `${cP.reunionesRealizadas || 0} citas realizadas ${periodoSuffix}` },
         { title: 'Ventas ganadas', value: formatNumber.format(ganadas), icon: '🏆', color: 'yellow', subtext: `${formatPercent(tasaGlobal)} conv. global (${cP.ventasCount || 0} en periodo)` }
@@ -856,8 +854,8 @@ const Dashboard = () => {
                                 etapa: 'Entrada',
                                 cantidad: totalEntrada,
                                 color: 'bg-(--theme-500)',
-                                contadorHoy: vendedorData.periodos?.[periodo]?.prospectos ?? 0,
-                                labelContador: `recibidos ${periodoSuffix}`,
+                                contadorHoy: prospectosNuevosPeriodo,
+                                labelContador: `nuevos ${periodoSuffix}`,
                                 cantidadExito: enContacto,
                                 cantidadPerdida: sinContactar,
                                 porcentajeExito: formatPercent(tasaContacto),
