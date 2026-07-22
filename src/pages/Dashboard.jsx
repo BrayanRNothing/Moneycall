@@ -1051,50 +1051,37 @@ const Dashboard = () => {
                                                 <h3 className="text-xs font-black uppercase tracking-widest text-gray-800">ESTADO GENERAL</h3>
                                             </div>
                                             
-                                            <div className="flex flex-col gap-2.5 flex-1 justify-between">
-                                                {/* Velocidad de Respuesta */}
-                                                <div className="flex items-center justify-between px-4 py-3 bg-gray-50/50 border border-gray-100 rounded-lg group hover:border-gray-300 hover:shadow-sm transition-all">
+                                            <div className="flex flex-col gap-3 flex-1 justify-between">
+                                                {/* Cantidad de Prospectos */}
+                                                <div className="flex-1 flex items-center justify-between px-4 py-4 bg-gray-50/50 border border-gray-100 rounded-lg group hover:border-gray-300 hover:shadow-sm transition-all">
                                                     <div>
-                                                        <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-0.5">Velocidad de Respuesta</h4>
-                                                        <span className="text-lg font-black text-gray-700">{closerData?.eficiencia?.responseTimeHoras || 0} hrs</span>
+                                                        <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-0.5">Prospectos</h4>
+                                                        <span className="text-xl font-black text-gray-700">{formatNumber.format(totalEntrada)}</span>
                                                     </div>
-                                                    <div className="w-8 h-8 rounded-md bg-gray-100 flex items-center justify-center group-hover:bg-gray-200 transition-colors">
-                                                        <Zap className="w-4 h-4 text-gray-600" />
+                                                    <div className="w-12 h-12 rounded-md bg-gray-100 flex items-center justify-center group-hover:bg-gray-200 transition-colors">
+                                                        <Users className="w-7 h-7 text-gray-500" />
                                                     </div>
                                                 </div>
 
-                                                {/* Tasa de Asistencia */}
-                                                <div className="flex items-center justify-between px-4 py-3 bg-gray-50/50 border border-gray-100 rounded-lg group hover:border-gray-300 hover:shadow-sm transition-all">
+                                                {/* Cantidad de Clientes */}
+                                                <div className="flex-1 flex items-center justify-between px-4 py-4 bg-gray-50/50 border border-gray-100 rounded-lg group hover:border-gray-300 hover:shadow-sm transition-all">
                                                     <div>
-                                                        <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-0.5">Tasa de Asistencia</h4>
-                                                        <span className="text-lg font-black text-gray-700">{closerData?.tasasConversion?.asistencia || 0}%</span>
+                                                        <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-0.5">Clientes</h4>
+                                                        <span className="text-xl font-black text-gray-700">{formatNumber.format(ganadas)}</span>
                                                     </div>
-                                                    <div className="w-8 h-8 rounded-md bg-gray-100 flex items-center justify-center group-hover:bg-gray-200 transition-colors">
-                                                        <Users className="w-4 h-4 text-gray-600" />
+                                                    <div className="w-12 h-12 rounded-md bg-gray-100 flex items-center justify-center group-hover:bg-gray-200 transition-colors">
+                                                        <Target className="w-7 h-7 text-gray-500" />
                                                     </div>
                                                 </div>
 
-                                                {/* Ciclo de Cierre */}
-                                                <div className="flex items-center justify-between px-4 py-3 bg-gray-50/50 border border-gray-100 rounded-lg group hover:border-gray-300 hover:shadow-sm transition-all">
+                                                {/* Ingresos Generados */}
+                                                <div className="flex-1 flex items-center justify-between px-4 py-4 bg-gray-50/50 border border-gray-100 rounded-lg group hover:border-gray-300 hover:shadow-sm transition-all">
                                                     <div>
-                                                        <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-0.5">Ciclo de Cierre</h4>
-                                                        <span className="text-lg font-black text-gray-700">{closerData?.eficiencia?.cicloVentaDias || 0} días</span>
+                                                        <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-0.5">Ingresos</h4>
+                                                        <span className="text-xl font-black text-gray-700">{formatMoney.format(cP.ventasMonto || 0)}</span>
                                                     </div>
-                                                    <div className="w-8 h-8 rounded-md bg-gray-100 flex items-center justify-center group-hover:bg-gray-200 transition-colors">
-                                                        <RefreshCw className="w-4 h-4 text-gray-600" />
-                                                    </div>
-                                                </div>
-
-                                                {/* Ticket Promedio */}
-                                                <div className="flex items-center justify-between px-4 py-3 bg-gray-50/50 border border-gray-100 rounded-lg group hover:border-gray-300 hover:shadow-sm transition-all">
-                                                    <div>
-                                                        <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-0.5">Ticket Promedio</h4>
-                                                        <span className="text-lg font-black text-gray-700">
-                                                            {formatMoney.format(cP.ventasCount > 0 ? cP.ventasMonto / cP.ventasCount : 0)}
-                                                        </span>
-                                                    </div>
-                                                    <div className="w-8 h-8 rounded-md bg-gray-100 flex items-center justify-center group-hover:bg-gray-200 transition-colors">
-                                                        <DollarSign className="w-4 h-4 text-gray-600" />
+                                                    <div className="w-12 h-12 rounded-md bg-gray-100 flex items-center justify-center group-hover:bg-gray-200 transition-colors">
+                                                        <DollarSign className="w-7 h-7 text-gray-500" />
                                                     </div>
                                                 </div>
                                             </div>

@@ -1452,99 +1452,89 @@ const Calendario = () => {
                 {activeTab === "agendar" ? (
                   <div className="animate-in fade-in slide-in-from-right-2 duration-200 flex-1 flex flex-col min-h-0">
                     <div className="flex flex-col flex-1 min-h-0 space-y-4 px-1">
-                      {/* ── HEADER ───────────────────────── */}
-                      <div className="shrink-0 flex items-center justify-between">
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="p-1.5 bg-(--theme-50) text-(--theme-600) rounded-lg border border-(--theme-100)">
-                              <CalendarIcon className="w-4 h-4" />
-                            </span>
-                            <h3 className="text-sm font-black text-slate-800 tracking-tight">Agendar Cita</h3>
-                          </div>
-                          <p className="text-[10px] font-bold text-(--theme-500) uppercase tracking-wider mt-1 ml-0.5">
-                            {selectedDate.toLocaleDateString("es-MX", { weekday: "long", day: "numeric", month: "short" }).toUpperCase()}
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* Toggle Prospecto / Cliente — simple */}
-                      <div className="shrink-0 flex gap-1 border-b border-slate-100 pb-0">
-                        <button
-                          type="button"
-                          onClick={() => { setContactType("prospecto"); setSelectedProspect(""); }}
-                          className={`px-3 py-2 text-xs font-bold transition-all border-b-2 -mb-px ${
-                            contactType === "prospecto"
-                              ? "border-(--theme-500) text-(--theme-600)"
-                              : "border-transparent text-slate-400 hover:text-slate-600"
-                          }`}
-                        >
-                          Prospecto
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => { setContactType("cliente"); setSelectedProspect(""); }}
-                          className={`px-3 py-2 text-xs font-bold transition-all border-b-2 -mb-px ${
-                            contactType === "cliente"
-                              ? "border-(--theme-500) text-(--theme-600)"
-                              : "border-transparent text-slate-400 hover:text-slate-600"
-                          }`}
-                        >
-                          Cliente
-                        </button>
+                      {/* ── ENCABEZADO SIMPLIFICADO ───────────────────────── */}
+                      <div className="shrink-0 pb-1 px-1 mt-1">
+                        <h3 className="text-[11px] font-black text-slate-800 tracking-tight leading-none uppercase">Agendar Cita</h3>
+                        <p className="text-[9px] font-bold text-slate-400 mt-0.5 uppercase tracking-wider">
+                          {selectedDate.toLocaleDateString("es-MX", { weekday: "long", day: "numeric", month: "short" })}
+                        </p>
                       </div>
 
                       <form
                         onSubmit={handleSubmit}
-                        className="flex-1 flex flex-col min-h-0 space-y-3 pb-2 pr-1 custom-scrollbar overflow-y-auto"
+                        className="flex-1 flex flex-col min-h-0 space-y-3.5 pb-4 pr-1.5 custom-scrollbar overflow-y-auto mt-2"
                       >
-                        {/* 1. Selección de contacto + closer */}
-                        <div className="space-y-2.5 shrink-0">
-                          {/* Contacto */}
-                          <div>
-                            <label className="flex items-center gap-1.5 text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-0.5">
-                              {contactType === "cliente" ? <Briefcase className="w-3 h-3 text-(--theme-500)" /> : <User className="w-3 h-3 text-(--theme-500)" />}
-                              {contactType === "cliente" ? "Cliente" : "Prospecto"}
-                            </label>
-                            <div className="relative">
-                              <select
-                                value={selectedProspect}
-                                onChange={(e) => setSelectedProspect(e.target.value)}
-                                className="w-full h-10 pl-3 pr-8 text-[11px] font-bold text-slate-700 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-(--theme-500)/20 focus:border-(--theme-500) outline-none transition-all cursor-pointer appearance-none"
-                                required
-                              >
-                                <option value="" disabled>
-                                  {contactType === "cliente" ? "Seleccionar cliente..." : "Seleccionar prospecto..."}
-                                </option>
-                                {(contactType === "cliente" ? clientes : prospectos).map((p) => (
-                                  <option key={p.id || p._id} value={p.id || p._id}>
-                                    {p.nombres} {p.apellidoPaterno ? p.apellidoPaterno.charAt(0) + "." : ""}
-                                    {p.empresa ? ` — ${p.empresa}` : ""}
-                                  </option>
-                                ))}
-                              </select>
-                              <ChevronRight className="w-3 h-3 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 rotate-90 pointer-events-none" />
-                            </div>
-                            {contactType === "cliente" && clientes.length === 0 && (
-                              <p className="text-[9px] text-amber-500 font-bold mt-1 ml-1">No hay clientes ganados registrados aún.</p>
-                            )}
-                            {contactType === "prospecto" && prospectos.length === 0 && (
-                              <p className="text-[9px] text-amber-500 font-bold mt-1 ml-1">No hay prospectos disponibles.</p>
-                            )}
+                        {/* 1. Selección de contacto */}
+                        <div className="shrink-0 p-3 bg-white border border-slate-100 rounded-2xl shadow-xs">
+                          {/* Segmented Control for Prospecto / Cliente */}
+                          <div className="flex p-0.5 bg-slate-100 rounded-lg mb-3">
+                            <button
+                              type="button"
+                              onClick={() => { setContactType("prospecto"); setSelectedProspect(""); }}
+                              className={`flex-1 py-1.5 text-[9px] font-black uppercase tracking-widest rounded-md transition-all ${
+                                contactType === "prospecto"
+                                  ? "bg-white text-slate-800 shadow-sm"
+                                  : "text-slate-400 hover:text-slate-600"
+                              }`}
+                            >
+                              Prospecto
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => { setContactType("cliente"); setSelectedProspect(""); }}
+                              className={`flex-1 py-1.5 text-[9px] font-black uppercase tracking-widest rounded-md transition-all ${
+                                contactType === "cliente"
+                                  ? "bg-white text-slate-800 shadow-sm"
+                                  : "text-slate-400 hover:text-slate-600"
+                              }`}
+                            >
+                              Cliente
+                            </button>
                           </div>
+                          
+                          <label className="flex items-center gap-1.5 text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1">
+                            {contactType === "cliente" ? <Briefcase className="w-3.5 h-3.5 text-(--theme-500)" /> : <User className="w-3.5 h-3.5 text-(--theme-500)" />}
+                            {contactType === "cliente" ? "Selecciona el Cliente" : "Selecciona el Prospecto"}
+                          </label>
+                          <div className="relative">
+                            <select
+                              value={selectedProspect}
+                              onChange={(e) => setSelectedProspect(e.target.value)}
+                              className="w-full h-10 pl-3 pr-8 text-[11px] font-bold text-slate-800 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-(--theme-500)/20 focus:border-(--theme-500) outline-none transition-all cursor-pointer appearance-none hover:bg-slate-100/50"
+                              required
+                            >
+                              <option value="" disabled>Buscar {contactType}...</option>
+                              {(contactType === "cliente" ? clientes : prospectos).map((p) => (
+                                <option key={p.id || p._id} value={p.id || p._id}>
+                                  {p.nombres} {p.apellidoPaterno ? p.apellidoPaterno.charAt(0) + "." : ""}
+                                  {p.empresa ? ` — ${p.empresa}` : ""}
+                                </option>
+                              ))}
+                            </select>
+                            <ChevronRight className="w-4 h-4 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 rotate-90 pointer-events-none" />
+                          </div>
+                          {contactType === "cliente" && clientes.length === 0 && (
+                            <p className="text-[9px] text-amber-500 font-bold mt-1.5 ml-1">No hay clientes ganados registrados aún.</p>
+                          )}
+                          {contactType === "prospecto" && prospectos.length === 0 && (
+                            <p className="text-[9px] text-amber-500 font-bold mt-1.5 ml-1">No hay prospectos disponibles.</p>
+                          )}
+                        </div>
 
-                          {/* Closer / Responsable + Invitados — misma fila */}
-                          <div className="grid grid-cols-2 gap-2">
-                            {/* Closer */}
+                        {/* 2. Responsable e Invitados */}
+                        <div className="shrink-0 p-3.5 bg-white border border-slate-100 rounded-2xl shadow-xs">
+                          <div className="grid grid-cols-2 gap-3">
+                            {/* Responsable */}
                             <div>
-                              <label className="flex items-center gap-1 text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-0.5">
-                                <Users className="w-3 h-3 text-(--theme-500)" />
+                              <label className="flex items-center gap-1.5 text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">
+                                <Users className="w-3.5 h-3.5 text-(--theme-500)" />
                                 {currentUser?.rol === "vendedor" ? "Responsable" : "Closer"}
                               </label>
                               <div className="relative">
                                 <select
                                   value={selectedCloser}
                                   onChange={(e) => setSelectedCloser(e.target.value)}
-                                  className="w-full h-9 pl-2.5 pr-7 text-[10px] font-bold text-slate-700 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-(--theme-500)/20 focus:border-(--theme-500) outline-none transition-all cursor-pointer appearance-none"
+                                  className="w-full h-10 pl-3 pr-8 text-[11px] font-bold text-slate-700 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-(--theme-500)/20 focus:border-(--theme-500) outline-none transition-all cursor-pointer appearance-none hover:bg-slate-100/50"
                                   required
                                 >
                                   <option value="" disabled>Seleccionar...</option>
@@ -1554,14 +1544,14 @@ const Calendario = () => {
                                     </option>
                                   ))}
                                 </select>
-                                <ChevronRight className="w-3 h-3 text-slate-400 absolute right-2 top-1/2 -translate-y-1/2 rotate-90 pointer-events-none" />
+                                <ChevronRight className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 rotate-90 pointer-events-none" />
                               </div>
                             </div>
 
                             {/* Invitados */}
                             <div>
-                              <label className="flex items-center gap-1 text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-0.5">
-                                <UserPlus className="w-3 h-3 text-(--theme-500)" />
+                              <label className="flex items-center gap-1.5 text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">
+                                <UserPlus className="w-3.5 h-3.5 text-(--theme-500)" />
                                 Invitados
                               </label>
                               <div className="flex gap-1.5">
@@ -1571,164 +1561,202 @@ const Calendario = () => {
                                   onChange={(e) => setInvitadoInput(e.target.value)}
                                   onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addInvitadoLocal())}
                                   placeholder="correo@..."
-                                  className="flex-1 h-9 px-2.5 text-[10px] font-medium border border-slate-200 bg-slate-50 rounded-xl focus:ring-2 focus:ring-(--theme-500)/30 outline-none transition-all min-w-0"
+                                  className="flex-1 h-10 px-2.5 text-[11px] font-medium border border-slate-200 bg-slate-50 rounded-xl focus:ring-2 focus:ring-(--theme-500)/30 outline-none transition-all min-w-0"
                                 />
                                 <button
                                   type="button"
                                   onClick={addInvitadoLocal}
-                                  className="w-9 h-9 shrink-0 flex items-center justify-center bg-(--theme-500) text-white rounded-xl hover:bg-(--theme-600) transition-all"
+                                  className="w-10 h-10 shrink-0 flex items-center justify-center bg-slate-100 text-slate-600 rounded-xl hover:bg-slate-200 transition-all border border-slate-200 shadow-xs"
                                 >
-                                  <UserPlus className="w-3.5 h-3.5" />
+                                  <UserPlus className="w-4 h-4" />
                                 </button>
                               </div>
-                              {/* Pills de invitados agregados */}
-                              {formData.invitados.length > 0 && (
-                                <div className="flex flex-wrap gap-1 mt-1.5">
-                                  {formData.invitados.map((inv, idx) => (
-                                    <span
-                                      key={idx}
-                                      className="flex items-center gap-1 px-1.5 py-0.5 bg-white text-slate-600 rounded text-[8px] font-bold border border-slate-200"
-                                    >
-                                      {inv.split("@")[0]}
-                                      <X
-                                        className="w-2 h-2 cursor-pointer hover:text-red-500"
-                                        onClick={() =>
-                                          setFormData({
-                                            ...formData,
-                                            invitados: formData.invitados.filter((i) => i !== inv),
-                                          })
-                                        }
-                                      />
-                                    </span>
-                                  ))}
-                                </div>
-                              )}
                             </div>
                           </div>
-                        </div>
 
-                        {/* 3. Plataforma de videollamada */}
-                        <div className="shrink-0 space-y-2.5">
-                          <label className="flex items-center gap-1.5 text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">
-                            <VideoIcon className="w-3 h-3 text-(--theme-500)" /> Plataforma
-                          </label>
-                          <select
-                            value={plataforma}
-                            onChange={(e) => setPlataforma(e.target.value)}
-                            className="w-full h-9 pl-3 pr-8 text-[11px] font-bold text-slate-700 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-(--theme-500)/20 focus:border-(--theme-500) outline-none transition-all cursor-pointer appearance-none"
-                          >
-                            <option value="meet" disabled={!closerLinkedToGoogle}>Google Meet {!closerLinkedToGoogle && "(Requiere vincular cuenta)"}</option>
-                            <option value="mirrowtalk">MirrowTalk</option>
-                            <option value="propio">Link Propio</option>
-                          </select>
-                          {!closerLinkedToGoogle && (
-                            <p className="text-[9px] font-bold text-amber-500 mt-1.5 ml-1">
-                              * El vendedor no ha vinculado su cuenta de Google.
-                            </p>
-                          )}
-                          {plataforma === "propio" && (
-                            <input
-                              type="url"
-                              value={linkPropio}
-                              onChange={(e) => setLinkPropio(e.target.value)}
-                              placeholder="https://..."
-                              className="w-full h-9 px-3 text-[11px] font-medium border border-slate-200 bg-slate-50 rounded-xl focus:ring-2 focus:ring-(--theme-500)/30 outline-none transition-all mt-2"
-                            />
+                          {/* Pills de invitados (fila completa abajo) */}
+                          {formData.invitados.length > 0 && (
+                            <div className="flex flex-wrap gap-1.5 mt-3 pt-2 border-t border-slate-100">
+                              {formData.invitados.map((inv, idx) => (
+                                <span
+                                  key={idx}
+                                  className="flex items-center gap-1.5 px-2 py-1 bg-slate-100 text-slate-700 rounded-lg text-[9px] font-bold border border-slate-200 shadow-xs"
+                                >
+                                  {inv.split("@")[0]}
+                                  <X
+                                    className="w-3 h-3 cursor-pointer hover:text-rose-500 transition-colors"
+                                    onClick={() =>
+                                      setFormData({
+                                        ...formData,
+                                        invitados: formData.invitados.filter((i) => i !== inv),
+                                      })
+                                    }
+                                  />
+                                </span>
+                              ))}
+                            </div>
                           )}
                         </div>
 
-                        {/* 4. Horarios (Botón que abre modal) */}
-                        <div className="shrink-0">
-                          <label className="flex items-center gap-1.5 text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">
-                            <Clock className="w-3 h-3 text-(--theme-500)" /> Horario
-                          </label>
-                          <button
-                            type="button"
-                            onClick={() => setShowTimeModal(true)}
-                            className="w-full h-10 border border-slate-200 bg-white rounded-xl text-[11px] font-bold text-slate-600 hover:border-(--theme-500) hover:text-(--theme-600) transition-all flex justify-between items-center px-3 shadow-sm"
-                          >
-                            <span>
-                              {selectedTimeSlot ? selectedTimeSlot.start.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" }) : "Seleccionar horario..."}
-                            </span>
-                            <Clock className="w-4 h-4 opacity-50" />
-                          </button>
-                        </div>
-
-                        {/* 4. Notas y Pie (Compacto) */}
-                        <div className="shrink-0 space-y-3">
+                        {/* 3. Modalidad y Horario */}
+                        <div className="shrink-0 p-3.5 bg-white border border-slate-100 rounded-2xl shadow-xs space-y-4">
+                          {/* Plataforma */}
                           <div>
-                            <label className="flex items-center gap-1.5 text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">
-                              <FileText className="w-3 h-3 text-slate-300" />{" "}
-                              Notas
+                            <label className="flex items-center gap-1.5 text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">
+                              <VideoIcon className="w-3.5 h-3.5 text-(--theme-500)" /> Modalidad de Reunión
                             </label>
-                            <textarea
-                              value={formData.notas}
-                              onChange={(e) =>
-                                setFormData({
-                                  ...formData,
-                                  notas: e.target.value,
-                                })
-                              }
-                              rows="2"
-                              className="w-full p-2.5 text-[10px] font-medium border border-slate-200 bg-slate-50 rounded-xl focus:ring-2 focus:ring-(--theme-500)/20 focus:border-(--theme-500) outline-none transition-all resize-none placeholder:text-slate-300"
-                              placeholder="Agrega contexto, agenda o instrucciones para la reunión..."
-                            />
+                            <div className="flex gap-2">
+                              <button
+                                type="button"
+                                onClick={() => setPlataforma("meet")}
+                                disabled={!closerLinkedToGoogle}
+                                className={`flex-1 flex flex-col items-center justify-center gap-1.5 h-16 rounded-xl border transition-all ${
+                                  plataforma === "meet" 
+                                    ? "bg-blue-50 border-blue-300 text-blue-700 shadow-sm ring-1 ring-blue-300 scale-100" 
+                                    : "bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100 scale-95 hover:scale-100"
+                                } ${!closerLinkedToGoogle ? "opacity-50 cursor-not-allowed grayscale" : ""}`}
+                              >
+                                <VideoIcon className="w-5 h-5" />
+                                <span className="text-[9px] font-black tracking-wide">MEET</span>
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => setPlataforma("mirrowtalk")}
+                                className={`flex-1 flex flex-col items-center justify-center gap-1.5 h-16 rounded-xl border transition-all ${
+                                  plataforma === "mirrowtalk" 
+                                    ? "bg-purple-50 border-purple-300 text-purple-700 shadow-sm ring-1 ring-purple-300 scale-100" 
+                                    : "bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100 scale-95 hover:scale-100"
+                                }`}
+                              >
+                                <ExternalLink className="w-5 h-5" />
+                                <span className="text-[9px] font-black tracking-wide">MIRROW</span>
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => setPlataforma("propio")}
+                                className={`flex-1 flex flex-col items-center justify-center gap-1.5 h-16 rounded-xl border transition-all ${
+                                  plataforma === "propio" 
+                                    ? "bg-slate-800 border-slate-900 text-white shadow-sm scale-100" 
+                                    : "bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100 scale-95 hover:scale-100"
+                                }`}
+                              >
+                                <LinkIcon className="w-5 h-5" />
+                                <span className="text-[9px] font-black tracking-wide">PROPIO</span>
+                              </button>
+                            </div>
+                            
+                            {!closerLinkedToGoogle && plataforma === "meet" && (
+                              <p className="text-[9px] font-bold text-amber-500 mt-2">
+                                * Cuenta de Google no vinculada.
+                              </p>
+                            )}
+                            
+                            {/* Input opcional link propio */}
+                            {plataforma === "propio" && (
+                              <div className="mt-3 animate-in fade-in slide-in-from-top-1">
+                                <input
+                                  type="url"
+                                  value={linkPropio}
+                                  onChange={(e) => setLinkPropio(e.target.value)}
+                                  placeholder="Ingresa tu enlace (Zoom, Teams...)"
+                                  className="w-full h-10 px-3 text-[11px] font-medium border border-slate-200 bg-slate-50 rounded-xl focus:ring-2 focus:ring-slate-500/30 outline-none transition-all"
+                                />
+                              </div>
+                            )}
                           </div>
 
+                          <div className="w-full h-px bg-slate-100"></div>
+
+                          {/* Horario */}
+                          <div>
+                            <label className="flex items-center gap-1.5 text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">
+                              <Clock className="w-3.5 h-3.5 text-(--theme-500)" /> Selección de Horario
+                            </label>
+                            <button
+                              type="button"
+                              onClick={() => setShowTimeModal(true)}
+                              className={`w-full h-12 border rounded-xl text-xs font-bold transition-all flex justify-between items-center px-4 shadow-xs ${
+                                selectedTimeSlot 
+                                  ? "bg-emerald-50 border-emerald-300 text-emerald-700 hover:bg-emerald-100 ring-1 ring-emerald-300" 
+                                  : "bg-slate-50 border-slate-200 text-slate-500 hover:border-(--theme-500) hover:text-(--theme-600)"
+                              }`}
+                            >
+                              <span>
+                                {selectedTimeSlot ? `Confirmado: ${selectedTimeSlot.start.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })}` : "Toca para elegir una hora..."}
+                              </span>
+                              <Clock className={`w-4 h-4 ${selectedTimeSlot ? "text-emerald-500" : "text-slate-400"}`} />
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* 4. Notas */}
+                        <div className="shrink-0 p-3.5 bg-white border border-slate-100 rounded-2xl shadow-xs">
+                          <label className="flex items-center gap-1.5 text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">
+                            <FileText className="w-3.5 h-3.5 text-slate-400" /> Notas adicionales
+                          </label>
+                          <textarea
+                            value={formData.notas}
+                            onChange={(e) =>
+                              setFormData({
+                                ...formData,
+                                notas: e.target.value,
+                              })
+                            }
+                            rows="2"
+                            className="w-full p-3 text-[11px] font-medium border border-slate-200 bg-slate-50 rounded-xl focus:ring-2 focus:ring-(--theme-500)/20 focus:border-(--theme-500) outline-none transition-all resize-none placeholder:text-slate-400"
+                            placeholder="Agrega el contexto de la reunión, puntos a tocar..."
+                          />
+                        </div>
+
+                        {/* 5. Botón Principal */}
+                        <div className="mt-1 shrink-0">
                           <button
                             type="submit"
                             disabled={!selectedTimeSlot || !selectedProspect}
-                            className={`w-full py-3.5 px-4 rounded-2xl font-black uppercase tracking-widest text-[11px] transition-all ${
+                            className={`w-full py-4 px-4 rounded-2xl font-black uppercase tracking-widest text-[11px] transition-all flex items-center justify-center gap-2 ${
                               (!selectedTimeSlot || !selectedProspect)
-                                ? "bg-slate-200 text-slate-400 cursor-not-allowed shadow-none"
-                                : "text-white hover:scale-[1.02] active:scale-[0.98]"
+                                ? "bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed shadow-none"
+                                : "text-white bg-(--theme-500) hover:bg-(--theme-600) shadow-[0_8px_20px_-4px_color-mix(in_srgb,var(--theme-500)_40%,transparent)] hover:-translate-y-0.5 active:translate-y-0"
                             }`}
-                            style={
-                              (!selectedTimeSlot || !selectedProspect)
-                                ? {}
-                                : {
-                                    background: "linear-gradient(135deg, var(--theme-600) 0%, var(--theme-500) 100%)",
-                                    boxShadow: "0 8px 24px -4px color-mix(in srgb, var(--theme-500) 35%, transparent)",
-                                  }
-                            }
                           >
+                            <CalendarIcon className="w-4 h-4" />
                             {selectedTimeSlot
-                              ? `✓ Confirmar · ${selectedTimeSlot.start.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })}`
-                              : "Selecciona un horario primero"}
+                              ? "Confirmar Agendamiento"
+                              : "Completa los datos"}
                           </button>
-
-                          {createdEventLink && (
-                            <div className="p-3 bg-blue-50/50 border border-blue-100 rounded-2xl flex flex-col items-center animate-in zoom-in-95">
-                              <div className="flex items-center gap-2 text-blue-700 mb-2">
-                                <LinkIcon className="w-4 h-4" />
-                                <p className="font-black text-[9px] uppercase tracking-wider text-blue-800">
-                                  Meet Generado
-                                </p>
-                              </div>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  navigator.clipboard.writeText(
-                                    createdEventLink,
-                                  );
-                                  toast.success("Enlace de Meet copiado");
-                                }}
-                                className="w-full py-2 bg-white border border-blue-200 text-blue-600 rounded-xl hover:bg-blue-50 font-black text-[10px] flex items-center justify-center gap-2 shadow-sm transition-all"
-                              >
-                                <Copy className="w-3.5 h-3.5" />
-                                COPIAR ENLACE
-                              </button>
-                            </div>
-                          )}
-
-                          {bookingCheck && (
-                            <div
-                              className={`p-3 rounded-2xl border text-[11px] font-bold ${bookingCheck.type === "success" ? "bg-emerald-50 border-emerald-200 text-emerald-700" : bookingCheck.type === "warning" ? "bg-amber-50 border-amber-200 text-amber-700" : "bg-rose-50 border-rose-200 text-rose-700"}`}
-                            >
-                              {bookingCheck.message}
-                            </div>
-                          )}
                         </div>
+
+                        {createdEventLink && (
+                          <div className="shrink-0 p-4 bg-blue-50/80 border border-blue-200 rounded-2xl flex flex-col items-center animate-in zoom-in-95 mt-2">
+                            <div className="flex items-center gap-1.5 text-blue-700 mb-2">
+                              <LinkIcon className="w-4 h-4" />
+                              <p className="font-black text-[10px] uppercase tracking-widest text-blue-800">
+                                Meet Generado
+                              </p>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                navigator.clipboard.writeText(createdEventLink);
+                                toast.success("Enlace copiado exitosamente");
+                              }}
+                              className="w-full py-2.5 bg-white border border-blue-200 text-blue-600 rounded-xl hover:bg-blue-100 font-black text-[10px] flex items-center justify-center gap-1.5 transition-all uppercase tracking-widest shadow-sm"
+                            >
+                              <Copy className="w-4 h-4" />
+                              Copiar Enlace
+                            </button>
+                          </div>
+                        )}
+
+                        {bookingCheck && (
+                          <div
+                            className={`shrink-0 p-3.5 rounded-xl border text-[11px] font-bold mt-2 ${bookingCheck.type === "success" ? "bg-emerald-50 border-emerald-200 text-emerald-700" : bookingCheck.type === "warning" ? "bg-amber-50 border-amber-200 text-amber-700" : "bg-rose-50 border-rose-200 text-rose-700"}`}
+                          >
+                            {bookingCheck.message}
+                          </div>
+                        )}
                       </form>
                     </div>
                   </div>
