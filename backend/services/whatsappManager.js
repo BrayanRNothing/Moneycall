@@ -990,9 +990,89 @@ async function initSessions(io) {
             await new Promise(r => setTimeout(r, i === 0 ? 0 : 1500));
             connectClient(session.vendedor_id, io);
         }
+
+        initScheduledMessagesWorker(io);
     } catch (err) {
         console.error('Error inicializando sesiones de WhatsApp:', err.message);
     }
+}
+
+// Worker para procesar mensajes programados de WhatsApp
+function initScheduledMessagesWorker(io) {
+    setInterval(async () => {
+        try {
+            const nowIso = new Date().toISOString();
+            const pending = await db.prepare(
+                `SELECT * FROM whatsapp_scheduled WHERE status = 'pending' AND scheduled_at <= ?`
+            ).all(nowIso);
+
+            for (const item of pending) {
+                try {
+                    const client = await db.prepare('SELECT id, telefono FROM clientes WHERE id = ?').get(item.cliente_id);
+                    if (client && client.telefono && connections[item.vendedor_id]) {
+                        await sendMessage(item.vendedor_id, client.telefono, item.mensaje);
+                        await db.prepare('INSERT INTO actividades (tipo, vendedor, cliente, descripcion, resultado) VALUES (?, ?, ?, ?, ?)')
+                            .run('whatsapp', item.vendedor_id, client.id, `Vendedor: ${item.mensaje}`, 'enviado');
+                        await db.prepare('UPDATE clientes SET "ultimaInteraccion" = CURRENT_TIMESTAMP WHERE id = ?').run(client.id);
+                        await db.prepare(`UPDATE whatsapp_scheduled SET status = 'sent' WHERE id = ?`).run(item.id);
+                        if (io) {
+                            io.to(`user_${item.vendedor_id}`).emit('prospectos_actualizados');
+                        }
+                    } else {
+                        await db.prepare(`UPDATE whatsapp_scheduled SET status = 'failed' WHERE id = ?`).run(item.id);
+                    }
+                } catch (err) {
+                    console.error(`Error enviando WhatsApp programado #${item.id}:`, err.message);
+                    await db.prepare(`UPDATE whatsapp_scheduled SET status = 'failed' WHERE id = ?`).run(item.id);
+                }
+            }
+        } catch (_) {}
+    }, 20000);
+}
+
+// Enviar un mensaje multimedia (imágenes, documentos PDF, audios PTT)
+async function sendMediaMessage(vendedorId, numero, mediaType, fileBuffer, fileName = '', caption = '', mimeType = '') {
+    const sock = connections[vendedorId];
+    if (!sock || connectionStatuses[vendedorId] !== 'conectado') {
+        throw new Error('Tu sesión de WhatsApp no está conectada. Ve a Ajustes para vincular tu cuenta.');
+    }
+
+    let cleanNumber = numero.replace(/\D/g, '');
+    if (cleanNumber.length === 10) cleanNumber = '521' + cleanNumber;
+    if (cleanNumber.length === 11 && cleanNumber.startsWith('1')) cleanNumber = '521' + cleanNumber.substring(1);
+    if (cleanNumber.length === 12 && cleanNumber.startsWith('52') && !cleanNumber.startsWith('521')) {
+        cleanNumber = '521' + cleanNumber.substring(2);
+    }
+
+    const jid = `${cleanNumber}@s.whatsapp.net`;
+    await delay(200);
+
+    let messageContent = {};
+
+    if (mediaType === 'audio') {
+        messageContent = {
+            audio: fileBuffer,
+            mimetype: mimeType || 'audio/ogg; codecs=opus',
+            ptt: true
+        };
+    } else if (mediaType === 'image') {
+        messageContent = {
+            image: fileBuffer,
+            caption: caption || ''
+        };
+    } else if (mediaType === 'document') {
+        messageContent = {
+            document: fileBuffer,
+            mimetype: mimeType || 'application/pdf',
+            fileName: fileName || 'documento.pdf',
+            caption: caption || ''
+        };
+    } else {
+        throw new Error('Tipo de archivo no soportado: ' + mediaType);
+    }
+
+    await sock.sendMessage(jid, messageContent);
+    return true;
 }
 
 // Enviar un mensaje usando la sesión del vendedor
@@ -1314,6 +1394,7 @@ module.exports = {
     connectClient,
     disconnectClient,
     sendMessage,
+    sendMediaMessage,
     getSessionStatus,
     getStoredQr
 };

@@ -412,6 +412,28 @@ const initDb = async () => {
     session_data TEXT NOT NULL,
     "updatedAt" TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
   );
+
+  CREATE TABLE IF NOT EXISTS whatsapp_scheduled (
+    id SERIAL PRIMARY KEY,
+    vendedor_id INTEGER REFERENCES usuarios(id) ON DELETE CASCADE,
+    cliente_id INTEGER REFERENCES clientes(id) ON DELETE CASCADE,
+    mensaje TEXT,
+    media_url TEXT,
+    scheduled_at TIMESTAMPTZ NOT NULL,
+    status TEXT DEFAULT 'pending',
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+  );
+
+  CREATE TABLE IF NOT EXISTS whatsapp_chat_settings (
+    id SERIAL PRIMARY KEY,
+    vendedor_id INTEGER REFERENCES usuarios(id) ON DELETE CASCADE,
+    cliente_id INTEGER REFERENCES clientes(id) ON DELETE CASCADE,
+    is_pinned INTEGER DEFAULT 0,
+    is_unread INTEGER DEFAULT 0,
+    label TEXT DEFAULT '',
+    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(vendedor_id, cliente_id)
+  );
 `;
 
   let finalSql = sql;

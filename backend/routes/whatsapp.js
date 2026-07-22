@@ -365,4 +365,197 @@ router.post('/chats/:id/toggle-client', auth, async (req, res) => {
     }
 });
 
+// Configurar multer para envíos multimedia de WhatsApp (imágenes, PDFs, audios)
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+
+const WA_UPLOADS_DIR = path.join(__dirname, '..', 'uploads', 'whatsapp');
+if (!fs.existsSync(WA_UPLOADS_DIR)) {
+    fs.mkdirSync(WA_UPLOADS_DIR, { recursive: true });
+}
+
+const waStorage = multer.diskStorage({
+    destination: (_req, _file, cb) => cb(null, WA_UPLOADS_DIR),
+    filename: (_req, file, cb) => {
+        const ext = path.extname(file.originalname) || (file.mimetype.includes('audio') ? '.ogg' : '.bin');
+        const base = path.basename(file.originalname, ext).replace(/[^a-zA-Z0-9_\-]/g, '_').slice(0, 40);
+        cb(null, `${Date.now()}_${base}${ext}`);
+    }
+});
+
+const waUpload = multer({
+    storage: waStorage,
+    limits: { fileSize: 25 * 1024 * 1024 } // 25 MB
+});
+
+// POST /api/whatsapp/send-media - Enviar imágenes, PDFs o notas de voz
+router.post('/send-media', auth, waUpload.single('file'), async (req, res) => {
+    const vendedorId = req.usuario.id;
+    const { clienteId, mediaType, caption } = req.body;
+    const file = req.file;
+
+    if (!clienteId || !file) {
+        return res.status(400).json({ mensaje: 'Falta clienteId o archivo' });
+    }
+
+    try {
+        const client = await db.prepare('SELECT id, nombres, "apellidoPaterno", telefono, "equipo_id" FROM clientes WHERE id = ?').get(clienteId);
+        if (!client || !client.telefono) {
+            return res.status(404).json({ mensaje: 'Cliente no encontrado o sin teléfono' });
+        }
+
+        const relativeUrl = `/uploads/whatsapp/${file.filename}`;
+        const fileBuffer = fs.readFileSync(file.path);
+        const fileName = file.originalname || file.filename;
+        const mimeType = file.mimetype;
+
+        const { sendMediaMessage } = require('../services/whatsappManager');
+        await sendMediaMessage(vendedorId, client.telefono, mediaType, fileBuffer, fileName, caption, mimeType);
+
+        let descTag = '';
+        if (mediaType === 'audio') {
+            descTag = `[AUDIO](${relativeUrl})`;
+        } else if (mediaType === 'image') {
+            descTag = `[IMAGE](${relativeUrl})${caption ? ' - ' + caption : ''}`;
+        } else {
+            descTag = `[DOCUMENT](${relativeUrl})${caption ? ' - ' + caption : ''}`;
+        }
+
+        await db.prepare('INSERT INTO actividades (tipo, vendedor, cliente, descripcion, resultado) VALUES (?, ?, ?, ?, ?)')
+            .run('whatsapp', vendedorId, clienteId, `Vendedor: ${descTag}`, 'enviado');
+
+        await db.prepare('UPDATE clientes SET "ultimaInteraccion" = CURRENT_TIMESTAMP WHERE id = ?').run(clienteId);
+
+        const io = req.app.get('io');
+        if (io) {
+            io.emit('prospectos_actualizados');
+            io.to(`user_${vendedorId}`).emit('prospectos_actualizados');
+        }
+
+        res.json({ mensaje: 'Archivo enviado correctamente', url: relativeUrl });
+    } catch (err) {
+        console.error('Error enviando media WhatsApp:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// POST /api/whatsapp/scheduled - Programar un mensaje futuro
+router.post('/scheduled', auth, async (req, res) => {
+    const vendedorId = req.usuario.id;
+    const { clienteId, mensaje, scheduledAt } = req.body;
+
+    if (!clienteId || !mensaje || !scheduledAt) {
+        return res.status(400).json({ mensaje: 'Faltan campos requeridos' });
+    }
+
+    try {
+        await db.prepare(
+            `INSERT INTO whatsapp_scheduled (vendedor_id, cliente_id, mensaje, scheduled_at, status) VALUES (?, ?, ?, ?, 'pending')`
+        ).run(vendedorId, clienteId, String(mensaje).trim(), scheduledAt);
+
+        res.json({ mensaje: 'Mensaje programado exitosamente' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// GET /api/whatsapp/scheduled - Obtener lista de mensajes programados pendientes
+router.get('/scheduled', auth, async (req, res) => {
+    const vendedorId = req.usuario.id;
+    try {
+        const rows = await db.prepare(
+            `SELECT s.*, c.nombres, c."apellidoPaterno", c.telefono 
+             FROM whatsapp_scheduled s
+             JOIN clientes c ON s.cliente_id = c.id
+             WHERE s.vendedor_id = ? AND s.status = 'pending'
+             ORDER BY s.scheduled_at ASC`
+        ).all(vendedorId);
+
+        res.json(rows);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// DELETE /api/whatsapp/scheduled/:id - Cancelar mensaje programado
+router.delete('/scheduled/:id', auth, async (req, res) => {
+    const vendedorId = req.usuario.id;
+    const { id } = req.params;
+    try {
+        await db.prepare(
+            `UPDATE whatsapp_scheduled SET status = 'cancelled' WHERE id = ? AND vendedor_id = ?`
+        ).run(id, vendedorId);
+
+        res.json({ mensaje: 'Mensaje programado cancelado' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// POST /api/whatsapp/chats/:clienteId/settings - Actualizar ajustes de chat (Fijar, No leído, Etiqueta)
+router.post('/chats/:clienteId/settings', auth, async (req, res) => {
+    const vendedorId = req.usuario.id;
+    const { clienteId } = req.params;
+    const { isPinned, isUnread, label } = req.body;
+
+    try {
+        const existing = await db.prepare(
+            `SELECT * FROM whatsapp_chat_settings WHERE vendedor_id = ? AND cliente_id = ?`
+        ).get(vendedorId, clienteId);
+
+        if (existing) {
+            await db.prepare(
+                `UPDATE whatsapp_chat_settings 
+                 SET is_pinned = COALESCE(?, is_pinned), 
+                     is_unread = COALESCE(?, is_unread), 
+                     label = COALESCE(?, label),
+                     updated_at = CURRENT_TIMESTAMP
+                 WHERE vendedor_id = ? AND cliente_id = ?`
+            ).run(
+                isPinned !== undefined ? (isPinned ? 1 : 0) : null,
+                isUnread !== undefined ? (isUnread ? 1 : 0) : null,
+                label !== undefined ? label : null,
+                vendedorId, clienteId
+            );
+        } else {
+            await db.prepare(
+                `INSERT INTO whatsapp_chat_settings (vendedor_id, cliente_id, is_pinned, is_unread, label)
+                 VALUES (?, ?, ?, ?, ?)`
+            ).run(
+                vendedorId, clienteId,
+                isPinned ? 1 : 0,
+                isUnread ? 1 : 0,
+                label || ''
+            );
+        }
+
+        res.json({ mensaje: 'Ajustes de chat actualizados' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// GET /api/whatsapp/chats-settings - Obtener mapa de configuraciones de chat del vendedor
+router.get('/chats-settings', auth, async (req, res) => {
+    const vendedorId = req.usuario.id;
+    try {
+        const rows = await db.prepare(
+            `SELECT cliente_id, is_pinned, is_unread, label FROM whatsapp_chat_settings WHERE vendedor_id = ?`
+        ).all(vendedorId);
+
+        const map = {};
+        for (const r of rows) {
+            map[r.cliente_id] = {
+                isPinned: Boolean(r.is_pinned),
+                isUnread: Boolean(r.is_unread),
+                label: r.label || ''
+            };
+        }
+        res.json(map);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 module.exports = router;
