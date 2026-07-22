@@ -1799,6 +1799,16 @@ const Seguimiento = () => {
                                                         </button>
                                                     )}
                                                     <button
+                                                         onClick={(e) => {
+                                                             e.stopPropagation();
+                                                             navigate('/vendedor/chats', { state: { clienteId: p._id || p.id } });
+                                                         }}
+                                                         className="text-slate-300 hover:text-emerald-600 transition-colors p-1.5 rounded-md hover:bg-emerald-50"
+                                                         title="Abrir Chat WhatsApp"
+                                                     >
+                                                         <MessageSquare className="w-4 h-4" />
+                                                     </button>
+                                                    <button
                                                         onClick={(e) => { e.stopPropagation(); abrirModalEditar(p); }}
                                                         className="text-slate-300 hover:text-(--theme-600) transition-colors p-1.5 rounded-md hover:bg-slate-50"
                                                         title="Editar Prospecto"

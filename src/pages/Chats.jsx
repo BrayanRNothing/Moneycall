@@ -5,7 +5,7 @@ import {
     Link, Sparkles, RefreshCw, LogOut, ArrowLeft,
     CheckCircle2, Filter, StickyNote
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import API_URL from '../config/api';
 import { getToken, getUser } from '../utils/authUtils';
 import socket from '../config/socket';
@@ -26,6 +26,9 @@ const getAuthHeaders = () => ({ 'x-auth-token': getToken() || '' });
 
 export default function Chats() {
     const navigate = useNavigate();
+    const location = useLocation();
+    const [searchParams] = useSearchParams();
+    const targetClienteId = location.state?.clienteId || location.state?.cliente?.id || searchParams.get('clienteId');
     const [wsStatus, setWsStatus] = useState('desconectado');
     const [loadingStatus, setLoadingStatus] = useState(true);
     const [qrCode, setQrCode] = useState(null);
@@ -202,6 +205,34 @@ export default function Chats() {
             fetchChatsList(false);
         }
     }, [wsStatus]);
+
+    // Seleccionar automáticamente el chat del prospecto o cliente cuando viene redirigido desde Seguimiento o Clientes
+    useEffect(() => {
+        if (targetClienteId) {
+            const targetIdStr = String(targetClienteId);
+            if (chats.length > 0) {
+                const found = chats.find(c => String(c.id) === targetIdStr);
+                if (found) {
+                    setActiveChat(found);
+                } else {
+                    axios.get(`${API_URL}/api/clientes/${targetClienteId}`, { headers: getAuthHeaders() })
+                        .then(res => {
+                            if (res.data) {
+                                const newChat = {
+                                    id: res.data.id,
+                                    nombres: res.data.nombres || 'Cliente',
+                                    apellidoPaterno: res.data.apellidoPaterno || '',
+                                    telefono: res.data.telefono || '',
+                                    etapaEmbudo: res.data.etapaEmbudo || ''
+                                };
+                                setActiveChat(newChat);
+                            }
+                        })
+                        .catch(() => {});
+                }
+            }
+        }
+    }, [targetClienteId, chats]);
 
     // 3. Cargar mensajes del chat activo
     const fetchMessages = async (clienteId) => {

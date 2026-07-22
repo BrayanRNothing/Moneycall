@@ -19,6 +19,31 @@ if (!fs.existsSync(SESSION_DIR_BASE)) {
     fs.mkdirSync(SESSION_DIR_BASE, { recursive: true });
 }
 
+// Mapa en memoria de mensajes recientes por vendedor para reintentos E2EE (getMessage): { [vendedorId]: Map<msgId, messageObject> }
+const messageStore = {};
+
+function storeMessageForVendor(vendedorId, msg) {
+    if (!msg || !msg.key || !msg.key.id || !msg.message) return;
+    if (!messageStore[vendedorId]) {
+        messageStore[vendedorId] = new Map();
+    }
+    const vendorStore = messageStore[vendedorId];
+    vendorStore.set(msg.key.id, msg.message);
+    if (vendorStore.size > 1000) {
+        const oldestKey = vendorStore.keys().next().value;
+        vendorStore.delete(oldestKey);
+    }
+}
+
+function getMessageForVendor(vendedorId, key) {
+    if (!key || !key.id) return { conversation: '' };
+    const vendorStore = messageStore[vendedorId];
+    if (vendorStore && vendorStore.has(key.id)) {
+        return vendorStore.get(key.id);
+    }
+    return { conversation: '' };
+}
+
 // Mapa de intentos de reconexión para backoff exponencial: { [vendedorId]: retryCount }
 const retryCount = {};
 
@@ -311,6 +336,11 @@ async function saveSessionToDb(vendedorId, sessionDir) {
 }
 
 async function restoreSessionFromDb(vendedorId, sessionDir) {
+    const credsFile = path.join(sessionDir, 'creds.json');
+    if (fs.existsSync(credsFile)) {
+        console.log(`[WhatsApp user_${vendedorId}] Sesión local activa detectada en disco, omitiendo sobrescritura desde DB.`);
+        return true;
+    }
     const { db } = require('../config/database');
     try {
         const row = await db.prepare('SELECT session_data FROM whatsapp_sessions WHERE vendedor_id = ?').get(vendedorId);
@@ -354,13 +384,13 @@ function cleanSessionFolder(sessionDir) {
         .catch(err => console.error(`⚠️ Error al borrar carpeta de sesión ${sessionDir}:`, err.message));
 }
 
-// Debounce para evitar sobrecargar la base de datos en creds.update (incrementado a 15s)
+// Debounce optimizado a 2s para mantener credenciales E2EE en sync con la base de datos de inmediato
 const syncTimeouts = {};
 function queueSessionSync(vendedorId, sessionDir) {
     if (syncTimeouts[vendedorId]) clearTimeout(syncTimeouts[vendedorId]);
     syncTimeouts[vendedorId] = setTimeout(() => {
         saveSessionToDb(vendedorId, sessionDir);
-    }, 15000);
+    }, 2000);
 }
 
 // Heartbeat: mapa de timers de verificación de conexión
@@ -376,9 +406,10 @@ function startHeartbeat(vendedorId, io) {
             return;
         }
         try {
-            // Si el socket está en estado 'open' pero no hay actividad, ping implícito con readyState
-            if (sock.ws && sock.ws.readyState !== 1 /* OPEN */) {
-                console.warn(`[WhatsApp user_${vendedorId}] Heartbeat detectó conexión muerta (ws.readyState=${sock.ws?.readyState}). Reconectando...`);
+            // Verificar readyState únicamente si está definido explícitamente en el socket
+            const wsState = sock.ws?.readyState ?? sock.ws?.socket?.readyState;
+            if (wsState !== undefined && wsState !== 1 /* OPEN */) {
+                console.warn(`[WhatsApp user_${vendedorId}] Heartbeat detectó conexión muerta (wsState=${wsState}). Reconectando...`);
                 stopHeartbeat(vendedorId);
                 delete connections[vendedorId];
                 connectionStatuses[vendedorId] = 'desconectado';
@@ -639,8 +670,9 @@ async function connectClient(vendedorId, io) {
         connectTimeoutMs: 60000,
         keepAliveIntervalMs: 25000,
         retryRequestDelayMs: 250,               // Reintentos rápidos
-        maxMsgRetryCount: 3,                    // Permitir reintentos razonables para recuperar mensajes
-        generateHighQualityLinkPreview: false   // Ahorrar tiempo en previews de links
+        maxMsgRetryCount: 5,                    // Permitir reintentos para recuperar mensajes desincronizados / Bad MAC
+        generateHighQualityLinkPreview: false,  // Ahorrar tiempo en previews de links
+        getMessage: async (key) => getMessageForVendor(vendedorId, key)
     });
 
     connections[vendedorId] = sock;
@@ -683,6 +715,8 @@ async function connectClient(vendedorId, io) {
             connectionStatuses[vendedorId] = 'desconectado';
             
             if (!isLoggedOut) {
+                // Guardar último estado de credenciales en DB antes de reconectar
+                await saveSessionToDb(vendedorId, sessionDir);
                 // Reconectar con backoff exponencial
                 const reconnectDelay = getReconnectDelay(vendedorId);
                 console.log(`[WhatsApp user_${vendedorId}] Reconectando en ${Math.round(reconnectDelay / 1000)}s...`);
@@ -702,6 +736,15 @@ async function connectClient(vendedorId, io) {
             await saveSessionToDb(vendedorId, sessionDir);
             io.to(`user_${vendedorId}`).emit('whatsapp-status', { status: 'sincronizando' });
             startHeartbeat(vendedorId, io); // Iniciar heartbeat de monitoreo
+
+            // Safety timeout: si en 3.5 segundos sigue en 'sincronizando', marcar como 'conectado'
+            setTimeout(() => {
+                if (connectionStatuses[vendedorId] === 'sincronizando' && connections[vendedorId]) {
+                    console.log(`[WhatsApp user_${vendedorId}] Estado actualizado: sincronizando -> conectado (transición automática)`);
+                    connectionStatuses[vendedorId] = 'conectado';
+                    io.to(`user_${vendedorId}`).emit('whatsapp-status', { status: 'conectado' });
+                }
+            }, 3500);
         }
 
         if (receivedPendingNotifications) {
@@ -713,6 +756,10 @@ async function connectClient(vendedorId, io) {
 
     sock.ev.on('messaging-history.set', async ({ chats, contacts, messages, isLatest }) => {
         console.log(`[WhatsApp user_${vendedorId}] Historial inicial recibido: ${chats?.length || 0} chats, ${contacts?.length || 0} contactos, ${messages?.length || 0} mensajes.`);
+        
+        // Al recibir el historial inicial, marcar inmediatamente la sesión como conectada
+        connectionStatuses[vendedorId] = 'conectado';
+        io.to(`user_${vendedorId}`).emit('whatsapp-status', { status: 'conectado' });
         
         if (contacts) {
             for (const contact of contacts) {
@@ -807,6 +854,7 @@ async function connectClient(vendedorId, io) {
         if (m.type === 'notify' || m.type === 'append') {
             for (const msg of m.messages) {
                 if (!msg.message) continue;
+                storeMessageForVendor(vendedorId, msg);
 
                 const remoteJid = msg.key?.remoteJid || '';
                 const remoteJidAlt = msg.key?.remoteJidAlt || '';

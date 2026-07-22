@@ -1,6 +1,6 @@
 import { useTranslation } from '../utils/translations';
 import React, { useMemo, useState, useEffect, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { 
     Search, RefreshCw, ChevronRight, ArrowLeft, User, History, Trash2, Download, 
     Upload, Plus, X, Phone, MessageCircle, Calendar, Filter, Star, Mail, 
@@ -57,6 +57,7 @@ const getEtapaMeta = (etapa) => ETAPA_META[etapa] || { label: 'Cliente Activo', 
 const Clientes = () => {
     const { t } = useTranslation();
     const location = useLocation();
+    const navigate = useNavigate();
     const esMenuSeguimiento = location.pathname.endsWith('/clientes/seguimiento');
     const [clientes, setClientes] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -1268,6 +1269,16 @@ const Clientes = () => {
                                                                 <Share2 className="w-4 h-4" />
                                                             </button>
                                                         )}
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                navigate('/vendedor/chats', { state: { clienteId: cliente.id || cliente._id } });
+                                                            }}
+                                                            className="text-slate-300 hover:text-emerald-600 transition-colors p-1.5 rounded-md hover:bg-emerald-50"
+                                                            title="Abrir Chat WhatsApp"
+                                                        >
+                                                            <MessageSquare className="w-4 h-4" />
+                                                        </button>
                                                         <button
                                                             onClick={(e) => { e.stopPropagation(); handleVerDetalles(cliente); }}
                                                             className="text-slate-300 hover:text-blue-500 transition-colors p-1.5 rounded-md hover:bg-slate-50"
