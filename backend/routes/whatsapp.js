@@ -114,12 +114,9 @@ router.get('/chats', auth, async (req, res) => {
     const vendedorId = req.usuario.id;
     const { rol } = req.usuario;
     try {
-        // Obtener clientes con su último mensaje WhatsApp en una sola query con JOIN
-        let sql;
-        let params = [];
-
+        let rows = [];
         if (rol === 'admin') {
-            const selectBase = `
+            rows = await db.prepare(`
                 SELECT 
                     c.id,
                     c.nombres,
@@ -127,53 +124,41 @@ router.get('/chats', auth, async (req, res) => {
                     c.telefono,
                     c."etapaEmbudo",
                     c."ultimaInteraccion",
-                    c."propietarioId",
-                    c."prospectorAsignado",
-                    c."vendedorAsignado",
-                    c."closerAsignado",
-                    c.compartido,
-                    c."equipo_id",
                     c."fechaRegistro",
                     c.fuente,
                     (
                         SELECT a.descripcion 
                         FROM actividades a 
-                        WHERE a.cliente = c.id AND a.tipo = 'whatsapp' AND a.resultado != 'nota_interna'
-                        ORDER BY a."createdAt" DESC LIMIT 1
+                        WHERE a.cliente = c.id AND a.tipo = 'whatsapp' AND (a.resultado IS NULL OR a.resultado != 'nota_interna')
+                        ORDER BY COALESCE(a."createdAt", a.fecha) DESC LIMIT 1
                     ) AS "lastMessage",
                     (
-                        SELECT a."createdAt" 
+                        SELECT COALESCE(a."createdAt", a.fecha)
                         FROM actividades a 
-                        WHERE a.cliente = c.id AND a.tipo = 'whatsapp' AND a.resultado != 'nota_interna'
-                        ORDER BY a."createdAt" DESC LIMIT 1
+                        WHERE a.cliente = c.id AND a.tipo = 'whatsapp' AND (a.resultado IS NULL OR a.resultado != 'nota_interna')
+                        ORDER BY COALESCE(a."createdAt", a.fecha) DESC LIMIT 1
                     ) AS "lastMessageTime",
                     (
                         SELECT a.resultado 
                         FROM actividades a 
-                        WHERE a.cliente = c.id AND a.tipo = 'whatsapp' AND a.resultado != 'nota_interna'
-                        ORDER BY a."createdAt" DESC LIMIT 1
+                        WHERE a.cliente = c.id AND a.tipo = 'whatsapp' AND (a.resultado IS NULL OR a.resultado != 'nota_interna')
+                        ORDER BY COALESCE(a."createdAt", a.fecha) DESC LIMIT 1
                     ) AS "lastResult"
                 FROM clientes c
-            `;
-
-            sql = `
-                WITH sub AS (${selectBase})
-                SELECT 
-                    id, 
-                    nombres, 
-                    "apellidoPaterno", 
-                    telefono, 
-                    "etapaEmbudo", 
-                    "lastMessage", 
-                    "lastMessageTime", 
-                    "lastResult",
-                    fuente
-                FROM sub
-                WHERE telefono IS NOT NULL AND telefono != ''
-                ORDER BY COALESCE("lastMessageTime", "ultimaInteraccion", "fechaRegistro") DESC
-            `;
+                WHERE c.telefono IS NOT NULL AND c.telefono != ''
+                ORDER BY COALESCE(
+                    (
+                        SELECT COALESCE(a."createdAt", a.fecha)
+                        FROM actividades a 
+                        WHERE a.cliente = c.id AND a.tipo = 'whatsapp' AND (a.resultado IS NULL OR a.resultado != 'nota_interna')
+                        ORDER BY COALESCE(a."createdAt", a.fecha) DESC LIMIT 1
+                    ),
+                    c."ultimaInteraccion",
+                    c."fechaRegistro"
+                ) DESC
+            `).all();
         } else {
-            const selectBase = `
+            rows = await db.prepare(`
                 SELECT 
                     c.id,
                     c.nombres,
@@ -181,67 +166,52 @@ router.get('/chats', auth, async (req, res) => {
                     c.telefono,
                     c."etapaEmbudo",
                     c."ultimaInteraccion",
-                    c."propietarioId",
-                    c."prospectorAsignado",
-                    c."vendedorAsignado",
-                    c."closerAsignado",
-                    c.compartido,
-                    c."equipo_id",
                     c."fechaRegistro",
                     c.fuente,
                     (
                         SELECT a.descripcion 
                         FROM actividades a 
-                        WHERE a.cliente = c.id AND a.tipo = 'whatsapp' AND a.resultado != 'nota_interna'
+                        WHERE a.cliente = c.id AND a.tipo = 'whatsapp' AND (a.resultado IS NULL OR a.resultado != 'nota_interna')
                         ORDER BY COALESCE(a."createdAt", a.fecha) DESC LIMIT 1
                     ) AS "lastMessage",
                     (
-                        SELECT a."createdAt" 
+                        SELECT COALESCE(a."createdAt", a.fecha)
                         FROM actividades a 
-                        WHERE a.cliente = c.id AND a.tipo = 'whatsapp' AND a.resultado != 'nota_interna'
+                        WHERE a.cliente = c.id AND a.tipo = 'whatsapp' AND (a.resultado IS NULL OR a.resultado != 'nota_interna')
                         ORDER BY COALESCE(a."createdAt", a.fecha) DESC LIMIT 1
                     ) AS "lastMessageTime",
                     (
                         SELECT a.resultado 
                         FROM actividades a 
-                        WHERE a.cliente = c.id AND a.tipo = 'whatsapp' AND a.resultado != 'nota_interna'
+                        WHERE a.cliente = c.id AND a.tipo = 'whatsapp' AND (a.resultado IS NULL OR a.resultado != 'nota_interna')
                         ORDER BY COALESCE(a."createdAt", a.fecha) DESC LIMIT 1
                     ) AS "lastResult"
                 FROM clientes c
-            `;
-
-            sql = `
-                WITH sub AS (${selectBase})
-                SELECT 
-                    id, 
-                    nombres, 
-                    "apellidoPaterno", 
-                    telefono, 
-                    "etapaEmbudo", 
-                    "lastMessage", 
-                    "lastMessageTime", 
-                    "lastResult",
-                    fuente
-                FROM sub
-                WHERE telefono IS NOT NULL AND telefono != ''
+                WHERE c.telefono IS NOT NULL AND c.telefono != ''
                   AND (
-                    COALESCE("propietarioId", "prospectorAsignado", "vendedorAsignado") = ?
-                    OR "vendedorAsignado" = ?
-                    OR "prospectorAsignado" = ?
-                    OR "closerAsignado" = ?
+                    c."vendedorAsignado" = ?
+                    OR c."prospectorAsignado" = ?
+                    OR c."propietarioId" = ?
+                    OR c."closerAsignado" = ?
                     OR EXISTS (
                         SELECT 1 FROM actividades act 
-                        WHERE act.cliente = sub.id AND act.tipo = 'whatsapp' AND act.vendedor = ?
+                        WHERE act.cliente = c.id AND act.tipo = 'whatsapp' AND act.vendedor = ?
                     )
                   )
-                ORDER BY COALESCE("lastMessageTime", "ultimaInteraccion", "fechaRegistro") DESC
-            `;
-            params = [vendedorId, vendedorId, vendedorId, vendedorId, vendedorId];
+                ORDER BY COALESCE(
+                    (
+                        SELECT COALESCE(a."createdAt", a.fecha)
+                        FROM actividades a 
+                        WHERE a.cliente = c.id AND a.tipo = 'whatsapp' AND (a.resultado IS NULL OR a.resultado != 'nota_interna')
+                        ORDER BY COALESCE(a."createdAt", a.fecha) DESC LIMIT 1
+                    ),
+                    c."ultimaInteraccion",
+                    c."fechaRegistro"
+                ) DESC
+            `).all(vendedorId, vendedorId, vendedorId, vendedorId, vendedorId);
         }
 
-        const rows = await db.prepare(sql).all(...params);
-
-        const chats = rows.map(r => ({
+        const chats = (rows || []).map(r => ({
             id: r.id,
             nombres: r.nombres || 'Sin nombre',
             apellidoPaterno: r.apellidoPaterno || '',
@@ -255,7 +225,7 @@ router.get('/chats', auth, async (req, res) => {
 
         res.json(chats);
     } catch (err) {
-        console.error('[WhatsApp /chats] Error:', err.message);
+        console.error('[WhatsApp /chats] Error:', err);
         res.status(500).json({ error: err.message });
     }
 });
