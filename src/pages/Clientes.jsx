@@ -1159,6 +1159,7 @@ const Clientes = () => {
                                     <tr>
                                         <th className="px-6 py-3 text-left w-1/5">Cliente</th>
                                         <th className="px-6 py-3 text-left w-1/5">Contacto</th>
+                                        <th className="px-6 py-3 text-center">Facturado</th>
                                         <th className="px-6 py-3 text-center">Etapa</th>
                                         <th className="px-6 py-3 text-left">Última interacción</th>
                                         <th className="px-6 py-3 text-left">Recordatorio</th>
@@ -1171,6 +1172,19 @@ const Clientes = () => {
                                         const esMio = cliente.esPropietario === true || isOwnerRecord(cliente);
                                         const nombreCalculado = [cliente.nombres, cliente.apellidoPaterno, cliente.apellidoMaterno].filter(Boolean).join(' ');
                                         const nombreCompleto = nombreCalculado || cliente.nombreCompleto || cliente.nombre || 'Sin nombre';
+
+                                        // Calcular Facturado
+                                        let totalFacturadoModulos = 0;
+                                        try {
+                                            const sections = JSON.parse(cliente.customSections || '[]');
+                                            totalFacturadoModulos = sections
+                                                ?.filter(s => s.tipo === 'payments')
+                                                ?.flatMap(s => s.contenido || [])
+                                                ?.filter(p => p.estado === 'pagado')
+                                                ?.reduce((sum, p) => sum + (parseFloat(p.monto) || 0), 0) || 0;
+                                        } catch (e) {}
+                                        const totalVentasSql = parseFloat(cliente.totalVentasSql || cliente.totalventassql) || 0;
+                                        const granTotalFacturado = totalFacturadoModulos + totalVentasSql;
 
                                         return (
                                             <tr
@@ -1215,6 +1229,15 @@ const Clientes = () => {
                                                             <Mail className="w-3.5 h-3.5 text-gray-400 shrink-0" />
                                                             {cliente.correo ? cliente.correo.split(',')[0].trim() : '—'}
                                                         </p>
+                                                    </div>
+                                                </td>
+
+                                                {/* Facturado */}
+                                                <td className="px-6 py-4 whitespace-nowrap text-center">
+                                                    <div className="flex items-center space-x-1 border border-green-500 rounded-md px-2 py-1 bg-green-500/10 w-max cursor-pointer">
+                                                        <span className="text-green-500 text-sm font-semibold">
+                                                            $ {granTotalFacturado.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                        </span>
                                                     </div>
                                                 </td>
 

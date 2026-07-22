@@ -955,7 +955,12 @@ router.get('/clientes-ganados', [auth, esVendedor], async (req, res) => {
                 WHERE a.cliente = c.id
                   AND a.tipo = 'cita'
                   AND (a.resultado = 'pendiente' OR a.resultado IS NULL)
-            ) as proximaCita
+            ) as proximaCita,
+            (
+                SELECT SUM(monto)
+                FROM ventas
+                WHERE cliente = c.id
+            ) as totalVentasSql
             FROM clientes c
             LEFT JOIN usuarios u ON c.closerAsignado = u.id
             LEFT JOIN usuarios owner ON owner.id = COALESCE(c."propietarioId", c.prospectorAsignado, c.vendedorAsignado)

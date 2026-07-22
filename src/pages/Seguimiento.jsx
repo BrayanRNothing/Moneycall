@@ -1675,6 +1675,7 @@ const Seguimiento = () => {
                                     <tr>
                                         <th className="px-6 py-3 text-left font-bold text-[10px] tracking-widest w-1/5">Cliente</th>
                                         <th className="px-6 py-3 text-left font-bold text-[10px] tracking-widest w-1/5">Contacto</th>
+                                        <th className="px-6 py-3 text-center font-bold text-[10px] tracking-widest">Valor</th>
                                         <th className="px-6 py-3 text-center font-bold text-[10px] tracking-widest">Etapa</th>
                                         <th className="px-6 py-3 text-left font-bold text-[10px] tracking-widest">Última interacción</th>
                                         <th className="px-6 py-3 text-left font-bold text-[10px] tracking-widest">Recordatorio</th>
@@ -1719,6 +1720,15 @@ const Seguimiento = () => {
                                                         {p.correo ? p.correo.split(',')[0].trim() : '—'}
                                                     </p>
                                                 </div>
+                                            </td>
+                                            <td className="px-6 py-4 text-center whitespace-nowrap">
+                                                {p.customMetricValue ? (
+                                                    <span className="text-sm font-black text-emerald-600 bg-emerald-50 border border-emerald-100 px-2.5 py-1 rounded-lg shadow-xs">
+                                                        {p.customMetricLabel === 'USD' ? 'US$' : '$'}{Number(p.customMetricValue).toLocaleString('es-MX')}
+                                                    </span>
+                                                ) : (
+                                                    <span className="text-sm font-bold text-gray-400">—</span>
+                                                )}
                                             </td>
                                             <td className="px-6 py-4 text-center whitespace-nowrap">
                                                 {p.etapaEmbudo === 'prospecto_nuevo' && !p.ultimaActTipo ? (
