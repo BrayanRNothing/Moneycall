@@ -537,9 +537,12 @@ router.get('/dashboard-closer', [auth, esVendedor], async (req, res) => {
         finMes.setHours(23, 59, 59, 999);
 
         let sqlVentas = `
-            SELECT v.* FROM ventas v
+            SELECT v.*, c.nombres as clienteNombre, c.telefono as clienteTelefono, u.nombre as vendedorNombre
+            FROM ventas v
             JOIN clientes c ON v.cliente = c.id
+            LEFT JOIN usuarios u ON v.vendedor = u.id
             WHERE (v.vendedor = ? ${equipoId ? 'OR c.equipo_id = ?' : ''})
+            ORDER BY v.fecha DESC
         `;
         let paramsVentas = equipoId ? [closerId, equipoId] : [closerId];
         const ventasTodas = await db.prepare(sqlVentas).all(...paramsVentas);
@@ -648,6 +651,19 @@ router.get('/dashboard-closer', [auth, esVendedor], async (req, res) => {
             total: calcularStatsCloserPeriodo(() => true)
         };
 
+        // Build detalle list (latest 20 sales with client info)
+        const ventasDetalle = ventasTodas.slice(0, 20).map(v => ({
+            id: v.id,
+            clienteId: v.cliente,
+            clienteNombre: v.clienteNombre || 'Sin nombre',
+            clienteTelefono: v.clienteTelefono || '',
+            vendedorNombre: v.vendedorNombre || 'Desconocido',
+            monto: v.monto || 0,
+            fecha: v.fecha,
+            estado: v.estado || 'completado',
+            notas: v.notas || ''
+        }));
+
         res.json({
             embudo,
             metricas: {
@@ -666,7 +682,8 @@ router.get('/dashboard-closer', [auth, esVendedor], async (req, res) => {
             analisisPerdidas,
             analisisPerdidasPremium,
             analisisFuentes: analisisFuentesPremium,
-            eficiencia
+            eficiencia,
+            ventasDetalle
         });
     } catch (error) {
         console.error('Error en dashboard-closer:', error);

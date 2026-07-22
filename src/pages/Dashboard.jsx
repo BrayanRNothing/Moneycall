@@ -343,7 +343,8 @@ const Dashboard = () => {
             },
             analisisPerdidasPremium: rawData?.analisisPerdidasPremium || {},
             analisisFuentes: rawData?.analisisFuentes || {},
-            eficiencia: rawData?.eficiencia || { cicloVentaDias: 0, responseTimeHoras: 0, leadsEstancados: 0 }
+            eficiencia: rawData?.eficiencia || { cicloVentaDias: 0, responseTimeHoras: 0, leadsEstancados: 0 },
+            ventasDetalle: Array.isArray(rawData?.ventasDetalle) ? rawData.ventasDetalle : []
         };
     };
 
@@ -1137,6 +1138,43 @@ const Dashboard = () => {
                                                             <span className="text-sm font-black text-gray-600">{closerData.metricas?.ventas?.totales || 0}</span>
                                                         </div>
                                                     </div>
+
+                                                    {/* Detalle de ventas individuales */}
+                                                    {(closerData.ventasDetalle || []).length > 0 && (
+                                                        <div className="mt-2">
+                                                            <h5 className="text-[8px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Detalle de ventas</h5>
+                                                            <div className="space-y-1.5">
+                                                                {(closerData.ventasDetalle || []).map((venta, idx) => {
+                                                                    const fechaVenta = venta.fecha ? new Date(venta.fecha) : null;
+                                                                    const fechaStr = fechaVenta ? fechaVenta.toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
+                                                                    return (
+                                                                        <div 
+                                                                            key={venta.id || idx} 
+                                                                            onClick={() => {
+                                                                                if (venta.clienteId) navigate('/vendedor/clientes', { state: { selectedId: venta.clienteId }, replace: true });
+                                                                            }}
+                                                                            className="flex items-center gap-2 px-2.5 py-2 bg-white border border-gray-100 rounded-lg hover:border-green-200 hover:shadow-sm transition-all cursor-pointer group"
+                                                                        >
+                                                                            <div className="w-7 h-7 rounded-full bg-green-50 flex items-center justify-center shrink-0 group-hover:bg-green-100 transition-colors">
+                                                                                <span className="text-[10px]">💰</span>
+                                                                            </div>
+                                                                            <div className="flex-1 min-w-0">
+                                                                                <div className="flex items-center gap-1.5">
+                                                                                    <span className="text-[11px] font-black text-gray-700 truncate">{venta.clienteNombre}</span>
+                                                                                </div>
+                                                                                <div className="flex items-center gap-2 mt-0.5">
+                                                                                    <span className="text-[9px] text-gray-400 font-bold">{fechaStr}</span>
+                                                                                    <span className="text-[9px] text-gray-300">•</span>
+                                                                                    <span className="text-[9px] text-gray-400 font-bold truncate">{venta.vendedorNombre}</span>
+                                                                                </div>
+                                                                            </div>
+                                                                            <span className="text-xs font-black text-green-600 shrink-0">{formatMoney.format(venta.monto)}</span>
+                                                                        </div>
+                                                                    );
+                                                                })}
+                                                            </div>
+                                                        </div>
+                                                    )}
                                                 </div>
 
                                                 {/* Tasas de conversión */}
