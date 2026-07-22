@@ -964,41 +964,41 @@ export default function Chats() {
             {/* COLUMNA IZQUIERDA: LISTADO DE CHATS */}
             <div className={`w-full md:w-[320px] lg:w-[380px] flex flex-col bg-white border-r border-slate-200/80 shrink-0 ${activeChat ? 'hidden md:flex' : 'flex'}`}>
                 {/* Header Izquierdo */}
-                <div className="p-4 bg-slate-50 border-b border-slate-200/60 flex justify-between items-center">
+                <div className="p-3 bg-slate-50 border-b border-slate-200/60 flex flex-col gap-2.5">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-green-500 text-white rounded-full flex items-center justify-center font-black shadow-md shadow-green-500/10">
+                        <div className="w-10 h-10 bg-green-500 text-white rounded-full flex items-center justify-center font-black shadow-md shadow-green-500/10 shrink-0">
                             {currentUser?.nombre?.charAt(0).toUpperCase()}
                         </div>
-                        <div>
-                            <h2 className="text-sm font-black text-slate-800 leading-tight">Mis Conversaciones</h2>
+                        <div className="min-w-0 flex-1">
+                            <h2 className="text-sm font-black text-slate-800 leading-tight truncate">Mis Conversaciones</h2>
                             {wsStatus === 'sincronizando' ? (
                                 <p className="text-[10px] text-amber-600 font-bold flex items-center gap-1" title="WhatsApp está conectando y descargando el historial de mensajes de tu teléfono. Esto puede tardar unos minutos.">
-                                    <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse" /> Sincronizando...
+                                    <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse shrink-0" /> <span className="truncate">Sincronizando...</span>
                                 </p>
                             ) : (
                                 <p className="text-[10px] text-green-600 font-bold flex items-center gap-1">
-                                    <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-ping" /> Conectado
+                                    <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-ping shrink-0" /> <span className="truncate">Conectado</span>
                                 </p>
                             )}
                         </div>
                     </div>
-                    <div className="flex items-center gap-1.5 shrink-0">
+                    <div className="flex items-center gap-2">
                         <button
                             type="button"
                             onClick={() => setShowScheduledListModal(true)}
-                            className="px-2 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-[10px] font-extrabold flex items-center gap-1 transition-all"
+                            className="flex-1 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-[10px] font-extrabold flex items-center justify-center gap-1.5 transition-all shadow-sm"
                             title="Ver mensajes de WhatsApp programados"
                         >
-                            <Clock size={12} />
-                            <span>Programados ({scheduledList.length})</span>
+                            <Clock size={11} className="shrink-0" />
+                            <span className="truncate">Programados ({scheduledList.length})</span>
                         </button>
                         <button
                             type="button"
                             onClick={() => navigate('/vendedor/ajustes')}
-                            className="px-2 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-[10px] font-extrabold flex items-center gap-1 transition-all"
+                            className="flex-1 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-[10px] font-extrabold flex items-center justify-center gap-1.5 transition-all shadow-sm"
                             title="Ver recomendaciones y reglas anti-spam de WhatsApp en Ajustes"
                         >
-                            <span>⚠️</span> Anti-Spam
+                            <span className="shrink-0">⚠️</span> <span className="truncate">Anti-Spam</span>
                         </button>
                     </div>
                 </div>
