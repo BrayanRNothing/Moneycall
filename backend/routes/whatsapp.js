@@ -69,12 +69,25 @@ router.post('/send', auth, async (req, res) => {
             await db.prepare('INSERT INTO actividades (tipo, vendedor, cliente, descripcion, resultado) VALUES (?, ?, ?, ?, ?)')
                 .run('whatsapp', vendedorId, clienteId, textoFinal, 'nota_interna');
         } else {
-            // ✅ PRIMERO enviar el mensaje. Si falla, no registramos nada en DB.
-            await sendMessage(vendedorId, client.telefono, textoFinal);
-
-            // ✅ Luego registrar en la base de datos (solo si el envío fue exitoso)
-            await db.prepare('INSERT INTO actividades (tipo, vendedor, cliente, descripcion, resultado) VALUES (?, ?, ?, ?, ?)')
+            // ✅ Registrar en base de datos inmediatamente como 'enviado' (respuesta instantánea)
+            const activityResult = await db.prepare('INSERT INTO actividades (tipo, vendedor, cliente, descripcion, resultado) VALUES (?, ?, ?, ?, ?)')
                 .run('whatsapp', vendedorId, clienteId, `Vendedor: ${textoFinal}`, 'enviado');
+
+            // ✅ Enviar mensaje en segundo plano (fire-and-forget) para no bloquear la respuesta HTTP
+            sendMessage(vendedorId, client.telefono, textoFinal).catch((err) => {
+                console.error(`[WhatsApp background send error] for client ${clienteId}:`, err.message);
+                // Si falla en segundo plano, cambiar el resultado de la actividad a 'fallido' y notificar por sockets
+                db.prepare('UPDATE actividades SET resultado = ? WHERE id = ?')
+                    .run('fallido', activityResult.lastInsertRowid)
+                    .then(() => {
+                        const io = req.app.get('io');
+                        if (io) {
+                            io.emit('prospectos_actualizados');
+                            io.to(`user_${vendedorId}`).emit('prospectos_actualizados');
+                        }
+                    })
+                    .catch(e => console.error('Error updating failed status:', e.message));
+            });
         }
 
         // Transición automática de etapa si estaba en Sin Contacto
@@ -99,8 +112,10 @@ router.post('/send', auth, async (req, res) => {
 
         // Emitir actualizaciones globalmente y a la sala
         const io = req.app.get('io');
-        io.emit('prospectos_actualizados');
-        io.to(`user_${vendedorId}`).emit('prospectos_actualizados');
+        if (io) {
+            io.emit('prospectos_actualizados');
+            io.to(`user_${vendedorId}`).emit('prospectos_actualizados');
+        }
 
         res.json({ success: true, mensaje: 'Mensaje enviado correctamente' });
     } catch (err) {
@@ -417,9 +432,6 @@ router.post('/send-media', auth, waUpload.single('file'), async (req, res) => {
         const fileName = file.originalname || finalFilename;
         const mimeType = finalMime;
 
-        const { sendMediaMessage } = require('../services/whatsappManager');
-        await sendMediaMessage(vendedorId, client.telefono, mediaType, fileBuffer, fileName, caption, mimeType);
-
         let descTag = '';
         if (mediaType === 'audio') {
             descTag = `[AUDIO](${relativeUrl})`;
@@ -429,10 +441,27 @@ router.post('/send-media', auth, waUpload.single('file'), async (req, res) => {
             descTag = `[DOCUMENT](${relativeUrl})${caption ? ' - ' + caption : ''}`;
         }
 
-        await db.prepare('INSERT INTO actividades (tipo, vendedor, cliente, descripcion, resultado) VALUES (?, ?, ?, ?, ?)')
+        // ✅ Registrar en base de datos inmediatamente (respuesta instantánea)
+        const activityResult = await db.prepare('INSERT INTO actividades (tipo, vendedor, cliente, descripcion, resultado) VALUES (?, ?, ?, ?, ?)')
             .run('whatsapp', vendedorId, clienteId, `Vendedor: ${descTag}`, 'enviado');
 
         await db.prepare('UPDATE clientes SET "ultimaInteraccion" = CURRENT_TIMESTAMP WHERE id = ?').run(clienteId);
+
+        // ✅ Enviar mensaje de WhatsApp en segundo plano para no bloquear al usuario
+        const { sendMediaMessage } = require('../services/whatsappManager');
+        sendMediaMessage(vendedorId, client.telefono, mediaType, fileBuffer, fileName, caption, mimeType).catch((err) => {
+            console.error('Error enviando media en segundo plano:', err.message);
+            db.prepare('UPDATE actividades SET resultado = ? WHERE id = ?')
+                .run('fallido', activityResult.lastInsertRowid)
+                .then(() => {
+                    const io = req.app.get('io');
+                    if (io) {
+                        io.emit('prospectos_actualizados');
+                        io.to(`user_${vendedorId}`).emit('prospectos_actualizados');
+                    }
+                })
+                .catch(e => console.error('Error updating failed media status:', e.message));
+        });
 
         const io = req.app.get('io');
         if (io) {
