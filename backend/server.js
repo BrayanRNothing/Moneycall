@@ -46,9 +46,10 @@ app.use(express.urlencoded({ extended: true }));
 
 
 
-// ✅ Servir archivos subidos (contratos PDF) antes de cualquier otra ruta
+// ✅ Servir archivos subidos (contratos PDF, WhatsApp media) antes de cualquier otra ruta
 const uploadsPath = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadsPath)) fs.mkdirSync(uploadsPath, { recursive: true });
+app.use('/uploads', express.static(uploadsPath));
 app.use('/archivos', express.static(uploadsPath));
 
 // Routes

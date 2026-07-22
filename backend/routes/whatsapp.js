@@ -170,7 +170,6 @@ router.get('/chats', auth, async (req, res) => {
                     fuente
                 FROM sub
                 WHERE telefono IS NOT NULL AND telefono != ''
-                  AND ("lastMessageTime" IS NOT NULL OR fuente = 'WhatsApp')
                 ORDER BY COALESCE("lastMessageTime", "ultimaInteraccion"::timestamptz, "fechaRegistro"::timestamptz) DESC
             `;
         } else {
@@ -193,20 +192,20 @@ router.get('/chats', auth, async (req, res) => {
                     (
                         SELECT a.descripcion 
                         FROM actividades a 
-                        WHERE a.cliente = c.id AND a.tipo = 'whatsapp' AND a.resultado != 'nota_interna' AND a.vendedor = ?
-                        ORDER BY a."createdAt" DESC LIMIT 1
+                        WHERE a.cliente = c.id AND a.tipo = 'whatsapp' AND a.resultado != 'nota_interna'
+                        ORDER BY COALESCE(a."createdAt", a.fecha) DESC LIMIT 1
                     ) AS "lastMessage",
                     (
                         SELECT a."createdAt" 
                         FROM actividades a 
-                        WHERE a.cliente = c.id AND a.tipo = 'whatsapp' AND a.resultado != 'nota_interna' AND a.vendedor = ?
-                        ORDER BY a."createdAt" DESC LIMIT 1
+                        WHERE a.cliente = c.id AND a.tipo = 'whatsapp' AND a.resultado != 'nota_interna'
+                        ORDER BY COALESCE(a."createdAt", a.fecha) DESC LIMIT 1
                     ) AS "lastMessageTime",
                     (
                         SELECT a.resultado 
                         FROM actividades a 
-                        WHERE a.cliente = c.id AND a.tipo = 'whatsapp' AND a.resultado != 'nota_interna' AND a.vendedor = ?
-                        ORDER BY a."createdAt" DESC LIMIT 1
+                        WHERE a.cliente = c.id AND a.tipo = 'whatsapp' AND a.resultado != 'nota_interna'
+                        ORDER BY COALESCE(a."createdAt", a.fecha) DESC LIMIT 1
                     ) AS "lastResult"
                 FROM clientes c
             `;
@@ -225,9 +224,10 @@ router.get('/chats', auth, async (req, res) => {
                     fuente
                 FROM sub
                 WHERE telefono IS NOT NULL AND telefono != ''
-                  AND ("lastMessageTime" IS NOT NULL OR fuente = 'WhatsApp')
                   AND (
                     COALESCE("propietarioId", "prospectorAsignado", "vendedorAsignado") = ?
+                    OR "vendedorAsignado" = ?
+                    OR "prospectorAsignado" = ?
                     OR "closerAsignado" = ?
                     OR EXISTS (
                         SELECT 1 FROM actividades act 
@@ -236,7 +236,7 @@ router.get('/chats', auth, async (req, res) => {
                   )
                 ORDER BY COALESCE("lastMessageTime", "ultimaInteraccion"::timestamptz, "fechaRegistro"::timestamptz) DESC
             `;
-            params = [vendedorId, vendedorId, vendedorId, vendedorId, vendedorId, vendedorId];
+            params = [vendedorId, vendedorId, vendedorId, vendedorId, vendedorId];
         }
 
         const rows = await db.prepare(sql).all(...params);
@@ -274,8 +274,9 @@ router.get('/chats/:clienteId', auth, async (req, res) => {
 
             if (!client) return res.status(404).json({ mensaje: 'Cliente no encontrado' });
 
-            const propietario = client.propietarioId ?? client.prospectorAsignado ?? client.vendedorAsignado;
-            const hasAccess = String(propietario) === String(vendedorId) ||
+            const hasAccess = String(client.vendedorAsignado) === String(vendedorId) ||
+                              String(client.prospectorAsignado) === String(vendedorId) ||
+                              String(client.propietarioId) === String(vendedorId) ||
                               String(client.closerAsignado) === String(vendedorId) ||
                               (await db.prepare('SELECT 1 FROM actividades WHERE cliente = ? AND tipo = ? AND vendedor = ? LIMIT 1').get(clienteId, 'whatsapp', vendedorId)) !== undefined;
 
@@ -285,7 +286,7 @@ router.get('/chats/:clienteId', auth, async (req, res) => {
         }
 
         const activities = await db.prepare(
-            'SELECT id, descripcion, resultado, "createdAt", "fecha" FROM actividades WHERE cliente = ? AND tipo = ? ORDER BY "createdAt" ASC'
+            'SELECT id, descripcion, resultado, "createdAt", "fecha" FROM actividades WHERE cliente = ? AND tipo = ? ORDER BY COALESCE("createdAt", "fecha") ASC, id ASC'
         ).all(clienteId, 'whatsapp');
         
         res.json(activities);
