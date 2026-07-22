@@ -148,14 +148,16 @@ router.get('/chats', auth, async (req, res) => {
                 FROM clientes c
                 WHERE c.telefono IS NOT NULL AND c.telefono != ''
                 ORDER BY COALESCE(
-                    (
-                        SELECT COALESCE(a."createdAt", a.fecha)
-                        FROM actividades a 
-                        WHERE a.cliente = c.id AND a.tipo = 'whatsapp' AND (a.resultado IS NULL OR a.resultado != 'nota_interna')
-                        ORDER BY COALESCE(a."createdAt", a.fecha) DESC LIMIT 1
+                    CAST(
+                        (
+                            SELECT COALESCE(a."createdAt", a.fecha)
+                            FROM actividades a 
+                            WHERE a.cliente = c.id AND a.tipo = 'whatsapp' AND (a.resultado IS NULL OR a.resultado != 'nota_interna')
+                            ORDER BY COALESCE(a."createdAt", a.fecha) DESC LIMIT 1
+                        ) AS TEXT
                     ),
-                    c."ultimaInteraccion",
-                    c."fechaRegistro"
+                    CAST(c."ultimaInteraccion" AS TEXT),
+                    CAST(c."fechaRegistro" AS TEXT)
                 ) DESC
             `).all();
         } else {
@@ -202,14 +204,16 @@ router.get('/chats', auth, async (req, res) => {
                     )
                   )
                 ORDER BY COALESCE(
-                    (
-                        SELECT COALESCE(a."createdAt", a.fecha)
-                        FROM actividades a 
-                        WHERE a.cliente = c.id AND a.tipo = 'whatsapp' AND (a.resultado IS NULL OR a.resultado != 'nota_interna')
-                        ORDER BY COALESCE(a."createdAt", a.fecha) DESC LIMIT 1
+                    CAST(
+                        (
+                            SELECT COALESCE(a."createdAt", a.fecha)
+                            FROM actividades a 
+                            WHERE a.cliente = c.id AND a.tipo = 'whatsapp' AND (a.resultado IS NULL OR a.resultado != 'nota_interna')
+                            ORDER BY COALESCE(a."createdAt", a.fecha) DESC LIMIT 1
+                        ) AS TEXT
                     ),
-                    c."ultimaInteraccion",
-                    c."fechaRegistro"
+                    CAST(c."ultimaInteraccion" AS TEXT),
+                    CAST(c."fechaRegistro" AS TEXT)
                 ) DESC
             `).all(vId, vStr, vId, vStr, vId, vStr, vId, vStr, vId, vStr);
         }

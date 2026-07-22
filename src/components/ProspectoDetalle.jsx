@@ -149,6 +149,17 @@ export default function ProspectoDetalle({
     const registrandoActividadRef = useRef(false);
     const registrandoActividadLockoutRef = useRef(0);
     const [registrandoActividadBlockedUntil, setRegistrandoActividadBlockedUntil] = useState(0);
+    const chatScrollRef = useRef(null);
+
+    useEffect(() => {
+        if (chatScrollRef.current && filtroHistorial === 'whatsapp') {
+            setTimeout(() => {
+                if (chatScrollRef.current) {
+                    chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight;
+                }
+            }, 100);
+        }
+    }, [actividadesContext, filtroHistorial, loadingContext]);
     const [editandoEtapa, setEditandoEtapa] = useState(false);
     const [loadingEtapa, setLoadingEtapa] = useState(false);
 
@@ -1508,6 +1519,7 @@ export default function ProspectoDetalle({
                             </div>
                         </div>
                         <div
+                            ref={chatScrollRef}
                             className="flex-1 overflow-y-auto px-4 py-4 hide-scrollbar bg-slate-50/30"
                             style={{ minHeight: 0 }}
                         >

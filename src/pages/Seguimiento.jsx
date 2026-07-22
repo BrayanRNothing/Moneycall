@@ -44,6 +44,25 @@ import socket from '../config/socket';
 import SourcePicker from '../components/ui/SourcePicker';
 import { useBotStore } from '../store/useBotStore';
 
+const formatInteraccionNotas = (text) => {
+    if (!text) return '';
+    let clean = text.replace(/^(Vendedor:|Cliente:)\s*/i, '');
+    const mediaMatch = clean.match(/\[(IMAGE|VIDEO|AUDIO|DOCUMENT|STICKER)\]\(([^)]+)\)/i);
+    if (mediaMatch) {
+        const type = mediaMatch[1].toUpperCase();
+        const caption = clean.replace(/\[(IMAGE|VIDEO|AUDIO|DOCUMENT|STICKER)\]\(([^)]+)\)\s*-?\s*/i, '');
+        const typeLabels = {
+            IMAGE: '📷 Imagen',
+            VIDEO: '🎥 Video',
+            AUDIO: '🎙️ Nota de voz',
+            DOCUMENT: '📄 Documento',
+            STICKER: '🎨 Sticker'
+        };
+        return (typeLabels[type] || type) + (caption ? ` - ${caption}` : '');
+    }
+    return clean;
+};
+
 // --- CSV helpers ---
 const CSV_HEADERS = ['nombres', 'apellidoPaterno', 'apellidoMaterno', 'telefono', 'correo', 'empresa', 'sitioWeb', 'ubicacion', 'notas', 'fuente'];
 const CSV_LABELS = ['Nombres', 'Apellido Paterno', 'Apellido Materno', 'Telefono', 'Correo', 'Empresa', 'Sitio Web', 'Ubicacion', 'Notas', 'Fuente'];
@@ -1722,9 +1741,9 @@ const Seguimiento = () => {
                                                             {p.ultimaActTipo === 'cita' && <Calendar className="w-3 h-3 text-(--theme-500)" />}
                                                             {!['llamada', 'whatsapp', 'correo', 'cita'].includes(p.ultimaActTipo) && <Clock className="w-3 h-3 text-slate-400" />}
                                                         </div>
-                                                        <p className="text-xs text-blue-600 leading-snug" title={p.ultimaActNotas || ''}>
+                                                        <p className="text-xs text-blue-600 leading-snug truncate max-w-[150px]" title={formatInteraccionNotas(p.ultimaActNotas)}>
                                                             {p.ultimaActNotas
-                                                                ? (p.ultimaActNotas.length > 50 ? p.ultimaActNotas.slice(0, 50) + '…' : p.ultimaActNotas)
+                                                                ? (formatInteraccionNotas(p.ultimaActNotas).length > 30 ? formatInteraccionNotas(p.ultimaActNotas).slice(0, 30) + '…' : formatInteraccionNotas(p.ultimaActNotas))
                                                                 : <span className="italic text-slate-400">{getTipoLabel(p.ultimaActTipo)}</span>}
                                                         </p>
                                                     </div>

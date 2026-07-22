@@ -54,6 +54,25 @@ const ETAPA_META = {
 
 const getEtapaMeta = (etapa) => ETAPA_META[etapa] || { label: 'Cliente Activo', className: 'bg-slate-100 text-slate-700 border-slate-200' };
 
+const formatInteraccionNotas = (text) => {
+    if (!text) return '';
+    let clean = text.replace(/^(Vendedor:|Cliente:)\s*/i, '');
+    const mediaMatch = clean.match(/\[(IMAGE|VIDEO|AUDIO|DOCUMENT|STICKER)\]\(([^)]+)\)/i);
+    if (mediaMatch) {
+        const type = mediaMatch[1].toUpperCase();
+        const caption = clean.replace(/\[(IMAGE|VIDEO|AUDIO|DOCUMENT|STICKER)\]\(([^)]+)\)\s*-?\s*/i, '');
+        const typeLabels = {
+            IMAGE: '📷 Imagen',
+            VIDEO: '🎥 Video',
+            AUDIO: '🎙️ Nota de voz',
+            DOCUMENT: '📄 Documento',
+            STICKER: '🎨 Sticker'
+        };
+        return (typeLabels[type] || type) + (caption ? ` - ${caption}` : '');
+    }
+    return clean;
+};
+
 const Clientes = () => {
     const { t } = useTranslation();
     const location = useLocation();
@@ -1216,9 +1235,9 @@ const Clientes = () => {
                                                                 {cliente.ultimaActTipo === 'correo' && <Mail className="w-3 h-3 text-purple-500" />}
                                                                 {cliente.ultimaActTipo === 'cita' && <Calendar className="w-3 h-3 text-blue-500" />}
                                                             </div>
-                                                            <p className="text-xs text-blue-600 leading-snug" title={cliente.ultimaActNotas || ''}>
+                                                            <p className="text-xs text-blue-600 leading-snug truncate max-w-[150px]" title={formatInteraccionNotas(cliente.ultimaActNotas)}>
                                                                 {cliente.ultimaActNotas
-                                                                    ? (cliente.ultimaActNotas.length > 50 ? cliente.ultimaActNotas.slice(0, 50) + '…' : cliente.ultimaActNotas)
+                                                                    ? (formatInteraccionNotas(cliente.ultimaActNotas).length > 30 ? formatInteraccionNotas(cliente.ultimaActNotas).slice(0, 30) + '…' : formatInteraccionNotas(cliente.ultimaActNotas))
                                                                     : <span className="italic text-slate-400">{cliente.ultimaActTipo}</span>}
                                                             </p>
                                                         </div>
