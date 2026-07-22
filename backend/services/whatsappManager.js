@@ -589,18 +589,28 @@ async function handleOutgoingMessageFromOtherDevice(vendedorId, phone, text, io,
 
                 const desc = `Vendedor: ${text}`;
                 
-                // Buscar el último mensaje idéntico para evitar duplicados
+                // Buscar el último mensaje para evitar duplicados
                 const duplicate = await db.prepare(
-                    `SELECT id, "createdAt" FROM actividades 
-                     WHERE cliente = ? AND tipo = 'whatsapp' AND descripcion = ? 
+                    `SELECT id, "createdAt", descripcion FROM actividades 
+                     WHERE cliente = ? AND tipo = 'whatsapp' 
                      ORDER BY id DESC LIMIT 1`
-                ).get(client.id, desc);
+                ).get(client.id);
 
                 let isDuplicate = false;
                 if (duplicate) {
                     const diffMs = Math.abs(new Date() - new Date(duplicate.createdAt));
-                    if (diffMs < 10000) {
-                        isDuplicate = true;
+                    if (diffMs < 15000) {
+                        if (duplicate.descripcion === desc) {
+                            isDuplicate = true;
+                        } else {
+                            // Si ambos son multimedia, comparar tipo (por ejemplo, [IMAGE] o [AUDIO])
+                            const mediaRegex = /^Vendedor:\s*\[(IMAGE|VIDEO|AUDIO|DOCUMENT|STICKER)\]/i;
+                            const match1 = desc.match(mediaRegex);
+                            const match2 = duplicate.descripcion.match(mediaRegex);
+                            if (match1 && match2 && match1[1] === match2[1]) {
+                                isDuplicate = true;
+                            }
+                        }
                     }
                 }
 

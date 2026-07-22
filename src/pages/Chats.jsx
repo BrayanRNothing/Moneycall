@@ -23,6 +23,26 @@ const EMOJIS = [
     '🎉', '🎁', '🚀', '💡', '⏰', '📞', '📱', '💬', '📍', '💵'
 ];
 
+const formatDateDivider = (dateStr) => {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    const today = new Date();
+    const yesterday = new Date();
+    yesterday.setDate(today.getDate() - 1);
+
+    if (date.toDateString() === today.toDateString()) {
+        return 'Hoy';
+    } else if (date.toDateString() === yesterday.toDateString()) {
+        return 'Ayer';
+    } else {
+        return date.toLocaleDateString('es-MX', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
+        });
+    }
+};
+
 const getAuthHeaders = () => ({ 'x-auth-token': getToken() || '' });
 
 export default function Chats() {
@@ -1292,40 +1312,52 @@ export default function Chats() {
                                         No hay interacciones de WhatsApp guardadas con este cliente. Escribe abajo para iniciar el chat.
                                     </div>
                                 </div>
-                            ) : (
-                                messages.map((m) => {
+                            ) : (() => {
+                                let lastDate = null;
+                                return messages.map((m) => {
                                     const isFromMe = m.resultado === 'enviado' || m.descripcion.startsWith('Vendedor:');
                                     const msgText = m.descripcion.replace(/^(Vendedor:|Cliente:)\s*/, '');
+                                    const msgDate = new Date(m.createdAt || m.fecha).toDateString();
+                                    const showDivider = msgDate !== lastDate;
+                                    lastDate = msgDate;
                                     
                                     return (
-                                        <div
-                                            key={m.id}
-                                            className={`flex ${isFromMe ? 'justify-end' : 'justify-start'} animate-in fade-in-50 duration-200`}
-                                        >
+                                        <React.Fragment key={m.id}>
+                                            {showDivider && (
+                                                <div className="flex justify-center my-4 select-none">
+                                                    <span className="px-3.5 py-1 bg-white/90 backdrop-blur border border-slate-200/50 text-[10px] font-black uppercase tracking-widest text-slate-500 rounded-full shadow-xs">
+                                                        {formatDateDivider(m.createdAt || m.fecha)}
+                                                    </span>
+                                                </div>
+                                            )}
                                             <div
-                                                className={`max-w-[85%] sm:max-w-[70%] px-3.5 py-2 rounded-2xl bubble-shadow text-slate-800 text-xs font-semibold relative break-words overflow-hidden ${
-                                                    m.resultado === 'nota_interna'
-                                                        ? 'bg-amber-100 border border-amber-300 rounded-tr-none text-amber-900 shadow-sm'
-                                                        : isFromMe 
-                                                            ? 'bg-[#d9fdd3] rounded-tr-none' 
-                                                            : 'bg-white rounded-tl-none'
-                                                }`}
+                                                className={`flex ${isFromMe ? 'justify-end' : 'justify-start'} animate-in fade-in-50 duration-200`}
                                             >
-                                                {m.resultado === 'nota_interna' && (
-                                                    <div className="flex items-center gap-1.5 mb-1 text-[10px] uppercase font-black tracking-wider text-amber-600/80">
-                                                        <StickyNote size={12} />
-                                                        <span>Nota Interna</span>
+                                                <div
+                                                    className={`max-w-[85%] sm:max-w-[70%] px-3.5 py-2 rounded-2xl bubble-shadow text-slate-800 text-xs font-semibold relative break-words overflow-hidden ${
+                                                        m.resultado === 'nota_interna'
+                                                            ? 'bg-amber-100 border border-amber-300 rounded-tr-none text-amber-900 shadow-sm'
+                                                            : isFromMe 
+                                                                ? 'bg-[#d9fdd3] rounded-tr-none' 
+                                                                : 'bg-white rounded-tl-none'
+                                                    }`}
+                                                >
+                                                    {m.resultado === 'nota_interna' && (
+                                                        <div className="flex items-center gap-1.5 mb-1 text-[10px] uppercase font-black tracking-wider text-amber-600/80">
+                                                            <StickyNote size={12} />
+                                                            <span>Nota Interna</span>
+                                                        </div>
+                                                    )}
+                                                    {renderBubbleContent(msgText)}
+                                                    <div className="absolute bottom-1 right-2 flex items-center gap-0.5 text-[9px] text-slate-400 font-bold select-none">
+                                                        <span>{formatTime(m.createdAt || m.fecha)}</span>
                                                     </div>
-                                                )}
-                                                {renderBubbleContent(msgText)}
-                                                <div className="absolute bottom-1 right-2 flex items-center gap-0.5 text-[9px] text-slate-400 font-bold select-none">
-                                                    <span>{formatTime(m.createdAt || m.fecha)}</span>
                                                 </div>
                                             </div>
-                                        </div>
+                                        </React.Fragment>
                                     );
-                                })
-                            )}
+                                });
+                            })()}
                             <div ref={messagesEndRef} />
                         </div>
 

@@ -388,10 +388,34 @@ router.post('/send-media', auth, waUpload.single('file'), async (req, res) => {
             return res.status(404).json({ mensaje: 'Cliente no encontrado o sin teléfono' });
         }
 
-        const relativeUrl = `/uploads/whatsapp/${file.filename}`;
-        const fileBuffer = fs.readFileSync(file.path);
-        const fileName = file.originalname || file.filename;
-        const mimeType = file.mimetype;
+        let finalPath = file.path;
+        let finalFilename = file.filename;
+        let finalMime = file.mimetype;
+        let relativeUrl = `/uploads/whatsapp/${file.filename}`;
+
+        if (mediaType === 'audio') {
+            try {
+                const transcodedFilename = `transcoded_${Date.now()}_voice.ogg`;
+                const transcodedPath = path.join(WA_UPLOADS_DIR, transcodedFilename);
+                
+                const { execSync } = require('child_process');
+                execSync(`ffmpeg -y -i "${file.path}" -c:a libopus -b:a 24k -application voip "${transcodedPath}"`, { stdio: 'ignore' });
+                
+                if (fs.existsSync(transcodedPath)) {
+                    finalPath = transcodedPath;
+                    finalFilename = transcodedFilename;
+                    finalMime = 'audio/ogg; codecs=opus';
+                    relativeUrl = `/uploads/whatsapp/${transcodedFilename}`;
+                    try { fs.unlinkSync(file.path); } catch (_) {}
+                }
+            } catch (ffmpegErr) {
+                console.warn('⚠️ FFmpeg no pudo transcodificar el audio (puede que no esté instalado):', ffmpegErr.message);
+            }
+        }
+
+        const fileBuffer = fs.readFileSync(finalPath);
+        const fileName = file.originalname || finalFilename;
+        const mimeType = finalMime;
 
         const { sendMediaMessage } = require('../services/whatsappManager');
         await sendMediaMessage(vendedorId, client.telefono, mediaType, fileBuffer, fileName, caption, mimeType);
