@@ -1150,10 +1150,7 @@ const Dashboard = () => {
                                                                     return (
                                                                         <div 
                                                                             key={venta.id || idx} 
-                                                                            onClick={() => {
-                                                                                if (venta.clienteId) navigate('/vendedor/clientes', { state: { selectedId: venta.clienteId }, replace: true });
-                                                                            }}
-                                                                            className="flex items-center gap-2 px-2.5 py-2 bg-white border border-gray-100 rounded-lg hover:border-green-200 hover:shadow-sm transition-all cursor-pointer group"
+                                                                            className="flex items-center gap-2 px-2.5 py-2 bg-white border border-gray-100 rounded-lg"
                                                                         >
                                                                             <div className="w-7 h-7 rounded-full bg-green-50 flex items-center justify-center shrink-0 group-hover:bg-green-100 transition-colors">
                                                                                 <span className="text-[10px]">💰</span>
