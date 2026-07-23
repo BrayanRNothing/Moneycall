@@ -314,15 +314,13 @@ export const useMoneycallBotLogic = () => {
     });
   };
 
-  // --- DASHBOARD STEPS ---
-  // --- DASHBOARD STEPS ---
+  // --- DASHBOARD STEPS (Updated for simplified 3-tab system) ---
   const stepDashboardIntro = () => {
     setCurrentStep({
       id: 'dashboard_intro',
-      text: 'Este es tu Embudo de Ventas. Aquí puedes ver de forma gráfica y en tiempo real el flujo de tus leads desde la Entrada hasta el Cierre de ventas, junto con los porcentajes de conversión de cada etapa.',
-      targetSelector: '#dashboard-funnel-container',
+      text: 'Este es tu **Dashboard Unificado**. En la parte superior tienes tus métricas clave de impacto en tiempo real: **Valor Total de Pipeline**, **Prospectos Activos**, **Ingresos** y tu **Conversión Global**.',
       options: [
-        { label: 'Siguiente: Filtros de Período', action: () => stepDashboardPeriodos() },
+        { label: 'Siguiente: Filtros de Periodo', action: () => stepDashboardPeriodos() },
         { label: 'Cancelar', action: () => startConversation() }
       ]
     });
@@ -331,10 +329,10 @@ export const useMoneycallBotLogic = () => {
   const stepDashboardPeriodos = () => {
     setCurrentStep({
       id: 'dashboard_periodos',
-      text: 'Con estos botones de Filtro, puedes segmentar las métricas de tu embudo y ver el desempeño por Hoy, esta Semana o el Mes en curso. ¡Así tienes el control absoluto de tus números en tiempo real!',
+      text: 'Con el **Selector de Periodo** arriba a la derecha, puedes cambiar instantáneamente todo el dashboard entre Hoy, Semana, Mes o el Histórico Total.',
       targetSelector: '#dashboard-period-selector',
       options: [
-        { label: 'Siguiente: KPIs Operativos', action: () => stepDashboardKpis() },
+        { label: 'Siguiente: Pestaña Resumen', action: () => stepDashboardKpis() },
         { label: 'Atrás', action: () => stepDashboardIntro() },
         { label: 'Cancelar', action: () => startConversation() }
       ]
@@ -344,10 +342,9 @@ export const useMoneycallBotLogic = () => {
   const stepDashboardKpis = () => {
     setCurrentStep({
       id: 'dashboard_kpis',
-      text: 'En esta sección de Salud Operativa vigilamos tu eficiencia comercial. Medimos tu Velocidad de Respuesta, Tasa de Asistencia a reuniones (show-up), Ciclo de Cierre en días y el Ticket Promedio.',
-      targetSelector: '#dashboard-kpi-cards',
+      text: 'En la pestaña **Resumen** se muestra tu **Embudo de Ventas** gráfico. Abajo tienes accesos directos de **Atajos y Tareas** de tu equipo, y tu agenda de **Citas y Recordatorios** pendientes.',
       options: [
-        { label: 'Siguiente: Agenda Prioritaria', action: () => stepDashboardAgenda() },
+        { label: 'Siguiente: Pestaña Pipeline', action: () => stepDashboardAgenda() },
         { label: 'Atrás', action: () => stepDashboardPeriodos() },
         { label: 'Cancelar', action: () => startConversation() }
       ]
@@ -357,10 +354,9 @@ export const useMoneycallBotLogic = () => {
   const stepDashboardAgenda = () => {
     setCurrentStep({
       id: 'dashboard_agenda',
-      text: 'Aquí tienes la Agenda Prioritaria. Te muestra tus próximos compromisos de reuniones y citas de ventas del día para que nunca dejes de asistir a un cliente.',
-      targetSelector: '#dashboard-agenda-prioritaria',
+      text: 'En la pestaña **Pipeline** vigilamos el dinero en proceso. Aquí verás el **Desglose de Valor por Etapa** (dónde se concentra tu dinero estimado) y las **Tasas de Conversión Efectivas** paso a paso.',
       options: [
-        { label: 'Siguiente: Tareas Críticas', action: () => stepDashboardTareas() },
+        { label: 'Siguiente: Pestaña Rendimiento', action: () => stepDashboardTareas() },
         { label: 'Atrás', action: () => stepDashboardKpis() },
         { label: 'Cancelar', action: () => startConversation() }
       ]
@@ -370,8 +366,7 @@ export const useMoneycallBotLogic = () => {
   const stepDashboardTareas = () => {
     setCurrentStep({
       id: 'dashboard_tareas',
-      text: 'Por último, este es el panel de Tareas Críticas de tu equipo. Te ayuda a recordar y ejecutar los pendientes de alta prioridad en tu día a día comercial.',
-      targetSelector: '#dashboard-tareas-criticas',
+      text: 'Por último, en la pestaña **Rendimiento** vigilamos la actividad física. Medimos tu **Tasa de Show-up** a citas, el **Termómetro de llamadas** del día (tu meta es mínimo 20 llamadas salientes) y tu **Ratio 80/20** de prospección proactiva contra reactiva.',
       options: [
         { label: 'Finalizar Recorrido', action: () => startConversation() },
         { label: 'Atrás', action: () => stepDashboardAgenda() }
