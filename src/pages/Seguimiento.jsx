@@ -348,6 +348,16 @@ const Seguimiento = () => {
             setProspectos(normalizados);
             setTotalPages(metaTotalPages);
             setTotalItems(metaTotalItems);
+
+            // ✅ CORRECCIÓN: Si hay un prospecto seleccionado, actualizar su referencia con los nuevos datos cargados
+            if (prospectoSeleccionado) {
+                const selId = prospectoSeleccionado.id || prospectoSeleccionado._id;
+                const updatedSelected = normalizados.find(p => (p.id || p._id) == selId);
+                if (updatedSelected) {
+                    setProspectoSeleccionado(updatedSelected);
+                }
+            }
+
             return normalizados; // Retornar datos para el init
         } catch (error) {
             console.error('Error al cargar:', error);

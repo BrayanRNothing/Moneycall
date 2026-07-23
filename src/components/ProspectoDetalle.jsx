@@ -244,8 +244,11 @@ export default function ProspectoDetalle({
             const currentId = prospectoSeleccionado?.id || prospectoSeleccionado?._id;
             const newId = initialProspecto.id || initialProspecto._id;
 
+            // Siempre actualizar la información general del prospecto
+            setProspectoSeleccionado(initialProspecto);
+
+            // Solo resetear los campos editables si cambiamos de prospecto (ID diferente)
             if (currentId !== newId) {
-                setProspectoSeleccionado(initialProspecto);
                 setNotasRapidas(initialProspecto.notas || '');
                 setMonedaSeleccionada(initialProspecto.customMetricLabel || 'MXN');
                 setValorProspecto(initialProspecto.customMetricValue || '');

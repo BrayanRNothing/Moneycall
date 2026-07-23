@@ -185,12 +185,14 @@ export default function ClienteDetalle({
     // Solo actualizar estado local al recibir nuevos datos
     useEffect(() => {
         if (initialCliente) {
-            // Solo sobreescribir si no estamos en medio de una edición o si el ID cambió realmente
             const currentId = ClienteSeleccionado?.id || ClienteSeleccionado?._id;
             const newId = initialCliente.id || initialCliente._id;
-            
+
+            // Siempre actualizar la información general del cliente
+            setClienteSeleccionado(initialCliente);
+
+            // Solo resetear/inicializar los campos editables si cambiamos de cliente (ID diferente)
             if (currentId !== newId) {
-                setClienteSeleccionado(initialCliente);
                 setNotasRapidas(initialCliente.notas || '');
                 setMonedaSeleccionada(initialCliente.customMetricLabel || 'MXN');
                 setValorCliente(initialCliente.customMetricValue || '');
