@@ -891,7 +891,7 @@ const Dashboard = () => {
     ];
 
     return (
-        <div className="h-full overflow-y-auto flex flex-col gap-4 p-4 bg-gray-50/50 scrollbar-thin">
+        <div className="h-full overflow-hidden flex flex-col gap-3 p-4 bg-gray-50/50">
 
 
 
@@ -1004,9 +1004,9 @@ const Dashboard = () => {
 
             {/* ═══════════════════════ TAB: RESUMEN ═══════════════════════ */}
             {dashboardTab === 'resumen' && (
-            <div className="flex flex-col gap-4 animate-in fade-in duration-500 mt-1">
+            <div className="flex-1 min-h-0 flex flex-col gap-3 animate-in fade-in duration-500 mt-1">
                 {/* Embudo de Ventas (Funnel) */}
-                <div id="dashboard-funnel-container" className="bg-white border border-gray-200 rounded-xl p-3 shadow-sm w-full">
+                <div id="dashboard-funnel-container" className="shrink-0 bg-white border border-gray-200 rounded-xl p-3 shadow-sm w-full">
                     <FunnelVisual
                         stages={[
                             {
@@ -1062,10 +1062,10 @@ const Dashboard = () => {
                     />
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-2 gap-3">
                     {/* COLUMNA 1: ATAJOS RÁPIDOS Y TAREAS */}
-                    <div className="bg-white border border-gray-200/90 rounded-2xl p-5 shadow-xs flex flex-col">
-                        <div className="mb-4 flex items-center justify-between border-b border-gray-100 pb-3">
+                    <div className="bg-white border border-gray-200/90 rounded-2xl p-4 shadow-xs flex flex-col h-full min-h-0">
+                        <div className="mb-3.5 flex items-center justify-between border-b border-gray-100 pb-2.5 shrink-0">
                             <div className="flex items-center gap-2">
                                 <button onClick={() => setHealthTab('resumen')} className={`px-3 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-md transition-all flex items-center gap-1.5 ${healthTab === 'resumen' ? 'bg-(--theme-50) text-(--theme-600)' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50'}`}>
                                     <TrendingUp className="w-3.5 h-3.5" />
@@ -1078,51 +1078,53 @@ const Dashboard = () => {
                             </div>
                         </div>
                         {healthTab === 'resumen' ? (
-                            <div className="grid grid-cols-2 gap-3">
-                                <button onClick={() => navigate('/vendedor/prospectos')} className="flex flex-col items-center justify-center p-4 bg-gray-50/50 border border-gray-100 rounded-xl hover:border-gray-300 hover:bg-gray-50 hover:shadow-xs transition-all group">
-                                    <UserPlus className="w-6 h-6 text-blue-500 mb-2 group-hover:scale-110 transition-transform" />
+                            <div className="flex-1 min-h-0 grid grid-cols-2 gap-3">
+                                <button onClick={() => navigate('/vendedor/prospectos')} className="flex flex-col items-center justify-center p-3 bg-gray-50/50 border border-gray-100 rounded-xl hover:border-gray-300 hover:bg-gray-50 hover:shadow-xs transition-all group h-full">
+                                    <UserPlus className="w-6 h-6 text-blue-500 mb-2 group-hover:scale-110 transition-transform shrink-0" />
                                     <span className="text-[10px] font-black text-gray-700 uppercase tracking-widest text-center">Crear Prospecto</span>
                                 </button>
-                                <button onClick={() => navigate('/vendedor/clientes')} className="flex flex-col items-center justify-center p-4 bg-gray-50/50 border border-gray-100 rounded-xl hover:border-gray-300 hover:bg-gray-50 hover:shadow-xs transition-all group">
-                                    <Users className="w-6 h-6 text-emerald-500 mb-2 group-hover:scale-110 transition-transform" />
+                                <button onClick={() => navigate('/vendedor/clientes')} className="flex flex-col items-center justify-center p-3 bg-gray-50/50 border border-gray-100 rounded-xl hover:border-gray-300 hover:bg-gray-50 hover:shadow-xs transition-all group h-full">
+                                    <Users className="w-6 h-6 text-emerald-500 mb-2 group-hover:scale-110 transition-transform shrink-0" />
                                     <span className="text-[10px] font-black text-gray-700 uppercase tracking-widest text-center">Registrar Cliente</span>
                                 </button>
-                                <button onClick={() => { setEditingTask(null); setNewTask({ titulo: '', descripcion: '', prioridad: 'media' }); setShowTaskModal(true); }} className="flex flex-col items-center justify-center p-4 bg-gray-50/50 border border-gray-100 rounded-xl hover:border-gray-300 hover:bg-gray-50 hover:shadow-xs transition-all group">
-                                    <Bell className="w-6 h-6 text-amber-500 mb-2 group-hover:scale-110 transition-transform" />
+                                <button onClick={() => { setEditingTask(null); setNewTask({ titulo: '', descripcion: '', prioridad: 'media' }); setShowTaskModal(true); }} className="flex flex-col items-center justify-center p-3 bg-gray-50/50 border border-gray-100 rounded-xl hover:border-gray-300 hover:bg-gray-50 hover:shadow-xs transition-all group h-full">
+                                    <Bell className="w-6 h-6 text-amber-500 mb-2 group-hover:scale-110 transition-transform shrink-0" />
                                     <span className="text-[10px] font-black text-gray-700 uppercase tracking-widest text-center">Nueva Tarea</span>
                                 </button>
-                                <button onClick={() => navigate('/vendedor/calendario')} className="flex flex-col items-center justify-center p-4 bg-gray-50/50 border border-gray-100 rounded-xl hover:border-gray-300 hover:bg-gray-50 hover:shadow-xs transition-all group">
-                                    <Calendar className="w-6 h-6 text-purple-500 mb-2 group-hover:scale-110 transition-transform" />
+                                <button onClick={() => navigate('/vendedor/calendario')} className="flex flex-col items-center justify-center p-3 bg-gray-50/50 border border-gray-100 rounded-xl hover:border-gray-300 hover:bg-gray-50 hover:shadow-xs transition-all group h-full">
+                                    <Calendar className="w-6 h-6 text-purple-500 mb-2 group-hover:scale-110 transition-transform shrink-0" />
                                     <span className="text-[10px] font-black text-gray-700 uppercase tracking-widest text-center">Calendario</span>
                                 </button>
                             </div>
                         ) : (
-                            <div className="space-y-2">
-                                <div className="flex items-center justify-between mb-2">
+                            <div className="flex-1 min-h-0 flex flex-col">
+                                <div className="flex items-center justify-between mb-2 shrink-0">
                                     <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Tareas Pendientes</span>
                                     <button onClick={() => { setEditingTask(null); setNewTask({ titulo: '', descripcion: '', prioridad: 'media' }); setShowTaskModal(true); }} className="px-2.5 py-1 bg-(--theme-600) text-white rounded-lg text-[9px] font-black uppercase">+ Nueva</button>
                                 </div>
-                                {teamTasks.map((t) => (
-                                    <div key={t.id || t._id} className={`p-3 rounded-xl border transition-all ${t.estado === 'completada' ? 'bg-gray-50/50 border-gray-100 opacity-60' : 'bg-white border-gray-100 hover:border-gray-200'}`}>
-                                        <div className="flex items-center justify-between">
-                                            <div className="flex items-center gap-2">
-                                                <button onClick={() => toggleTaskStatus(t)} className={`w-4 h-4 rounded border flex items-center justify-center ${t.estado === 'completada' ? 'bg-green-500 border-green-500 text-white' : 'border-gray-300'}`}>
-                                                    {t.estado === 'completada' && <CheckCircle2 className="w-2.5 h-2.5" />}
-                                                </button>
-                                                <span className={`text-xs font-bold ${t.estado === 'completada' ? 'line-through text-gray-400' : 'text-gray-800'}`}>{t.titulo}</span>
+                                <div className="flex-1 min-h-0 overflow-y-auto space-y-2 pr-1 scrollbar-thin">
+                                    {teamTasks.map((t) => (
+                                        <div key={t.id || t._id} className={`p-3 rounded-xl border transition-all ${t.estado === 'completada' ? 'bg-gray-50/50 border-gray-100 opacity-60' : 'bg-white border-gray-100 hover:border-gray-200'}`}>
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-2">
+                                                    <button onClick={() => toggleTaskStatus(t)} className={`w-4 h-4 rounded border flex items-center justify-center ${t.estado === 'completada' ? 'bg-green-500 border-green-500 text-white' : 'border-gray-300'}`}>
+                                                        {t.estado === 'completada' && <CheckCircle2 className="w-2.5 h-2.5" />}
+                                                    </button>
+                                                    <span className={`text-xs font-bold ${t.estado === 'completada' ? 'line-through text-gray-400' : 'text-gray-800'}`}>{t.titulo}</span>
+                                                </div>
+                                                <span className="text-[8px] font-black px-2 py-0.5 rounded-full uppercase bg-blue-50 text-blue-600 border border-blue-100">{t.prioridad}</span>
                                             </div>
-                                            <span className="text-[8px] font-black px-2 py-0.5 rounded-full uppercase bg-blue-50 text-blue-600 border border-blue-100">{t.prioridad}</span>
                                         </div>
-                                    </div>
-                                ))}
-                                {teamTasks.length === 0 && (<div className="py-6 text-center text-gray-400 text-xs font-bold">Sin tareas pendientes</div>)}
+                                    ))}
+                                    {teamTasks.length === 0 && (<div className="py-6 text-center text-gray-400 text-xs font-bold">Sin tareas pendientes</div>)}
+                                </div>
                             </div>
                         )}
                     </div>
 
                     {/* COLUMNA 2: RECORDATORIOS + CITAS */}
-                    <div className="bg-white border border-gray-200/90 rounded-2xl p-5 shadow-xs flex flex-col">
-                        <div className="flex items-center justify-between mb-4 border-b border-gray-100 pb-3">
+                    <div className="bg-white border border-gray-200/90 rounded-2xl p-4 shadow-xs flex flex-col h-full min-h-0">
+                        <div className="flex items-center justify-between mb-3.5 border-b border-gray-100 pb-2.5 shrink-0">
                             <div className="flex items-center gap-2">
                                 <button onClick={() => setSidebarTab('recordatorios')} className={`px-3 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-md transition-all flex items-center gap-1.5 ${sidebarTab === 'recordatorios' ? 'bg-rose-50 text-rose-600 border border-rose-100' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50'}`}>
                                     <Phone className="w-3.5 h-3.5 text-rose-500" />
@@ -1134,7 +1136,7 @@ const Dashboard = () => {
                                 </button>
                             </div>
                         </div>
-                        <div className="space-y-2">
+                        <div className="flex-1 min-h-0 overflow-y-auto space-y-2 pr-1 scrollbar-thin">
                             {sidebarTab === 'recordatorios' && (
                                 recordatorios.length === 0 ? (<div className="py-6 text-center text-gray-400 text-xs font-bold">Sin recordatorios hoy.</div>) : (
                                     recordatorios.map((p, idx) => {

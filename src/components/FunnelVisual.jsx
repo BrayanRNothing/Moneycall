@@ -44,7 +44,7 @@ const FunnelVisual = ({ stages }) => {
                 return (
                     <React.Fragment key={index}>
                         {/* Card Principal - Ancho y Alto Igual */}
-                        <div className={`bg-linear-to-br ${gradientClass} rounded-lg p-2.5 shadow-md hover:shadow-lg transition-all duration-300 relative overflow-hidden group flex-1 h-48`}>
+                        <div className={`bg-linear-to-br ${gradientClass} rounded-lg p-2.5 shadow-md hover:shadow-lg transition-all duration-300 relative overflow-hidden group flex-1 h-40`}>
                             {/* Fondo decorativo (Reflejo original) - z-20 para que cubra los elementos de abajo sin tapar clics */}
                             <div className="absolute right-0 top-0 h-full w-1/3 bg-white/5 skew-x-12 transform origin-top-right group-hover:scale-110 transition-transform duration-500 z-20 pointer-events-none"></div>
 
