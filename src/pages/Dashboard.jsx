@@ -978,7 +978,34 @@ const Dashboard = () => {
                         </div>
                     ))}
                 </div>
+            </div>
 
+            {/* PESTAÑAS PRINCIPALES DEL DASHBOARD */}
+            <div className="flex items-center gap-1 bg-white border border-gray-200 rounded-xl p-1 shadow-sm mt-1">
+                {[
+                    { key: 'resumen', label: 'Resumen', icon: <TrendingUp className="w-3.5 h-3.5" /> },
+                    { key: 'pipeline', label: 'Pipeline', icon: <DollarSign className="w-3.5 h-3.5" /> },
+                    { key: 'rendimiento', label: 'Rendimiento', icon: <Target className="w-3.5 h-3.5" /> },
+                ].map(tab => (
+                    <button
+                        key={tab.key}
+                        onClick={() => setDashboardTab(tab.key)}
+                        className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-[11px] font-black uppercase tracking-widest transition-all ${
+                            dashboardTab === tab.key
+                                ? 'bg-linear-to-r from-(--theme-500) to-(--theme-600) text-white shadow-md shadow-(--theme-500)/20'
+                                : 'text-gray-400 hover:text-gray-700 hover:bg-gray-50'
+                        }`}
+                    >
+                        {tab.icon}
+                        {tab.label}
+                    </button>
+                ))}
+            </div>
+
+            {/* ═══════════════════════ TAB: RESUMEN ═══════════════════════ */}
+            {dashboardTab === 'resumen' && (
+            <div className="flex flex-col gap-4 animate-in fade-in duration-500 mt-1">
+                {/* Embudo de Ventas (Funnel) */}
                 <div id="dashboard-funnel-container" className="bg-white border border-gray-200 rounded-xl p-3 shadow-sm w-full">
                     <FunnelVisual
                         stages={[
@@ -1034,82 +1061,9 @@ const Dashboard = () => {
                         type="vendedor"
                     />
                 </div>
-            </div>
 
-            {/* PESTAÑAS PRINCIPALES DEL DASHBOARD */}
-            <div className="flex items-center gap-1 bg-white border border-gray-200 rounded-xl p-1 shadow-sm mt-1">
-                {[
-                    { key: 'resumen', label: 'Resumen', icon: <TrendingUp className="w-3.5 h-3.5" /> },
-                    { key: 'pipeline', label: 'Pipeline', icon: <DollarSign className="w-3.5 h-3.5" /> },
-                    { key: 'rendimiento', label: 'Rendimiento', icon: <Target className="w-3.5 h-3.5" /> },
-                ].map(tab => (
-                    <button
-                        key={tab.key}
-                        onClick={() => setDashboardTab(tab.key)}
-                        className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-[11px] font-black uppercase tracking-widest transition-all ${
-                            dashboardTab === tab.key
-                                ? 'bg-linear-to-r from-(--theme-500) to-(--theme-600) text-white shadow-md shadow-(--theme-500)/20'
-                                : 'text-gray-400 hover:text-gray-700 hover:bg-gray-50'
-                        }`}
-                    >
-                        {tab.icon}
-                        {tab.label}
-                    </button>
-                ))}
-            </div>
-
-            {/* ═══════════════════════ TAB: RESUMEN ═══════════════════════ */}
-            {dashboardTab === 'resumen' && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 animate-in fade-in duration-500 mt-1">
-
-                {/* COLUMNA 1: ACTIVIDAD + INGRESOS DEL PERIODO */}
-                <div className="flex flex-col gap-4">
-                    {/* Actividad e Ingresos del Periodo */}
-                    <div className="bg-white border border-gray-200/90 rounded-2xl p-5 shadow-xs">
-                        <h3 className="text-xs font-black uppercase tracking-widest text-gray-800 mb-3 flex items-center gap-2">
-                            <Activity className="w-4 h-4 text-emerald-600" />
-                            Actividad del Periodo ({periodoSuffix})
-                        </h3>
-                        <div className="grid grid-cols-2 gap-2.5 mb-4">
-                            <div className="bg-blue-50/60 border border-blue-100 rounded-xl p-3">
-                                <span className="text-[9px] font-bold text-blue-500 uppercase tracking-wider block">Nuevos Leads</span>
-                                <span className="text-xl font-black text-blue-700 tabular-nums">{prospectosNuevosPeriodo}</span>
-                            </div>
-                            <div className="bg-emerald-50/60 border border-emerald-100 rounded-xl p-3">
-                                <span className="text-[9px] font-bold text-emerald-500 uppercase tracking-wider block">Llamadas</span>
-                                <span className="text-xl font-black text-emerald-700 tabular-nums">{mP.llamadas || 0}</span>
-                            </div>
-                            <div className="bg-violet-50/60 border border-violet-100 rounded-xl p-3">
-                                <span className="text-[9px] font-bold text-violet-500 uppercase tracking-wider block">Mensajes</span>
-                                <span className="text-xl font-black text-violet-700 tabular-nums">{mP.mensajes || 0}</span>
-                            </div>
-                            <div className="bg-amber-50/60 border border-amber-100 rounded-xl p-3">
-                                <span className="text-[9px] font-bold text-amber-500 uppercase tracking-wider block">Reuniones</span>
-                                <span className="text-xl font-black text-amber-700 tabular-nums">{mP.reuniones || 0}</span>
-                            </div>
-                        </div>
-                        {/* Cierres del periodo */}
-                        <div className="border-t border-gray-100 pt-3">
-                            <div className="flex justify-between items-center">
-                                <div>
-                                    <span className="text-[9px] font-bold text-gray-400 uppercase block">Cierres del Periodo</span>
-                                    <span className="text-2xl font-black text-gray-900 tabular-nums">{formatMoney.format(cP.ventasMonto || 0)}</span>
-                                </div>
-                                <div className="text-right">
-                                    <span className="text-[9px] font-bold text-gray-400 uppercase block">Ventas Ganadas</span>
-                                    <span className="text-2xl font-black text-emerald-600 tabular-nums">{cP.ventasCount || 0}</span>
-                                </div>
-                            </div>
-                            {(cP.ventasCount || 0) > 0 && (
-                                <div className="bg-emerald-50/70 border border-emerald-100 rounded-xl p-2.5 flex justify-between items-center mt-2">
-                                    <span className="text-[9px] font-black text-emerald-700 uppercase">Ticket Promedio</span>
-                                    <span className="text-sm font-black text-emerald-700">{formatMoney.format(cP.ventasMonto / cP.ventasCount)}</span>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Atajos Rápidos y Tareas */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    {/* COLUMNA 1: ATAJOS RÁPIDOS Y TAREAS */}
                     <div className="bg-white border border-gray-200/90 rounded-2xl p-5 shadow-xs flex flex-col">
                         <div className="mb-4 flex items-center justify-between border-b border-gray-100 pb-3">
                             <div className="flex items-center gap-2">
@@ -1165,11 +1119,8 @@ const Dashboard = () => {
                             </div>
                         )}
                     </div>
-                </div>
 
-                {/* COLUMNA 2: RECORDATORIOS + CITAS */}
-                <div className="flex flex-col gap-4">
-                    {/* Recordatorios y Próximas Citas */}
+                    {/* COLUMNA 2: RECORDATORIOS + CITAS */}
                     <div className="bg-white border border-gray-200/90 rounded-2xl p-5 shadow-xs flex flex-col">
                         <div className="flex items-center justify-between mb-4 border-b border-gray-100 pb-3">
                             <div className="flex items-center gap-2">
@@ -1220,24 +1171,6 @@ const Dashboard = () => {
                                     })
                                 )
                             )}
-                        </div>
-                    </div>
-
-                    {/* Histórico rápido */}
-                    <div className="bg-white border border-gray-200/90 rounded-2xl p-5 shadow-xs">
-                        <h3 className="text-xs font-black uppercase tracking-widest text-gray-800 mb-3 flex items-center gap-2">
-                            <DollarSign className="w-4 h-4 text-emerald-600" />
-                            Resumen Financiero
-                        </h3>
-                        <div className="space-y-2">
-                            <div className="bg-slate-900 text-white rounded-xl p-3.5 flex justify-between items-center">
-                                <span className="text-[9px] font-black text-slate-400 uppercase">Pipeline Estimado</span>
-                                <span className="text-sm font-black text-emerald-400 tabular-nums">{formatMoney.format(valorPipelineData.totalEstimado)}</span>
-                            </div>
-                            <div className="bg-gray-50 border border-gray-100 rounded-xl p-3.5 flex justify-between items-center">
-                                <span className="text-[9px] font-black text-gray-500 uppercase">Histórico Acumulado</span>
-                                <span className="text-sm font-black text-gray-900 tabular-nums">{formatMoney.format(closerData.metricas?.ventas?.montoTotal || 0)}</span>
-                            </div>
                         </div>
                     </div>
                 </div>
