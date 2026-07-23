@@ -10,30 +10,42 @@ export const socket = io(API_URL, {
     reconnectionAttempts: Infinity
 });
 
-// Emitir join_team al conectar/reconectar para recibir solo eventos del propio equipo
-const joinTeamRoom = () => {
+// Emitir join_team y join_user al conectar/reconectar para recibir eventos en tiempo real con token de seguridad
+const joinRooms = () => {
     try {
-        const raw = localStorage.getItem('user') || sessionStorage.getItem('user');
-        if (raw) {
-            const user = JSON.parse(raw);
+        const rawUser = localStorage.getItem('user') || sessionStorage.getItem('user');
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        
+        if (rawUser && token) {
+            const user = JSON.parse(rawUser);
+            
+            // 1. Unirse a la sala de equipo
             if (user?.equipo_id) {
-                socket.emit('join_team', user.equipo_id);
+                socket.emit('join_team', { equipoId: user.equipo_id, token });
                 console.log(`👥 Unido a sala WebSocket: team_${user.equipo_id}`);
+            }
+            
+            // 2. Unirse a la sala de usuario (para notificaciones individuales)
+            const userId = user?.id || user?._id;
+            if (userId) {
+                socket.emit('join_user', { userId, token });
+                console.log(`👤 Unido a sala WebSocket: user_${userId}`);
             }
         }
     } catch (e) {
-        // silencioso — equipo_id puede no existir en tokens viejos
+        console.error('Error al unirse a salas WebSocket:', e);
     }
 };
 
 // Eventos básicos de depuración
 socket.on('connect', () => {
     console.log('✅ Conectado a WebSockets', socket.id);
-    joinTeamRoom();
+    joinRooms();
 });
 
 socket.on('reconnect', () => {
-    joinTeamRoom();
+    console.log('🔄 Reconectado a WebSockets');
+    joinRooms();
 });
 
 socket.on('disconnect', () => {
