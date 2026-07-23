@@ -266,6 +266,7 @@ const Dashboard = () => {
         yearsList.push(y);
     }
 
+    const [dashboardTab, setDashboardTab] = useState('resumen');
     const [healthTab, setHealthTab] = useState('resumen');
     const [actividades, setActividades] = useState([]);
     const [loadingActividades, setLoadingActividades] = useState(false);
@@ -1035,7 +1036,31 @@ const Dashboard = () => {
                 </div>
             </div>
 
-            {/* SECCIÓN PRINCIPAL DE MÉTRICAS Y DESGLOSE EN GRID REDISEÑADO */}
+            {/* PESTAÑAS PRINCIPALES DEL DASHBOARD */}
+            <div className="flex items-center gap-1 bg-white border border-gray-200 rounded-xl p-1 shadow-sm mt-1">
+                {[
+                    { key: 'resumen', label: 'Resumen', icon: <TrendingUp className="w-3.5 h-3.5" /> },
+                    { key: 'pipeline', label: 'Pipeline', icon: <DollarSign className="w-3.5 h-3.5" /> },
+                    { key: 'ingresos', label: 'Ingresos', icon: <Activity className="w-3.5 h-3.5" /> },
+                    { key: 'rendimiento', label: 'Rendimiento', icon: <Target className="w-3.5 h-3.5" /> },
+                ].map(tab => (
+                    <button
+                        key={tab.key}
+                        onClick={() => setDashboardTab(tab.key)}
+                        className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-[11px] font-black uppercase tracking-widest transition-all ${
+                            dashboardTab === tab.key
+                                ? 'bg-linear-to-r from-(--theme-500) to-(--theme-600) text-white shadow-md shadow-(--theme-500)/20'
+                                : 'text-gray-400 hover:text-gray-700 hover:bg-gray-50'
+                        }`}
+                    >
+                        {tab.icon}
+                        {tab.label}
+                    </button>
+                ))}
+            </div>
+
+            {/* ═══════════════════════ TAB: RESUMEN ═══════════════════════ */}
+            {dashboardTab === 'resumen' && (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 animate-in fade-in duration-500 mt-1">
 
                 {/* COLUMNA 1: DESGLOSE DE VALOR DE PROSPECTOS Y TASAS DE CONVERSIÓN */}
@@ -1143,9 +1168,8 @@ const Dashboard = () => {
                     </div>
                 </div>
 
-                {/* COLUMNA 2: ATAJOS RÁPIDOS, ACTIVIDAD E INGRESOS */}
+                {/* COLUMNA 2: ATAJOS RÁPIDOS + RECORDATORIOS */}
                 <div className="flex flex-col gap-4">
-                    
                     {/* Tarjeta: Atajos Rápidos y Tareas */}
                     <div className="bg-white border border-gray-200/90 rounded-2xl p-5 shadow-xs flex flex-col">
                         <div className="mb-4 flex items-center justify-between border-b border-gray-100 pb-3">
@@ -1162,45 +1186,25 @@ const Dashboard = () => {
                                     className={`px-3 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-md transition-all flex items-center gap-1.5 ${healthTab === 'tareas' ? 'bg-(--theme-50) text-(--theme-600)' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50'}`}
                                 >
                                     <Bell className="w-3.5 h-3.5" />
-                                    Tareas de Equipo ({teamTasks.length})
+                                    Tareas ({teamTasks.length})
                                 </button>
                             </div>
                         </div>
-
                         {healthTab === 'resumen' ? (
                             <div className="grid grid-cols-2 gap-3">
-                                <button 
-                                    onClick={() => navigate('/vendedor/prospectos')}
-                                    className="flex flex-col items-center justify-center p-4 bg-gray-50/50 border border-gray-100 rounded-xl hover:border-gray-300 hover:bg-gray-50 hover:shadow-xs transition-all group"
-                                >
+                                <button onClick={() => navigate('/vendedor/prospectos')} className="flex flex-col items-center justify-center p-4 bg-gray-50/50 border border-gray-100 rounded-xl hover:border-gray-300 hover:bg-gray-50 hover:shadow-xs transition-all group">
                                     <UserPlus className="w-6 h-6 text-blue-500 mb-2 group-hover:scale-110 transition-transform" />
                                     <span className="text-[10px] font-black text-gray-700 uppercase tracking-widest text-center">Crear Prospecto</span>
                                 </button>
-
-                                <button 
-                                    onClick={() => navigate('/vendedor/clientes')}
-                                    className="flex flex-col items-center justify-center p-4 bg-gray-50/50 border border-gray-100 rounded-xl hover:border-gray-300 hover:bg-gray-50 hover:shadow-xs transition-all group"
-                                >
+                                <button onClick={() => navigate('/vendedor/clientes')} className="flex flex-col items-center justify-center p-4 bg-gray-50/50 border border-gray-100 rounded-xl hover:border-gray-300 hover:bg-gray-50 hover:shadow-xs transition-all group">
                                     <Users className="w-6 h-6 text-emerald-500 mb-2 group-hover:scale-110 transition-transform" />
                                     <span className="text-[10px] font-black text-gray-700 uppercase tracking-widest text-center">Registrar Cliente</span>
                                 </button>
-
-                                <button 
-                                    onClick={() => {
-                                        setEditingTask(null);
-                                        setNewTask({ titulo: '', descripcion: '', prioridad: 'media' });
-                                        setShowTaskModal(true);
-                                    }}
-                                    className="flex flex-col items-center justify-center p-4 bg-gray-50/50 border border-gray-100 rounded-xl hover:border-gray-300 hover:bg-gray-50 hover:shadow-xs transition-all group"
-                                >
+                                <button onClick={() => { setEditingTask(null); setNewTask({ titulo: '', descripcion: '', prioridad: 'media' }); setShowTaskModal(true); }} className="flex flex-col items-center justify-center p-4 bg-gray-50/50 border border-gray-100 rounded-xl hover:border-gray-300 hover:bg-gray-50 hover:shadow-xs transition-all group">
                                     <Bell className="w-6 h-6 text-amber-500 mb-2 group-hover:scale-110 transition-transform" />
                                     <span className="text-[10px] font-black text-gray-700 uppercase tracking-widest text-center">Nueva Tarea</span>
                                 </button>
-
-                                <button 
-                                    onClick={() => navigate('/vendedor/calendario')}
-                                    className="flex flex-col items-center justify-center p-4 bg-gray-50/50 border border-gray-100 rounded-xl hover:border-gray-300 hover:bg-gray-50 hover:shadow-xs transition-all group"
-                                >
+                                <button onClick={() => navigate('/vendedor/calendario')} className="flex flex-col items-center justify-center p-4 bg-gray-50/50 border border-gray-100 rounded-xl hover:border-gray-300 hover:bg-gray-50 hover:shadow-xs transition-all group">
                                     <Calendar className="w-6 h-6 text-purple-500 mb-2 group-hover:scale-110 transition-transform" />
                                     <span className="text-[10px] font-black text-gray-700 uppercase tracking-widest text-center">Calendario</span>
                                 </button>
@@ -1209,12 +1213,7 @@ const Dashboard = () => {
                             <div className="space-y-2">
                                 <div className="flex items-center justify-between mb-2">
                                     <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Tareas Pendientes</span>
-                                    <button
-                                        onClick={() => { setEditingTask(null); setNewTask({ titulo: '', descripcion: '', prioridad: 'media' }); setShowTaskModal(true); }}
-                                        className="px-2.5 py-1 bg-(--theme-600) text-white rounded-lg text-[9px] font-black uppercase"
-                                    >
-                                        + Nueva Tarea
-                                    </button>
+                                    <button onClick={() => { setEditingTask(null); setNewTask({ titulo: '', descripcion: '', prioridad: 'media' }); setShowTaskModal(true); }} className="px-2.5 py-1 bg-(--theme-600) text-white rounded-lg text-[9px] font-black uppercase">+ Nueva Tarea</button>
                                 </div>
                                 {teamTasks.map((t) => (
                                     <div key={t.id || t._id} className={`p-3 rounded-xl border transition-all ${t.estado === 'completada' ? 'bg-gray-50/50 border-gray-100 opacity-60' : 'bg-white border-gray-100 hover:border-gray-200'}`}>
@@ -1229,114 +1228,32 @@ const Dashboard = () => {
                                         </div>
                                     </div>
                                 ))}
-                                {teamTasks.length === 0 && (
-                                    <div className="py-6 text-center text-gray-400 text-xs font-bold">Sin tareas pendientes</div>
-                                )}
+                                {teamTasks.length === 0 && (<div className="py-6 text-center text-gray-400 text-xs font-bold">Sin tareas pendientes</div>)}
                             </div>
                         )}
-                    </div>
-
-                    {/* Tarjeta: Actividad e Ingresos del Periodo */}
-                    <div className="bg-white border border-gray-200/90 rounded-2xl p-5 shadow-xs space-y-4">
-                        <div>
-                            <h3 className="text-xs font-black uppercase tracking-widest text-gray-800 mb-3 flex items-center gap-2">
-                                <Activity className="w-4 h-4 text-emerald-600" />
-                                Actividad e Ingresos ({periodoSuffix})
-                            </h3>
-                            <div className="grid grid-cols-2 gap-2.5">
-                                <div className="bg-blue-50/60 border border-blue-100 rounded-xl p-3">
-                                    <span className="text-[9px] font-bold text-blue-500 uppercase tracking-wider block">Nuevos Leads</span>
-                                    <span className="text-xl font-black text-blue-700 tabular-nums">{prospectosNuevosPeriodo}</span>
-                                </div>
-                                <div className="bg-emerald-50/60 border border-emerald-100 rounded-xl p-3">
-                                    <span className="text-[9px] font-bold text-emerald-500 uppercase tracking-wider block">Llamadas Realizadas</span>
-                                    <span className="text-xl font-black text-emerald-700 tabular-nums">{mP.llamadas || 0}</span>
-                                </div>
-                                <div className="bg-violet-50/60 border border-violet-100 rounded-xl p-3">
-                                    <span className="text-[9px] font-bold text-violet-500 uppercase tracking-wider block">Mensajes Enviados</span>
-                                    <span className="text-xl font-black text-violet-700 tabular-nums">{mP.mensajes || 0}</span>
-                                </div>
-                                <div className="bg-amber-50/60 border border-amber-100 rounded-xl p-3">
-                                    <span className="text-[9px] font-bold text-amber-500 uppercase tracking-wider block">Reuniones / Citas</span>
-                                    <span className="text-xl font-black text-amber-700 tabular-nums">{mP.reuniones || 0}</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="border-t border-gray-100 pt-3">
-                            <div className="flex justify-between items-center mb-2">
-                                <div>
-                                    <span className="text-[9px] font-bold text-gray-400 uppercase block">Cierres del Periodo</span>
-                                    <span className="text-2xl font-black text-gray-900 tabular-nums">{formatMoney.format(cP.ventasMonto || 0)}</span>
-                                </div>
-                                <div className="text-right">
-                                    <span className="text-[9px] font-bold text-gray-400 uppercase block">Ventas Ganadas</span>
-                                    <span className="text-2xl font-black text-emerald-600 tabular-nums">{cP.ventasCount || 0}</span>
-                                </div>
-                            </div>
-
-                            {(cP.ventasCount || 0) > 0 && (
-                                <div className="bg-emerald-50/70 border border-emerald-100 rounded-xl p-2.5 flex justify-between items-center mb-2">
-                                    <span className="text-[9px] font-black text-emerald-700 uppercase">Ticket Promedio</span>
-                                    <span className="text-sm font-black text-emerald-700">{formatMoney.format(cP.ventasMonto / cP.ventasCount)}</span>
-                                </div>
-                            )}
-
-                            <div className="bg-gray-50 border border-gray-100 rounded-xl p-3 flex justify-between items-center text-[10px] font-bold">
-                                <span className="text-gray-500 uppercase">Total Histórico Acumulado</span>
-                                <span className="text-gray-900 font-black">{formatMoney.format(closerData.metricas?.ventas?.montoTotal || 0)}</span>
-                            </div>
-                        </div>
                     </div>
 
                     {/* Tarjeta: Recordatorios y Próximas Citas */}
                     <div className="bg-white border border-gray-200/90 rounded-2xl p-5 shadow-xs flex flex-col">
                         <div className="flex items-center justify-between mb-4 border-b border-gray-100 pb-3">
                             <div className="flex items-center gap-2">
-                                <button
-                                    onClick={() => setSidebarTab('recordatorios')}
-                                    className={`px-3 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-md transition-all flex items-center gap-1.5 ${
-                                        sidebarTab === 'recordatorios'
-                                            ? 'bg-rose-50 text-rose-600 border border-rose-100'
-                                            : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50'
-                                    }`}
-                                >
+                                <button onClick={() => setSidebarTab('recordatorios')} className={`px-3 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-md transition-all flex items-center gap-1.5 ${sidebarTab === 'recordatorios' ? 'bg-rose-50 text-rose-600 border border-rose-100' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50'}`}>
                                     <Phone className="w-3.5 h-3.5 text-rose-500" />
                                     Recordatorios ({recordatorios.length})
                                 </button>
-                                <button
-                                    onClick={() => setSidebarTab('citas')}
-                                    className={`px-3 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-md transition-all flex items-center gap-1.5 ${
-                                        sidebarTab === 'citas'
-                                            ? 'bg-indigo-50 text-indigo-600 border border-indigo-100'
-                                            : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50'
-                                    }`}
-                                >
+                                <button onClick={() => setSidebarTab('citas')} className={`px-3 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-md transition-all flex items-center gap-1.5 ${sidebarTab === 'citas' ? 'bg-indigo-50 text-indigo-600 border border-indigo-100' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50'}`}>
                                     <Calendar className="w-3.5 h-3.5 text-indigo-500" />
                                     Próximas Citas ({reuniones.length})
                                 </button>
                             </div>
                         </div>
-
                         <div className="space-y-2">
                             {sidebarTab === 'recordatorios' && (
-                                recordatorios.length === 0 ? (
-                                    <div className="py-6 text-center text-gray-400 text-xs font-bold">Sin recordatorios hoy.</div>
-                                ) : (
+                                recordatorios.length === 0 ? (<div className="py-6 text-center text-gray-400 text-xs font-bold">Sin recordatorios hoy.</div>) : (
                                     recordatorios.map((p, idx) => {
                                         const esVencido = new Date(p.proximaLlamada) < new Date();
                                         return (
-                                            <div
-                                                key={p.id || p._id || `rec-${idx}`}
-                                                className={`relative overflow-hidden group ${esVencido ? 'bg-linear-to-br from-rose-500 to-rose-600' : 'bg-linear-to-br from-indigo-500 to-indigo-600'} rounded-xl p-3 shadow-xs hover:shadow-md transition-all cursor-pointer text-white`}
-                                                onClick={() => {
-                                                    if (p.esCliente) {
-                                                        navigate('/vendedor/clientes', { state: { selectedId: p.id || p._id } });
-                                                    } else {
-                                                        navigate('/vendedor/prospectos', { state: { selectedId: p.id || p._id } });
-                                                    }
-                                                }}
-                                            >
+                                            <div key={p.id || p._id || `rec-${idx}`} className={`relative overflow-hidden group ${esVencido ? 'bg-linear-to-br from-rose-500 to-rose-600' : 'bg-linear-to-br from-indigo-500 to-indigo-600'} rounded-xl p-3 shadow-xs hover:shadow-md transition-all cursor-pointer text-white`} onClick={() => { if (p.esCliente) { navigate('/vendedor/clientes', { state: { selectedId: p.id || p._id } }); } else { navigate('/vendedor/prospectos', { state: { selectedId: p.id || p._id } }); } }}>
                                                 <div className="flex items-center justify-between gap-2">
                                                     <span className="text-xs font-black truncate">{p.nombre || `${p.nombres || ''} ${p.apellidoPaterno || ''}`.trim()}</span>
                                                     <div className="flex items-center gap-1 text-[9px] font-bold bg-white/20 px-2 py-0.5 rounded-md backdrop-blur-xs shrink-0">
@@ -1350,44 +1267,18 @@ const Dashboard = () => {
                                     })
                                 )
                             )}
-
                             {sidebarTab === 'citas' && (
-                                loadingReuniones ? (
-                                    <div className="flex justify-center py-6"><RefreshCw className="animate-spin text-gray-400 w-5 h-5" /></div>
-                                ) : reuniones.length === 0 ? (
-                                    <div className="py-6 text-center text-gray-400 text-xs font-bold">Libre de reuniones.</div>
-                                ) : (
+                                loadingReuniones ? (<div className="flex justify-center py-6"><RefreshCw className="animate-spin text-gray-400 w-5 h-5" /></div>) : reuniones.length === 0 ? (<div className="py-6 text-center text-gray-400 text-xs font-bold">Libre de reuniones.</div>) : (
                                     reuniones.map(r => {
                                         const rFecha = new Date(r.fecha);
                                         const esHoy = rFecha.toDateString() === new Date().toDateString();
                                         return (
-                                            <div
-                                                key={r.id || r._id}
-                                                className={`relative overflow-hidden group ${esHoy ? 'bg-linear-to-br from-emerald-500 to-emerald-600' : 'bg-linear-to-br from-indigo-600 to-indigo-700'} rounded-xl p-3 shadow-xs hover:shadow-md transition-all cursor-pointer text-white`}
-                                                onClick={() => handleReunionClick(r)}
-                                            >
+                                            <div key={r.id || r._id} className={`relative overflow-hidden group ${esHoy ? 'bg-linear-to-br from-emerald-500 to-emerald-600' : 'bg-linear-to-br from-indigo-600 to-indigo-700'} rounded-xl p-3 shadow-xs hover:shadow-md transition-all cursor-pointer text-white`} onClick={() => handleReunionClick(r)}>
                                                 <div className="flex items-center justify-between gap-2">
-                                                    <div className="flex items-center gap-2 min-w-0">
-                                                        <Video className="w-4 h-4 shrink-0 text-white" />
-                                                        <span className="text-xs font-black truncate">{r.cliente?.nombres} {r.cliente?.apellidoPaterno}</span>
-                                                    </div>
-                                                    <div className="flex items-center gap-1 text-[9px] font-bold bg-white/20 px-2 py-0.5 rounded-md backdrop-blur-xs shrink-0">
-                                                        <Clock className="w-3 h-3" />
-                                                        {rFecha.toLocaleString('es-MX', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
-                                                    </div>
+                                                    <div className="flex items-center gap-2 min-w-0"><Video className="w-4 h-4 shrink-0 text-white" /><span className="text-xs font-black truncate">{r.cliente?.nombres} {r.cliente?.apellidoPaterno}</span></div>
+                                                    <div className="flex items-center gap-1 text-[9px] font-bold bg-white/20 px-2 py-0.5 rounded-md backdrop-blur-xs shrink-0"><Clock className="w-3 h-3" />{rFecha.toLocaleString('es-MX', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}</div>
                                                 </div>
-                                                {r.googleMeetLink && (
-                                                    <a
-                                                        href={r.googleMeetLink.startsWith('http') ? r.googleMeetLink : `https://${r.googleMeetLink}`}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="mt-2.5 flex items-center justify-center gap-1.5 py-1.5 px-3 bg-white text-indigo-700 rounded-lg text-[9px] font-black hover:bg-indigo-50 transition-colors shadow-xs"
-                                                        onClick={(e) => e.stopPropagation()}
-                                                    >
-                                                        <Video className="w-3 h-3" />
-                                                        UNIRSE A GOOGLE MEET
-                                                    </a>
-                                                )}
+                                                {r.googleMeetLink && (<a href={r.googleMeetLink.startsWith('http') ? r.googleMeetLink : `https://${r.googleMeetLink}`} target="_blank" rel="noopener noreferrer" className="mt-2.5 flex items-center justify-center gap-1.5 py-1.5 px-3 bg-white text-indigo-700 rounded-lg text-[9px] font-black hover:bg-indigo-50 transition-colors shadow-xs" onClick={(e) => e.stopPropagation()}><Video className="w-3 h-3" />UNIRSE A GOOGLE MEET</a>)}
                                             </div>
                                         );
                                     })
@@ -1397,6 +1288,294 @@ const Dashboard = () => {
                     </div>
                 </div>
             </div>
+            )}
+
+            {/* ═══════════════════════ TAB: PIPELINE ═══════════════════════ */}
+            {dashboardTab === 'pipeline' && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 animate-in fade-in duration-500 mt-1">
+                {/* Desglose de Valor por Etapa */}
+                <div className="bg-white border border-gray-200/90 rounded-2xl p-5 shadow-xs flex flex-col">
+                    <div className="mb-4 flex items-center justify-between border-b border-gray-100 pb-3">
+                        <div>
+                            <h3 className="text-xs font-black uppercase tracking-widest text-gray-800 flex items-center gap-2">
+                                <DollarSign className="w-4 h-4 text-emerald-600" />
+                                Desglose de Valor de Prospectos
+                            </h3>
+                            <p className="text-[9px] text-gray-400 font-bold mt-0.5">Distribución monetaria por etapa del pipeline</p>
+                        </div>
+                        <span className="text-[9px] font-black text-emerald-600 uppercase tracking-widest bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-100">
+                            {valorPipelineData.conValorCount} leads con valor
+                        </span>
+                    </div>
+                    {/* Banner Monetario */}
+                    <div className="bg-slate-900 text-white rounded-xl p-4 shadow-xs relative overflow-hidden mb-4">
+                        <div className="flex justify-between items-center relative z-10">
+                            <div>
+                                <span className="text-[9px] font-black text-emerald-400 uppercase tracking-widest block">Pipeline Estimado Total</span>
+                                <span className="text-2xl font-black text-white tabular-nums tracking-tight">{formatMoney.format(valorPipelineData.totalEstimado)}</span>
+                            </div>
+                            <div className="text-right">
+                                <span className="text-[9px] font-bold text-slate-400 uppercase block">Promedio por Lead</span>
+                                <span className="text-sm font-black text-emerald-300 tabular-nums">{formatMoney.format(valorPipelineData.promedioLead)}</span>
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-3 gap-2 mt-3 pt-2.5 border-t border-slate-800 text-[9px] font-bold">
+                            <div><span className="text-slate-400 block text-[8px] uppercase">En Proceso</span><span className="text-emerald-400 font-black">{formatMoney.format(valorPipelineData.totalProceso)}</span></div>
+                            <div className="text-center"><span className="text-slate-400 block text-[8px] uppercase">Ganado</span><span className="text-green-400 font-black">{formatMoney.format(valorPipelineData.totalGanado)}</span></div>
+                            <div className="text-right"><span className="text-slate-400 block text-[8px] uppercase">Perdido</span><span className="text-rose-400 font-black">{formatMoney.format(valorPipelineData.totalPerdido)}</span></div>
+                        </div>
+                    </div>
+                    {/* Lista de Etapas */}
+                    <div className="space-y-2.5">
+                        <h4 className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Valor por Etapa</h4>
+                        {valorPipelineData.etapas.map((stage) => (
+                            <div key={stage.key} className="bg-gray-50/70 border border-gray-100 rounded-xl p-3 transition-all hover:bg-gray-50 hover:border-gray-200">
+                                <div className="flex justify-between items-center mb-1.5">
+                                    <div className="flex items-center gap-2">
+                                        <span className={`text-[9px] font-black px-2.5 py-0.5 rounded-md uppercase ${stage.badgeBg}`}>{stage.count} leads</span>
+                                        <span className="text-xs font-extrabold text-gray-800">{stage.label}</span>
+                                    </div>
+                                    <div className="text-right">
+                                        <span className="text-xs font-black text-gray-900 tabular-nums">{formatMoney.format(stage.valor)}</span>
+                                        <span className="text-[9px] font-bold text-gray-400 block">{stage.porcentajeValor.toFixed(1)}% del total</span>
+                                    </div>
+                                </div>
+                                <div className="h-2 w-full bg-gray-200/60 rounded-full overflow-hidden">
+                                    <div className={`h-full rounded-full bg-linear-to-r ${stage.barGradient} transition-all duration-700`} style={{ width: `${Math.max(stage.porcentajeValor, stage.valor > 0 ? 5 : 0)}%` }} />
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Tasas de Conversión */}
+                <div className="flex flex-col gap-4">
+                    <div className="bg-white border border-gray-200/90 rounded-2xl p-5 shadow-xs">
+                        <h3 className="text-xs font-black uppercase tracking-widest text-gray-800 mb-3 flex items-center gap-2">
+                            <Target className="w-4 h-4 text-purple-600" />
+                            Tasas de Conversión Efectivas
+                        </h3>
+                        <div className="space-y-3">
+                            {[
+                                { label: 'Contacto', value: tasaContacto, desc: `${enContacto} de ${totalEntrada}` },
+                                { label: 'Agendamiento', value: tasaAgendamiento, desc: `${negociacion} de ${enContacto}` },
+                                { label: 'Cierre', value: tasaCierre, desc: `${ganadas} de ${negociacion}` },
+                                { label: 'Global', value: tasaGlobal, desc: `${ganadas} de ${totalLeadsHistoricos}` },
+                            ].map((rate, i) => (
+                                <div key={i} className="space-y-1">
+                                    <div className="flex justify-between items-center text-[10px]">
+                                        <span className="font-extrabold text-gray-700">{rate.label} ({rate.desc})</span>
+                                        <span className="font-black text-gray-900 tabular-nums">{formatPercent(rate.value)}</span>
+                                    </div>
+                                    <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
+                                        <div className={`h-full rounded-full transition-all duration-700 ${rate.value >= 30 ? 'bg-emerald-500' : rate.value >= 15 ? 'bg-amber-500' : 'bg-rose-400'}`} style={{ width: `${Math.min(rate.value, 100)}%` }} />
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Resumen de Embudo Rápido */}
+                    <div className="bg-white border border-gray-200/90 rounded-2xl p-5 shadow-xs">
+                        <h3 className="text-xs font-black uppercase tracking-widest text-gray-800 mb-3 flex items-center gap-2">
+                            <Activity className="w-4 h-4 text-blue-600" />
+                            Embudo de Ventas Actual
+                        </h3>
+                        <div className="grid grid-cols-2 gap-2.5">
+                            {[
+                                { label: 'Prospecto Nuevo', count: closerData.embudo.prospecto_nuevo, color: 'blue' },
+                                { label: 'En Contacto', count: closerData.embudo.en_contacto, color: 'slate' },
+                                { label: 'Negociación', count: closerData.embudo.reunion_agendada, color: 'indigo' },
+                                { label: 'Ganadas', count: closerData.embudo.ganado, color: 'emerald' },
+                                { label: 'Perdidas', count: closerData.embudo.perdido, color: 'rose' },
+                                { label: 'Total Pipeline', count: closerData.embudo.total, color: 'gray' },
+                            ].map((item, i) => (
+                                <div key={i} className={`bg-${item.color}-50/60 border border-${item.color}-100 rounded-xl p-3`}>
+                                    <span className={`text-[9px] font-bold text-${item.color}-500 uppercase tracking-wider block`}>{item.label}</span>
+                                    <span className={`text-xl font-black text-${item.color}-700 tabular-nums`}>{item.count || 0}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            )}
+
+            {/* ═══════════════════════ TAB: INGRESOS ═══════════════════════ */}
+            {dashboardTab === 'ingresos' && (
+            <div className="flex flex-col gap-4 animate-in fade-in duration-500 mt-1">
+                {/* Banner de Ingresos Principal */}
+                <div className="bg-linear-to-r from-slate-900 to-slate-800 text-white rounded-2xl p-6 shadow-lg relative overflow-hidden">
+                    <div className="absolute right-0 top-0 w-1/3 h-full bg-linear-to-l from-emerald-500/10 to-transparent"></div>
+                    <div className="relative z-10">
+                        <div className="flex items-center gap-2 mb-1">
+                            <DollarSign className="w-5 h-5 text-emerald-400" />
+                            <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">Ingresos del Periodo — {periodoSuffix}</span>
+                        </div>
+                        <div className="flex items-end justify-between mt-3">
+                            <div>
+                                <span className="text-3xl font-black tabular-nums tracking-tight">{formatMoney.format(cP.ventasMonto || 0)}</span>
+                                <span className="text-xs font-bold text-slate-400 block mt-1">{cP.ventasCount || 0} ventas cerradas</span>
+                            </div>
+                            <div className="text-right">
+                                <span className="text-[9px] font-bold text-slate-400 uppercase block">Ticket Promedio</span>
+                                <span className="text-lg font-black text-emerald-300 tabular-nums">{formatMoney.format(cP.ventasCount > 0 ? cP.ventasMonto / cP.ventasCount : 0)}</span>
+                            </div>
+                        </div>
+                        <div className="mt-4 pt-3 border-t border-slate-700/50 flex justify-between text-[10px] font-bold">
+                            <div>
+                                <span className="text-slate-400 block text-[8px] uppercase">Histórico Acumulado</span>
+                                <span className="text-white font-black">{formatMoney.format(closerData.metricas?.ventas?.montoTotal || 0)}</span>
+                            </div>
+                            <div className="text-right">
+                                <span className="text-slate-400 block text-[8px] uppercase">Pipeline Estimado</span>
+                                <span className="text-emerald-300 font-black">{formatMoney.format(valorPipelineData.totalEstimado)}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    {/* Actividad del Periodo */}
+                    <div className="bg-white border border-gray-200/90 rounded-2xl p-5 shadow-xs">
+                        <h3 className="text-xs font-black uppercase tracking-widest text-gray-800 mb-4 flex items-center gap-2">
+                            <Activity className="w-4 h-4 text-emerald-600" />
+                            Actividad del Periodo
+                        </h3>
+                        <div className="grid grid-cols-2 gap-2.5">
+                            <div className="bg-blue-50/60 border border-blue-100 rounded-xl p-3">
+                                <span className="text-[9px] font-bold text-blue-500 uppercase tracking-wider block">Nuevos Leads</span>
+                                <span className="text-xl font-black text-blue-700 tabular-nums">{prospectosNuevosPeriodo}</span>
+                            </div>
+                            <div className="bg-emerald-50/60 border border-emerald-100 rounded-xl p-3">
+                                <span className="text-[9px] font-bold text-emerald-500 uppercase tracking-wider block">Llamadas</span>
+                                <span className="text-xl font-black text-emerald-700 tabular-nums">{mP.llamadas || 0}</span>
+                            </div>
+                            <div className="bg-violet-50/60 border border-violet-100 rounded-xl p-3">
+                                <span className="text-[9px] font-bold text-violet-500 uppercase tracking-wider block">Mensajes</span>
+                                <span className="text-xl font-black text-violet-700 tabular-nums">{mP.mensajes || 0}</span>
+                            </div>
+                            <div className="bg-amber-50/60 border border-amber-100 rounded-xl p-3">
+                                <span className="text-[9px] font-bold text-amber-500 uppercase tracking-wider block">Reuniones</span>
+                                <span className="text-xl font-black text-amber-700 tabular-nums">{mP.reuniones || 0}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Desglose de Valor por Estado */}
+                    <div className="bg-white border border-gray-200/90 rounded-2xl p-5 shadow-xs">
+                        <h3 className="text-xs font-black uppercase tracking-widest text-gray-800 mb-4 flex items-center gap-2">
+                            <DollarSign className="w-4 h-4 text-emerald-600" />
+                            Desglose Monetario
+                        </h3>
+                        <div className="space-y-3">
+                            {[
+                                { label: 'En Proceso', value: valorPipelineData.totalProceso, color: 'blue', pct: valorPipelineData.totalEstimado > 0 ? (valorPipelineData.totalProceso / valorPipelineData.totalEstimado * 100) : 0 },
+                                { label: 'Ganado', value: valorPipelineData.totalGanado, color: 'emerald', pct: valorPipelineData.totalEstimado > 0 ? (valorPipelineData.totalGanado / valorPipelineData.totalEstimado * 100) : 0 },
+                                { label: 'Perdido', value: valorPipelineData.totalPerdido, color: 'rose', pct: valorPipelineData.totalEstimado > 0 ? (valorPipelineData.totalPerdido / valorPipelineData.totalEstimado * 100) : 0 },
+                            ].map((item, i) => (
+                                <div key={i} className="space-y-1">
+                                    <div className="flex justify-between items-center text-[10px]">
+                                        <span className="font-extrabold text-gray-700">{item.label}</span>
+                                        <span className="font-black text-gray-900 tabular-nums">{formatMoney.format(item.value)} ({item.pct.toFixed(1)}%)</span>
+                                    </div>
+                                    <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
+                                        <div className={`h-full rounded-full transition-all duration-700 bg-${item.color}-500`} style={{ width: `${Math.min(item.pct, 100)}%` }} />
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            )}
+
+            {/* ═══════════════════════ TAB: RENDIMIENTO ═══════════════════════ */}
+            {dashboardTab === 'rendimiento' && (
+            <div className="flex flex-col gap-4 animate-in fade-in duration-500 mt-1">
+                {/* KPIs de Alto Impacto */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <MetricKPICard title="Tasa de Show-up" value={closerData?.tasasConversion?.asistencia || 0} format="percent" icon={<Video className="w-5 h-5" />} detail={closerData?.tasasConversion?.asistenciaDetalle || "Show-up en citas agendadas"} thresholds={{ good: 70, okay: 45 }} />
+                    <MetricKPICard title={t("Ticket Promedio")} value={cP.ventasCount > 0 ? cP.ventasMonto / cP.ventasCount : 0} format="money" icon={<DollarSign className="w-5 h-5" />} detail={`Promedio en el período (${cP.ventasCount} ventas)`} color="emerald" />
+                    <MetricKPICard title="Conversión Global" value={tasaGlobal} format="percent" icon={<Target className="w-5 h-5" />} detail="De prospecto nuevo a venta ganada" thresholds={{ good: 15, okay: 8 }} />
+                </div>
+                {/* Métricas de Eficiencia */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <MetricKPICard title="Tiempo de Respuesta" value={closerData?.eficiencia?.responseTimeHoras || 0} format="number" icon={<Clock className="w-5 h-5" />} detail="Horas promedio hasta el 1er contacto" thresholds={{ good: 2, okay: 6 }} reverse={true} />
+                    <MetricKPICard title={t("Ciclo de Cierre")} value={closerData?.eficiencia?.cicloVentaDias || 0} format="number" icon={<ArrowRightLeft className="w-5 h-5" />} detail="Días promedio desde entrada a cierre" thresholds={{ good: 5, okay: 12 }} reverse={true} />
+                    <MetricKPICard title="Leads Estancados" value={closerData?.eficiencia?.leadsEstancados || 0} format="number" icon={<AlertTriangle className="w-5 h-5" />} detail="Prospectos con >7 días sin actividad" color="rose" />
+                </div>
+
+                {/* Termómetro y Ratio 80/20 */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                    {/* Termómetro de Llamadas */}
+                    <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm flex flex-col justify-between min-h-[300px]">
+                        <div className="flex items-start justify-between mb-4">
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600 shadow-xs border border-emerald-100 shrink-0"><Phone className="w-5 h-5" /></div>
+                                <div>
+                                    <h3 className="text-sm font-black uppercase tracking-widest text-gray-800">Termómetro</h3>
+                                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tight mt-0.5">Llamadas Salientes Hoy</p>
+                                </div>
+                            </div>
+                            <div className="text-right flex flex-col items-end">
+                                <div className="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-1.5">Ritmo Actual</div>
+                                <span className={`text-[10px] font-black px-3 py-1.5 rounded-lg uppercase tracking-wider border transition-colors ${llamadasDeHoyFinal < 10 ? 'bg-amber-50 text-amber-600 border-amber-200' : llamadasDeHoyFinal < 20 ? 'bg-blue-50 text-blue-600 border-blue-200' : llamadasDeHoyFinal < 30 ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 'bg-emerald-500 text-white border-emerald-600 shadow-xs'}`}>
+                                    {llamadasDeHoyFinal < 10 ? 'Bajo' : llamadasDeHoyFinal < 20 ? 'Buen Ritmo' : llamadasDeHoyFinal < 30 ? 'Óptimo' : '¡Máximo!'}
+                                </span>
+                            </div>
+                        </div>
+                        <div className="flex-1 flex flex-col justify-center items-center py-4">
+                            <div className="flex items-baseline gap-2 mb-8">
+                                <span className="text-6xl font-black text-gray-800 tracking-tighter leading-none">{llamadasDeHoyFinal}</span>
+                                <span className="text-2xl font-black text-gray-300">/ 30</span>
+                            </div>
+                            <div className="w-full space-y-3 px-2">
+                                <div className="relative h-4 bg-gray-100 rounded-full overflow-hidden border border-gray-200/80 shadow-inner">
+                                    <div className="absolute left-[66.6%] top-0 bottom-0 w-0.5 bg-white z-20 mix-blend-overlay"></div>
+                                    <div className={`absolute top-0 bottom-0 left-0 rounded-full transition-all duration-1000 ease-out bg-linear-to-r ${llamadasDeHoyFinal < 10 ? 'from-amber-400 to-amber-500' : llamadasDeHoyFinal < 20 ? 'from-blue-400 to-blue-500' : 'from-emerald-400 to-emerald-500'}`} style={{ width: `${Math.min((llamadasDeHoyFinal / 30) * 100, 100)}%` }}>
+                                        <div className="absolute top-0 left-0 right-0 h-1/2 bg-white/20 rounded-t-full"></div>
+                                    </div>
+                                </div>
+                                <div className="flex justify-between text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">
+                                    <span>Inicio (0)</span><span className="relative left-2">Meta (20)</span><span>Óptimo (30)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Ratio 80/20 */}
+                    <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm flex flex-col justify-between min-h-[300px]">
+                        <div className="flex items-start justify-between mb-2">
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600 shadow-xs border border-indigo-100 shrink-0"><Target className="w-6 h-6" /></div>
+                                <div>
+                                    <h3 className="text-sm font-black uppercase tracking-widest text-gray-800">Ratio 80/20</h3>
+                                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tight mt-0.5">Metodología Moneycall</p>
+                                </div>
+                            </div>
+                            <div className="w-10 h-10 rounded-full border border-gray-100 flex items-center justify-center bg-gray-50 text-gray-400 shrink-0"><PercentCircle className="w-5 h-5" /></div>
+                        </div>
+                        <div className="flex-1 flex flex-col items-center justify-center py-2 relative z-10">
+                            <ProactiveRatioDoughnut proactiveCount={llamadasProactivas} reactiveCount={llamadasReactivas} />
+                        </div>
+                    </div>
+                </div>
+
+                {/* Insight Card */}
+                <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4 shadow-xs">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-[10px] bg-blue-100 flex items-center justify-center text-blue-600 shrink-0"><Zap className="w-5 h-5 fill-current" /></div>
+                        <div className="flex-1 min-w-0">
+                            <h4 className="text-[10px] font-black uppercase tracking-widest mb-0.5 text-blue-800">Insight del Día</h4>
+                            <p className="text-[11px] text-blue-700/80 font-medium leading-relaxed">
+                                {llamadasDeHoyFinal >= 20 ? '¡Excelente ritmo de prospección! Tu embudo está sano y tu probabilidad de cierre ha aumentado. Sigue así.' : 'Un alto volumen de llamadas salientes (mínimo 20) es la clave de la metodología. ¡Toma el teléfono y llena tu embudo!'}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            )}
 
             {/* Modal de Tarea - Movido al final para evitar problemas de stacking context */}
             {showTaskModal && (
