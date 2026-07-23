@@ -243,6 +243,16 @@ const Dashboard = () => {
     const [recordatorios, setRecordatorios] = useState([]);
     const [reuniones, setReuniones] = useState([]);
     const [sidebarTab, setSidebarTab] = useState('recordatorios');
+    const [valorPipelineData, setValorPipelineData] = useState({
+        totalEstimado: 0,
+        totalProceso: 0,
+        totalGanado: 0,
+        totalPerdido: 0,
+        promedioLead: 0,
+        conValorCount: 0,
+        totalLeads: 0,
+        etapas: []
+    });
 
     const [loadingReuniones, setLoadingReuniones] = useState(true);
     const [periodo, setPeriodo] = useState('dia');
@@ -490,6 +500,93 @@ const Dashboard = () => {
                     });
                 }
 
+                // CÁLCULO DE VALOR TOTAL Y DESGLOSE DEL PIPELINE
+                const prospectosRaw = resProspectos.status === 'fulfilled' 
+                    ? (Array.isArray(resProspectos.value.data.data) ? resProspectos.value.data.data : Array.isArray(resProspectos.value.data) ? resProspectos.value.data : []) 
+                    : [];
+                const clientesRaw = resClientes.status === 'fulfilled' 
+                    ? (Array.isArray(resClientes.value.data) ? resClientes.value.data : []) 
+                    : [];
+
+                let totalEst = 0;
+                let totalProc = 0;
+                let totalGan = 0;
+                let totalPerd = 0;
+                let leadsConValor = 0;
+
+                const breakdownEtapas = {
+                    prospecto_nuevo: { label: 'Prospectos Nuevos', count: 0, valor: 0, color: 'bg-blue-500', barGradient: 'from-blue-500 to-indigo-600', badgeBg: 'bg-blue-50 text-blue-700' },
+                    en_contacto: { label: 'En Contacto', count: 0, valor: 0, color: 'bg-emerald-500', barGradient: 'from-emerald-500 to-teal-600', badgeBg: 'bg-emerald-50 text-emerald-700' },
+                    reunion_agendada: { label: 'Citas / Reuniones', count: 0, valor: 0, color: 'bg-violet-500', barGradient: 'from-violet-500 to-purple-600', badgeBg: 'bg-violet-50 text-violet-700' },
+                    propuesta_enviada: { label: 'En Negociación', count: 0, valor: 0, color: 'bg-amber-500', barGradient: 'from-amber-500 to-orange-600', badgeBg: 'bg-amber-50 text-amber-700' },
+                    venta_ganada: { label: 'Ventas Ganadas', count: 0, valor: 0, color: 'bg-green-500', barGradient: 'from-green-500 to-emerald-600', badgeBg: 'bg-green-50 text-green-700' },
+                    perdido: { label: 'Perdidos', count: 0, valor: 0, color: 'bg-rose-400', barGradient: 'from-rose-400 to-red-500', badgeBg: 'bg-rose-50 text-rose-700' }
+                };
+
+                const processProspectoItem = (item, isClienteGanado = false) => {
+                    const valRaw = item.customMetricValue || item.monto || item.valor || item.valor_estimado || item.valorEstimado;
+                    const val = parseFloat(String(valRaw || '0').replace(/[^0-9.-]+/g, '')) || 0;
+                    
+                    let etapaKey = 'prospecto_nuevo';
+                    const e = (item.etapaEmbudo || '').toLowerCase();
+                    const st = (item.estado || '').toLowerCase();
+
+                    if (isClienteGanado || st === 'ganado' || e === 'venta_ganada' || e === 'cliente_activo' || e === 'contrato_firmado') {
+                        etapaKey = 'venta_ganada';
+                        totalGan += val;
+                    } else if (st === 'perdido' || e === 'perdido' || e === 'no_interesado') {
+                        etapaKey = 'perdido';
+                        totalPerd += val;
+                    } else if (e.includes('reunion') || e.includes('cita') || e.includes('agendad')) {
+                        etapaKey = 'reunion_agendada';
+                        totalProc += val;
+                        totalEst += val;
+                    } else if (e.includes('propuesta') || e.includes('cotiza') || e.includes('negocia')) {
+                        etapaKey = 'propuesta_enviada';
+                        totalProc += val;
+                        totalEst += val;
+                    } else if (e.includes('contacto') || e.includes('llamad')) {
+                        etapaKey = 'en_contacto';
+                        totalProc += val;
+                        totalEst += val;
+                    } else {
+                        etapaKey = 'prospecto_nuevo';
+                        totalProc += val;
+                        totalEst += val;
+                    }
+
+                    if (val > 0) leadsConValor++;
+
+                    if (breakdownEtapas[etapaKey]) {
+                        breakdownEtapas[etapaKey].count += 1;
+                        breakdownEtapas[etapaKey].valor += val;
+                    }
+                };
+
+                prospectosRaw.forEach(p => processProspectoItem(p, false));
+                clientesRaw.forEach(c => processProspectoItem(c, true));
+
+                const totalLeadsCount = prospectosRaw.length + clientesRaw.length;
+                const promedioVal = leadsConValor > 0 ? totalEst / leadsConValor : 0;
+
+                const etapasArr = Object.entries(breakdownEtapas).map(([key, data]) => ({
+                    key,
+                    ...data,
+                    porcentajeValor: totalEst > 0 ? (data.valor / totalEst) * 100 : 0
+                }));
+
+                setValorPipelineData({
+                    totalEstimado: totalEst,
+                    totalProceso: totalProc,
+                    totalGanado: totalGan,
+                    totalPerdido: totalPerd,
+                    promedioLead: promedioVal,
+                    conValorCount: leadsConValor,
+                    totalLeads: totalLeadsCount,
+                    etapas: etapasArr
+                });
+
+
                 if (resClientes.status === 'fulfilled') {
                     const clientesConRec = (resClientes.value.data || []).filter(c => !!c.proximaLlamada && (c.nombres || c.nombre));
                     // Marcamos que son clientes ganados para identificarlos
@@ -659,7 +756,9 @@ const Dashboard = () => {
                 setSelectedMonth={setSelectedMonth}
                 selectedYear={selectedYear}
                 setSelectedYear={setSelectedYear}
+                valorPipelineData={valorPipelineData}
             />
+
         );
     }
 
@@ -769,11 +868,12 @@ const Dashboard = () => {
     mergeFuentes(closerData?.analisisFuentes);
 
     const cardsResumen = [
+        { title: 'Valor Total Pipeline', value: formatMoney.format(valorPipelineData.totalEstimado), icon: '💎', color: 'emerald', subtext: `${valorPipelineData.conValorCount} leads con monto (Prom. ${formatMoney.format(valorPipelineData.promedioLead)})` },
         { title: 'Prospectos activos', value: formatNumber.format(totalEntrada), icon: '👥', color: 'blue', subtext: `${prospectosNuevosPeriodo} nuevos ${periodoSuffix}` },
-        { title: 'En contacto', value: formatNumber.format(enContacto), icon: '📞', color: 'green', subtext: `${sinContactar} todavía sin tocar` },
-        { title: 'En negociación', value: formatNumber.format(negociacion), icon: '🤝', color: 'purple', subtext: `${cP.reunionesRealizadas || 0} citas realizadas ${periodoSuffix}` },
-        { title: 'Ventas ganadas', value: formatNumber.format(ganadas), icon: '🏆', color: 'yellow', subtext: `${formatPercent(tasaGlobal)} conv. global (${cP.ventasCount || 0} en periodo)` }
+        { title: 'Ingresos ganados', value: formatMoney.format(cP.ventasMonto || valorPipelineData.totalGanado || 0), icon: '🏆', color: 'yellow', subtext: `${cP.ventasCount || 0} cierres ${periodoSuffix} (${formatMoney.format(closerData.metricas?.ventas?.montoTotal || 0)} acum.)` },
+        { title: 'Conversión global', value: formatPercent(tasaGlobal), icon: '⚡', color: 'purple', subtext: `${ganadas} ventas de ${totalLeadsHistoricos} leads` }
     ];
+
 
     const labelPeriodo = periodo === 'dia' ? 'hoy' : periodo === 'semana' ? 'semana' : periodo === 'mes' ? 'mes' : 'total';
     const labelMensajes = periodo === 'dia' ? 'Mensajes hoy' : periodo === 'semana' ? 'Mensajes esta semana' : periodo === 'mes' ? 'Mensajes este mes' : 'Mensajes totales';
@@ -792,10 +892,15 @@ const Dashboard = () => {
         <div className="h-full flex flex-col gap-3 p-3 xl:overflow-hidden bg-gray-50/50 scrollbar-hide">
 
             <div className="shrink-0 flex flex-col">
-                <div className="flex items-center justify-between mb-1.5 px-1">
-                    <div className="flex items-center gap-1.5">
-                        <TrendingUp className="w-4 h-4 text-(--theme-600)" />
-                        <span className="text-sm font-bold text-gray-700 uppercase tracking-widest">{t("Conversión de Prospectos")}</span>
+                <div className="flex items-center justify-between mb-2 px-1">
+                    <div className="flex items-center gap-2">
+                        <div className="p-1.5 bg-(--theme-50) text-(--theme-600) rounded-lg">
+                            <TrendingUp className="w-4 h-4" />
+                        </div>
+                        <div>
+                            <h1 className="text-sm font-black text-gray-800 uppercase tracking-widest">{t("Conversión de Prospectos y Rendimiento")}</h1>
+                            <p className="text-[9px] text-gray-400 font-bold">Métricas ejecutivas de pipeline y ventas en tiempo real</p>
+                        </div>
                     </div>
 
                     <div className="flex items-center gap-3">
@@ -848,6 +953,28 @@ const Dashboard = () => {
                         )}
                     </div>
                 </div>
+
+                {/* Executive Top Metrics Banner */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-2.5">
+                    {cardsResumen.map((card, idx) => (
+                        <div key={idx} className="bg-white border border-slate-200/90 rounded-xl p-3 shadow-xs hover:shadow-sm hover:border-slate-300 transition-all flex items-center gap-3">
+                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg shrink-0 ${
+                                card.color === 'emerald' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' :
+                                card.color === 'blue' ? 'bg-blue-50 text-blue-600 border border-blue-100' :
+                                card.color === 'yellow' ? 'bg-amber-50 text-amber-600 border border-amber-100' :
+                                'bg-purple-50 text-purple-600 border border-purple-100'
+                            }`}>
+                                {card.icon}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block truncate">{card.title}</span>
+                                <span className="text-base font-black text-slate-900 tracking-tight block truncate tabular-nums">{card.value}</span>
+                                <span className="text-[9px] font-extrabold text-slate-500 block truncate">{card.subtext}</span>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
                 <div id="dashboard-funnel-container" className="bg-white border border-gray-200 rounded-xl p-3 shadow-sm w-full">
                     <FunnelVisual
                         stages={[
@@ -1044,34 +1171,77 @@ const Dashboard = () => {
                                             )}
                                         </div>
 
-                                        {/* COLUMNA DERECHA: DESGLOSE DETALLADO */}
-                                        <div className="lg:w-1/2 flex flex-col bg-white border border-gray-200 rounded-lg p-4 shadow-xs overflow-hidden">
-                                            <div className="mb-3 shrink-0">
-                                                <h3 className="text-xs font-black uppercase tracking-widest text-gray-800">DESGLOSE DETALLADO</h3>
-                                                <p className="text-[9px] text-gray-400 font-bold mt-0.5">Vista general de tu pipeline</p>
+                                        {/* COLUMNA DERECHA: DESGLOSE DE VALOR DE PROSPECTOS */}
+                                        <div className="lg:w-1/2 flex flex-col bg-white border border-gray-200 rounded-xl p-5 shadow-xs overflow-hidden">
+                                            <div className="mb-4 shrink-0 flex items-center justify-between border-b border-gray-100 pb-3">
+                                                <div>
+                                                    <h3 className="text-xs font-black uppercase tracking-widest text-gray-800 flex items-center gap-1.5">
+                                                        <DollarSign className="w-4 h-4 text-emerald-600" />
+                                                        Desglose de Valor de Prospectos
+                                                    </h3>
+                                                    <p className="text-[9px] text-gray-400 font-bold mt-0.5">Distribución monetaria por etapa del pipeline</p>
+                                                </div>
+                                                <div className="text-right">
+                                                    <span className="text-[9px] font-black text-emerald-600 uppercase tracking-widest bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-100 block">
+                                                        {valorPipelineData.conValorCount} leads con valor
+                                                    </span>
+                                                </div>
                                             </div>
                                             
-                                            <div className="flex-1 overflow-y-auto space-y-3 pr-1 scrollbar-hide" style={{ scrollbarWidth: 'none' }}>
-                                                {/* Embudo desglosado */}
-                                                <div className="space-y-1.5">
-                                                    <h4 className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Pipeline por etapa</h4>
-                                                    {[
-                                                        { label: 'Prospectos nuevos', count: vendedorData.embudo.prospecto_nuevo || 0, color: 'bg-blue-500', textColor: 'text-blue-600' },
-                                                        { label: 'En contacto', count: vendedorData.embudo.en_contacto || 0, color: 'bg-emerald-500', textColor: 'text-emerald-600' },
-                                                        { label: 'Reunión agendada', count: vendedorData.embudo.reunion_agendada || 0, color: 'bg-violet-500', textColor: 'text-violet-600' },
-                                                        { label: 'En negociación', count: closerData.embudo.en_negociacion || 0, color: 'bg-amber-500', textColor: 'text-amber-600' },
-                                                        { label: 'Venta ganada', count: closerData.embudo.venta_ganada || 0, color: 'bg-green-500', textColor: 'text-green-600' },
-                                                        { label: 'Perdidos', count: closerData.embudo.perdido || 0, color: 'bg-rose-400', textColor: 'text-rose-500' },
-                                                    ].map((stage, i) => {
-                                                        const maxCount = Math.max(totalEntrada, 1);
-                                                        const pct = Math.min((stage.count / maxCount) * 100, 100);
+                                            <div className="flex-1 overflow-y-auto space-y-4 pr-1 scrollbar-hide" style={{ scrollbarWidth: 'none' }}>
+                                                
+                                                {/* Mini Tarjeta Resumen de Pipeline Monetario */}
+                                                <div className="bg-slate-900 text-white rounded-xl p-3.5 shadow-xs relative overflow-hidden">
+                                                    <div className="flex justify-between items-center relative z-10">
+                                                        <div>
+                                                            <span className="text-[9px] font-black text-emerald-400 uppercase tracking-widest block">Pipeline Estimado Total</span>
+                                                            <span className="text-xl font-black text-white tabular-nums tracking-tight">{formatMoney.format(valorPipelineData.totalEstimado)}</span>
+                                                        </div>
+                                                        <div className="text-right">
+                                                            <span className="text-[9px] font-bold text-slate-400 uppercase block">Promedio por Lead</span>
+                                                            <span className="text-xs font-black text-emerald-300 tabular-nums">{formatMoney.format(valorPipelineData.promedioLead)}</span>
+                                                        </div>
+                                                    </div>
+                                                    <div className="grid grid-cols-3 gap-1.5 mt-3 pt-2.5 border-t border-slate-800 text-[9px] font-bold">
+                                                        <div className="text-slate-300">
+                                                            <span className="text-slate-400 block text-[8px] uppercase">En Proceso</span>
+                                                            <span className="text-emerald-400 font-black">{formatMoney.format(valorPipelineData.totalProceso)}</span>
+                                                        </div>
+                                                        <div className="text-slate-300 text-center">
+                                                            <span className="text-slate-400 block text-[8px] uppercase">Ganado</span>
+                                                            <span className="text-green-400 font-black">{formatMoney.format(valorPipelineData.totalGanado)}</span>
+                                                        </div>
+                                                        <div className="text-slate-300 text-right">
+                                                            <span className="text-slate-400 block text-[8px] uppercase">Perdido</span>
+                                                            <span className="text-rose-400 font-black">{formatMoney.format(valorPipelineData.totalPerdido)}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {/* Desglose por Etapas con Montos $ */}
+                                                <div className="space-y-3">
+                                                    <h4 className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Valor por Etapa</h4>
+                                                    {valorPipelineData.etapas.map((stage) => {
                                                         return (
-                                                            <div key={i} className="flex items-center gap-2 group">
-                                                                <span className="text-[10px] font-bold text-gray-500 w-28 truncate shrink-0">{stage.label}</span>
-                                                                <div className="flex-1 h-4 bg-gray-50 rounded-full overflow-hidden relative">
-                                                                    <div className={`h-full ${stage.color} rounded-full transition-all duration-700`} style={{ width: `${Math.max(pct, stage.count > 0 ? 4 : 0)}%` }} />
+                                                            <div key={stage.key} className="bg-gray-50/70 border border-gray-100/90 rounded-xl p-2.5 transition-all hover:bg-gray-50 hover:border-gray-200">
+                                                                <div className="flex justify-between items-center mb-1">
+                                                                    <div className="flex items-center gap-2 min-w-0">
+                                                                        <span className={`text-[9px] font-black px-2 py-0.5 rounded-md uppercase shrink-0 ${stage.badgeBg}`}>
+                                                                            {stage.count} leads
+                                                                        </span>
+                                                                        <span className="text-[11px] font-extrabold text-gray-800 truncate">{stage.label}</span>
+                                                                    </div>
+                                                                    <div className="text-right shrink-0">
+                                                                        <span className="text-xs font-black text-gray-900 tabular-nums">{formatMoney.format(stage.valor)}</span>
+                                                                        <span className="text-[9px] font-bold text-gray-400 block">{stage.porcentajeValor.toFixed(1)}% del total</span>
+                                                                    </div>
                                                                 </div>
-                                                                <span className={`text-xs font-black ${stage.textColor} w-8 text-right tabular-nums`}>{stage.count}</span>
+                                                                <div className="h-2 w-full bg-gray-200/60 rounded-full overflow-hidden mt-1.5">
+                                                                    <div 
+                                                                        className={`h-full rounded-full bg-linear-to-r ${stage.barGradient} transition-all duration-700`} 
+                                                                        style={{ width: `${Math.max(stage.porcentajeValor, stage.valor > 0 ? 5 : 0)}%` }} 
+                                                                    />
+                                                                </div>
                                                             </div>
                                                         );
                                                     })}
@@ -1102,6 +1272,7 @@ const Dashboard = () => {
                                                         </div>
                                                     </div>
                                                 </div>
+
 
                                                 {/* Separador */}
                                                 <div className="border-t border-gray-100" />

@@ -26,7 +26,8 @@ const DashboardMobile = ({
     selectedMonth,
     setSelectedMonth,
     selectedYear,
-    setSelectedYear
+    setSelectedYear,
+    valorPipelineData = { totalEstimado: 0, conValorCount: 0, etapas: [] }
 }) => {
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('resumen');
@@ -40,7 +41,7 @@ const DashboardMobile = ({
         }
     };
 
-    // Cálculos rápidos (reutilizados del dashboard original pero simplificados)
+    // Cálculos rápidos
     const mP = vendedorData.periodos?.[periodo] || {};
     const cP = closerData.periodos?.[periodo] || { ventasCount: 0, ventasMonto: 0, reunionesRealizadas: 0 };
     const isTotal = periodo === 'total';
@@ -114,6 +115,20 @@ const DashboardMobile = ({
                 )}
             </div>
 
+            {/* ── Banner de Valor Total de Pipeline ── */}
+            <div className="bg-slate-900 text-white rounded-3xl p-5 shadow-lg border border-slate-800 relative overflow-hidden">
+                <div className="flex items-center justify-between mb-2">
+                    <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">Valor Estimado Total Pipeline</span>
+                    <span className="text-[9px] font-bold text-slate-400 bg-slate-800 px-2 py-0.5 rounded-full">{valorPipelineData.conValorCount} leads con monto</span>
+                </div>
+                <div className="text-2xl font-black text-white tabular-nums tracking-tight mb-1">
+                    {formatMoney.format(valorPipelineData.totalEstimado || 0)}
+                </div>
+                <div className="text-[10px] text-slate-400 font-bold">
+                    Promedio por lead: <span className="text-emerald-300 font-black">{formatMoney.format(valorPipelineData.promedioLead || 0)}</span>
+                </div>
+            </div>
+
             {/* ── Top Metrics Grid ── */}
             <div className="grid grid-cols-2 gap-3">
                 <StatCard title="Entrada" value={totalEntrada} icon="📥" color="blue" />
@@ -124,10 +139,14 @@ const DashboardMobile = ({
 
             {/* ── Simplified Pipeline (Vertical) ── */}
             <div className="bg-white/80 backdrop-blur-xl border border-white/40 rounded-3xl p-5 shadow-sm overflow-hidden relative premium-reflejo">
-                <div className="flex items-center gap-2 mb-6">
-                    <Target className="w-4 h-4 text-(--theme-500)" />
-                    <span className="text-xs font-black uppercase tracking-[0.2em] text-slate-400">Pipeline Comercial</span>
+                <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center gap-2">
+                        <Target className="w-4 h-4 text-(--theme-500)" />
+                        <span className="text-xs font-black uppercase tracking-[0.2em] text-slate-400">Pipeline Comercial</span>
+                    </div>
+                    <span className="text-[10px] font-extrabold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">Desglose $</span>
                 </div>
+
                 
                 <div className="space-y-6 relative">
                     {/* Línea conectora */}
