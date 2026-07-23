@@ -102,12 +102,26 @@ export default function VendedorAjustes() {
         socket.on('whatsapp-status', handleStatus);
         socket.on('whatsapp-qr', handleQr);
 
+        // Desplazamiento automático suave a la sección anti-spam si se requiere
+        if (location.state?.scrollToAntiSpam && activeTab === 'whatsapp') {
+            setTimeout(() => {
+                const element = document.getElementById('antispam-warnings');
+                if (element) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    element.classList.add('ring-4', 'ring-amber-400/80', 'ring-offset-4', 'scale-[1.01]');
+                    setTimeout(() => {
+                        element.classList.remove('ring-4', 'ring-amber-400/80', 'ring-offset-4', 'scale-[1.01]');
+                    }, 4000);
+                }
+            }, 650);
+        }
+
         return () => {
             socket.emit('leave_user', storedUser.id || storedUser._id);
             socket.off('whatsapp-status', handleStatus);
             socket.off('whatsapp-qr', handleQr);
         };
-    }, []);
+    }, [activeTab, location.state]);
 
     const connectWhatsApp = async () => {
         setWsStatus('generando_qr');
@@ -910,6 +924,7 @@ export default function VendedorAjustes() {
                             )}
 
                             {activeTab === 'whatsapp' && (
+
                                 <section className="bg-white md:rounded-3xl md:shadow-xl border-b md:border border-slate-200 overflow-y-auto max-h-[70vh] md:max-h-[58vh] lg:max-h-[62vh] xl:max-h-[66vh] min-h-[400px]">
                                     <style>{`
                                         @keyframes scan {
@@ -922,6 +937,12 @@ export default function VendedorAjustes() {
                                             50% { transform: scale(1.1); opacity: 0.8; }
                                             100% { transform: scale(0.95); opacity: 0.5; }
                                         }
+                                        .neon-glow-green {
+                                            box-shadow: 0 0 20px rgba(34, 197, 94, 0.2);
+                                        }
+                                        .neon-glow-amber {
+                                            box-shadow: 0 0 25px rgba(245, 158, 11, 0.25);
+                                        }
                                     `}</style>
                                     
                                     <div className="p-6 sm:p-8">
@@ -933,11 +954,11 @@ export default function VendedorAjustes() {
                                         </h2>
 
                                         {wsStatus === 'conectado' || wsStatus === 'sincronizando' ? (
-                                            <div className="max-w-xl mx-auto bg-green-50/40 border border-green-100 rounded-3xl p-6 sm:p-8 text-center shadow-xs">
+                                            <div className="max-w-xl mx-auto bg-gradient-to-b from-green-55/40 to-white border border-green-100 rounded-3xl p-6 sm:p-8 text-center shadow-md neon-glow-green">
                                                 <div className="relative w-20 h-20 mx-auto mb-6 flex items-center justify-center">
-                                                    <div className="absolute inset-0 bg-green-500/20 rounded-full" style={{ animation: 'pulse-ring 2s infinite' }} />
-                                                    <div className="relative w-16 h-16 bg-green-500 text-white rounded-full flex items-center justify-center shadow-lg shadow-green-500/30">
-                                                        <MessageSquare size={32} />
+                                                    <div className="absolute inset-0 bg-green-500/20 rounded-full animate-ping" style={{ animationDuration: '2.5s' }} />
+                                                    <div className="relative w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 text-white rounded-full flex items-center justify-center shadow-lg shadow-green-500/30">
+                                                        <MessageSquare size={30} />
                                                     </div>
                                                     <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-md">
                                                         <CheckCircle2 className="text-green-500" size={16} fill="currentColor" />
@@ -945,39 +966,39 @@ export default function VendedorAjustes() {
                                                 </div>
                                                 
                                                 <h3 className="text-xl font-black text-green-900 leading-tight">¡WhatsApp Vinculado!</h3>
-                                                <p className="text-xs text-green-600 font-bold mt-1 uppercase tracking-wider">Línea activa en el CRM</p>
+                                                <p className="text-xs text-green-600 font-bold mt-1 uppercase tracking-widest">Línea activa en el CRM</p>
                                                 
-                                                <div className="my-6 p-4 bg-white/80 border border-green-100 rounded-2xl text-left space-y-2.5 text-xs text-slate-600">
-                                                    <div className="flex justify-between">
-                                                        <span className="font-bold text-slate-400">Canal de Envío:</span>
-                                                        <span className="font-black text-slate-800">API Baileys Embebido</span>
-                                                    </div>
-                                                    <div className="flex justify-between">
-                                                        <span className="font-bold text-slate-400">Estado de Conexión:</span>
+                                                <div className="my-6 grid grid-cols-1 sm:grid-cols-2 gap-3 text-left">
+                                                    <div className="p-4 bg-white border border-slate-100 rounded-2xl shadow-xs">
+                                                        <span className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">Estado de Conexión</span>
                                                         {wsStatus === 'sincronizando' ? (
-                                                            <span className="font-black text-amber-500 flex items-center gap-1">
-                                                                <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" /> Sincronizando...
+                                                            <span className="text-xs font-bold text-amber-500 flex items-center gap-1.5">
+                                                                <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse" /> Sincronizando...
                                                             </span>
                                                         ) : (
-                                                            <span className="font-black text-green-600 flex items-center gap-1">
-                                                                <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" /> En Línea
+                                                            <span className="text-xs font-bold text-green-600 flex items-center gap-1.5">
+                                                                <span className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse" /> En Línea
                                                             </span>
                                                         )}
                                                     </div>
-                                                    <div className="flex justify-between">
-                                                        <span className="font-bold text-slate-400">Multicuenta:</span>
-                                                        <span className="font-black text-slate-800">Vinculado a tu ID de Vendedor</span>
+                                                    <div className="p-4 bg-white border border-slate-100 rounded-2xl shadow-xs">
+                                                        <span className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">Canal de Envío</span>
+                                                        <span className="text-xs font-bold text-slate-700">API Baileys Embebido</span>
+                                                    </div>
+                                                    <div className="p-4 bg-white border border-slate-100 rounded-2xl shadow-xs sm:col-span-2">
+                                                        <span className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">Cuenta Asignada</span>
+                                                        <span className="text-xs font-bold text-slate-700">Vinculado a tu ID de Vendedor ({user?.nombre})</span>
                                                     </div>
                                                 </div>
 
-                                                <p className="text-slate-500 text-xs leading-relaxed max-w-sm mx-auto">
-                                                    Los mensajes enviados desde el CRM saldrán desde tu número telefónico. Las respuestas de tus clientes se registrarán automáticamente.
+                                                <p className="text-slate-500 text-xs leading-relaxed max-w-sm mx-auto font-medium">
+                                                    Los mensajes enviados desde el CRM saldrán desde tu número telefónico. Las respuestas de tus clientes se registrarán automáticamente en el historial.
                                                 </p>
                                                 
                                                 <button
                                                     type="button"
                                                     onClick={disconnectWhatsApp}
-                                                    className="mt-8 px-6 py-3 bg-red-50 hover:bg-red-100 border border-red-100 text-red-600 font-black text-xs rounded-xl shadow-xs transition-all active:scale-95 uppercase tracking-widest"
+                                                    className="mt-8 px-6 py-3 bg-red-50 hover:bg-red-100 border border-red-100 text-red-600 font-black text-xs rounded-xl shadow-sm transition-all active:scale-95 uppercase tracking-widest"
                                                 >
                                                     Desconectar WhatsApp
                                                 </button>
@@ -991,26 +1012,26 @@ export default function VendedorAjustes() {
                                                         <p className="text-xs text-slate-400 mt-1">Sigue los pasos en tu teléfono móvil para establecer la conexión:</p>
                                                     </div>
 
-                                                    <ul className="space-y-3.5 text-xs text-slate-600 font-medium">
+                                                    <ul className="space-y-3.5 text-xs text-slate-600 font-semibold">
                                                         <li className="flex items-start gap-3">
-                                                            <span className="w-5 h-5 rounded-full bg-green-100 text-green-700 flex items-center justify-center font-black shrink-0 text-[10px]">1</span>
+                                                            <span className="w-5 h-5 rounded-full bg-green-100 text-green-700 flex items-center justify-center font-black shrink-0 text-[10px] shadow-sm">1</span>
                                                             <p className="mt-0.5">Abre **WhatsApp** en tu teléfono móvil.</p>
                                                         </li>
                                                         <li className="flex items-start gap-3">
-                                                            <span className="w-5 h-5 rounded-full bg-green-100 text-green-700 flex items-center justify-center font-black shrink-0 text-[10px]">2</span>
+                                                            <span className="w-5 h-5 rounded-full bg-green-100 text-green-700 flex items-center justify-center font-black shrink-0 text-[10px] shadow-sm">2</span>
                                                             <p className="mt-0.5">Toca el botón de **Menú (⋮)** en Android o **Configuración (⚙️)** en iPhone.</p>
                                                         </li>
                                                         <li className="flex items-start gap-3">
-                                                            <span className="w-5 h-5 rounded-full bg-green-100 text-green-700 flex items-center justify-center font-black shrink-0 text-[10px]">3</span>
+                                                            <span className="w-5 h-5 rounded-full bg-green-100 text-green-700 flex items-center justify-center font-black shrink-0 text-[10px] shadow-sm">3</span>
                                                             <p className="mt-0.5">Selecciona **Dispositivos vinculados** y presiona **Vincular un dispositivo**.</p>
                                                         </li>
                                                         <li className="flex items-start gap-3">
-                                                            <span className="w-5 h-5 rounded-full bg-green-100 text-green-700 flex items-center justify-center font-black shrink-0 text-[10px]">4</span>
+                                                            <span className="w-5 h-5 rounded-full bg-green-100 text-green-700 flex items-center justify-center font-black shrink-0 text-[10px] shadow-sm">4</span>
                                                             <p className="mt-0.5">Apunta la cámara de tu teléfono móvil hacia la pantalla para escanear el código QR.</p>
                                                         </li>
                                                     </ul>
 
-                                                    <div className="pt-2 border-t border-slate-200/60 text-[10px] text-slate-400 flex items-center gap-1.5 font-semibold">
+                                                    <div className="pt-2 border-t border-slate-200/60 text-[10px] text-slate-400 flex items-center gap-1.5 font-bold">
                                                         <span>🔒 Conexión cifrada de extremo a extremo</span>
                                                     </div>
                                                 </div>
@@ -1042,35 +1063,35 @@ export default function VendedorAjustes() {
                                                 </div>
                                             </div>
                                         ) : (
-                                            <div className="bg-slate-50 border border-slate-100 rounded-3xl p-6 sm:p-8 text-center max-w-xl mx-auto shadow-xs">
+                                            <div className="bg-gradient-to-b from-slate-50 to-white border border-slate-150 rounded-3xl p-6 sm:p-8 text-center max-w-xl mx-auto shadow-sm">
                                                 <div className="w-16 h-16 bg-green-100 text-green-600 rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-sm">
                                                     <MessageSquare size={32} />
                                                 </div>
                                                 
                                                 <h3 className="text-lg font-black text-slate-800">Conecta tu cuenta de WhatsApp</h3>
-                                                <p className="text-slate-500 text-xs mt-2 max-w-sm mx-auto leading-relaxed">
+                                                <p className="text-slate-500 text-xs mt-2 max-w-sm mx-auto leading-relaxed font-semibold">
                                                     Vincula tu línea de WhatsApp personal o business para enviar alertas automáticas y mantener conversaciones fluidas en tiempo real con tus prospectos directamente desde la app.
                                                 </p>
 
                                                 <div className="my-6 grid grid-cols-3 gap-3 text-left">
-                                                    <div className="p-3 bg-white border border-slate-100 rounded-2xl">
-                                                        <div className="text-green-500 font-bold text-xs mb-1">🚀 Cero Costo</div>
-                                                        <p className="text-[10px] text-slate-400 leading-tight">Usa tu línea celular sin pagar costos por mensaje.</p>
+                                                    <div className="p-3.5 bg-white border border-slate-100 rounded-2xl shadow-xs hover:scale-102 transition-transform">
+                                                        <div className="text-green-500 font-black text-xs mb-1">🚀 Cero Costo</div>
+                                                        <p className="text-[10px] text-slate-400 leading-tight font-medium">Usa tu línea celular sin pagar costos por mensaje.</p>
                                                     </div>
-                                                    <div className="p-3 bg-white border border-slate-100 rounded-2xl">
-                                                        <div className="text-green-500 font-bold text-xs mb-1">📂 Historial</div>
-                                                        <p className="text-[10px] text-slate-400 leading-tight">Conserva todo el historial de chats en la ficha del cliente.</p>
+                                                    <div className="p-3.5 bg-white border border-slate-100 rounded-2xl shadow-xs hover:scale-102 transition-transform">
+                                                        <div className="text-green-500 font-black text-xs mb-1">📂 Historial</div>
+                                                        <p className="text-[10px] text-slate-400 leading-tight font-medium">Conserva todo el historial de chats en la ficha del cliente.</p>
                                                     </div>
-                                                    <div className="p-3 bg-white border border-slate-100 rounded-2xl">
-                                                        <div className="text-green-500 font-bold text-xs mb-1">💬 Multicuenta</div>
-                                                        <p className="text-[10px] text-slate-400 leading-tight">Cada vendedor vincula su propia línea personal.</p>
+                                                    <div className="p-3.5 bg-white border border-slate-100 rounded-2xl shadow-xs hover:scale-102 transition-transform">
+                                                        <div className="text-green-500 font-black text-xs mb-1">💬 Multicuenta</div>
+                                                        <p className="text-[10px] text-slate-400 leading-tight font-medium">Cada vendedor vincula su propia línea personal.</p>
                                                     </div>
                                                 </div>
                                                 
                                                 <button
                                                     type="button"
                                                     onClick={connectWhatsApp}
-                                                    className="px-8 py-3 bg-green-500 hover:bg-green-600 text-white font-black text-xs rounded-xl shadow-lg shadow-green-500/20 transition-all active:scale-95 uppercase tracking-widest"
+                                                    className="px-8 py-3.5 bg-green-500 hover:bg-green-600 text-white font-black text-xs rounded-xl shadow-lg shadow-green-500/25 transition-all active:scale-95 uppercase tracking-widest hover:brightness-105"
                                                 >
                                                     Vincular WhatsApp
                                                 </button>
@@ -1078,8 +1099,8 @@ export default function VendedorAjustes() {
                                         )}
 
                                         {/* Seccion de Advertencias Anti-Spam y Politicas de Meta */}
-                                        <div className="mt-8 pt-6 border-t border-slate-200/80">
-                                            <div className="bg-amber-50/90 border border-amber-200/90 rounded-3xl p-6 text-left shadow-xs">
+                                        <div className="mt-8 pt-6 border-t border-slate-150">
+                                            <div id="antispam-warnings" className="bg-gradient-to-b from-amber-50/60 to-white border border-amber-200/80 rounded-3xl p-6 text-left shadow-sm transition-all duration-550 neon-glow-amber">
                                                 <div className="flex items-start gap-3.5 mb-4">
                                                     <div className="p-2.5 rounded-2xl bg-amber-500 text-white shrink-0 shadow-md shadow-amber-500/20">
                                                         <AlertTriangle size={22} />
@@ -1088,51 +1109,51 @@ export default function VendedorAjustes() {
                                                         <h4 className="text-sm sm:text-base font-black text-amber-950 leading-tight">
                                                             ⚠️ Advertencias de Uso y Políticas Anti-Spam de WhatsApp
                                                         </h4>
-                                                        <p className="text-xs text-amber-800/90 mt-1 font-semibold leading-relaxed">
+                                                        <p className="text-xs text-amber-800 mt-1 font-bold leading-relaxed">
                                                             Para evitar bloqueos o suspensiones temporales/definitivas por parte de Meta, sigue rigurosamente estas reglas de uso recomendadas:
                                                         </p>
                                                     </div>
                                                 </div>
 
                                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 text-xs">
-                                                    <div className="p-4 bg-white/95 border border-amber-200/60 rounded-2xl space-y-1.5 shadow-xs">
-                                                        <p className="font-extrabold text-amber-900 flex items-center gap-2">
+                                                    <div className="p-4 bg-white/95 border border-amber-100 rounded-2xl space-y-1.5 shadow-xs hover:border-amber-200 hover:shadow-sm transition-all">
+                                                        <p className="font-extrabold text-amber-900 flex items-center gap-2 text-xs">
                                                             <span>🛑</span> No envíes Spam o Mensajes Masivos
                                                         </p>
-                                                        <p className="text-[11px] text-slate-600 leading-relaxed font-medium">
+                                                        <p className="text-[11px] text-slate-600 leading-relaxed font-semibold">
                                                             No envíes mensajes a contactos que no te conozcan, no hayan solicitado información o no tengan guardado tu número telefónico.
                                                         </p>
                                                     </div>
 
-                                                    <div className="p-4 bg-white/95 border border-amber-200/60 rounded-2xl space-y-1.5 shadow-xs">
-                                                        <p className="font-extrabold text-amber-900 flex items-center gap-2">
+                                                    <div className="p-4 bg-white/95 border border-amber-100 rounded-2xl space-y-1.5 shadow-xs hover:border-amber-200 hover:shadow-sm transition-all">
+                                                        <p className="font-extrabold text-amber-900 flex items-center gap-2 text-xs">
                                                             <span>⏱️</span> Mantén Ritmo y Pausas Humanas
                                                         </p>
-                                                        <p className="text-[11px] text-slate-600 leading-relaxed font-medium">
+                                                        <p className="text-[11px] text-slate-600 leading-relaxed font-semibold">
                                                             Evita enviar decenas de mensajes por segundo. Los patrones de envío instantáneo activan los filtros automatizados de spam de WhatsApp.
                                                         </p>
                                                     </div>
 
-                                                    <div className="p-4 bg-white/95 border border-amber-200/60 rounded-2xl space-y-1.5 shadow-xs">
-                                                        <p className="font-extrabold text-amber-900 flex items-center gap-2">
+                                                    <div className="p-4 bg-white/95 border border-amber-100 rounded-2xl space-y-1.5 shadow-xs hover:border-amber-200 hover:shadow-sm transition-all">
+                                                        <p className="font-extrabold text-amber-900 flex items-center gap-2 text-xs">
                                                             <span>📝</span> Personaliza tus Textos y Plantillas
                                                         </p>
-                                                        <p className="text-[11px] text-slate-600 leading-relaxed font-medium">
+                                                        <p className="text-[11px] text-slate-600 leading-relaxed font-semibold">
                                                             Evita enviar exactamente la misma plantilla o texto idéntico a múltiples prospectos. Usa variables (nombres, empresas) para variarlo.
                                                         </p>
                                                     </div>
 
-                                                    <div className="p-4 bg-white/95 border border-amber-200/60 rounded-2xl space-y-1.5 shadow-xs">
-                                                        <p className="font-extrabold text-amber-900 flex items-center gap-2">
+                                                    <div className="p-4 bg-white/95 border border-amber-100 rounded-2xl space-y-1.5 shadow-xs hover:border-amber-200 hover:shadow-sm transition-all">
+                                                        <p className="font-extrabold text-amber-900 flex items-center gap-2 text-xs">
                                                             <span>🚫</span> Cuidado con Chips o SIMs Nuevas
                                                         </p>
-                                                        <p className="text-[11px] text-slate-600 leading-relaxed font-medium">
+                                                        <p className="text-[11px] text-slate-600 leading-relaxed font-semibold">
                                                             Los números de teléfono recién creados tienen menor reputación en servidores de WhatsApp y son altamente propensos a bloqueos por reporte.
                                                         </p>
                                                     </div>
                                                 </div>
 
-                                                <div className="mt-4 pt-3.5 border-t border-amber-200/70 text-[11px] text-amber-900 font-bold flex items-center gap-2">
+                                                <div className="mt-4 pt-3.5 border-t border-amber-200/50 text-[11px] text-amber-900 font-extrabold flex items-center gap-2">
                                                     <span>🛡️ Nota: La responsabilidad sobre la reputación y uso de la línea telefónica recae en el usuario de la cuenta.</span>
                                                 </div>
                                             </div>

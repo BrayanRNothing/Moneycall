@@ -2,7 +2,8 @@ const express = require('express');
 const router = express.Router();
 const { auth } = require('../middleware/auth');
 const { db } = require('../config/database');
-const { connectClient, disconnectClient, sendMessage, getSessionStatus } = require('../services/whatsappManager');
+const { connectClient, disconnectClient, sendMessage, getSessionStatus, getWhatsAppProfilePicture } = require('../services/whatsappManager');
+
 
 // POST /api/whatsapp/connect - Iniciar conexión
 router.post('/connect', auth, async (req, res) => {
@@ -22,6 +23,22 @@ router.get('/status', auth, async (req, res) => {
     const status = getSessionStatus(vendedorId);
     res.json({ status });
 });
+
+// GET /api/whatsapp/profile-picture - Obtener foto de perfil de contacto
+router.get('/profile-picture', auth, async (req, res) => {
+    const { phone } = req.query;
+    if (!phone) {
+        return res.status(400).json({ error: 'Falta el parámetro phone' });
+    }
+    const vendedorId = req.usuario.id;
+    try {
+        const url = await getWhatsAppProfilePicture(vendedorId, phone);
+        res.json({ url });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 
 // POST /api/whatsapp/disconnect - Cerrar sesión
 router.post('/disconnect', auth, async (req, res) => {

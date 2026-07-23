@@ -96,8 +96,25 @@ function resolveLidToPhone(jid, sessionDir) {
             console.error('Error al resolver LID de forma reversa:', err.message);
         }
     }
-    return jid;
 }
+
+// Guardar la vinculación entre un identificador LID y el número de teléfono real
+function saveLidMapping(contact, sessionDir) {
+    if (contact.id && contact.lid && contact.id.endsWith('@s.whatsapp.net') && contact.lid.endsWith('@lid')) {
+        const lidNum = contact.lid.split('@')[0];
+        const phoneNum = contact.id.split('@')[0];
+        const mappingFile = path.join(sessionDir, `lid-mapping-${lidNum}_reverse.json`);
+        if (!fs.existsSync(mappingFile)) {
+            try {
+                fs.writeFileSync(mappingFile, JSON.stringify(phoneNum), 'utf8');
+                console.log(`[WhatsApp] Guardado mapeo LID de forma reversa: ${lidNum} -> ${phoneNum}`);
+            } catch (e) {
+                console.error('Error al escribir mapeo LID reverso:', e.message);
+            }
+        }
+    }
+}
+
 
 // Validar si un JID o teléfono corresponde a un grupo de WhatsApp, transmisión, LID o ID no individual
 function isGroupOrNonPersonJid(jidOrPhone) {
@@ -815,6 +832,7 @@ async function connectClient(vendedorId, io) {
     sock.ev.on('contacts.set', async ({ contacts }) => {
         if (!contacts) return;
         for (const contact of contacts) {
+            saveLidMapping(contact, sessionDir);
             if (contact.id) {
                 const resolvedJid = resolveLidToPhone(contact.id, sessionDir);
                 if (!isGroupOrNonPersonJid(resolvedJid)) {
@@ -831,6 +849,7 @@ async function connectClient(vendedorId, io) {
     sock.ev.on('contacts.upsert', async (contacts) => {
         if (!contacts) return;
         for (const contact of contacts) {
+            saveLidMapping(contact, sessionDir);
             if (contact.id) {
                 const resolvedJid = resolveLidToPhone(contact.id, sessionDir);
                 if (!isGroupOrNonPersonJid(resolvedJid)) {
@@ -847,6 +866,7 @@ async function connectClient(vendedorId, io) {
     sock.ev.on('contacts.update', async (updates) => {
         if (!updates) return;
         for (const update of updates) {
+            saveLidMapping(update, sessionDir);
             if (update.id) {
                 const resolvedJid = resolveLidToPhone(update.id, sessionDir);
                 if (!isGroupOrNonPersonJid(resolvedJid)) {
@@ -859,6 +879,7 @@ async function connectClient(vendedorId, io) {
             }
         }
     });
+
 
     sock.ev.on('messages.upsert', async (m) => {
         if (m.type === 'notify' || m.type === 'append') {
@@ -1095,20 +1116,15 @@ async function sendMessage(vendedorId, numero, texto) {
     // Formatear número de destino al formato de WhatsApp
     // Quitar cualquier carácter no numérico
     let cleanNumber = numero.replace(/\D/g, '');
+    const last10 = cleanNumber.slice(-10);
     
-    // Si tiene 10 dígitos (número mexicano estándar), agregar prefijo de país de celular 521
-    if (cleanNumber.length === 10) {
-        cleanNumber = '521' + cleanNumber;
-    }
-    
-    // Si es mexicano con 11 dígitos y empieza con 1 (formato celular antiguo de contacto), reformatear a 521 + 10 dígitos
-    if (cleanNumber.length === 11 && cleanNumber.startsWith('1')) {
-        cleanNumber = '521' + cleanNumber.substring(1);
-    }
-    
-    // Si tiene 12 dígitos y empieza con 52 (México), pero no tiene el 1 intermedio, insertar el 1
-    if (cleanNumber.length === 12 && cleanNumber.startsWith('52') && !cleanNumber.startsWith('521')) {
-        cleanNumber = '521' + cleanNumber.substring(2);
+    // Si es un número de 10 dígitos, o empieza con 52, 044, 045, o tiene 12/13 dígitos y parece mexicano:
+    if (
+        cleanNumber.length === 10 ||
+        (cleanNumber.length === 13 && (cleanNumber.startsWith('044') || cleanNumber.startsWith('045'))) ||
+        (cleanNumber.startsWith('52') && (cleanNumber.length === 12 || cleanNumber.length === 13))
+    ) {
+        cleanNumber = '521' + last10;
     }
 
     const jid = `${cleanNumber}@s.whatsapp.net`;
@@ -1120,6 +1136,7 @@ async function sendMessage(vendedorId, numero, texto) {
     await sock.sendMessage(jid, { text: texto });
     return true;
 }
+
 
 // Desconectar cliente manualmente (solo cuando el usuario lo pida desde la UI)
 async function disconnectClient(vendedorId) {
@@ -1399,6 +1416,53 @@ async function processHistoricalMessages(vendedorId, messages, io) {
     }
 }
 
+// Obtener foto de perfil de un contacto desde WhatsApp con almacenamiento en caché local
+async function getWhatsAppProfilePicture(vendedorId, phone) {
+    const sock = connections[vendedorId];
+    if (!sock) return null;
+
+    let cleanNumber = phone.replace(/\D/g, '');
+    const last10 = cleanNumber.slice(-10);
+    
+    // Si parece mexicano, normalizar a 521 + 10 digitos
+    if (
+        cleanNumber.length === 10 ||
+        (cleanNumber.length === 13 && (cleanNumber.startsWith('044') || cleanNumber.startsWith('045'))) ||
+        (cleanNumber.startsWith('52') && (cleanNumber.length === 12 || cleanNumber.length === 13))
+    ) {
+        cleanNumber = '521' + last10;
+    }
+
+    const jid = `${cleanNumber}@s.whatsapp.net`;
+    const cacheDir = path.join(__dirname, '../uploads/profile_pictures');
+    if (!fs.existsSync(cacheDir)) {
+        fs.mkdirSync(cacheDir, { recursive: true });
+    }
+
+    const cacheFile = path.join(cacheDir, `${cleanNumber}.json`);
+    if (fs.existsSync(cacheFile)) {
+        try {
+            const data = JSON.parse(fs.readFileSync(cacheFile, 'utf8'));
+            // Cache por 7 días
+            if (Date.now() - data.timestamp < 7 * 24 * 60 * 60 * 1000) {
+                return data.url;
+            }
+        } catch (e) {}
+    }
+
+    try {
+        const url = await sock.profilePictureUrl(jid, 'image');
+        if (url) {
+            fs.writeFileSync(cacheFile, JSON.stringify({ url, timestamp: Date.now() }), 'utf8');
+            return url;
+        }
+    } catch (err) {
+        // No tiene foto o error de rate-limit
+        return null;
+    }
+    return null;
+}
+
 module.exports = {
     initSessions,
     connectClient,
@@ -1406,5 +1470,7 @@ module.exports = {
     sendMessage,
     sendMediaMessage,
     getSessionStatus,
-    getStoredQr
+    getStoredQr,
+    getWhatsAppProfilePicture
 };
+

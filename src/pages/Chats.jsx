@@ -43,6 +43,55 @@ const formatDateDivider = (dateStr) => {
     }
 };
 
+const ChatAvatar = ({ phone, name, size = 'md' }) => {
+    const [avatarUrl, setAvatarUrl] = useState(null);
+    const [loaded, setLoaded] = useState(false);
+
+    useEffect(() => {
+        if (!phone) return;
+        const cached = localStorage.getItem(`avatar_${phone}`);
+        if (cached) {
+            setAvatarUrl(cached);
+            setLoaded(true);
+            return;
+        }
+        
+        axios.get(`${API_URL}/api/whatsapp/profile-picture?phone=${phone}`, {
+            headers: { 'x-auth-token': getToken() }
+        })
+        .then(res => {
+            if (res.data?.url) {
+                setAvatarUrl(res.data.url);
+                localStorage.setItem(`avatar_${phone}`, res.data.url);
+            }
+            setLoaded(true);
+        })
+        .catch(() => {
+            setLoaded(true);
+        });
+    }, [phone]);
+
+    const sizeClasses = size === 'sm' ? 'w-10 h-10 rounded-xl text-xs' : 'w-11 h-11 rounded-2xl text-sm';
+
+    if (avatarUrl) {
+        return (
+            <img 
+                src={avatarUrl} 
+                alt={name} 
+                className={`${sizeClasses} object-cover shadow-sm ring-1 ring-slate-100/60`} 
+                onError={() => setAvatarUrl(null)}
+            />
+        );
+    }
+
+    return (
+        <div className={`${sizeClasses} bg-linear-to-br from-green-400 to-green-600 text-white flex items-center justify-center font-black shadow-sm select-none`}>
+            {name ? name.charAt(0).toUpperCase() : 'U'}
+        </div>
+    );
+};
+
+
 const getAuthHeaders = () => ({ 'x-auth-token': getToken() || '' });
 
 export default function Chats() {
@@ -999,12 +1048,17 @@ export default function Chats() {
                         </button>
                         <button
                             type="button"
-                            onClick={() => navigate('/vendedor/ajustes')}
+                            onClick={() => {
+                                localStorage.setItem('crm_active_settings_tab', 'whatsapp');
+                                navigate('/vendedor/ajustes', { state: { activeTab: 'whatsapp', scrollToAntiSpam: true } });
+
+                            }}
                             className="flex-1 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-[10px] font-extrabold flex items-center justify-center gap-1.5 transition-all shadow-sm"
                             title="Ver recomendaciones y reglas anti-spam de WhatsApp en Ajustes"
                         >
                             <span className="shrink-0">⚠️</span> <span className="truncate">Anti-Spam</span>
                         </button>
+
                     </div>
                 </div>
 
@@ -1084,9 +1138,7 @@ export default function Chats() {
                                         className="flex-1 p-3.5 flex gap-3 text-left min-w-0"
                                     >
                                         <div className="relative shrink-0">
-                                            <div className="w-11 h-11 bg-linear-to-br from-green-400 to-green-600 text-white rounded-2xl flex items-center justify-center font-black text-sm shadow-sm">
-                                                {c.nombres.charAt(0).toUpperCase()}
-                                            </div>
+                                            <ChatAvatar phone={c.telefono} name={c.nombres} size="md" />
                                             {isPinned && (
                                                 <div className="absolute -top-1 -right-1 w-4 h-4 bg-amber-400 text-amber-950 rounded-full flex items-center justify-center shadow-xs">
                                                     <Pin size={10} className="fill-amber-950" />
@@ -1213,9 +1265,7 @@ export default function Chats() {
                                     <ArrowLeft size={20} />
                                 </button>
                                 
-                                <div className="w-10 h-10 bg-linear-to-br from-green-400 to-green-600 text-white rounded-xl flex items-center justify-center font-black shadow-sm text-xs">
-                                    {activeChat.nombres.charAt(0).toUpperCase()}
-                                </div>
+                                <ChatAvatar phone={activeChat.telefono} name={activeChat.nombres} size="sm" />
                                 <div>
                                     <h3 className="text-xs font-black text-slate-800 leading-tight">
                                         {activeChat.nombres} {activeChat.apellidoPaterno}
