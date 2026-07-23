@@ -890,7 +890,8 @@ const Dashboard = () => {
     ];
 
     return (
-        <div className="h-full flex flex-col gap-3 p-3 xl:overflow-hidden bg-gray-50/50 scrollbar-hide">
+        <div className="min-h-full flex flex-col gap-4 p-4 bg-gray-50/50">
+
 
             <div className="shrink-0 flex flex-col">
                 <div className="flex items-center justify-between mb-2 px-1">
@@ -1033,349 +1034,264 @@ const Dashboard = () => {
                 </div>
             </div>
 
-            <div className="flex-1 flex flex-col xl:flex-row gap-4 min-h-0 overflow-y-auto xl:overflow-hidden pr-0.5 scrollbar-hide">
+            {/* SECCIÓN PRINCIPAL DE MÉTRICAS Y DESGLOSE EN GRID REDISEÑADO */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 animate-in fade-in duration-500 mt-1">
 
-                <div className="flex-1 flex flex-col min-w-0">
-                    <div className="flex-1 min-h-0 relative z-10 bg-white border border-gray-200 rounded-xl p-3 shadow-sm flex flex-col">
-                        <div className="flex-1 min-h-0 overflow-y-auto xl:pr-1 scrollbar-hide" style={{ scrollbarWidth: 'none' }}>
-                            <div className="h-full flex flex-col gap-4 animate-in fade-in duration-500">
-                                    {/* SECCIÓN 1: ATAJOS RÁPIDOS Y KPIs */}
-                                    <div className="h-full flex flex-col lg:flex-row gap-4 p-1">
-                                        {/* COLUMNA IZQUIERDA: ATAJOS RÁPIDOS */}
-                                        <div className="lg:w-1/2 flex flex-col bg-white border border-gray-200 rounded-lg p-6 shadow-xs overflow-hidden">
-                                            <div className="mb-4 shrink-0 flex items-center gap-2">
-                                                <button
-                                                    onClick={() => setHealthTab('resumen')}
-                                                    className={`px-3 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-md transition-all flex items-center gap-1.5 ${healthTab === 'resumen'
-                                                        ? 'bg-(--theme-50) text-(--theme-600)'
-                                                        : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50'
-                                                        }`}
-                                                >
-                                                    <TrendingUp className="w-3.5 h-3.5" />
-                                                    Atajos Rpidos
-                                                </button>
-                                                <button
-                                                    onClick={() => setHealthTab('tareas')}
-                                                    className={`px-3 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-md transition-all flex items-center gap-1.5 ${healthTab === 'tareas'
-                                                        ? 'bg-(--theme-50) text-(--theme-600)'
-                                                        : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50'
-                                                        }`}
-                                                >
-                                                    <Bell className="w-3.5 h-3.5" />
-                                                    Tareas
-                                                </button>
-                                            </div>
-                                            {healthTab === 'resumen' ? (
-                                                <div className="grid grid-cols-2 gap-3 flex-1">
-                                                    <button 
-                                                        onClick={() => navigate('/vendedor/prospectos')}
-                                                        className="flex flex-col items-center justify-center p-4 bg-gray-50/30 border border-gray-100 rounded-lg hover:border-gray-300 hover:bg-gray-50 hover:shadow-sm transition-all group"
-                                                    >
-                                                        <UserPlus className="w-7 h-7 text-gray-400 mb-2 group-hover:text-gray-600 transition-colors stroke-[1.5]" />
-                                                        <span className="text-[10px] font-black text-gray-500 group-hover:text-gray-700 uppercase tracking-widest text-center transition-colors">Crear Prospecto</span>
-                                                    </button>
+                {/* COLUMNA 1: DESGLOSE DE VALOR DE PROSPECTOS Y TASAS DE CONVERSIÓN */}
+                <div className="flex flex-col gap-4">
+                    {/* Tarjeta: Desglose de Valor por Etapa */}
+                    <div className="bg-white border border-gray-200/90 rounded-2xl p-5 shadow-xs flex flex-col">
+                        <div className="mb-4 flex items-center justify-between border-b border-gray-100 pb-3">
+                            <div>
+                                <h3 className="text-xs font-black uppercase tracking-widest text-gray-800 flex items-center gap-2">
+                                    <DollarSign className="w-4 h-4 text-emerald-600" />
+                                    Desglose de Valor de Prospectos
+                                </h3>
+                                <p className="text-[9px] text-gray-400 font-bold mt-0.5">Distribución monetaria por etapa del pipeline</p>
+                            </div>
+                            <span className="text-[9px] font-black text-emerald-600 uppercase tracking-widest bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-100">
+                                {valorPipelineData.conValorCount} leads con valor
+                            </span>
+                        </div>
 
-                                                    <button 
-                                                        onClick={() => navigate('/vendedor/clientes')}
-                                                        className="flex flex-col items-center justify-center p-4 bg-gray-50/30 border border-gray-100 rounded-lg hover:border-gray-300 hover:bg-gray-50 hover:shadow-sm transition-all group"
-                                                    >
-                                                        <Users className="w-7 h-7 text-gray-400 mb-2 group-hover:text-gray-600 transition-colors stroke-[1.5]" />
-                                                        <span className="text-[10px] font-black text-gray-500 group-hover:text-gray-700 uppercase tracking-widest text-center transition-colors">Registrar Cliente</span>
-                                                    </button>
+                        {/* Banner Monetario */}
+                        <div className="bg-slate-900 text-white rounded-xl p-4 shadow-xs relative overflow-hidden mb-4">
+                            <div className="flex justify-between items-center relative z-10">
+                                <div>
+                                    <span className="text-[9px] font-black text-emerald-400 uppercase tracking-widest block">Pipeline Estimado Total</span>
+                                    <span className="text-2xl font-black text-white tabular-nums tracking-tight">{formatMoney.format(valorPipelineData.totalEstimado)}</span>
+                                </div>
+                                <div className="text-right">
+                                    <span className="text-[9px] font-bold text-slate-400 uppercase block">Promedio por Lead</span>
+                                    <span className="text-sm font-black text-emerald-300 tabular-nums">{formatMoney.format(valorPipelineData.promedioLead)}</span>
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-3 gap-2 mt-3 pt-2.5 border-t border-slate-800 text-[9px] font-bold">
+                                <div>
+                                    <span className="text-slate-400 block text-[8px] uppercase">En Proceso</span>
+                                    <span className="text-emerald-400 font-black">{formatMoney.format(valorPipelineData.totalProceso)}</span>
+                                </div>
+                                <div className="text-center">
+                                    <span className="text-slate-400 block text-[8px] uppercase">Ganado</span>
+                                    <span className="text-green-400 font-black">{formatMoney.format(valorPipelineData.totalGanado)}</span>
+                                </div>
+                                <div className="text-right">
+                                    <span className="text-slate-400 block text-[8px] uppercase">Perdido</span>
+                                    <span className="text-rose-400 font-black">{formatMoney.format(valorPipelineData.totalPerdido)}</span>
+                                </div>
+                            </div>
+                        </div>
 
-                                                    <button 
-                                                        onClick={() => {
-                                                            setEditingTask(null);
-                                                            setNewTask({ titulo: '', descripcion: '', prioridad: 'media' });
-                                                            setShowTaskModal(true);
-                                                        }}
-                                                        className="flex flex-col items-center justify-center p-4 bg-gray-50/30 border border-gray-100 rounded-lg hover:border-gray-300 hover:bg-gray-50 hover:shadow-sm transition-all group"
-                                                    >
-                                                        <Bell className="w-7 h-7 text-gray-400 mb-2 group-hover:text-gray-600 transition-colors stroke-[1.5]" />
-                                                        <span className="text-[10px] font-black text-gray-500 group-hover:text-gray-700 uppercase tracking-widest text-center transition-colors">Nueva Tarea</span>
-                                                    </button>
-
-                                                    <button 
-                                                        onClick={() => navigate('/vendedor/calendario')}
-                                                        className="flex flex-col items-center justify-center p-4 bg-gray-50/30 border border-gray-100 rounded-lg hover:border-gray-300 hover:bg-gray-50 hover:shadow-sm transition-all group"
-                                                    >
-                                                        <Calendar className="w-7 h-7 text-gray-400 mb-2 group-hover:text-gray-600 transition-colors stroke-[1.5]" />
-                                                        <span className="text-[10px] font-black text-gray-500 group-hover:text-gray-700 uppercase tracking-widest text-center transition-colors">Calendario</span>
-                                                    </button>
-                                                </div>
-                                            ) : (
-                                                <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
-                                                    <div className="flex items-center justify-between mb-3 px-1">
-                                                        <div className="flex items-center gap-2">
-                                                            <div className="w-8 h-8 bg-(--theme-50) rounded-xl flex items-center justify-center text-(--theme-600) shadow-xs">
-                                                                <Bell className="w-4 h-4" />
-                                                            </div>
-                                                            <div>
-                                                                <h3 className="text-[11px] font-black uppercase tracking-widest text-gray-800">Tareas de Equipo</h3>
-                                                            </div>
-                                                        </div>
-                                                        <button
-                                                            onClick={() => {
-                                                                setEditingTask(null);
-                                                                setNewTask({ titulo: '', descripcion: '', prioridad: 'media' });
-                                                                setShowTaskModal(true);
-                                                            }}
-                                                            className="px-3 py-1.5 bg-(--theme-600) hover:bg-(--theme-700) text-white rounded-lg shadow-sm transition-all flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest"
-                                                        >
-                                                            <Plus className="w-3.5 h-3.5" />
-                                                            NUEVA
-                                                        </button>
-                                                    </div>
-
-                                                    <div className="flex-1 overflow-y-auto space-y-2 pr-1 scrollbar-hide">
-                                                        {teamTasks.map((t) => (
-                                                            <div key={t.id || t._id} className={`group relative p-3 rounded-xl border transition-all ${t.estado === 'completada' ? 'bg-gray-50/50 border-gray-100 opacity-60' : 'bg-white border-gray-100 hover:border-(--theme-200) hover:shadow-sm'}`}>
-                                                                <div className="flex items-start gap-3">
-                                                                    <button
-                                                                        onClick={() => toggleTaskStatus(t)}
-                                                                        className={`mt-0.5 w-4 h-4 rounded-md border-2 flex items-center justify-center transition-colors ${t.estado === 'completada' ? 'bg-green-500 border-green-500 text-white' : 'border-gray-300 hover:border-(--theme-500)'}`}
-                                                                    >
-                                                                        {t.estado === 'completada' && <CheckCircle2 className="w-2.5 h-2.5" />}
-                                                                    </button>
-                                                                    <div className="flex-1 min-w-0">
-                                                                        <div className="flex items-center gap-2 mb-1">
-                                                                            <h4 className={`text-xs font-bold truncate ${t.estado === 'completada' ? 'line-through text-gray-400' : 'text-gray-800'}`}>{t.titulo}</h4>
-                                                                            <span className={`text-[7px] font-black px-1.5 py-0.5 rounded-full uppercase border ${t.prioridad === 'alta' ? 'bg-rose-50 text-rose-600 border-rose-100' :
-                                                                                t.prioridad === 'media' ? 'bg-amber-50 text-amber-600 border-amber-100' :
-                                                                                    'bg-blue-50 text-blue-600 border-blue-100'
-                                                                                }`}>
-                                                                                {t.prioridad}
-                                                                            </span>
-                                                                        </div>
-                                                                        <div className="flex items-center gap-3 mt-1.5">
-                                                                            <span className="text-[9px] font-bold text-gray-400 flex items-center gap-1 bg-gray-50 px-1.5 py-0.5 rounded-md">
-                                                                                <Users className="w-2.5 h-2.5 text-gray-400" />
-                                                                                <span className="text-gray-600 truncate max-w-[60px]">{t.vendedorNombre || '...'}</span>
-                                                                            </span>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                                        <button onClick={() => { setEditingTask(t); setNewTask({ titulo: t.titulo, descripcion: t.descripcion, prioridad: t.prioridad, fechaLimite: t.fechaLimite }); setShowTaskModal(true); }} className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-400 hover:text-(--theme-600)"><Pencil className="w-3 h-3" /></button>
-                                                                        <button onClick={() => handleDeleteTask(t.id || t._id)} className="p-1.5 hover:bg-rose-50 rounded-lg text-gray-400 hover:text-rose-600"><Trash2 className="w-3 h-3" /></button>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        ))}
-                                                        {teamTasks.length === 0 && (
-                                                            <div className="flex flex-col items-center justify-center py-8 text-center">
-                                                                <Bell className="w-6 h-6 text-gray-200 mb-2" />
-                                                                <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em]">Sin tareas</p>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            )}
+                        {/* Lista de Etapas */}
+                        <div className="space-y-2.5">
+                            <h4 className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Valor por Etapa</h4>
+                            {valorPipelineData.etapas.map((stage) => (
+                                <div key={stage.key} className="bg-gray-50/70 border border-gray-100 rounded-xl p-3 transition-all hover:bg-gray-50 hover:border-gray-200">
+                                    <div className="flex justify-between items-center mb-1.5">
+                                        <div className="flex items-center gap-2">
+                                            <span className={`text-[9px] font-black px-2.5 py-0.5 rounded-md uppercase ${stage.badgeBg}`}>
+                                                {stage.count} leads
+                                            </span>
+                                            <span className="text-xs font-extrabold text-gray-800">{stage.label}</span>
                                         </div>
-
-                                        {/* COLUMNA DERECHA: DESGLOSE DE VALOR DE PROSPECTOS */}
-                                        <div className="lg:w-1/2 flex flex-col bg-white border border-gray-200 rounded-xl p-5 shadow-xs overflow-hidden">
-                                            <div className="mb-4 shrink-0 flex items-center justify-between border-b border-gray-100 pb-3">
-                                                <div>
-                                                    <h3 className="text-xs font-black uppercase tracking-widest text-gray-800 flex items-center gap-1.5">
-                                                        <DollarSign className="w-4 h-4 text-emerald-600" />
-                                                        Desglose de Valor de Prospectos
-                                                    </h3>
-                                                    <p className="text-[9px] text-gray-400 font-bold mt-0.5">Distribución monetaria por etapa del pipeline</p>
-                                                </div>
-                                                <div className="text-right">
-                                                    <span className="text-[9px] font-black text-emerald-600 uppercase tracking-widest bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-100 block">
-                                                        {valorPipelineData.conValorCount} leads con valor
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            
-                                            <div className="flex-1 overflow-y-auto space-y-4 pr-1 scrollbar-hide" style={{ scrollbarWidth: 'none' }}>
-                                                
-                                                {/* Mini Tarjeta Resumen de Pipeline Monetario */}
-                                                <div className="bg-slate-900 text-white rounded-xl p-3.5 shadow-xs relative overflow-hidden">
-                                                    <div className="flex justify-between items-center relative z-10">
-                                                        <div>
-                                                            <span className="text-[9px] font-black text-emerald-400 uppercase tracking-widest block">Pipeline Estimado Total</span>
-                                                            <span className="text-xl font-black text-white tabular-nums tracking-tight">{formatMoney.format(valorPipelineData.totalEstimado)}</span>
-                                                        </div>
-                                                        <div className="text-right">
-                                                            <span className="text-[9px] font-bold text-slate-400 uppercase block">Promedio por Lead</span>
-                                                            <span className="text-xs font-black text-emerald-300 tabular-nums">{formatMoney.format(valorPipelineData.promedioLead)}</span>
-                                                        </div>
-                                                    </div>
-                                                    <div className="grid grid-cols-3 gap-1.5 mt-3 pt-2.5 border-t border-slate-800 text-[9px] font-bold">
-                                                        <div className="text-slate-300">
-                                                            <span className="text-slate-400 block text-[8px] uppercase">En Proceso</span>
-                                                            <span className="text-emerald-400 font-black">{formatMoney.format(valorPipelineData.totalProceso)}</span>
-                                                        </div>
-                                                        <div className="text-slate-300 text-center">
-                                                            <span className="text-slate-400 block text-[8px] uppercase">Ganado</span>
-                                                            <span className="text-green-400 font-black">{formatMoney.format(valorPipelineData.totalGanado)}</span>
-                                                        </div>
-                                                        <div className="text-slate-300 text-right">
-                                                            <span className="text-slate-400 block text-[8px] uppercase">Perdido</span>
-                                                            <span className="text-rose-400 font-black">{formatMoney.format(valorPipelineData.totalPerdido)}</span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                {/* Desglose por Etapas con Montos $ */}
-                                                <div className="space-y-3">
-                                                    <h4 className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Valor por Etapa</h4>
-                                                    {valorPipelineData.etapas.map((stage) => {
-                                                        return (
-                                                            <div key={stage.key} className="bg-gray-50/70 border border-gray-100/90 rounded-xl p-2.5 transition-all hover:bg-gray-50 hover:border-gray-200">
-                                                                <div className="flex justify-between items-center mb-1">
-                                                                    <div className="flex items-center gap-2 min-w-0">
-                                                                        <span className={`text-[9px] font-black px-2 py-0.5 rounded-md uppercase shrink-0 ${stage.badgeBg}`}>
-                                                                            {stage.count} leads
-                                                                        </span>
-                                                                        <span className="text-[11px] font-extrabold text-gray-800 truncate">{stage.label}</span>
-                                                                    </div>
-                                                                    <div className="text-right shrink-0">
-                                                                        <span className="text-xs font-black text-gray-900 tabular-nums">{formatMoney.format(stage.valor)}</span>
-                                                                        <span className="text-[9px] font-bold text-gray-400 block">{stage.porcentajeValor.toFixed(1)}% del total</span>
-                                                                    </div>
-                                                                </div>
-                                                                <div className="h-2 w-full bg-gray-200/60 rounded-full overflow-hidden mt-1.5">
-                                                                    <div 
-                                                                        className={`h-full rounded-full bg-linear-to-r ${stage.barGradient} transition-all duration-700`} 
-                                                                        style={{ width: `${Math.max(stage.porcentajeValor, stage.valor > 0 ? 5 : 0)}%` }} 
-                                                                    />
-                                                                </div>
-                                                            </div>
-                                                        );
-                                                    })}
-                                                </div>
-
-                                                {/* Separador */}
-                                                <div className="border-t border-gray-100" />
-
-                                                {/* Métricas del periodo */}
-                                                <div className="space-y-1.5">
-                                                    <h4 className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Actividad {periodoSuffix}</h4>
-                                                    <div className="grid grid-cols-2 gap-2">
-                                                        <div className="bg-blue-50/50 border border-blue-100/50 rounded-lg px-3 py-2">
-                                                            <span className="text-[9px] font-bold text-blue-400 uppercase tracking-wider block">Nuevos</span>
-                                                            <span className="text-lg font-black text-blue-600 tabular-nums">{prospectosNuevosPeriodo}</span>
-                                                        </div>
-                                                        <div className="bg-emerald-50/50 border border-emerald-100/50 rounded-lg px-3 py-2">
-                                                            <span className="text-[9px] font-bold text-emerald-400 uppercase tracking-wider block">Llamadas</span>
-                                                            <span className="text-lg font-black text-emerald-600 tabular-nums">{mP.llamadas || 0}</span>
-                                                        </div>
-                                                        <div className="bg-violet-50/50 border border-violet-100/50 rounded-lg px-3 py-2">
-                                                            <span className="text-[9px] font-bold text-violet-400 uppercase tracking-wider block">Mensajes</span>
-                                                            <span className="text-lg font-black text-violet-600 tabular-nums">{mP.mensajes || 0}</span>
-                                                        </div>
-                                                        <div className="bg-amber-50/50 border border-amber-100/50 rounded-lg px-3 py-2">
-                                                            <span className="text-[9px] font-bold text-amber-400 uppercase tracking-wider block">Reuniones</span>
-                                                            <span className="text-lg font-black text-amber-600 tabular-nums">{mP.reuniones || 0}</span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-
-                                                {/* Separador */}
-                                                <div className="border-t border-gray-100" />
-
-                                                {/* Ingresos desglose */}
-                                                <div className="space-y-1.5">
-                                                    <h4 className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Ingresos</h4>
-                                                    <div className="flex items-end justify-between">
-                                                        <div>
-                                                            <span className="text-[9px] font-bold text-gray-400 uppercase block">Este periodo</span>
-                                                            <span className="text-xl font-black text-gray-800">{formatMoney.format(cP.ventasMonto || 0)}</span>
-                                                        </div>
-                                                        <div className="text-right">
-                                                            <span className="text-[9px] font-bold text-gray-400 uppercase block">Cierres</span>
-                                                            <span className="text-xl font-black text-green-600">{cP.ventasCount || 0}</span>
-                                                        </div>
-                                                    </div>
-                                                    {(cP.ventasCount || 0) > 0 && (
-                                                        <div className="mt-1 bg-green-50/50 border border-green-100/50 rounded-lg px-3 py-2">
-                                                            <div className="flex justify-between items-center">
-                                                                <span className="text-[9px] font-bold text-green-500 uppercase">Ticket promedio</span>
-                                                                <span className="text-sm font-black text-green-600">{formatMoney.format(cP.ventasMonto / cP.ventasCount)}</span>
-                                                            </div>
-                                                        </div>
-                                                    )}
-                                                    {/* Total acumulado */}
-                                                    <div className="mt-1 bg-gray-50/80 border border-gray-100 rounded-lg px-3 py-2">
-                                                        <div className="flex justify-between items-center">
-                                                            <span className="text-[9px] font-bold text-gray-400 uppercase">Total acumulado</span>
-                                                            <span className="text-sm font-black text-gray-600">{formatMoney.format(closerData.metricas?.ventas?.montoTotal || 0)}</span>
-                                                        </div>
-                                                        <div className="flex justify-between items-center mt-0.5">
-                                                            <span className="text-[9px] font-bold text-gray-400 uppercase">Ventas totales</span>
-                                                            <span className="text-sm font-black text-gray-600">{closerData.metricas?.ventas?.totales || 0}</span>
-                                                        </div>
-                                                    </div>
-
-                                                    {/* Detalle de ventas individuales */}
-                                                    {(closerData.ventasDetalle || []).length > 0 && (
-                                                        <div className="mt-2">
-                                                            <h5 className="text-[8px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Detalle de ventas</h5>
-                                                            <div className="space-y-1.5">
-                                                                {(closerData.ventasDetalle || []).map((venta, idx) => {
-                                                                    const fechaVenta = venta.fecha ? new Date(venta.fecha) : null;
-                                                                    const fechaStr = fechaVenta ? fechaVenta.toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
-                                                                    return (
-                                                                        <div 
-                                                                            key={venta.id || idx} 
-                                                                            className="flex items-center gap-2 px-2.5 py-2 bg-white border border-gray-100 rounded-lg"
-                                                                        >
-                                                                            <div className="w-7 h-7 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center shrink-0 group-hover:bg-emerald-100 transition-colors">
-                                                                                <DollarSign className="w-3.5 h-3.5 text-emerald-600" />
-                                                                            </div>
-                                                                            <div className="flex-1 min-w-0">
-                                                                                <div className="flex items-center gap-1.5">
-                                                                                    <span className="text-[11px] font-black text-gray-700 truncate">{venta.clienteNombre}</span>
-                                                                                </div>
-                                                                                <div className="flex items-center gap-2 mt-0.5">
-                                                                                    <span className="text-[9px] text-gray-400 font-bold">{fechaStr}</span>
-                                                                                    <span className="text-[9px] text-gray-300">•</span>
-                                                                                    <span className="text-[9px] text-gray-400 font-bold truncate">{venta.vendedorNombre}</span>
-                                                                                </div>
-                                                                            </div>
-                                                                            <span className="text-xs font-black text-green-600 shrink-0">{formatMoney.format(venta.monto)}</span>
-                                                                        </div>
-                                                                    );
-                                                                })}
-                                                            </div>
-                                                        </div>
-                                                    )}
-                                                </div>
-
-                                                {/* Tasas de conversión */}
-                                                <div className="border-t border-gray-100" />
-                                                <div className="space-y-1.5">
-                                                    <h4 className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Tasas de conversión</h4>
-                                                    {[
-                                                        { label: 'Contacto', value: tasaContacto, desc: `${enContacto} de ${totalEntrada}` },
-                                                        { label: 'Agendamiento', value: tasaAgendamiento, desc: `${negociacion} de ${enContacto}` },
-                                                        { label: 'Cierre', value: tasaCierre, desc: `${ganadas} de ${negociacion}` },
-                                                        { label: 'Global', value: tasaGlobal, desc: `${ganadas} de ${totalLeadsHistoricos}` },
-                                                    ].map((rate, i) => (
-                                                        <div key={i} className="flex items-center gap-2">
-                                                            <span className="text-[10px] font-bold text-gray-500 w-24 shrink-0">{rate.label}</span>
-                                                            <div className="flex-1 h-3 bg-gray-50 rounded-full overflow-hidden">
-                                                                <div 
-                                                                    className={`h-full rounded-full transition-all duration-700 ${
-                                                                        rate.value >= 30 ? 'bg-green-500' : rate.value >= 15 ? 'bg-amber-500' : 'bg-rose-400'
-                                                                    }`} 
-                                                                    style={{ width: `${Math.min(rate.value, 100)}%` }} 
-                                                                />
-                                                            </div>
-                                                            <span className="text-[10px] font-black text-gray-600 w-10 text-right tabular-nums">{formatPercent(rate.value)}</span>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </div>
+                                        <div className="text-right">
+                                            <span className="text-xs font-black text-gray-900 tabular-nums">{formatMoney.format(stage.valor)}</span>
+                                            <span className="text-[9px] font-bold text-gray-400 block">{stage.porcentajeValor.toFixed(1)}% del total</span>
                                         </div>
                                     </div>
+                                    <div className="h-2 w-full bg-gray-200/60 rounded-full overflow-hidden">
+                                        <div 
+                                            className={`h-full rounded-full bg-linear-to-r ${stage.barGradient} transition-all duration-700`} 
+                                            style={{ width: `${Math.max(stage.porcentajeValor, stage.valor > 0 ? 5 : 0)}%` }} 
+                                        />
+                                    </div>
                                 </div>
+                            ))}
+                        </div>
+                    </div>
 
-                            {healthTab === 'kpis' && (
+                    {/* Tarjeta: Tasas de Conversión */}
+                    <div className="bg-white border border-gray-200/90 rounded-2xl p-5 shadow-xs">
+                        <h3 className="text-xs font-black uppercase tracking-widest text-gray-800 mb-3 flex items-center gap-2">
+                            <Target className="w-4 h-4 text-purple-600" />
+                            Tasas de Conversión Efectivas
+                        </h3>
+                        <div className="space-y-3">
+                            {[
+                                { label: 'Contacto', value: tasaContacto, desc: `${enContacto} de ${totalEntrada}` },
+                                { label: 'Agendamiento', value: tasaAgendamiento, desc: `${negociacion} de ${enContacto}` },
+                                { label: 'Cierre', value: tasaCierre, desc: `${ganadas} de ${negociacion}` },
+                                { label: 'Global', value: tasaGlobal, desc: `${ganadas} de ${totalLeadsHistoricos}` },
+                            ].map((rate, i) => (
+                                <div key={i} className="space-y-1">
+                                    <div className="flex justify-between items-center text-[10px]">
+                                        <span className="font-extrabold text-gray-700">{rate.label} ({rate.desc})</span>
+                                        <span className="font-black text-gray-900 tabular-nums">{formatPercent(rate.value)}</span>
+                                    </div>
+                                    <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
+                                        <div 
+                                            className={`h-full rounded-full transition-all duration-700 ${
+                                                rate.value >= 30 ? 'bg-emerald-500' : rate.value >= 15 ? 'bg-amber-500' : 'bg-rose-400'
+                                            }`} 
+                                            style={{ width: `${Math.min(rate.value, 100)}%` }} 
+                                        />
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+
+                {/* COLUMNA 2: ATAJOS RÁPIDOS, ACTIVIDAD E INGRESOS */}
+                <div className="flex flex-col gap-4">
+                    
+                    {/* Tarjeta: Atajos Rápidos y Tareas */}
+                    <div className="bg-white border border-gray-200/90 rounded-2xl p-5 shadow-xs flex flex-col">
+                        <div className="mb-4 flex items-center justify-between border-b border-gray-100 pb-3">
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={() => setHealthTab('resumen')}
+                                    className={`px-3 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-md transition-all flex items-center gap-1.5 ${healthTab === 'resumen' ? 'bg-(--theme-50) text-(--theme-600)' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50'}`}
+                                >
+                                    <TrendingUp className="w-3.5 h-3.5" />
+                                    Atajos Rápidos
+                                </button>
+                                <button
+                                    onClick={() => setHealthTab('tareas')}
+                                    className={`px-3 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-md transition-all flex items-center gap-1.5 ${healthTab === 'tareas' ? 'bg-(--theme-50) text-(--theme-600)' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50'}`}
+                                >
+                                    <Bell className="w-3.5 h-3.5" />
+                                    Tareas de Equipo ({teamTasks.length})
+                                </button>
+                            </div>
+                        </div>
+
+                        {healthTab === 'resumen' ? (
+                            <div className="grid grid-cols-2 gap-3">
+                                <button 
+                                    onClick={() => navigate('/vendedor/prospectos')}
+                                    className="flex flex-col items-center justify-center p-4 bg-gray-50/50 border border-gray-100 rounded-xl hover:border-gray-300 hover:bg-gray-50 hover:shadow-xs transition-all group"
+                                >
+                                    <UserPlus className="w-6 h-6 text-blue-500 mb-2 group-hover:scale-110 transition-transform" />
+                                    <span className="text-[10px] font-black text-gray-700 uppercase tracking-widest text-center">Crear Prospecto</span>
+                                </button>
+
+                                <button 
+                                    onClick={() => navigate('/vendedor/clientes')}
+                                    className="flex flex-col items-center justify-center p-4 bg-gray-50/50 border border-gray-100 rounded-xl hover:border-gray-300 hover:bg-gray-50 hover:shadow-xs transition-all group"
+                                >
+                                    <Users className="w-6 h-6 text-emerald-500 mb-2 group-hover:scale-110 transition-transform" />
+                                    <span className="text-[10px] font-black text-gray-700 uppercase tracking-widest text-center">Registrar Cliente</span>
+                                </button>
+
+                                <button 
+                                    onClick={() => {
+                                        setEditingTask(null);
+                                        setNewTask({ titulo: '', descripcion: '', prioridad: 'media' });
+                                        setShowTaskModal(true);
+                                    }}
+                                    className="flex flex-col items-center justify-center p-4 bg-gray-50/50 border border-gray-100 rounded-xl hover:border-gray-300 hover:bg-gray-50 hover:shadow-xs transition-all group"
+                                >
+                                    <Bell className="w-6 h-6 text-amber-500 mb-2 group-hover:scale-110 transition-transform" />
+                                    <span className="text-[10px] font-black text-gray-700 uppercase tracking-widest text-center">Nueva Tarea</span>
+                                </button>
+
+                                <button 
+                                    onClick={() => navigate('/vendedor/calendario')}
+                                    className="flex flex-col items-center justify-center p-4 bg-gray-50/50 border border-gray-100 rounded-xl hover:border-gray-300 hover:bg-gray-50 hover:shadow-xs transition-all group"
+                                >
+                                    <Calendar className="w-6 h-6 text-purple-500 mb-2 group-hover:scale-110 transition-transform" />
+                                    <span className="text-[10px] font-black text-gray-700 uppercase tracking-widest text-center">Calendario</span>
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="space-y-2">
+                                <div className="flex items-center justify-between mb-2">
+                                    <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Tareas Pendientes</span>
+                                    <button
+                                        onClick={() => { setEditingTask(null); setNewTask({ titulo: '', descripcion: '', prioridad: 'media' }); setShowTaskModal(true); }}
+                                        className="px-2.5 py-1 bg-(--theme-600) text-white rounded-lg text-[9px] font-black uppercase"
+                                    >
+                                        + Nueva Tarea
+                                    </button>
+                                </div>
+                                {teamTasks.map((t) => (
+                                    <div key={t.id || t._id} className={`p-3 rounded-xl border transition-all ${t.estado === 'completada' ? 'bg-gray-50/50 border-gray-100 opacity-60' : 'bg-white border-gray-100 hover:border-gray-200'}`}>
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-2">
+                                                <button onClick={() => toggleTaskStatus(t)} className={`w-4 h-4 rounded border flex items-center justify-center ${t.estado === 'completada' ? 'bg-green-500 border-green-500 text-white' : 'border-gray-300'}`}>
+                                                    {t.estado === 'completada' && <CheckCircle2 className="w-2.5 h-2.5" />}
+                                                </button>
+                                                <span className={`text-xs font-bold ${t.estado === 'completada' ? 'line-through text-gray-400' : 'text-gray-800'}`}>{t.titulo}</span>
+                                            </div>
+                                            <span className="text-[8px] font-black px-2 py-0.5 rounded-full uppercase bg-blue-50 text-blue-600 border border-blue-100">{t.prioridad}</span>
+                                        </div>
+                                    </div>
+                                ))}
+                                {teamTasks.length === 0 && (
+                                    <div className="py-6 text-center text-gray-400 text-xs font-bold">Sin tareas pendientes</div>
+                                )}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Tarjeta: Actividad e Ingresos del Periodo */}
+                    <div className="bg-white border border-gray-200/90 rounded-2xl p-5 shadow-xs space-y-4">
+                        <div>
+                            <h3 className="text-xs font-black uppercase tracking-widest text-gray-800 mb-3 flex items-center gap-2">
+                                <Activity className="w-4 h-4 text-emerald-600" />
+                                Actividad e Ingresos ({periodoSuffix})
+                            </h3>
+                            <div className="grid grid-cols-2 gap-2.5">
+                                <div className="bg-blue-50/60 border border-blue-100 rounded-xl p-3">
+                                    <span className="text-[9px] font-bold text-blue-500 uppercase tracking-wider block">Nuevos Leads</span>
+                                    <span className="text-xl font-black text-blue-700 tabular-nums">{prospectosNuevosPeriodo}</span>
+                                </div>
+                                <div className="bg-emerald-50/60 border border-emerald-100 rounded-xl p-3">
+                                    <span className="text-[9px] font-bold text-emerald-500 uppercase tracking-wider block">Llamadas Realizadas</span>
+                                    <span className="text-xl font-black text-emerald-700 tabular-nums">{mP.llamadas || 0}</span>
+                                </div>
+                                <div className="bg-violet-50/60 border border-violet-100 rounded-xl p-3">
+                                    <span className="text-[9px] font-bold text-violet-500 uppercase tracking-wider block">Mensajes Enviados</span>
+                                    <span className="text-xl font-black text-violet-700 tabular-nums">{mP.mensajes || 0}</span>
+                                </div>
+                                <div className="bg-amber-50/60 border border-amber-100 rounded-xl p-3">
+                                    <span className="text-[9px] font-bold text-amber-500 uppercase tracking-wider block">Reuniones / Citas</span>
+                                    <span className="text-xl font-black text-amber-700 tabular-nums">{mP.reuniones || 0}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="border-t border-gray-100 pt-3">
+                            <div className="flex justify-between items-center mb-2">
+                                <div>
+                                    <span className="text-[9px] font-bold text-gray-400 uppercase block">Cierres del Periodo</span>
+                                    <span className="text-2xl font-black text-gray-900 tabular-nums">{formatMoney.format(cP.ventasMonto || 0)}</span>
+                                </div>
+                                <div className="text-right">
+                                    <span className="text-[9px] font-bold text-gray-400 uppercase block">Ventas Ganadas</span>
+                                    <span className="text-2xl font-black text-emerald-600 tabular-nums">{cP.ventasCount || 0}</span>
+                                </div>
+                            </div>
+
+                            {(cP.ventasCount || 0) > 0 && (
+                                <div className="bg-emerald-50/70 border border-emerald-100 rounded-xl p-2.5 flex justify-between items-center mb-2">
+                                    <span className="text-[9px] font-black text-emerald-700 uppercase">Ticket Promedio</span>
+                                    <span className="text-sm font-black text-emerald-700">{formatMoney.format(cP.ventasMonto / cP.ventasCount)}</span>
+                                </div>
+                            )}
+
+                            <div className="bg-gray-50 border border-gray-100 rounded-xl p-3 flex justify-between items-center text-[10px] font-bold">
+                                <span className="text-gray-500 uppercase">Total Histórico Acumulado</span>
+                                <span className="text-gray-900 font-black">{formatMoney.format(closerData.metricas?.ventas?.montoTotal || 0)}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {healthTab === 'kpis' && (
+
                                 <div className="flex flex-col gap-4 h-full min-h-0">
                                     {/* Fila 1: KPIs de Alto Impacto */}
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 shrink-0">
@@ -1664,11 +1580,9 @@ const Dashboard = () => {
                                     </div>
                                 </div>
                             )}
-                        </div>
-                    </div>
-                </div>
 
                 <div className="w-80 shrink-0 flex flex-col gap-3 overflow-y-auto scrollbar-hide" style={{ scrollbarWidth: 'none' }}>
+
 
                     <div className="bg-(--theme-50)/40 border border-gray-200 rounded-xl p-4 shadow-sm flex flex-col flex-1 min-h-0">
                         <div className="flex items-center gap-1 mb-4 shrink-0 bg-black/5 rounded-lg p-1">
@@ -1814,11 +1728,10 @@ const Dashboard = () => {
                             )}
                         </div>
                     </div>
-
                 </div>
-            </div>
             {/* Modal de Tarea - Movido al final para evitar problemas de stacking context */}
             {showTaskModal && (
+
                 <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
                     <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-gray-100 flex flex-col">
                         <div className="p-6">
