@@ -1288,339 +1288,47 @@ const Dashboard = () => {
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
 
-            {healthTab === 'kpis' && (
-
-                                <div className="flex flex-col gap-4 h-full min-h-0">
-                                    {/* Fila 1: KPIs de Alto Impacto */}
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 shrink-0">
-                                        <MetricKPICard
-                                            title="Tasa de Show-up"
-                                            value={closerData?.tasasConversion?.asistencia || 0}
-                                            format="percent"
-                                            icon={<Video className="w-5 h-5" />}
-                                            detail={closerData?.tasasConversion?.asistenciaDetalle || "Show-up en citas agendadas"}
-                                            thresholds={{ good: 70, okay: 45 }}
-                                        />
-                                        <MetricKPICard
-                                            title={t("Ticket Promedio")}
-                                            value={cP.ventasCount > 0 ? cP.ventasMonto / cP.ventasCount : 0}
-                                            format="money"
-                                            icon={<DollarSign className="w-5 h-5" />}
-                                            detail={`Promedio en el período (${cP.ventasCount} ventas)`}
-                                            color="emerald"
-                                        />
-                                        <MetricKPICard
-                                            title="Conversión Global"
-                                            value={tasaGlobal}
-                                            format="percent"
-                                            icon={<Target className="w-5 h-5" />}
-                                            detail="De prospecto nuevo a venta ganada"
-                                            thresholds={{ good: 15, okay: 8 }}
-                                        />
-                                    </div>
-
-                                    {/* Fila 2: Métricas de Eficiencia (Velocidad) */}
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 shrink-0">
-                                        <MetricKPICard
-                                            title="Tiempo de Respuesta"
-                                            value={closerData?.eficiencia?.responseTimeHoras || 0}
-                                            format="number"
-                                            icon={<Clock className="w-5 h-5" />}
-                                            detail="Horas promedio hasta el 1er contacto"
-                                            thresholds={{ good: 2, okay: 6 }}
-                                            reverse={true}
-                                        />
-                                        <MetricKPICard
-                                            title={t("Ciclo de Cierre")}
-                                            value={closerData?.eficiencia?.cicloVentaDias || 0}
-                                            format="number"
-                                            icon={<ArrowRightLeft className="w-5 h-5" />}
-                                            detail="Días promedio desde entrada a cierre"
-                                            thresholds={{ good: 5, okay: 12 }}
-                                            reverse={true}
-                                        />
-                                        <MetricKPICard
-                                            title="Leads Estancados"
-                                            value={closerData?.eficiencia?.leadsEstancados || 0}
-                                            format="number"
-                                            icon={<AlertTriangle className="w-5 h-5" />}
-                                            detail="Prospectos con >7 días sin actividad"
-                                            color="rose"
-                                        />
-                                    </div>
-
-
-
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 flex-1 min-h-0 mt-auto">
-                                        {/* Distribución por Fuente */}
-                                        <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm flex flex-col h-full min-h-0">
-                                            <div className="flex items-center gap-2 mb-6 shrink-0">
-                                                <div className="w-10 h-10 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-500 shadow-xs">
-                                                    <Globe className="w-5 h-5" />
-                                                </div>
-                                                <div>
-                                                    <h3 className="text-xs font-black uppercase tracking-widest text-gray-800">Distribución por Fuente</h3>
-                                                    <p className="text-[9px] text-gray-400 font-bold uppercase tracking-tight">Análisis de Origen</p>
-                                                </div>
-                                            </div>
-
-                                            {Object.keys(analisisFuentesCombinado).length === 0 ? (
-                                                <div className="flex-1 flex flex-col items-center justify-center py-8 opacity-40">
-                                                    <p className="text-[9px] uppercase font-black tracking-widest">Sin datos de origen</p>
-                                                </div>
-                                            ) : (
-                                                <div className="flex-1 overflow-y-auto space-y-4 pr-2 custom-scrollbar">
-                                                    {Object.entries(analisisFuentesCombinado)
-                                                        .sort((a, b) => b[1].revenue - a[1].revenue)
-                                                        .map(([fuente, data]) => {
-                                                            const count = data.count;
-                                                            const revenue = data.revenue;
-                                                            return (
-                                                                <div key={fuente} className="space-y-1.5">
-                                                                    <div className="flex justify-between text-[11px] items-end">
-                                                                        <div>
-                                                                            <span className="font-black text-gray-700 block">{fuente}</span>
-                                                                            <span className="text-[9px] text-gray-400 font-bold">{count} leads</span>
-                                                                        </div>
-                                                                        <div className="text-right">
-                                                                            <span className="text-indigo-600 font-black block">{formatMoney.format(revenue)}</span>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div className="h-2 w-full bg-gray-50 rounded-full overflow-hidden">
-                                                                        <div
-                                                                            className="h-full bg-indigo-500 rounded-full"
-                                                                            style={{ width: `${Math.min((count / (closerData.embudo.total || 1) * 100), 100).toFixed(0)}%` }}
-                                                                        />
-                                                                    </div>
-                                                                </div>
-                                                            );
-                                                        })
-                                                    }
-                                                </div>
-                                            )}
-                                        </div>
-
-                                        {/* Análisis de Pérdidas (Motivos) */}
-                                        <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm flex flex-col h-full min-h-0">
-                                            <div className="flex items-center gap-2 mb-6 shrink-0">
-                                                <div className="w-10 h-10 bg-rose-50 rounded-2xl flex items-center justify-center text-rose-500 shadow-xs">
-                                                    <XCircle className="w-5 h-5" />
-                                                </div>
-                                                <div>
-                                                    <h3 className="text-xs font-black uppercase tracking-widest text-gray-800">Motivos de Pérdida</h3>
-                                                    <p className="text-[9px] text-gray-400 font-bold uppercase tracking-tight">Motivos de Descarte</p>
-                                                </div>
-                                            </div>
-
-                                            {Object.keys(closerData.analisisPerdidasPremium).length === 0 ? (
-                                                <div className="flex-1 flex flex-col items-center justify-center py-8 opacity-40">
-                                                    <p className="text-[9px] uppercase font-black tracking-widest">Sin datos de descarte</p>
-                                                </div>
-                                            ) : (
-                                                <div className="flex-1 overflow-y-auto space-y-5 pr-2 custom-scrollbar">
-                                                    {Object.entries(closerData.analisisPerdidasPremium)
-                                                        .sort((a, b) => b[1] - a[1])
-                                                        .map(([motivo, count]) => {
-                                                            const percent = (count / (closerData.embudo.perdido || 1)) * 100;
-                                                            return (
-                                                                <div key={motivo} className="flex items-center gap-4">
-                                                                    <span className="text-xs font-black text-rose-600 bg-rose-50 w-8 h-8 flex items-center justify-center rounded-xl border border-rose-100 shrink-0">{count}</span>
-                                                                    <div className="flex-1 min-w-0">
-                                                                        <div className="flex justify-between items-center mb-1.5">
-                                                                            <p className="text-[11px] font-black text-gray-700 truncate">{motivo}</p>
-                                                                            <p className="text-[10px] font-black text-gray-400">{percent.toFixed(0)}%</p>
-                                                                        </div>
-                                                                        <div className="h-1.5 bg-gray-50 rounded-full overflow-hidden">
-                                                                            <div className="h-full bg-rose-400" style={{ width: `${percent}%` }} />
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            );
-                                                        })
-                                                    }
-                                                </div>
-                                            )}
-                                        </div>
-
-                                        {/* Espacio para Métricas en Desarrollo (Simplificada y Centrada) */}
-                                        {/* Espacio para Métricas en Desarrollo */}
-                                        <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm flex flex-col h-full min-h-0 items-center justify-center text-center opacity-70 group transition-all">
-                                            <div className="max-w-[220px]">
-                                                <h3 className="text-sm font-black text-gray-400 uppercase tracking-[0.3em] leading-tight mb-2">Métricas en Desarrollo</h3>
-                                                <p className="text-[10px] text-gray-400 font-bold leading-relaxed">
-                                                    Nuevos análisis y predicciones inteligentes próximamente.
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-
-                            {healthTab === 'moneycall' && (
-                                <div className="flex flex-col gap-6 animate-in fade-in duration-500 pb-4">
-                                    <div className="flex items-center justify-between px-2">
-                                        <div>
-                                            <h2 className="text-lg font-black text-gray-800 tracking-tight">Proactividad y Esfuerzo</h2>
-                                            <p className="text-[11px] text-gray-500 font-bold uppercase tracking-widest mt-0.5">Monitoreo de la metodología 80/20 y ritmo de llamadas</p>
-                                        </div>
-                                        <div className="hidden sm:flex items-center gap-2">
-                                            <div className="flex items-center gap-2 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-100 shadow-xs">
-                                                <div className="relative flex h-2.5 w-2.5">
-                                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
-                                                </div>
-                                                <span className="text-[10px] font-black text-emerald-700 uppercase tracking-widest">Métricas en Vivo</span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-                                        {/* Termómetro de Llamadas */}
-                                        <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm flex flex-col justify-between min-h-[300px]">
-                                            <div className="flex items-start justify-between mb-4">
-                                                <div className="flex items-center gap-4">
-                                                    <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600 shadow-xs border border-emerald-100 shrink-0">
-                                                        <Phone className="w-5 h-5" />
-                                                    </div>
-                                                    <div>
-                                                        <h3 className="text-sm font-black uppercase tracking-widest text-gray-800">Termómetro</h3>
-                                                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tight mt-0.5">Llamadas Salientes Hoy</p>
-                                                    </div>
-                                                </div>
-                                                
-                                                <div className="text-right flex flex-col items-end">
-                                                    <div className="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-1.5">Ritmo Actual</div>
-                                                    <span className={`text-[10px] font-black px-3 py-1.5 rounded-lg uppercase tracking-wider border transition-colors ${
-                                                        llamadasDeHoyFinal < 10 ? 'bg-amber-50 text-amber-600 border-amber-200' :
-                                                        llamadasDeHoyFinal < 20 ? 'bg-blue-50 text-blue-600 border-blue-200' :
-                                                        llamadasDeHoyFinal < 30 ? 'bg-emerald-50 text-emerald-600 border-emerald-200' :
-                                                        'bg-emerald-500 text-white border-emerald-600 shadow-xs'
-                                                    }`}>
-                                                        {llamadasDeHoyFinal < 10 ? 'Bajo' :
-                                                         llamadasDeHoyFinal < 20 ? 'Buen Ritmo' :
-                                                         llamadasDeHoyFinal < 30 ? 'Óptimo' : '¡Máximo!'}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            
-                                            <div className="flex-1 flex flex-col justify-center items-center py-4">
-                                                <div className="flex items-baseline gap-2 mb-8">
-                                                    <span className="text-6xl font-black text-gray-800 tracking-tighter leading-none">{llamadasDeHoyFinal}</span>
-                                                    <span className="text-2xl font-black text-gray-300">/ 30</span>
-                                                </div>
-                                                
-                                                <div className="w-full space-y-3 px-2">
-                                                    <div className="relative h-4 bg-gray-100 rounded-full overflow-hidden border border-gray-200/80 shadow-inner">
-                                                        {/* Marcadores de meta */}
-                                                        <div className="absolute left-[66.6%] top-0 bottom-0 w-0.5 bg-white z-20 mix-blend-overlay"></div>
-                                                        <div className="absolute left-[100%] top-0 bottom-0 w-0.5 bg-white z-20 mix-blend-overlay"></div>
-
-                                                        {/* Barra de progreso */}
-                                                        <div 
-                                                            className={`absolute top-0 bottom-0 left-0 rounded-full transition-all duration-1000 ease-out bg-linear-to-r ${
-                                                                llamadasDeHoyFinal < 10 ? 'from-amber-400 to-amber-500' :
-                                                                llamadasDeHoyFinal < 20 ? 'from-blue-400 to-blue-500' :
-                                                                'from-emerald-400 to-emerald-500'
-                                                            }`}
-                                                            style={{ width: `${Math.min((llamadasDeHoyFinal / 30) * 100, 100)}%` }}
-                                                        >
-                                                            <div className="absolute top-0 left-0 right-0 h-1/2 bg-white/20 rounded-t-full"></div>
-                                                        </div>
-                                                    </div>
-                                                    
-                                                    <div className="flex justify-between text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">
-                                                        <span>Inicio (0)</span>
-                                                        <span className="relative left-2">Meta (20)</span>
-                                                        <span>Óptimo (30)</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        
-                                        {/* Ratio Proactivo Doughnut */}
-                                        <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm flex flex-col justify-between min-h-[300px]">
-                                            <div className="flex items-start justify-between mb-2">
-                                                <div className="flex items-center gap-4">
-                                                    <div className="w-12 h-12 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600 shadow-xs border border-indigo-100 shrink-0">
-                                                        <Target className="w-6 h-6" />
-                                                    </div>
-                                                    <div>
-                                                        <h3 className="text-sm font-black uppercase tracking-widest text-gray-800">Ratio 80/20</h3>
-                                                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tight mt-0.5">Metodología Moneycall</p>
-                                                    </div>
-                                                </div>
-                                                <div className="w-10 h-10 rounded-full border border-gray-100 flex items-center justify-center bg-gray-50 text-gray-400 shrink-0">
-                                                    <PercentCircle className="w-5 h-5" />
-                                                </div>
-                                            </div>
-                                            
-                                            <div className="flex-1 flex flex-col items-center justify-center py-2 relative z-10">
-                                                <ProactiveRatioDoughnut proactiveCount={llamadasProactivas} reactiveCount={llamadasReactivas} />
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    {/* Footer Insight Card - Light Theme */}
-                                    <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4 shadow-xs">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-[10px] bg-blue-100 flex items-center justify-center text-blue-600 shrink-0">
-                                                <Zap className="w-5 h-5 fill-current" />
-                                            </div>
-                                            <div className="flex-1 min-w-0">
-                                                <h4 className="text-[10px] font-black uppercase tracking-widest mb-0.5 text-blue-800">Insight del Día</h4>
-                                                <p className="text-[11px] text-blue-700/80 font-medium leading-relaxed">
-                                                    {llamadasDeHoyFinal >= 20 ? 
-                                                        '¡Excelente ritmo de prospección! Tu embudo está sano y tu probabilidad de cierre ha aumentado. Sigue así.' : 
-                                                        'Un alto volumen de llamadas salientes (mínimo 20) es la clave de la metodología. ¡Toma el teléfono y llena tu embudo!'}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-
-                <div className="w-80 shrink-0 flex flex-col gap-3 overflow-y-auto scrollbar-hide" style={{ scrollbarWidth: 'none' }}>
-
-
-                    <div className="bg-(--theme-50)/40 border border-gray-200 rounded-xl p-4 shadow-sm flex flex-col flex-1 min-h-0">
-                        <div className="flex items-center gap-1 mb-4 shrink-0 bg-black/5 rounded-lg p-1">
-                            <button
-                                onClick={() => setSidebarTab('recordatorios')}
-                                className={`flex-1 flex items-center justify-center gap-1.5 px-1 py-1.5 rounded-md text-[10px] font-bold transition-all uppercase tracking-wide min-w-0 ${
-                                    sidebarTab === 'recordatorios'
-                                        ? 'bg-white text-(--theme-600) shadow-sm border border-gray-200/50'
-                                        : 'text-gray-500 hover:text-gray-700 hover:bg-black/5'
-                                }`}
-                            >
-                                <Phone className={`w-3 h-3 shrink-0 ${sidebarTab === 'recordatorios' ? 'text-rose-500' : ''}`} />
-                                <span className="whitespace-nowrap truncate">Recordatorios</span>
-                            </button>
-                            <button
-                                onClick={() => setSidebarTab('citas')}
-                                className={`flex-1 flex items-center justify-center gap-1.5 px-1 py-1.5 rounded-md text-[10px] font-bold transition-all uppercase tracking-wide min-w-0 ${
-                                    sidebarTab === 'citas'
-                                        ? 'bg-white text-(--theme-600) shadow-sm border border-gray-200/50'
-                                        : 'text-gray-500 hover:text-gray-700 hover:bg-black/5'
-                                }`}
-                            >
-                                <Calendar className={`w-3 h-3 shrink-0 ${sidebarTab === 'citas' ? 'text-(--theme-500)' : ''}`} />
-                                <span className="whitespace-nowrap truncate">Próximas Citas</span>
-                            </button>
+                    {/* Tarjeta: Recordatorios y Próximas Citas */}
+                    <div className="bg-white border border-gray-200/90 rounded-2xl p-5 shadow-xs flex flex-col">
+                        <div className="flex items-center justify-between mb-4 border-b border-gray-100 pb-3">
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={() => setSidebarTab('recordatorios')}
+                                    className={`px-3 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-md transition-all flex items-center gap-1.5 ${
+                                        sidebarTab === 'recordatorios'
+                                            ? 'bg-rose-50 text-rose-600 border border-rose-100'
+                                            : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50'
+                                    }`}
+                                >
+                                    <Phone className="w-3.5 h-3.5 text-rose-500" />
+                                    Recordatorios ({recordatorios.length})
+                                </button>
+                                <button
+                                    onClick={() => setSidebarTab('citas')}
+                                    className={`px-3 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-md transition-all flex items-center gap-1.5 ${
+                                        sidebarTab === 'citas'
+                                            ? 'bg-indigo-50 text-indigo-600 border border-indigo-100'
+                                            : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50'
+                                    }`}
+                                >
+                                    <Calendar className="w-3.5 h-3.5 text-indigo-500" />
+                                    Próximas Citas ({reuniones.length})
+                                </button>
+                            </div>
                         </div>
-                        <div className="flex-1 overflow-y-auto space-y-2" style={{ scrollbarWidth: 'none' }}>
+
+                        <div className="space-y-2">
                             {sidebarTab === 'recordatorios' && (
                                 recordatorios.length === 0 ? (
-                                    <p className="text-xs text-gray-400 text-center py-3">Sin recordatorios hoy.</p>
+                                    <div className="py-6 text-center text-gray-400 text-xs font-bold">Sin recordatorios hoy.</div>
                                 ) : (
                                     recordatorios.map((p, idx) => {
                                         const esVencido = new Date(p.proximaLlamada) < new Date();
                                         return (
                                             <div
                                                 key={p.id || p._id || `rec-${idx}`}
-                                                className={`relative overflow-hidden group ${esVencido ? 'bg-linear-to-br from-rose-500 to-rose-600' : 'bg-linear-to-br from-(--theme-500) to-(--theme-600)'} rounded-lg p-2 shadow-sm hover:shadow-md transition-all cursor-pointer`}
+                                                className={`relative overflow-hidden group ${esVencido ? 'bg-linear-to-br from-rose-500 to-rose-600' : 'bg-linear-to-br from-indigo-500 to-indigo-600'} rounded-xl p-3 shadow-xs hover:shadow-md transition-all cursor-pointer text-white`}
                                                 onClick={() => {
                                                     if (p.esCliente) {
                                                         navigate('/vendedor/clientes', { state: { selectedId: p.id || p._id } });
@@ -1629,31 +1337,12 @@ const Dashboard = () => {
                                                     }
                                                 }}
                                             >
-                                                {/* Fondo decorativo */}
-                                                <div className="absolute right-0 top-0 h-full w-1/4 bg-white/10 skew-x-12 transform origin-top-right transition-transform duration-500"></div>
-
-                                                <div className="relative z-10">
-                                                    <div className="flex items-center justify-between gap-1 overflow-hidden">
-                                                        <div className="text-[11px] font-bold text-white truncate max-w-[70%]">
-                                                            {p.nombre || `${p.nombres || ''} ${p.apellidoPaterno || ''}`.trim()}
-                                                        </div>
-                                                        {p.esCliente && (
-                                                            <span className="text-[7px] font-black bg-white/20 text-white px-1 py-0.5 rounded backdrop-blur-sm uppercase tracking-tighter border border-white/10">Cliente</span>
-                                                        )}
-                                                    </div>
-
-                                                    <div className="flex items-center justify-between mt-1 gap-1">
-                                                        <div className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full flex items-center gap-1 bg-white/20 text-white backdrop-blur-sm border border-white/10 shrink-0`}>
-                                                            <Clock className="w-2 h-2" />
-                                                            {new Date(p.proximaLlamada).toLocaleString('es-MX', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
-                                                            {esVencido && <span className="ml-0.5 font-black opacity-80">⚠</span>}
-                                                        </div>
-                                                        {p.telefono && (
-                                                            <div className="flex items-center gap-0.5 text-[9px] text-white/80 font-medium truncate">
-                                                                <Phone className="w-2 h-2" />
-                                                                {p.telefono}
-                                                            </div>
-                                                        )}
+                                                <div className="flex items-center justify-between gap-2">
+                                                    <span className="text-xs font-black truncate">{p.nombre || `${p.nombres || ''} ${p.apellidoPaterno || ''}`.trim()}</span>
+                                                    <div className="flex items-center gap-1 text-[9px] font-bold bg-white/20 px-2 py-0.5 rounded-md backdrop-blur-xs shrink-0">
+                                                        <Clock className="w-3 h-3" />
+                                                        {new Date(p.proximaLlamada).toLocaleString('es-MX', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                                                        {esVencido && <span className="ml-0.5 font-black opacity-90">⚠️</span>}
                                                     </div>
                                                 </div>
                                             </div>
@@ -1661,67 +1350,44 @@ const Dashboard = () => {
                                     })
                                 )
                             )}
-                            
+
                             {sidebarTab === 'citas' && (
                                 loadingReuniones ? (
-                                    <div className="flex justify-center p-4"><RefreshCw className="animate-spin text-gray-400 w-4 h-4" /></div>
+                                    <div className="flex justify-center py-6"><RefreshCw className="animate-spin text-gray-400 w-5 h-5" /></div>
                                 ) : reuniones.length === 0 ? (
-                                    <p className="text-xs text-gray-400 text-center py-3">Libre de reuniones.</p>
+                                    <div className="py-6 text-center text-gray-400 text-xs font-bold">Libre de reuniones.</div>
                                 ) : (
                                     reuniones.map(r => {
                                         const rFecha = new Date(r.fecha);
                                         const esHoy = rFecha.toDateString() === new Date().toDateString();
-
                                         return (
                                             <div
                                                 key={r.id || r._id}
-                                                className={`relative overflow-hidden group ${esHoy ? 'bg-linear-to-br from-emerald-500 to-emerald-600' : 'bg-linear-to-br from-indigo-600 to-indigo-700'} rounded-lg p-2.5 shadow-sm hover:shadow-md transition-all cursor-pointer`}
+                                                className={`relative overflow-hidden group ${esHoy ? 'bg-linear-to-br from-emerald-500 to-emerald-600' : 'bg-linear-to-br from-indigo-600 to-indigo-700'} rounded-xl p-3 shadow-xs hover:shadow-md transition-all cursor-pointer text-white`}
                                                 onClick={() => handleReunionClick(r)}
                                             >
-                                                {/* Fondo decorativo */}
-                                                <div className="absolute right-0 top-0 h-full w-1/4 bg-white/10 skew-x-12 transform origin-top-right transition-transform duration-500 group-hover:w-1/3"></div>
-
-                                                <div className="relative z-10">
-                                                    <div className="flex items-center justify-between gap-1 overflow-hidden mb-1.5">
-                                                        <div className="text-[11px] font-bold text-white truncate flex items-center gap-1.5">
-                                                            <div className="w-5 h-5 rounded-md bg-white/20 flex items-center justify-center shrink-0">
-                                                                <Video className="w-3 h-3 text-white" />
-                                                            </div>
-                                                            {r.cliente?.nombres} {r.cliente?.apellidoPaterno}
-                                                        </div>
-                                                        {esHoy && (
-                                                            <span className="text-[7px] font-black bg-white/30 text-white px-1.5 py-0.5 rounded-full backdrop-blur-sm uppercase tracking-tighter border border-white/10 whitespace-nowrap animate-pulse">{t("Hoy")}</span>
-                                                        )}
+                                                <div className="flex items-center justify-between gap-2">
+                                                    <div className="flex items-center gap-2 min-w-0">
+                                                        <Video className="w-4 h-4 shrink-0 text-white" />
+                                                        <span className="text-xs font-black truncate">{r.cliente?.nombres} {r.cliente?.apellidoPaterno}</span>
                                                     </div>
-
-                                                    <div className="flex flex-col gap-2">
-                                                        <div className="flex justify-between items-center gap-1">
-                                                            <div className="text-[9px] font-bold text-white bg-white/20 backdrop-blur-sm border border-white/10 px-1.5 py-0.5 rounded-full flex items-center gap-1">
-                                                                <Clock className="w-2 h-2" />
-                                                                {rFecha.toLocaleString('es-MX', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
-                                                            </div>
-                                                            {r.cliente?.telefono && (
-                                                                <div className="text-[9px] text-white/90 font-medium flex items-center gap-0.5 mt-0.5">
-                                                                    <Phone className="w-2 h-2" />
-                                                                    {r.cliente.telefono}
-                                                                </div>
-                                                            )}
-                                                        </div>
-
-                                                        {r.googleMeetLink && (
-                                                            <a
-                                                                href={r.googleMeetLink.startsWith('http') ? r.googleMeetLink : `https://${r.googleMeetLink}`}
-                                                                target="_blank"
-                                                                rel="noopener noreferrer"
-                                                                className="flex items-center justify-center gap-1.5 py-1.5 px-3 bg-white text-indigo-700 rounded-lg text-[9px] font-black hover:bg-indigo-50 transition-colors shadow-sm active:scale-95"
-                                                                onClick={(e) => e.stopPropagation()}
-                                                            >
-                                                                <Video className="w-2.5 h-2.5" />
-                                                                UNIRSE A GOOGLE MEET
-                                                            </a>
-                                                        )}
+                                                    <div className="flex items-center gap-1 text-[9px] font-bold bg-white/20 px-2 py-0.5 rounded-md backdrop-blur-xs shrink-0">
+                                                        <Clock className="w-3 h-3" />
+                                                        {rFecha.toLocaleString('es-MX', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
                                                     </div>
                                                 </div>
+                                                {r.googleMeetLink && (
+                                                    <a
+                                                        href={r.googleMeetLink.startsWith('http') ? r.googleMeetLink : `https://${r.googleMeetLink}`}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="mt-2.5 flex items-center justify-center gap-1.5 py-1.5 px-3 bg-white text-indigo-700 rounded-lg text-[9px] font-black hover:bg-indigo-50 transition-colors shadow-xs"
+                                                        onClick={(e) => e.stopPropagation()}
+                                                    >
+                                                        <Video className="w-3 h-3" />
+                                                        UNIRSE A GOOGLE MEET
+                                                    </a>
+                                                )}
                                             </div>
                                         );
                                     })
@@ -1730,6 +1396,8 @@ const Dashboard = () => {
                         </div>
                     </div>
                 </div>
+            </div>
+
             {/* Modal de Tarea - Movido al final para evitar problemas de stacking context */}
             {showTaskModal && (
 
