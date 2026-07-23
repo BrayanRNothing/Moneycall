@@ -1,9 +1,9 @@
 import { io } from 'socket.io-client';
 import API_URL from './api';
 
-// Inicializar conexión con el servidor
+// Inicializar conexión con el servidor (con autoConnect: false por seguridad)
 export const socket = io(API_URL, {
-    autoConnect: true,
+    autoConnect: false,
     reconnection: true,
     reconnectionDelay: 1000,
     reconnectionDelayMax: 5000,
@@ -51,5 +51,8 @@ socket.on('reconnect', () => {
 socket.on('disconnect', () => {
     console.log('❌ Desconectado de WebSockets');
 });
+
+// ✅ SEGURIDAD: Iniciar conexión una vez que todos los listeners estén registrados y la variable 'socket' esté inicializada
+socket.connect();
 
 export default socket;
