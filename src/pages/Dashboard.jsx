@@ -890,7 +890,8 @@ const Dashboard = () => {
     ];
 
     return (
-        <div className="min-h-full flex flex-col gap-4 p-4 bg-gray-50/50">
+        <div className="h-full overflow-y-auto flex flex-col gap-4 p-4 bg-gray-50/50 scrollbar-thin">
+
 
 
             <div className="shrink-0 flex flex-col">

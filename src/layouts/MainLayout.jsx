@@ -216,7 +216,7 @@ const MainLayout = () => {
                     className="flex-1 bg-white/80 backdrop-blur-md border border-white/40 rounded-3xl overflow-hidden transition-all duration-300 relative premium-reflejo"
                 >
 
-                    <div className={`h-full scrollbar-hide ${isAjustesRoute || isDashboard || isMonitoreo ? 'overflow-hidden' : 'overflow-y-auto'}`}>
+                    <div className={`h-full scrollbar-hide ${isAjustesRoute || isMonitoreo ? 'overflow-hidden' : 'overflow-y-auto'}`}>
                         <Outlet />
                     </div>
                 </main>
