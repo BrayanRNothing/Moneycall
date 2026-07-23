@@ -138,6 +138,21 @@ export default function ProspectoDetalle({
     const [prospectoSeleccionado, setProspectoSeleccionado] = useState(initialProspecto);
     const pid = prospectoSeleccionado?.id || prospectoSeleccionado?._id;
 
+    const parseSafeArray = (val) => {
+        if (Array.isArray(val)) return val;
+        if (typeof val === 'string' && val.trim()) {
+            try { return JSON.parse(val); } catch (e) { return []; }
+        }
+        return [];
+    };
+
+    // SECCIONES PERSONALIZADAS (Declarados arriba para evitar errores de inicialización temporal)
+    const [customSections, setCustomSections] = useState(parseSafeArray(initialProspecto?.customSections));
+    const [modalNuevaSeccion, setModalNuevaSeccion] = useState(false);
+    const [drawerHistorialAbierto, setDrawerHistorialAbierto] = useState(false);
+    const [filtroHistorial, setFiltroHistorial] = useState('bitacora');
+
+
     const [actividadesContext, setActividadesContext] = useState([]);
     const [loadingContext, setLoadingContext] = useState(false);
 
@@ -205,19 +220,7 @@ export default function ProspectoDetalle({
     }, [llamadaFlow, currentStep, botActions]);
 
 
-    const parseSafeArray = (val) => {
-        if (Array.isArray(val)) return val;
-        if (typeof val === 'string' && val.trim()) {
-            try { return JSON.parse(val); } catch (e) { return []; }
-        }
-        return [];
-    };
 
-    // SECCIONES PERSONALIZADAS
-    const [customSections, setCustomSections] = useState(parseSafeArray(initialProspecto?.customSections));
-    const [modalNuevaSeccion, setModalNuevaSeccion] = useState(false);
-    const [drawerHistorialAbierto, setDrawerHistorialAbierto] = useState(false);
-    const [filtroHistorial, setFiltroHistorial] = useState('bitacora');
 
     const telefonosContacto = useMemo(() => {
         return [prospectoSeleccionado?.telefono, prospectoSeleccionado?.telefono2]
