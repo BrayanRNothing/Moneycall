@@ -5,7 +5,7 @@ import {
     TrendingUp, Users, Phone, Target, 
     Calendar, Bell, AlertTriangle, 
     ChevronRight, ArrowRight, BarChart3, 
-    DollarSign, CheckCircle2 
+    DollarSign, CheckCircle2, UserPlus, Award 
 } from 'lucide-react';
 import StatCard from '../components/ui/StatCard';
 
@@ -14,6 +14,7 @@ const PERIODOS = [
     { key: 'semana', label: 'Semana' },
     { key: 'mes', label: 'Mes' },
 ];
+
 
 const DashboardMobile = ({ 
     vendedorData, 
@@ -131,11 +132,12 @@ const DashboardMobile = ({
 
             {/* ── Top Metrics Grid ── */}
             <div className="grid grid-cols-2 gap-3">
-                <StatCard title="Entrada" value={totalEntrada} icon="📥" color="blue" />
-                <StatCard title="Ganadas" value={ganadas} icon="🏆" color="yellow" />
-                <StatCard title="Llamadas" value={mP.llamadas || 0} icon="📞" color="green" />
-                <StatCard title="Cierres $" value={formatMoney.format(ventasMonto)} icon="💰" color="purple" />
+                <StatCard title="Entrada" value={totalEntrada} icon={<UserPlus className="w-5 h-5" />} color="blue" />
+                <StatCard title="Ganadas" value={ganadas} icon={<Award className="w-5 h-5" />} color="yellow" />
+                <StatCard title="Llamadas" value={mP.llamadas || 0} icon={<Phone className="w-5 h-5" />} color="green" />
+                <StatCard title="Cierres $" value={formatMoney.format(ventasMonto)} icon={<DollarSign className="w-5 h-5" />} color="purple" />
             </div>
+
 
             {/* ── Simplified Pipeline (Vertical) ── */}
             <div className="bg-white/80 backdrop-blur-xl border border-white/40 rounded-3xl p-5 shadow-sm overflow-hidden relative premium-reflejo">

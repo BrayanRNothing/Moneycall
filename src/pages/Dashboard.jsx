@@ -868,11 +868,12 @@ const Dashboard = () => {
     mergeFuentes(closerData?.analisisFuentes);
 
     const cardsResumen = [
-        { title: 'Valor Total Pipeline', value: formatMoney.format(valorPipelineData.totalEstimado), icon: '💎', color: 'emerald', subtext: `${valorPipelineData.conValorCount} leads con monto (Prom. ${formatMoney.format(valorPipelineData.promedioLead)})` },
-        { title: 'Prospectos activos', value: formatNumber.format(totalEntrada), icon: '👥', color: 'blue', subtext: `${prospectosNuevosPeriodo} nuevos ${periodoSuffix}` },
-        { title: 'Ingresos ganados', value: formatMoney.format(cP.ventasMonto || valorPipelineData.totalGanado || 0), icon: '🏆', color: 'yellow', subtext: `${cP.ventasCount || 0} cierres ${periodoSuffix} (${formatMoney.format(closerData.metricas?.ventas?.montoTotal || 0)} acum.)` },
-        { title: 'Conversión global', value: formatPercent(tasaGlobal), icon: '⚡', color: 'purple', subtext: `${ganadas} ventas de ${totalLeadsHistoricos} leads` }
+        { title: 'Valor Total Pipeline', value: formatMoney.format(valorPipelineData.totalEstimado), icon: <DollarSign className="w-5 h-5" />, color: 'emerald', subtext: `${valorPipelineData.conValorCount} leads con monto (Prom. ${formatMoney.format(valorPipelineData.promedioLead)})` },
+        { title: 'Prospectos activos', value: formatNumber.format(totalEntrada), icon: <Users className="w-5 h-5" />, color: 'blue', subtext: `${prospectosNuevosPeriodo} nuevos ${periodoSuffix}` },
+        { title: 'Ingresos ganados', value: formatMoney.format(cP.ventasMonto || valorPipelineData.totalGanado || 0), icon: <Award className="w-5 h-5" />, color: 'yellow', subtext: `${cP.ventasCount || 0} cierres ${periodoSuffix} (${formatMoney.format(closerData.metricas?.ventas?.montoTotal || 0)} acum.)` },
+        { title: 'Conversión global', value: formatPercent(tasaGlobal), icon: <Target className="w-5 h-5" />, color: 'purple', subtext: `${ganadas} ventas de ${totalLeadsHistoricos} leads` }
     ];
+
 
 
     const labelPeriodo = periodo === 'dia' ? 'hoy' : periodo === 'semana' ? 'semana' : periodo === 'mes' ? 'mes' : 'total';
@@ -1323,8 +1324,8 @@ const Dashboard = () => {
                                                                             key={venta.id || idx} 
                                                                             className="flex items-center gap-2 px-2.5 py-2 bg-white border border-gray-100 rounded-lg"
                                                                         >
-                                                                            <div className="w-7 h-7 rounded-full bg-green-50 flex items-center justify-center shrink-0 group-hover:bg-green-100 transition-colors">
-                                                                                <span className="text-[10px]">💰</span>
+                                                                            <div className="w-7 h-7 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center shrink-0 group-hover:bg-emerald-100 transition-colors">
+                                                                                <DollarSign className="w-3.5 h-3.5 text-emerald-600" />
                                                                             </div>
                                                                             <div className="flex-1 min-w-0">
                                                                                 <div className="flex items-center gap-1.5">
