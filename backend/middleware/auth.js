@@ -1,6 +1,9 @@
 const jwt = require('jsonwebtoken');
 const { db } = require('../config/database');
 
+// ✅ SEGURIDAD: JWT_SECRET sin fallback — se valida en server.js al arrancar
+const JWT_SECRET = process.env.JWT_SECRET;
+
 const lastSeenCache = new Map();
 
 /**
@@ -15,7 +18,7 @@ const auth = async (req, res, next) => {
             return res.status(401).json({ mensaje: 'No hay token, autorización denegada' });
         }
 
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret');
+        const decoded = jwt.verify(token, JWT_SECRET);
 
         // Verificar que el usuario exista y esté activo — incluye equipo_id
         const row = await db.prepare('SELECT id, usuario, nombre, rol, email, telefono, activo, "equipo_id" FROM usuarios WHERE id = ?').get(decoded.id);

@@ -256,10 +256,13 @@ export default function ModulosCliente({
                                 </button>
                             </div>
 
-                            {contrato.url && (
+                            {contrato.url && (() => {
+                                // ✅ SEGURIDAD: Agregar token JWT a URLs de uploads protegidos
+                                const contratoUrl = `${API_URL}${contrato.url}${contrato.url.includes('?') ? '&' : '?'}token=${getToken()}`;
+                                return (
                                 <div className="flex items-center gap-2 pt-2 border-t border-slate-200/60">
                                     <a 
-                                        href={API_URL + contrato.url} 
+                                        href={contratoUrl} 
                                         target="_blank" 
                                         rel="noopener noreferrer"
                                         className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-[10px] font-bold text-slate-600 hover:bg-slate-50 transition-colors shadow-sm"
@@ -267,14 +270,15 @@ export default function ModulosCliente({
                                         <Eye className="w-3.5 h-3.5" /> Ver PDF
                                     </a>
                                     <a 
-                                        href={API_URL + contrato.url} 
+                                        href={contratoUrl} 
                                         download={contrato.nombre || 'contrato'}
                                         className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 bg-rose-600 border border-rose-700 rounded-lg text-[10px] font-bold text-white hover:bg-rose-700 transition-colors shadow-sm"
                                     >
                                         <Download className="w-3.5 h-3.5" /> Descargar
                                     </a>
                                 </div>
-                            )}
+                                );
+                            })()}
                         </div>
                     ))}
                 </div>

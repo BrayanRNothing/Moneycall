@@ -2,15 +2,28 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const rateLimit = require('express-rate-limit');
 const { db } = require('../config/database');
-const { auth } = require('../middleware/auth');
+const { auth, esTeamOwner } = require('../middleware/auth');
+
+// ✅ SEGURIDAD: JWT_SECRET sin fallback — se valida en server.js al arrancar
+const JWT_SECRET = process.env.JWT_SECRET;
 
 const ROLES_PERMITIDOS = ['vendedor', 'admin', 'asignador'];
+
+// ✅ SEGURIDAD: Rate limiting para login — máximo 10 intentos cada 15 minutos por IP
+const loginLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutos
+    max: 10, // máximo 10 intentos
+    message: { mensaje: 'Demasiados intentos de inicio de sesión. Intente de nuevo en 15 minutos.' },
+    standardHeaders: true,
+    legacyHeaders: false,
+});
 
 // @route   POST api/auth/login
 // @desc    Autenticar usuario y obtener token
 // @access  Public
-router.post('/login', async (req, res) => {
+router.post('/login', loginLimiter, async (req, res) => {
     try {
         console.log('--- INICIO INTENTO DE LOGIN ---');
         console.log('Body recibido (sin contraseña):', { ...req.body, contraseña: '***' });
@@ -60,7 +73,7 @@ router.post('/login', async (req, res) => {
         // Firmar Token
         jwt.sign(
             payload,
-            process.env.JWT_SECRET || 'secret',
+            JWT_SECRET,
             { expiresIn: '7d' },
             async (err, token) => {
                 if (err) throw err;
@@ -101,10 +114,20 @@ router.post('/login', async (req, res) => {
 });
 
 // @route   POST api/auth/register
-// @desc    Registrar un nuevo usuario
-// @access  Public
-router.post('/register', async (req, res) => {
+// @desc    Registrar un nuevo usuario (Solo admin o team owner)
+// @access  Private — Requiere autenticación
+router.post('/register', auth, async (req, res) => {
     try {
+        // ✅ SEGURIDAD: Solo admin o team owner pueden crear usuarios
+        const isAdmin = req.usuario.rol === 'admin';
+        let isTeamOwner = false;
+        if (!isAdmin && req.usuario.equipo_id) {
+            const equipo = await db.prepare('SELECT id FROM equipos WHERE owner_id = ?').get(req.usuario.id);
+            if (equipo) isTeamOwner = true;
+        }
+        if (!isAdmin && !isTeamOwner) {
+            return res.status(403).json({ mensaje: 'Solo administradores o propietarios de equipo pueden registrar usuarios' });
+        }
         console.log('📝 Intento de registro recibido:', { ...req.body, contraseña: '***' });
         let { usuario, contraseña, nombre, email, telefono, rol } = req.body;
 

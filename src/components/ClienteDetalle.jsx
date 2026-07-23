@@ -2462,7 +2462,7 @@ export default function ClienteDetalle({
                                                 <p className="text-sm font-extrabold text-slate-800 uppercase tracking-tight">{venta.notas || 'Venta registrada'}</p>
                                                 {venta.pdf_url && (
                                                     <a
-                                                        href={`${API_URL}${venta.pdf_url}`}
+                                                        href={`${API_URL}${venta.pdf_url}${venta.pdf_url.includes('?') ? '&' : '?'}token=${getToken()}`}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
                                                         className="inline-flex items-center gap-1 text-[11px] text-rose-600 hover:text-rose-800 font-bold hover:underline"

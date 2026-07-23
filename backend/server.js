@@ -4,6 +4,29 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
+const jwt = require('jsonwebtoken');
+
+// ✅ SEGURIDAD: Validar que JWT_SECRET esté configurado — sin fallback inseguro
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+    console.error('❌ FATAL: JWT_SECRET no está configurado. El servidor no puede arrancar de forma segura.');
+    process.exit(1);
+}
+
+// ✅ SEGURIDAD: Lista blanca de orígenes permitidos para CORS
+const ALLOWED_ORIGINS = [
+    // Producción (www y sin www)
+    process.env.FRONTEND_URL,
+    'https://crmoneycall.com',
+    'https://www.crmoneycall.com',
+    // Desarrollo local
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+    'http://localhost:5174',
+    'http://127.0.0.1:5174',
+    'http://localhost:4173',
+    'http://127.0.0.1:4173',
+].filter(Boolean); // Eliminar valores undefined/null y duplicados
 
 // Inicializar base de datos
 require('./config/database');
@@ -23,9 +46,17 @@ app.get('/health', (req, res) => {
 });
 console.log('✅ Healthcheck endpoint ready');
 
-// ✅ CORS CONFIGURATION - MUST BE FIRST
+// ✅ CORS CONFIGURATION - MUST BE FIRST (Restringido a orígenes permitidos)
 app.use(cors({
-    origin: '*', // Allows all origins. For production, you might want to restrict this later.
+    origin: (origin, callback) => {
+        // Permitir peticiones sin origin (mobile apps, curl, Postman, server-to-server)
+        if (!origin) return callback(null, true);
+        if (ALLOWED_ORIGINS.includes(origin)) {
+            return callback(null, true);
+        }
+        console.warn(`⚠️ CORS bloqueado para origen no autorizado: ${origin}`);
+        return callback(new Error('No permitido por CORS'));
+    },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'x-auth-token'],
     exposedHeaders: ['x-auth-token'],
@@ -46,11 +77,25 @@ app.use(express.urlencoded({ extended: true }));
 
 
 
-// ✅ Servir archivos subidos (contratos PDF, WhatsApp media) antes de cualquier otra ruta
+// ✅ SEGURIDAD: Servir archivos subidos PROTEGIDOS con autenticación JWT
 const uploadsPath = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadsPath)) fs.mkdirSync(uploadsPath, { recursive: true });
-app.use('/uploads', express.static(uploadsPath));
-app.use('/archivos', express.static(uploadsPath));
+
+// Middleware para validar token antes de servir archivos
+const uploadsAuth = (req, res, next) => {
+    const token = req.query.token || req.header('x-auth-token') || req.header('Authorization')?.replace('Bearer ', '');
+    if (!token) {
+        return res.status(401).json({ mensaje: 'Autenticación requerida para acceder a archivos' });
+    }
+    try {
+        jwt.verify(token, JWT_SECRET);
+        next();
+    } catch (_) {
+        return res.status(401).json({ mensaje: 'Token inválido' });
+    }
+};
+app.use('/uploads', uploadsAuth, express.static(uploadsPath));
+app.use('/archivos', uploadsAuth, express.static(uploadsPath));
 
 // Routes
 app.use('/api/auth', require('./routes/auth'));
@@ -128,11 +173,11 @@ const server = app.listen(PORT, HOST, () => {
     console.log(`📡 Modo: ${process.env.NODE_ENV || 'development'}`);
 });
 
-// ✅ INICIALIZAR SOCKET.IO
+// ✅ INICIALIZAR SOCKET.IO (CORS restringido a orígenes permitidos)
 const { Server } = require('socket.io');
 const io = new Server(server, {
     cors: {
-        origin: '*', // Permitir desde cualquier frontend
+        origin: ALLOWED_ORIGINS,
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
         allowedHeaders: ['x-auth-token']
     }
@@ -149,42 +194,41 @@ io.on('connection', (socket) => {
     console.log(`⚡ Cliente conectado a WebSockets: ${socket.id}`);
 
     // Unirse a la sala del usuario para notificaciones individuales de WhatsApp
-    // ✅ SEGURIDAD: Verificar token JWT antes de unirse a una sala de usuario
+    // ✅ SEGURIDAD: Token JWT OBLIGATORIO para unirse a cualquier sala
     socket.on('join_user', async (payload) => {
         try {
-            // payload puede ser solo el userId (legado) o { userId, token }
             let userId, token;
             if (typeof payload === 'object' && payload !== null) {
                 userId = payload.userId;
                 token = payload.token;
             } else {
-                // Modo legado: solo el ID — aceptar pero sin QR (no seguro para produccion)
-                userId = payload;
-                token = null;
+                // Modo legado sin token: RECHAZADO por seguridad
+                socket.emit('auth_error', { mensaje: 'Token requerido para unirse a la sala' });
+                return;
             }
 
-            if (!userId) return;
+            if (!userId || !token) {
+                socket.emit('auth_error', { mensaje: 'userId y token son requeridos' });
+                return;
+            }
 
-            // Si hay token, validarlo contra el userId
-            if (token) {
-                const jwt = require('jsonwebtoken');
-                const { db } = require('./config/database');
-                try {
-                    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret');
-                    const row = await db.prepare('SELECT id, activo FROM usuarios WHERE id = ?').get(decoded.id);
-                    if (!row || (row.activo === 0 || row.activo === false)) {
-                        socket.emit('auth_error', { mensaje: 'Token inválido' });
-                        return;
-                    }
-                    // Solo puede unirse a su propia sala
-                    if (String(decoded.id) !== String(userId)) {
-                        socket.emit('auth_error', { mensaje: 'No autorizado para unirse a esta sala' });
-                        return;
-                    }
-                } catch (_) {
-                    socket.emit('auth_error', { mensaje: 'Token inválido o expirado' });
+            // Validar token contra el userId
+            const { db } = require('./config/database');
+            try {
+                const decoded = jwt.verify(token, JWT_SECRET);
+                const row = await db.prepare('SELECT id, activo FROM usuarios WHERE id = ?').get(decoded.id);
+                if (!row || (row.activo === 0 || row.activo === false)) {
+                    socket.emit('auth_error', { mensaje: 'Token inválido' });
                     return;
                 }
+                // Solo puede unirse a su propia sala
+                if (String(decoded.id) !== String(userId)) {
+                    socket.emit('auth_error', { mensaje: 'No autorizado para unirse a esta sala' });
+                    return;
+                }
+            } catch (_) {
+                socket.emit('auth_error', { mensaje: 'Token inválido o expirado' });
+                return;
             }
 
             socket.join(`user_${userId}`);
@@ -209,29 +253,33 @@ io.on('connection', (socket) => {
         }
     });
 
-    // Unirse a la sala del equipo (con verificación de token de seguridad)
+    // Unirse a la sala del equipo — Token JWT OBLIGATORIO
     socket.on('join_team', async (data) => {
         const equipoId = typeof data === 'object' ? data.equipoId : data;
         const token = typeof data === 'object' ? data.token : null;
         if (!equipoId) return;
 
-        if (token) {
-            try {
-                const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret');
-                const { db } = require('./config/database');
-                const user = await db.prepare('SELECT id, "equipo_id", activo FROM usuarios WHERE id = ?').get(decoded.id);
-                if (!user || (user.activo === 0 || user.activo === false)) return;
-                if (String(user.equipo_id) === String(equipoId)) {
-                    socket.join(`team_${equipoId}`);
-                    console.log(`👥 Socket ${socket.id} unió al equipo autenticado: team_${equipoId}`);
-                } else {
-                    socket.emit('auth_error', { mensaje: 'No pertenece a este equipo' });
-                }
-            } catch (_) {
-                socket.emit('auth_error', { mensaje: 'Token inválido para equipo' });
+        if (!token) {
+            socket.emit('auth_error', { mensaje: 'Token requerido para unirse al equipo' });
+            return;
+        }
+
+        try {
+            const decoded = jwt.verify(token, JWT_SECRET);
+            const { db } = require('./config/database');
+            const user = await db.prepare('SELECT id, "equipo_id", activo FROM usuarios WHERE id = ?').get(decoded.id);
+            if (!user || (user.activo === 0 || user.activo === false)) {
+                socket.emit('auth_error', { mensaje: 'Usuario inválido o desactivado' });
+                return;
             }
-        } else {
-            socket.join(`team_${equipoId}`);
+            if (String(user.equipo_id) === String(equipoId)) {
+                socket.join(`team_${equipoId}`);
+                console.log(`👥 Socket ${socket.id} unió al equipo autenticado: team_${equipoId}`);
+            } else {
+                socket.emit('auth_error', { mensaje: 'No pertenece a este equipo' });
+            }
+        } catch (_) {
+            socket.emit('auth_error', { mensaje: 'Token inválido para equipo' });
         }
     });
 

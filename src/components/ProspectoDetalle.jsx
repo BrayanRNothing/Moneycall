@@ -85,6 +85,11 @@ export default function ProspectoDetalle({
             if (url.startsWith('/')) {
                 url = `${API_URL}${url}`;
             }
+            // ✅ SEGURIDAD: Agregar token JWT a URLs de uploads protegidos
+            if (url.includes('/uploads/')) {
+                const separator = url.includes('?') ? '&' : '?';
+                url = `${url}${separator}token=${getToken()}`;
+            }
             
             const caption = text.replace(/\[(IMAGE|VIDEO|AUDIO|DOCUMENT|STICKER)\]\(([^)]+)\)\s*-?\s*/i, '');
             

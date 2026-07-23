@@ -413,8 +413,8 @@ router.post('/send-media', auth, waUpload.single('file'), async (req, res) => {
                 const transcodedFilename = `transcoded_${Date.now()}_voice.ogg`;
                 const transcodedPath = path.join(WA_UPLOADS_DIR, transcodedFilename);
                 
-                const { execSync } = require('child_process');
-                execSync(`ffmpeg -y -i "${file.path}" -c:a libopus -b:a 24k -application voip "${transcodedPath}"`, { stdio: 'ignore' });
+                const { execFileSync } = require('child_process');
+                execFileSync('ffmpeg', ['-y', '-i', file.path, '-c:a', 'libopus', '-b:a', '24k', '-application', 'voip', transcodedPath], { stdio: 'ignore' });
                 
                 if (fs.existsSync(transcodedPath)) {
                     finalPath = transcodedPath;
