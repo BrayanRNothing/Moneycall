@@ -42,6 +42,9 @@ require('./config/database');
 
 const app = express();
 
+// ✅ SEGURIDAD: Confiar en el proxy (Railway, etc.) para que express-rate-limit obtenga la IP real del usuario
+app.set('trust proxy', 1);
+
 // ✅ HEALTHCHECK - FIRST PRIORITY (Railway require 200 fast)
 app.get('/health', (req, res) => {
     const { db } = require('./config/database');
