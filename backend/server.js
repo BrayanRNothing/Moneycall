@@ -1,8 +1,17 @@
-require('dotenv').config();
+const path = require('path');
+const dotenv = require('dotenv');
+
+// Cargar variables del CWD (por ejemplo, en producción o si se ejecuta dentro de backend/)
+dotenv.config();
+
+// Fallback: si no cargó JWT_SECRET (ej. si se ejecuta desde la raíz del proyecto), cargar del directorio backend/
+if (!process.env.JWT_SECRET) {
+    dotenv.config({ path: path.join(__dirname, '.env') });
+}
+
 // Build trigger: 2026-04-23
 const express = require('express');
 const cors = require('cors');
-const path = require('path');
 const fs = require('fs');
 const jwt = require('jsonwebtoken');
 
